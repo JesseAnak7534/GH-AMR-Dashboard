@@ -1,4 +1,4 @@
-# Resistance Rate by Region Chart Fix - Summary
+black ba# Resistance Rate by Region Chart Fix - Summary
 
 ## Issue Identified
 Some regions were not showing in the "Resistance Rate by Region (%)" chart even though they appeared in the "Antimicrobial Resistance by Region" chart on the Map Hotspots page.
