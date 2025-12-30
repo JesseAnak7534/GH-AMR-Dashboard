@@ -243,10 +243,13 @@ if not st.session_state.authenticated:
                             if ok:
                                 st.success("✅ Account created! We've sent a verification email with a link.")
                             else:
-                                st.warning(send_msg)
-                                st.info("If the email doesn't arrive, use the link below to verify.")
+                                if verify_link:
+                                    st.info("✅ Account created! Use the verification link below to activate your account.")
+                                else:
+                                    st.warning(send_msg)
+                                    st.info("If the email doesn't arrive, use the code below to verify.")
 
-                            # Always present the code and link (if configured) as a fallback
+                            # Always present the code and link (if configured) so users can proceed
                             st.markdown("### Email Verification Details")
                             st.write("Use the code or click the link to verify your account.")
                             st.code(code, language="text")
@@ -281,8 +284,11 @@ if not st.session_state.authenticated:
                             if ok:
                                 st.success("Verification email resent.")
                             else:
-                                st.warning(send_msg)
-                                st.info("If the email doesn't arrive, use the link below to verify.")
+                                if verify_link:
+                                    st.info("Verification email couldn't be sent. Use the link below to verify.")
+                                else:
+                                    st.warning(send_msg)
+                                    st.info("If the email doesn't arrive, use the code below to verify.")
                             st.code(code, language="text")
                             if verify_link:
                                 st.markdown(f"[Open verification link]({verify_link})")
