@@ -8,6 +8,7 @@ import numpy as np
 import os
 import uuid
 import bcrypt
+import secrets
 from dotenv import load_dotenv
 from io import BytesIO
 from datetime import datetime, timedelta
@@ -16,6 +17,7 @@ import plotly.express as px
 
 # Import modules
 from src import db, validate, plots, report, analytics
+from src import email_utils
 
 # Page configuration
 st.set_page_config(
@@ -69,6 +71,11 @@ if ADMIN_EMAIL and ADMIN_PASSWORD:
                 db.update_user_status(admin_user["user_id"], True)
             # Keep password in sync with configured admin password
             db.update_user_password(ADMIN_EMAIL, password_hash)
+        # Auto-verify admin email
+        try:
+            db.set_user_verified(ADMIN_EMAIL, True)
+        except Exception:
+            pass
     except Exception:
         pass
 
@@ -93,7 +100,7 @@ if not st.session_state.authenticated:
         st.markdown("---")
         
         # Create two columns for better spacing
-        tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
+        tab1, tab2, tab3 = st.tabs(["🔐 Login", "📝 Sign Up", "📧 Verify Email"])
         
         with tab1:
             st.subheader("Welcome Back")
@@ -109,6 +116,11 @@ if not st.session_state.authenticated:
                     if user and user['is_active']:
                         try:
                             if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
+                                # Require email verification
+                                if not user.get('is_verified'):
+                                    st.error("❌ Please verify your email before logging in.")
+                                    st.info("Use the '📧 Verify Email' tab to complete verification.")
+                                    st.stop()
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
 
@@ -157,10 +169,48 @@ if not st.session_state.authenticated:
                         password_hash = bcrypt.hashpw(signup_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
                         success, msg = db.create_user(signup_email, password_hash, is_admin=False)
                         if success:
-                            st.success("✅ Account created successfully! Please log in.")
-                            st.info("You can now log in with your credentials.")
+                            # Generate and send verification code
+                            code = f"{secrets.randbelow(1000000):06d}"
+                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
+                            db.set_verification_code(signup_email, code, expires_at)
+                            ok, send_msg = email_utils.send_verification_email(signup_email, code, country="Ghana")
+                            if ok:
+                                st.success("✅ Account created! Check your email for the verification code.")
+                            else:
+                                st.warning(send_msg)
+                                st.info("For testing, use the shown code if provided.")
+                            st.info("Go to the '📧 Verify Email' tab to complete verification.")
                         else:
                             st.error(f"❌ {msg}")
+                            with tab3:
+                                st.subheader("Verify Your Email")
+                                verify_email = st.text_input("📧 Email Address", placeholder="your.email@example.com", key="verify_email")
+                                requested_code = st.text_input("🔢 Verification Code", placeholder="6-digit code", key="verify_code")
+
+                                colv1, colv2 = st.columns(2)
+                                with colv1:
+                                    if st.button("Resend Code"):
+                                        if not verify_email:
+                                            st.error("Enter your email to resend code")
+                                        else:
+                                            code = f"{secrets.randbelow(1000000):06d}"
+                                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
+                                            db.set_verification_code(verify_email, code, expires_at)
+                                            ok, send_msg = email_utils.send_verification_email(verify_email, code, country="Ghana")
+                                            if ok:
+                                                st.success("Verification code sent")
+                                            else:
+                                                st.warning(send_msg)
+                                with colv2:
+                                    if st.button("Verify"):
+                                        if not verify_email or not requested_code:
+                                            st.error("Provide both email and code")
+                                        else:
+                                            ok, msg = db.verify_user_email(verify_email, requested_code)
+                                            if ok:
+                                                st.success("✅ Email verified! You can now log in.")
+                                            else:
+                                                st.error(f"❌ {msg}")
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
         

@@ -44,6 +44,18 @@ def init_database():
         )
     """)
 
+    # Add email verification columns if they don't exist (migration)
+    user_migrations = [
+        ("is_verified", "BOOLEAN DEFAULT 0"),
+        ("verification_code", "TEXT"),
+        ("verification_expires", "TEXT")
+    ]
+    for col_name, col_type in user_migrations:
+        try:
+            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            pass
+
     # Create datasets table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS datasets (
@@ -452,8 +464,8 @@ def create_user(email: str, password_hash: str, is_admin: bool = False) -> Tuple
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO users (email, password_hash, created_at, is_active, is_admin)
-            VALUES (?, ?, ?, 1, ?)
+            INSERT INTO users (email, password_hash, created_at, is_active, is_admin, is_verified)
+            VALUES (?, ?, ?, 1, ?, 0)
         """, (email, password_hash, datetime.now().isoformat(), 1 if is_admin else 0))
         conn.commit()
         return True, "User created successfully"
@@ -537,6 +549,74 @@ def update_user_password(email: str, new_password_hash: str) -> Tuple[bool, str]
         return True, "Password updated successfully"
     except Exception as e:
         return False, f"Error updating password: {str(e)}"
+    finally:
+        conn.close()
+
+
+def set_verification_code(email: str, code: str, expires_at: str) -> Tuple[bool, str]:
+    """Set a verification code and expiry for a user."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET verification_code = ?, verification_expires = ? WHERE email = ?",
+            (code, expires_at, email)
+        )
+        conn.commit()
+        return True, "Verification code set"
+    except Exception as e:
+        return False, f"Error setting verification code: {str(e)}"
+    finally:
+        conn.close()
+
+
+def verify_user_email(email: str, code: str) -> Tuple[bool, str]:
+    """Verify user email if code matches and not expired."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT verification_code, verification_expires FROM users WHERE email = ?", (email,))
+        row = cursor.fetchone()
+        if not row:
+            return False, "User not found"
+        saved_code = row[0]
+        expires = row[1]
+        if not saved_code:
+            return False, "No verification code set"
+        if str(saved_code) != str(code):
+            return False, "Invalid verification code"
+        # Expiry check
+        try:
+            if expires and datetime.fromisoformat(expires) < datetime.now():
+                return False, "Verification code expired"
+        except Exception:
+            pass
+        cursor.execute(
+            "UPDATE users SET is_verified = 1, verification_code = NULL, verification_expires = NULL WHERE email = ?",
+            (email,)
+        )
+        conn.commit()
+        return True, "Email verified"
+    except Exception as e:
+        conn.rollback()
+        return False, f"Error verifying email: {str(e)}"
+    finally:
+        conn.close()
+
+
+def set_user_verified(email: str, is_verified: bool = True) -> Tuple[bool, str]:
+    """Force set a user's verified flag (used for admin bootstrap)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET is_verified = ? WHERE email = ?",
+            (1 if is_verified else 0, email)
+        )
+        conn.commit()
+        return True, "User verification flag updated"
+    except Exception as e:
+        return False, f"Error updating verification flag: {str(e)}"
     finally:
         conn.close()
 
