@@ -246,7 +246,6 @@ if not st.session_state.authenticated:
                                 if verify_link:
                                     st.info("✅ Account created! Use the verification link below to activate your account.")
                                 else:
-                                    st.warning(send_msg)
                                     st.info("If the email doesn't arrive, use the code below to verify.")
 
                             # Always present the code and link (if configured) so users can proceed
@@ -287,7 +286,6 @@ if not st.session_state.authenticated:
                                 if verify_link:
                                     st.info("Verification email couldn't be sent. Use the link below to verify.")
                                 else:
-                                    st.warning(send_msg)
                                     st.info("If the email doesn't arrive, use the code below to verify.")
                             st.code(code, language="text")
                             if verify_link:
