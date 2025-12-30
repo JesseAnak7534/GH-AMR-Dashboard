@@ -34,17 +34,41 @@ if "authenticated" not in st.session_state:
     st.session_state.user_email = None
     st.session_state.is_admin = False
 
-# Create main admin account if configured via environment variables
-load_dotenv()
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+def _get_admin_config():
+    """Retrieve admin bootstrap credentials from Streamlit secrets or environment variables."""
+    admin_email = None
+    admin_password = None
+    # Prefer Streamlit secrets on cloud
+    try:
+        if hasattr(st, "secrets"):
+            if "ADMIN_EMAIL" in st.secrets and "ADMIN_PASSWORD" in st.secrets:
+                admin_email = st.secrets["ADMIN_EMAIL"]
+                admin_password = st.secrets["ADMIN_PASSWORD"]
+    except Exception:
+        pass
 
+    # Fallback to local .env / environment
+    load_dotenv()
+    admin_email = admin_email or os.getenv("ADMIN_EMAIL")
+    admin_password = admin_password or os.getenv("ADMIN_PASSWORD")
+    return admin_email, admin_password
+
+# Create or promote main admin account if configured via secrets/env
+ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
 if ADMIN_EMAIL and ADMIN_PASSWORD:
     try:
         admin_user = db.get_user_by_email(ADMIN_EMAIL)
+        password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         if not admin_user:
-            password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
             db.create_user(ADMIN_EMAIL, password_hash, is_admin=True)
+        else:
+            # Ensure admin privileges and active status
+            if not admin_user.get("is_admin"):
+                db.set_user_admin(ADMIN_EMAIL, True)
+            if not admin_user.get("is_active"):
+                db.update_user_status(admin_user["user_id"], True)
+            # Keep password in sync with configured admin password
+            db.update_user_password(ADMIN_EMAIL, password_hash)
     except Exception:
         pass
 

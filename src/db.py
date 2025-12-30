@@ -405,3 +405,21 @@ def delete_user(user_id: int) -> Tuple[bool, str]:
     finally:
         conn.close()
 
+
+def set_user_admin(email: str, is_admin: bool) -> Tuple[bool, str]:
+    """Update user's admin flag by email."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET is_admin = ? WHERE email = ?",
+            (1 if is_admin else 0, email)
+        )
+        conn.commit()
+        status = "granted" if is_admin else "revoked"
+        return True, f"Admin privileges {status}"
+    except Exception as e:
+        return False, f"Error updating admin flag: {str(e)}"
+    finally:
+        conn.close()
+
