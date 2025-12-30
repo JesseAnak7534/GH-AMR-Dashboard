@@ -33,11 +33,19 @@ db.init_database()
 
 # Handle email verification via magic link query params
 try:
-    params = getattr(st, "query_params", {})
+    # Prefer stable API; fallback to experimental
+    params = None
+    if hasattr(st, "query_params"):
+        params = st.query_params
+    else:
+        try:
+            params = st.experimental_get_query_params()
+        except Exception:
+            params = {}
+
     email_q = None
     code_q = None
     if params:
-        # Streamlit newer API returns dict-like; values can be str or list
         email_q = params.get("verify_email")
         code_q = params.get("verify_code")
         if isinstance(email_q, list):
@@ -196,18 +204,61 @@ if not st.session_state.authenticated:
                             code = f"{secrets.randbelow(1000000):06d}"
                             expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
                             db.set_verification_code(signup_email, code, expires_at)
+                            # Attempt to send email, but always show link and code as fallback
                             ok, send_msg = email_utils.send_verification_email(signup_email, code, country="Ghana")
+                            base_url = email_utils.get_app_base_url()
+                            verify_link = email_utils.build_verification_link(base_url, signup_email, code) if base_url else None
+
                             if ok:
                                 st.success("✅ Account created! We've sent a verification email with a link.")
                             else:
                                 st.warning(send_msg)
-                                st.info("If a link is shown, open it to verify.")
-                            st.info("Please open the verification link in your email to activate your account.")
+                                st.info("If the email doesn't arrive, use the link below to verify.")
+
+                            # Always present the code and link (if configured) as a fallback
+                            st.markdown("### Email Verification Details")
+                            st.write("Use the code or click the link to verify your account.")
+                            st.code(code, language="text")
+                            if verify_link:
+                                st.markdown(f"[Open verification link]({verify_link})")
+                            else:
+                                st.warning("Verification link is unavailable. Set APP_BASE_URL in Streamlit secrets for link support.")
                         else:
                             st.error(f"❌ {msg}")
                             # Verify Email tab removed; verification is via email link only.
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
+
+            # Provide a resend option in the Sign Up tab
+            st.markdown("---")
+            st.caption("Didn't receive the email? Resend it below.")
+            colr1, colr2 = st.columns([2, 1])
+            with colr1:
+                resend_email = st.text_input("Resend to Email", value=signup_email or "", key="resend_email")
+            with colr2:
+                if st.button("📨 Resend Verification", use_container_width=True):
+                    if not resend_email:
+                        st.error("Enter an email to resend.")
+                    else:
+                        try:
+                            code = f"{secrets.randbelow(1000000):06d}"
+                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
+                            db.set_verification_code(resend_email, code, expires_at)
+                            ok, send_msg = email_utils.send_verification_email(resend_email, code, country="Ghana")
+                            base_url = email_utils.get_app_base_url()
+                            verify_link = email_utils.build_verification_link(base_url, resend_email, code) if base_url else None
+                            if ok:
+                                st.success("Verification email resent.")
+                            else:
+                                st.warning(send_msg)
+                                st.info("If the email doesn't arrive, use the link below to verify.")
+                            st.code(code, language="text")
+                            if verify_link:
+                                st.markdown(f"[Open verification link]({verify_link})")
+                            else:
+                                st.warning("Verification link is unavailable. Set APP_BASE_URL in Streamlit secrets for link support.")
+                        except Exception as e:
+                            st.error(f"❌ Error resending email: {str(e)}")
         
         st.markdown("---")
         
