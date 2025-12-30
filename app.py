@@ -14,6 +14,7 @@ from io import BytesIO
 from datetime import datetime, timedelta
 from typing import List, Dict
 import plotly.express as px
+import urllib.parse
 
 # Import modules
 from src import db, validate, plots, report, analytics
@@ -29,6 +30,28 @@ st.set_page_config(
 
 # Initialize database
 db.init_database()
+
+# Handle email verification via magic link query params
+try:
+    params = getattr(st, "query_params", {})
+    email_q = None
+    code_q = None
+    if params:
+        # Streamlit newer API returns dict-like; values can be str or list
+        email_q = params.get("verify_email")
+        code_q = params.get("verify_code")
+        if isinstance(email_q, list):
+            email_q = email_q[0] if email_q else None
+        if isinstance(code_q, list):
+            code_q = code_q[0] if code_q else None
+    if email_q and code_q:
+        ok, msg = db.verify_user_email(str(email_q), str(code_q))
+        if ok:
+            st.success("✅ Email verified via link! You can now log in.")
+        else:
+            st.error(f"❌ Verification failed: {msg}")
+except Exception:
+    pass
 
 # Authentication check
 if "authenticated" not in st.session_state:
