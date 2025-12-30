@@ -31,34 +31,7 @@ st.set_page_config(
 # Initialize database
 db.init_database()
 
-# Handle email verification via magic link query params
-try:
-    params = None
-    if hasattr(st, "query_params"):
-        params = st.query_params
-    else:
-        try:
-            params = st.experimental_get_query_params()
-        except Exception:
-            params = {}
-
-    email_q = None
-    code_q = None
-    if params:
-        email_q = params.get("verify_email")
-        code_q = params.get("verify_code")
-        if isinstance(email_q, list):
-            email_q = email_q[0] if email_q else None
-        if isinstance(code_q, list):
-            code_q = code_q[0] if code_q else None
-    if email_q and code_q:
-        ok, msg = db.verify_user_email(str(email_q), str(code_q))
-        if ok:
-            st.success("✅ Email verified via link! You can now log in.")
-        else:
-            st.error(f"❌ Verification failed: {msg}")
-except Exception:
-    pass
+# Email verification via magic link is disabled
 
 # Authentication check
 if "authenticated" not in st.session_state:
@@ -167,15 +140,9 @@ if not st.session_state.authenticated:
                     if user and user['is_active']:
                         try:
                             if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
-                                # Identify configured admin email (allows direct login bypass of verification)
+                                # Email verification requirement removed; allow login if credentials match
                                 config_admin_email, _ = _get_admin_config()
                                 target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
-
-                                # Require email verification for normal users only
-                                if not user.get('is_verified') and login_email.strip().lower() != target_admin_email:
-                                    st.error("❌ Please verify your email before logging in.")
-                                    st.info("Check your email for the verification link and open it.")
-                                    st.stop()
 
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
@@ -224,42 +191,15 @@ if not st.session_state.authenticated:
                         password_hash = bcrypt.hashpw(signup_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
                         success, msg = db.create_user(signup_email, password_hash, is_admin=False)
                         if success:
-                            # Generate and send verification code
-                            code = f"{secrets.randbelow(1000000):06d}"
-                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
-                            db.set_verification_code(signup_email, code, expires_at)
-                            # Attempt to send email, but always show link and code as fallback
-                            ok, send_msg = email_utils.send_verification_email(signup_email, code, country="Ghana")
-                            base_url = email_utils.get_app_base_url()
-                            verify_link = email_utils.build_verification_link(base_url, signup_email, code) if base_url else None
-
-                            if ok:
-                                st.success("✅ Account created! We've sent a verification email with a link.")
-                            else:
-                                st.info("✅ Account created! Check your email for the verification link. If it doesn't arrive, try 'Resend Verification' below.")
+                            # Email authentication removed: mark user verified and allow immediate login
+                            try:
+                                db.set_user_verified(signup_email, True)
+                            except Exception:
+                                pass
+                            st.success("✅ Account created! You can now log in.")
                     except Exception as e:
                         st.error(f"❌ Error creating account: {str(e)}")
-            # Resend verification UI
-            colr1, colr2 = st.columns([2, 1])
-            with colr1:
-                resend_email = st.text_input("Resend to Email", value=signup_email or "", key="resend_email")
-            with colr2:
-                if st.button("📨 Resend Verification", use_container_width=True):
-                    if not resend_email:
-                        st.error("Enter an email to resend.")
-                    else:
-                        try:
-                            code = f"{secrets.randbelow(1000000):06d}"
-                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
-                            db.set_verification_code(resend_email, code, expires_at)
-                            ok, send_msg = email_utils.send_verification_email(resend_email, code, country="Ghana")
-                            if ok:
-                                st.success("Verification email resent.")
-                            else:
-                                st.info("If the email doesn't arrive, please try again later or contact the admin.")
-                            # Do not display code or link on the page; email only
-                        except Exception as e:
-                            st.error(f"❌ Error resending email: {str(e)}")
+            # Resend verification removed; email authentication is disabled
         
         st.markdown("---")
         

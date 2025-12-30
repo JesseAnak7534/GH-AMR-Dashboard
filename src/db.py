@@ -465,7 +465,7 @@ def create_user(email: str, password_hash: str, is_admin: bool = False) -> Tuple
     try:
         cursor.execute("""
             INSERT INTO users (email, password_hash, created_at, is_active, is_admin, is_verified)
-            VALUES (?, ?, ?, 1, ?, 0)
+            VALUES (?, ?, ?, 1, ?, 1)
         """, (email, password_hash, datetime.now().isoformat(), 1 if is_admin else 0))
         conn.commit()
         return True, "User created successfully"
