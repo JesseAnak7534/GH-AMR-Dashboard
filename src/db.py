@@ -31,6 +31,19 @@ def init_database():
     conn = get_connection()
     cursor = conn.cursor()
 
+    # Create users table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            last_login TEXT,
+            is_active BOOLEAN DEFAULT 1,
+            is_admin BOOLEAN DEFAULT 0
+        )
+    """)
+
     # Create datasets table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS datasets (
@@ -278,3 +291,117 @@ def delete_dataset(dataset_id: str) -> Tuple[bool, str]:
         return False, f"Error deleting dataset: {str(e)}"
     finally:
         conn.close()
+
+
+# ============================================================================
+# USER AUTHENTICATION FUNCTIONS
+# ============================================================================
+
+def create_user(email: str, password_hash: str, is_admin: bool = False) -> Tuple[bool, str]:
+    """Create a new user account."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO users (email, password_hash, created_at, is_active, is_admin)
+            VALUES (?, ?, ?, 1, ?)
+        """, (email, password_hash, datetime.now().isoformat(), 1 if is_admin else 0))
+        conn.commit()
+        return True, "User created successfully"
+    except sqlite3.IntegrityError:
+        return False, "Email already registered"
+    except Exception as e:
+        return False, f"Error creating user: {str(e)}"
+    finally:
+        conn.close()
+
+
+def get_user_by_email(email: str) -> Optional[Dict]:
+    """Get user by email."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    row = cursor.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def get_all_users() -> List[Dict]:
+    """Get all users for admin panel."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT user_id, email, created_at, last_login, is_active, is_admin 
+        FROM users 
+        ORDER BY created_at DESC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def update_last_login(email: str) -> bool:
+    """Update user's last login timestamp."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET last_login = ? WHERE email = ?",
+            (datetime.now().isoformat(), email)
+        )
+        conn.commit()
+        return True
+    except Exception as e:
+        return False
+    finally:
+        conn.close()
+
+
+def update_user_status(user_id: int, is_active: bool) -> Tuple[bool, str]:
+    """Activate or deactivate a user account."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET is_active = ? WHERE user_id = ?",
+            (1 if is_active else 0, user_id)
+        )
+        conn.commit()
+        status = "activated" if is_active else "deactivated"
+        return True, f"User {status} successfully"
+    except Exception as e:
+        return False, f"Error updating user: {str(e)}"
+    finally:
+        conn.close()
+
+
+def update_user_password(email: str, new_password_hash: str) -> Tuple[bool, str]:
+    """Update user's password hash."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET password_hash = ? WHERE email = ?",
+            (new_password_hash, email)
+        )
+        conn.commit()
+        return True, "Password updated successfully"
+    except Exception as e:
+        return False, f"Error updating password: {str(e)}"
+    finally:
+        conn.close()
+
+
+def delete_user(user_id: int) -> Tuple[bool, str]:
+    """Delete a user account."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        conn.commit()
+        return True, "User deleted successfully"
+    except Exception as e:
+        return False, f"Error deleting user: {str(e)}"
+    finally:
+        conn.close()
+

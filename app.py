@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import os
 import uuid
+import bcrypt
 from io import BytesIO
 from datetime import datetime, timedelta
 from typing import List, Dict
@@ -26,15 +27,122 @@ st.set_page_config(
 # Initialize database
 db.init_database()
 
-# App title and description
+# Authentication check
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+    st.session_state.user_email = None
+    st.session_state.is_admin = False
+
+# Create demo admin account if it doesn't exist
+try:
+    demo_user = db.get_user_by_email("admin@amr.gh")
+    if not demo_user:
+        password_hash = bcrypt.hashpw("Admin@123".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        db.create_user("admin@amr.gh", password_hash, is_admin=True)
+except Exception:
+    pass
+
+# If not authenticated, show login page
+if not st.session_state.authenticated:
+    st.markdown("""
+    <style>
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.markdown('<h1 style="text-align: center; color: #1f77b4;">🦠 AMR Dashboard</h1>', unsafe_allow_html=True)
+        st.markdown('<h4 style="text-align: center; color: #666;">Antimicrobial Resistance Surveillance</h4>', unsafe_allow_html=True)
+        st.markdown("---")
+        
+        with st.form("login_form"):
+            email = st.text_input("📧 Email", placeholder="admin@amr.gh")
+            password = st.text_input("🔐 Password", type="password", placeholder="Enter password (min 6 chars)")
+            col_a, col_b = st.columns(2)
+            
+            with col_a:
+                submit_login = st.form_submit_button("Login", use_container_width=True)
+            with col_b:
+                submit_signup = st.form_submit_button("Sign Up", use_container_width=True)
+            
+            if submit_login:
+                if not email or not password:
+                    st.error("❌ Please fill in all fields")
+                else:
+                    user = db.get_user_by_email(email)
+                    if user and user['is_active']:
+                        try:
+                            if bcrypt.checkpw(password.encode("utf-8"), user['password_hash'].encode("utf-8")):
+                                st.session_state.authenticated = True
+                                st.session_state.user_email = email
+                                st.session_state.is_admin = user['is_admin']
+                                db.update_last_login(email)
+                                st.success("✅ Login successful!")
+                                st.rerun()
+                            else:
+                                st.error("❌ Invalid email or password")
+                        except Exception as e:
+                            st.error(f"❌ Login error: {str(e)}")
+                    else:
+                        st.error("❌ Invalid email or password")
+            
+            if submit_signup:
+                if not email or not password:
+                    st.error("❌ Please fill in all fields")
+                elif len(password) < 6:
+                    st.error("❌ Password must be at least 6 characters")
+                elif "@" not in email:
+                    st.error("❌ Invalid email format")
+                else:
+                    try:
+                        password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                        success, msg = db.create_user(email, password_hash, is_admin=False)
+                        if success:
+                            st.success("✅ Account created! Please log in.")
+                        else:
+                            st.error(f"❌ {msg}")
+                    except Exception as e:
+                        st.error(f"❌ Error: {str(e)}")
+        
+        st.markdown("---")
+        with st.expander("📋 Demo Account"):
+            st.info("**Email:** admin@amr.gh\n\n**Password:** Admin@123")
+    
+    st.stop()
+
+# App title and description (only shown when authenticated)
 st.title("🦠 AMR Surveillance Dashboard")
 st.markdown("### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
 st.markdown("---")
 
-# Sidebar navigation
+# Sidebar navigation with user info
+with st.sidebar:
+    st.markdown(f"👤 **Logged in as:** {st.session_state.user_email}")
+    if st.session_state.is_admin:
+        st.markdown("🛡️ **Admin Account**")
+    
+    st.markdown("---")
+    
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.authenticated = False
+        st.session_state.user_email = None
+        st.session_state.is_admin = False
+        st.success("✅ Logged out successfully")
+        st.rerun()
+    
+    st.markdown("---")
+
 page = st.sidebar.radio(
     "Navigation",
-    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "Report Export"]
+    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "Report Export"] + 
+    (["Admin - Users"] if st.session_state.is_admin else [])
 )
 
 # ============================================================================
@@ -2643,6 +2751,132 @@ elif page == "Report Export":
                     except Exception as e:
                         st.error(f"Error generating report: {str(e)}")
                         st.info("Please check your data and try again. If the error persists, contact support.")
+
+# ============================================================================
+# PAGE 10: ADMIN - USER MANAGEMENT
+# ============================================================================
+elif page == "Admin - Users":
+    if not st.session_state.is_admin:
+        st.error("🚫 Access denied. Admin privileges required.")
+        st.stop()
+    
+    st.header("👥 User Management")
+    st.markdown("Manage user accounts and permissions")
+    st.markdown("---")
+    
+    # Get all users
+    all_users = db.get_all_users()
+    
+    if not all_users:
+        st.info("📭 No users registered yet.")
+    else:
+        # Display users in a table
+        st.subheader("📋 Registered Users")
+        
+        # Create columns for display
+        users_df = pd.DataFrame(all_users)
+        users_df['created_at'] = pd.to_datetime(users_df['created_at']).dt.strftime('%Y-%m-%d %H:%M')
+        users_df['last_login'] = users_df['last_login'].apply(
+            lambda x: pd.to_datetime(x).strftime('%Y-%m-%d %H:%M') if x else "Never"
+        )
+        users_df['Status'] = users_df['is_active'].apply(lambda x: "🟢 Active" if x else "🔴 Inactive")
+        users_df['Role'] = users_df['is_admin'].apply(lambda x: "👨‍💼 Admin" if x else "👤 User")
+        
+        # Display table
+        display_df = users_df[['email', 'created_at', 'last_login', 'Status', 'Role']].copy()
+        display_df.columns = ['Email', 'Created', 'Last Login', 'Status', 'Role']
+        
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        
+        st.markdown("---")
+        
+        # User management actions
+        st.subheader("🛠️ User Actions")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Deactivate User")
+            selected_user = st.selectbox(
+                "Select user to deactivate",
+                [u for u in all_users if u['is_active']],
+                format_func=lambda x: x['email'],
+                key="deactivate_user"
+            )
+            if st.button("🔴 Deactivate", use_container_width=True, key="btn_deactivate"):
+                success, msg = db.update_user_status(selected_user['user_id'], False)
+                if success:
+                    st.success(msg)
+                    st.rerun()
+                else:
+                    st.error(msg)
+        
+        with col2:
+            st.subheader("Reactivate User")
+            selected_inactive = st.selectbox(
+                "Select user to reactivate",
+                [u for u in all_users if not u['is_active']],
+                format_func=lambda x: x['email'],
+                key="reactivate_user"
+            )
+            if st.button("🟢 Reactivate", use_container_width=True, key="btn_reactivate"):
+                success, msg = db.update_user_status(selected_inactive['user_id'], True)
+                if success:
+                    st.success(msg)
+                    st.rerun()
+                else:
+                    st.error(msg)
+        
+        st.markdown("---")
+        
+        # Reset password section
+        st.subheader("🔐 Reset Password")
+        
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            user_for_reset = st.selectbox(
+                "Select user to reset password",
+                all_users,
+                format_func=lambda x: x['email'],
+                key="reset_user"
+            )
+        
+        with col2:
+            st.write("")  # Spacing
+            if st.button("🔑 Generate Temporary Password", use_container_width=True):
+                # Generate a temporary password
+                temp_password = f"Temp@{pd.Timestamp.now().strftime('%Y%m%d%H%M%S')}"
+                password_hash = bcrypt.hashpw(temp_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                success, msg = db.update_user_password(user_for_reset['email'], password_hash)
+                
+                if success:
+                    st.success(msg)
+                    st.info(f"🔐 Temporary Password: `{temp_password}`")
+                    st.warning("⚠️ Please share this password securely with the user. They should change it on first login.")
+                else:
+                    st.error(msg)
+        
+        st.markdown("---")
+        
+        # User statistics
+        st.subheader("📊 User Statistics")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        total_users = len(all_users)
+        active_users = len([u for u in all_users if u['is_active']])
+        inactive_users = len([u for u in all_users if not u['is_active']])
+        admin_users = len([u for u in all_users if u['is_admin']])
+        
+        with col1:
+            st.metric("Total Users", total_users)
+        with col2:
+            st.metric("Active Users", active_users)
+        with col3:
+            st.metric("Inactive Users", inactive_users)
+        with col4:
+            st.metric("Admins", admin_users)
 
 # ============================================================================
 # Footer

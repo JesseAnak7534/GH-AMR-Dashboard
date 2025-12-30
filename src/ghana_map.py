@@ -126,11 +126,12 @@ def create_interactive_ghana_map(
             pitch=0
         )
         
-        # Create deck
+        # Create deck with attribution hidden
         return pdk.Deck(
             layers=[layer],
             initial_view_state=view_state,
-            tooltip={"text": "{district}\n{region}\nResistance: {resistance_rate:.1f}%"}
+            tooltip={"text": "{district}\n{region}\nResistance: {resistance_rate:.1f}%"},
+            map_style=None
         )
     else:
         # Return empty deck if no location data
@@ -139,7 +140,7 @@ def create_interactive_ghana_map(
             longitude=ghana_center[1],
             zoom=7,
         )
-        return pdk.Deck(layers=[], initial_view_state=view_state)
+        return pdk.Deck(layers=[], initial_view_state=view_state, map_style=None)
 
 
 def create_regional_resistance_heatmap(
@@ -196,7 +197,8 @@ def create_regional_resistance_heatmap(
     return pdk.Deck(
         layers=[layer],
         initial_view_state=view_state,
-        tooltip={"text": "Resistance Rate: {resistance_rate:.1f}%"}
+        tooltip={"text": "Resistance Rate: {resistance_rate:.1f}%"},
+        map_style=None
     )
 
 
