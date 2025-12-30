@@ -73,7 +73,7 @@ if not st.session_state.authenticated:
         with tab1:
             st.subheader("Welcome Back")
             
-            login_email = st.text_input("📧 Email Address", placeholder="jesseanak98@gmail.com", key="login_email")
+            login_email = st.text_input("📧 Email Address", placeholder="Enter your email", key="login_email")
             login_password = st.text_input("🔐 Password", type="password", placeholder="Enter your password", key="login_password")
             
             if st.button("🔓 Sign In", use_container_width=True, type="primary"):
@@ -128,19 +128,11 @@ if not st.session_state.authenticated:
         
         st.markdown("---")
         
-        with st.expander("ℹ️ Admin Account Information"):
-            st.info("""
-            **Main Admin Credentials:**
-            - Email: `jesseanak98@gmail.com`
-            - Password: `Jese@1998`
-            
-            Use these credentials to access the admin panel and manage users.
-            """)
-        
         st.markdown("""
             <div style="text-align: center; color: #999; font-size: 0.85em; margin-top: 2rem;">
                 <p>🦠 AMR Surveillance Dashboard</p>
                 <p style="font-size: 0.8em;">Multi-source Surveillance System | Ghana</p>
+                <p style="font-size: 0.75em; color: #ccc; margin-top: 1rem;">Please enter your credentials to continue</p>
             </div>
         """, unsafe_allow_html=True)
     
