@@ -50,12 +50,7 @@ if ADMIN_EMAIL and ADMIN_PASSWORD:
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:
-    # Configure page for login
-    st.set_page_config(
-        page_title="AMR Dashboard - Login",
-        page_icon="🔐",
-        layout="centered"
-    )
+    # Render login page (avoid calling set_page_config twice)
     
     st.markdown("""
         <style>
