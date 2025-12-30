@@ -44,76 +44,105 @@ except Exception:
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:
+    # Configure page for login
+    st.set_page_config(
+        page_title="AMR Dashboard - Login",
+        page_icon="🔐",
+        layout="centered"
+    )
+    
     st.markdown("""
-    <style>
-    .center-content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    </style>
+        <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .main { background: white; border-radius: 10px; padding: 2rem; }
+        .center-title { text-align: center; color: #667eea; font-size: 2.5em; font-weight: bold; margin-bottom: 0.5rem; }
+        .center-subtitle { text-align: center; color: #666; font-size: 1.1em; margin-bottom: 2rem; }
+        </style>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.markdown('<h1 style="text-align: center; color: #1f77b4;">🦠 AMR Dashboard</h1>', unsafe_allow_html=True)
-        st.markdown('<h4 style="text-align: center; color: #666;">Antimicrobial Resistance Surveillance</h4>', unsafe_allow_html=True)
+        st.markdown('<div class="center-title">🦠 AMR Dashboard</div>', unsafe_allow_html=True)
+        st.markdown('<div class="center-subtitle">Antimicrobial Resistance Surveillance System</div>', unsafe_allow_html=True)
         st.markdown("---")
         
-        with st.form("login_form"):
-            email = st.text_input("📧 Email", placeholder="jesseanak98@gmail.com")
-            password = st.text_input("🔐 Password", type="password", placeholder="Enter password (min 6 chars)")
-            col_a, col_b = st.columns(2)
+        # Create two columns for better spacing
+        tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
+        
+        with tab1:
+            st.subheader("Welcome Back")
             
-            with col_a:
-                submit_login = st.form_submit_button("Login", use_container_width=True)
-            with col_b:
-                submit_signup = st.form_submit_button("Sign Up", use_container_width=True)
+            login_email = st.text_input("📧 Email Address", placeholder="jesseanak98@gmail.com", key="login_email")
+            login_password = st.text_input("🔐 Password", type="password", placeholder="Enter your password", key="login_password")
             
-            if submit_login:
-                if not email or not password:
+            if st.button("🔓 Sign In", use_container_width=True, type="primary"):
+                if not login_email or not login_password:
                     st.error("❌ Please fill in all fields")
                 else:
-                    user = db.get_user_by_email(email)
+                    user = db.get_user_by_email(login_email)
                     if user and user['is_active']:
                         try:
-                            if bcrypt.checkpw(password.encode("utf-8"), user['password_hash'].encode("utf-8")):
+                            if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
                                 st.session_state.authenticated = True
-                                st.session_state.user_email = email
+                                st.session_state.user_email = login_email
                                 st.session_state.is_admin = user['is_admin']
-                                db.update_last_login(email)
+                                db.update_last_login(login_email)
                                 st.success("✅ Login successful!")
+                                st.balloons()
                                 st.rerun()
                             else:
                                 st.error("❌ Invalid email or password")
                         except Exception as e:
                             st.error(f"❌ Login error: {str(e)}")
                     else:
-                        st.error("❌ Invalid email or password")
+                        st.error("❌ Invalid email or password, or account is inactive")
+        
+        with tab2:
+            st.subheader("Create New Account")
             
-            if submit_signup:
-                if not email or not password:
+            signup_email = st.text_input("📧 Email Address", placeholder="your.email@example.com", key="signup_email")
+            signup_password = st.text_input("🔐 Password", type="password", placeholder="At least 6 characters", key="signup_password")
+            signup_confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm your password", key="signup_confirm")
+            
+            if st.button("✅ Create Account", use_container_width=True, type="primary"):
+                if not signup_email or not signup_password:
                     st.error("❌ Please fill in all fields")
-                elif len(password) < 6:
+                elif len(signup_password) < 6:
                     st.error("❌ Password must be at least 6 characters")
-                elif "@" not in email:
+                elif signup_password != signup_confirm:
+                    st.error("❌ Passwords do not match")
+                elif "@" not in signup_email or "." not in signup_email.split("@")[1]:
                     st.error("❌ Invalid email format")
                 else:
                     try:
-                        password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-                        success, msg = db.create_user(email, password_hash, is_admin=False)
+                        password_hash = bcrypt.hashpw(signup_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                        success, msg = db.create_user(signup_email, password_hash, is_admin=False)
                         if success:
-                            st.success("✅ Account created! Please log in.")
+                            st.success("✅ Account created successfully! Please log in.")
+                            st.info("You can now log in with your credentials.")
                         else:
                             st.error(f"❌ {msg}")
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
         
         st.markdown("---")
-        with st.expander("📋 Admin Account"):
-            st.info("**Email:** jesseanak98@gmail.com\n\n**Password:** Jese@1998")
+        
+        with st.expander("ℹ️ Admin Account Information"):
+            st.info("""
+            **Main Admin Credentials:**
+            - Email: `jesseanak98@gmail.com`
+            - Password: `Jese@1998`
+            
+            Use these credentials to access the admin panel and manage users.
+            """)
+        
+        st.markdown("""
+            <div style="text-align: center; color: #999; font-size: 0.85em; margin-top: 2rem;">
+                <p>🦠 AMR Surveillance Dashboard</p>
+                <p style="font-size: 0.8em;">Multi-source Surveillance System | Ghana</p>
+            </div>
+        """, unsafe_allow_html=True)
     
     st.stop()
 
@@ -122,7 +151,7 @@ st.title("🦠 AMR Surveillance Dashboard")
 st.markdown("### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
 st.markdown("---")
 
-# Sidebar navigation with user info
+# Sidebar navigation with user info and admin panel
 with st.sidebar:
     st.markdown(f"👤 **Logged in as:** {st.session_state.user_email}")
     if st.session_state.is_admin:
