@@ -33,12 +33,12 @@ if "authenticated" not in st.session_state:
     st.session_state.user_email = None
     st.session_state.is_admin = False
 
-# Create demo admin account if it doesn't exist
+# Create main admin account if it doesn't exist
 try:
-    demo_user = db.get_user_by_email("admin@amr.gh")
-    if not demo_user:
-        password_hash = bcrypt.hashpw("Admin@123".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        db.create_user("admin@amr.gh", password_hash, is_admin=True)
+    admin_user = db.get_user_by_email("jesseanak98@gmail.com")
+    if not admin_user:
+        password_hash = bcrypt.hashpw("Jese@1998".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        db.create_user("jesseanak98@gmail.com", password_hash, is_admin=True)
 except Exception:
     pass
 
@@ -63,7 +63,7 @@ if not st.session_state.authenticated:
         st.markdown("---")
         
         with st.form("login_form"):
-            email = st.text_input("📧 Email", placeholder="admin@amr.gh")
+            email = st.text_input("📧 Email", placeholder="jesseanak98@gmail.com")
             password = st.text_input("🔐 Password", type="password", placeholder="Enter password (min 6 chars)")
             col_a, col_b = st.columns(2)
             
@@ -112,8 +112,8 @@ if not st.session_state.authenticated:
                         st.error(f"❌ Error: {str(e)}")
         
         st.markdown("---")
-        with st.expander("📋 Demo Account"):
-            st.info("**Email:** admin@amr.gh\n\n**Password:** Admin@123")
+        with st.expander("📋 Admin Account"):
+            st.info("**Email:** jesseanak98@gmail.com\n\n**Password:** Jese@1998")
     
     st.stop()
 

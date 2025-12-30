@@ -205,14 +205,14 @@ with col2:
     
     st.markdown("---")
     
-    # Demo account info
-    with st.expander("ℹ️ Demo Account (For Testing)", expanded=False):
+    # Admin account info
+    with st.expander("ℹ️ Admin Account", expanded=False):
         st.markdown("""
         <div class="demo-box">
-        <strong>Email:</strong> admin@amr.gh<br>
-        <strong>Password:</strong> Admin@123<br>
+        <strong>Email:</strong> jesseanak98@gmail.com<br>
+        <strong>Password:</strong> Jese@1998<br>
         <br>
-        <em>Auto-created on first login. Admin account with full access.</em>
+        <em>Main admin account with full system access and user management capabilities.</em>
         </div>
         """, unsafe_allow_html=True)
     

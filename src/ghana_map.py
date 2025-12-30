@@ -68,7 +68,7 @@ def create_interactive_ghana_map(
     samples_df: pd.DataFrame, 
     ast_df: pd.DataFrame,
     title: str = "Ghana - Sample Locations & Resistance"
-) -> dict:
+) -> pdk.Deck:
     """
     Create an interactive pydeck map of Ghana showing sample locations and resistance patterns.
     
@@ -78,7 +78,7 @@ def create_interactive_ghana_map(
         title: Title for the map
         
     Returns:
-        pydeck chart specification dictionary
+        pydeck Deck object
     """
     
     # Center of Ghana
@@ -86,67 +86,84 @@ def create_interactive_ghana_map(
     
     # Calculate resistance by location
     if 'latitude' in samples_df.columns and 'longitude' in samples_df.columns:
-        # Merge with AST data
-        sample_resistance = ast_df.groupby('sample_id')['result'].apply(
-            lambda x: (x == 'R').sum() / len(x) * 100 if len(x) > 0 else 0
-        ).reset_index()
-        sample_resistance.columns = ['sample_id', 'resistance_rate']
+        # Remove rows with missing coordinates
+        samples_clean = samples_df.dropna(subset=['latitude', 'longitude']).copy()
         
-        # Merge with samples
-        samples_with_resistance = samples_df.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
-        samples_with_resistance['resistance_rate'] = samples_with_resistance['resistance_rate'].fillna(0)
-        
-        # Create color mapping based on resistance
-        def get_color(resistance_rate):
-            if resistance_rate > 50:
-                return [255, 0, 0, 200]  # Red
-            elif resistance_rate > 30:
-                return [255, 165, 0, 200]  # Orange
-            else:
-                return [0, 255, 0, 200]  # Green
-        
-        samples_with_resistance['color'] = samples_with_resistance['resistance_rate'].apply(get_color)
-        
-        # Create pydeck layer
-        layer = pdk.Layer(
-            "ScatterplotLayer",
-            data=samples_with_resistance,
-            get_position='[longitude, latitude]',
-            get_color='color',
-            get_radius=100,
-            pickable=True,
-        )
-        
-        # Create view state
-        view_state = pdk.ViewState(
-            latitude=ghana_center[0],
-            longitude=ghana_center[1],
-            zoom=7,
-            bearing=0,
-            pitch=0
-        )
-        
-        # Create deck with attribution hidden
-        return pdk.Deck(
-            layers=[layer],
-            initial_view_state=view_state,
-            tooltip={"text": "{district}\n{region}\nResistance: {resistance_rate:.1f}%"},
-            map_style=None
-        )
-    else:
-        # Return empty deck if no location data
-        view_state = pdk.ViewState(
-            latitude=ghana_center[0],
-            longitude=ghana_center[1],
-            zoom=7,
-        )
-        return pdk.Deck(layers=[], initial_view_state=view_state, map_style=None)
+        if len(samples_clean) > 0:
+            # Merge with AST data
+            sample_resistance = ast_df.groupby('sample_id')['result'].apply(
+                lambda x: (x == 'R').sum() / len(x) * 100 if len(x) > 0 else 0
+            ).reset_index()
+            sample_resistance.columns = ['sample_id', 'resistance_rate']
+            
+            # Merge with samples
+            samples_with_resistance = samples_clean.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
+            samples_with_resistance['resistance_rate'] = samples_with_resistance['resistance_rate'].fillna(0)
+            
+            # Create color mapping based on resistance
+            def get_color(resistance_rate):
+                if resistance_rate > 50:
+                    return [255, 0, 0, 200]  # Red
+                elif resistance_rate > 30:
+                    return [255, 165, 0, 200]  # Orange
+                else:
+                    return [0, 255, 0, 200]  # Green
+            
+            samples_with_resistance['color'] = samples_with_resistance['resistance_rate'].apply(get_color)
+            
+            # Ensure latitude and longitude are floats
+            samples_with_resistance['latitude'] = pd.to_numeric(samples_with_resistance['latitude'], errors='coerce')
+            samples_with_resistance['longitude'] = pd.to_numeric(samples_with_resistance['longitude'], errors='coerce')
+            samples_with_resistance = samples_with_resistance.dropna(subset=['latitude', 'longitude'])
+            
+            # Create pydeck layer
+            layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=samples_with_resistance,
+                get_position=['longitude', 'latitude'],
+                get_color='color',
+                get_radius=150,
+                pickable=True,
+                auto_highlight=True,
+            )
+            
+            # Create view state
+            view_state = pdk.ViewState(
+                latitude=ghana_center[0],
+                longitude=ghana_center[1],
+                zoom=6,
+                bearing=0,
+                pitch=0
+            )
+            
+            # Create deck with proper map style
+            return pdk.Deck(
+                layers=[layer],
+                initial_view_state=view_state,
+                tooltip={
+                    "html": "<b>{district}</b><br/>Region: {region}<br/>Resistance Rate: {resistance_rate:.1f}%",
+                    "style": {"backgroundColor": "#f1f1f2", "color": "black"}
+                },
+                map_style="mapbox://styles/mapbox/light-v9"
+            )
+    
+    # Return empty deck if no location data
+    view_state = pdk.ViewState(
+        latitude=ghana_center[0],
+        longitude=ghana_center[1],
+        zoom=6,
+    )
+    return pdk.Deck(
+        layers=[],
+        initial_view_state=view_state,
+        map_style="mapbox://styles/mapbox/light-v9"
+    )
 
 
 def create_regional_resistance_heatmap(
     ast_df: pd.DataFrame,
     samples_df: pd.DataFrame
-):
+) -> pdk.Deck:
     """
     Create a heatmap showing resistance concentration by region using pydeck.
     
@@ -155,50 +172,79 @@ def create_regional_resistance_heatmap(
         samples_df: Samples DataFrame with region/district information
         
     Returns:
-        pydeck chart
+        pydeck Deck object
     """
     
     ghana_center = [7.3697, -5.6789]
     
-    # Calculate resistance by location
-    region_resistance = ast_df.merge(
-        samples_df[['sample_id', 'latitude', 'longitude', 'region']],
-        on='sample_id'
-    ).copy()
+    # Remove rows with missing coordinates
+    samples_clean = samples_df.dropna(subset=['latitude', 'longitude']).copy()
     
-    region_resistance['is_resistant'] = (region_resistance['result'] == 'R').astype(int)
+    if len(samples_clean) > 0:
+        # Calculate resistance by location
+        region_resistance = ast_df.merge(
+            samples_clean[['sample_id', 'latitude', 'longitude', 'region']],
+            on='sample_id'
+        ).copy()
+        
+        if len(region_resistance) > 0:
+            region_resistance['is_resistant'] = (region_resistance['result'] == 'R').astype(int)
+            
+            # Ensure coordinates are numeric
+            region_resistance['latitude'] = pd.to_numeric(region_resistance['latitude'], errors='coerce')
+            region_resistance['longitude'] = pd.to_numeric(region_resistance['longitude'], errors='coerce')
+            region_resistance = region_resistance.dropna(subset=['latitude', 'longitude'])
+            
+            # Group by location and calculate resistance
+            location_stats = region_resistance.groupby(['latitude', 'longitude']).agg({
+                'is_resistant': ['sum', 'count']
+            }).reset_index()
+            
+            location_stats.columns = ['latitude', 'longitude', 'resistant_count', 'total_count']
+            location_stats['resistance_rate'] = (location_stats['resistant_count'] / location_stats['total_count'] * 100)
+            
+            # Create ScatterplotLayer instead of HeatmapLayer for better visibility
+            layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=location_stats,
+                get_position=['longitude', 'latitude'],
+                get_color=[
+                    'case',
+                    ['>', ['get', 'resistance_rate'], 50], [255, 0, 0, 200],  # Red
+                    ['>', ['get', 'resistance_rate'], 30], [255, 165, 0, 200],  # Orange
+                    [0, 255, 0, 200]  # Green
+                ],
+                get_radius=200,
+                pickable=True,
+                auto_highlight=True,
+            )
+            
+            view_state = pdk.ViewState(
+                latitude=ghana_center[0],
+                longitude=ghana_center[1],
+                zoom=6,
+            )
+            
+            return pdk.Deck(
+                layers=[layer],
+                initial_view_state=view_state,
+                tooltip={
+                    "html": "<b>Location</b><br/>Region: {region}<br/>Resistance Rate: {resistance_rate:.1f}%<br/>Resistant: {resistant_count} / {total_count}",
+                    "style": {"backgroundColor": "#f1f1f2", "color": "black"}
+                },
+                map_style="mapbox://styles/mapbox/light-v9"
+            )
     
-    # Group by location and calculate resistance
-    location_stats = region_resistance.groupby(['latitude', 'longitude']).agg({
-        'is_resistant': ['sum', 'count']
-    }).reset_index()
-    
-    location_stats.columns = ['latitude', 'longitude', 'resistant_count', 'total_count']
-    location_stats['resistance_rate'] = (location_stats['resistant_count'] / location_stats['total_count'] * 100)
-    location_stats['color'] = location_stats['resistance_rate'].apply(
-        lambda x: [255, 0, 0, 200] if x > 50 else [255, 165, 0, 200] if x > 30 else [0, 255, 0, 200]
-    )
-    
-    # Create heatmap layer
-    layer = pdk.Layer(
-        "HeatmapLayer",
-        data=location_stats,
-        get_position='[longitude, latitude]',
-        get_weight='resistance_rate',
-        radius_pixels=50,
-    )
-    
+    # Return empty deck if no data
     view_state = pdk.ViewState(
         latitude=ghana_center[0],
         longitude=ghana_center[1],
-        zoom=7,
+        zoom=6,
     )
-    
     return pdk.Deck(
-        layers=[layer],
+        layers=[],
         initial_view_state=view_state,
-        tooltip={"text": "Resistance Rate: {resistance_rate:.1f}%"},
-        map_style=None
+        map_style="mapbox://styles/mapbox/light-v9"
     )
 
 
