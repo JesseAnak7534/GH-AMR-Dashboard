@@ -261,7 +261,7 @@ if page == "Upload & Data Quality":
                             uploaded_file.name.replace('.xlsx', ''),
                             samples_df,
                             ast_df,
-                            uploaded_by="User"
+                            uploaded_by=(st.session_state.user_email or "Anonymous")
                         )
 
                         if success:
@@ -279,6 +279,11 @@ if page == "Upload & Data Quality":
     # Show existing datasets
     st.subheader("📊 Existing Datasets")
     datasets = db.get_all_datasets()
+    # Hide admin-owned datasets from non-admin users
+    config_admin_email, _ = _get_admin_config()
+    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+    if not st.session_state.is_admin:
+        datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
     
     if datasets:
         for ds in datasets:
@@ -312,6 +317,11 @@ elif page == "Data Management":
 
     # Get all datasets
     datasets = db.get_all_datasets()
+    # Hide admin-owned datasets from non-admin users
+    config_admin_email, _ = _get_admin_config()
+    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+    if not st.session_state.is_admin:
+        datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
 
     if not datasets:
         st.info("No datasets available. Please upload data first on the 'Upload & Data Quality' page.")
@@ -2756,6 +2766,11 @@ elif page == "Report Export":
 
             # Dataset selection (optional - for metadata)
             datasets = db.get_all_datasets()
+            # Hide admin-owned datasets from non-admin users
+            config_admin_email, _ = _get_admin_config()
+            admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+            if not st.session_state.is_admin:
+                datasets = [d for d in datasets if (d.get('uploaded_by') or '').strip().lower() != admin_email]
             dataset_names = [f"{d['dataset_name']} ({d['dataset_id']})" for d in datasets]
 
             selected_dataset_name = "Filtered Dataset"
