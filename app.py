@@ -111,7 +111,20 @@ if not st.session_state.authenticated:
                             if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
-                                st.session_state.is_admin = user['is_admin']
+
+                                # Enforce admin for configured email (secrets/env) or fallback fixed admin
+                                config_admin_email, _ = _get_admin_config()
+                                is_admin_flag = user['is_admin']
+                                target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+                                if login_email.strip().lower() == target_admin_email:
+                                    is_admin_flag = 1
+                                    try:
+                                        db.set_user_admin(login_email, True)
+                                        db.update_user_status(user['user_id'], True)
+                                    except Exception:
+                                        pass
+
+                                st.session_state.is_admin = bool(is_admin_flag)
                                 db.update_last_login(login_email)
                                 st.success("✅ Login successful!")
                                 st.balloons()
