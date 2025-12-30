@@ -8,6 +8,7 @@ import numpy as np
 import os
 import uuid
 import bcrypt
+from dotenv import load_dotenv
 from io import BytesIO
 from datetime import datetime, timedelta
 from typing import List, Dict
@@ -33,14 +34,19 @@ if "authenticated" not in st.session_state:
     st.session_state.user_email = None
     st.session_state.is_admin = False
 
-# Create main admin account if it doesn't exist
-try:
-    admin_user = db.get_user_by_email("jesseanak98@gmail.com")
-    if not admin_user:
-        password_hash = bcrypt.hashpw("Jese@1998".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        db.create_user("jesseanak98@gmail.com", password_hash, is_admin=True)
-except Exception:
-    pass
+# Create main admin account if configured via environment variables
+load_dotenv()
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+if ADMIN_EMAIL and ADMIN_PASSWORD:
+    try:
+        admin_user = db.get_user_by_email(ADMIN_EMAIL)
+        if not admin_user:
+            password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+            db.create_user(ADMIN_EMAIL, password_hash, is_admin=True)
+    except Exception:
+        pass
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:

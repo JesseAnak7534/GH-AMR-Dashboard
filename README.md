@@ -68,7 +68,17 @@ streamlit run app.py
 
 The app will open at `http://localhost:8501`
 
----
+### Optional: Admin Account Setup
+
+To enable an initial admin user, create a `.env` file in the project root:
+
+```env
+ADMIN_EMAIL=your.admin@example.com
+ADMIN_PASSWORD=StrongPassword123!
+```
+
+On first launch, the app will create this admin account if it does not exist. Otherwise, you can use the Sign Up tab to create standard users.
+
 
 ## Project Structure
 
@@ -398,6 +408,8 @@ Data: [Your Dataset Name]
 *Environment + Food AMR Monitoring | Ghana*
 
 Last Updated: December 2024
-#   A M R - S u r v e i l l a n c e - D a s h b o a r d  
- #   A M R - S u r v e i l l a n c e - D a s h b o a r d  
+#   A M R - S u r v e i l l a n c e - D a s h b o a r d 
+ 
+ #   A M R - S u r v e i l l a n c e - D a s h b o a r d 
+ 
  
