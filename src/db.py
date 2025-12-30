@@ -303,9 +303,14 @@ def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tup
 
         # Build mapping for sample_id prefixes
         id_map = {}
+        empty_sample_counter = 0
         for _, row in samples_df.iterrows():
             old_sid = row.get('sample_id') or ''
-            new_sid = f"{source_dataset_id}-{old_sid}" if old_sid else f"{source_dataset_id}-sample"
+            if old_sid:
+                new_sid = f"{source_dataset_id}-{old_sid}"
+            else:
+                empty_sample_counter += 1
+                new_sid = f"{source_dataset_id}-sample-{empty_sample_counter}"
             id_map[old_sid] = new_sid
             cursor.execute(
                 """
@@ -332,11 +337,16 @@ def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tup
 
         added_samples = len(id_map)
 
+        empty_isolate_counter = 0
         for _, row in ast_df.iterrows():
             old_sid = row.get('sample_id') or ''
             new_sid = id_map.get(old_sid, f"{source_dataset_id}-{old_sid}")
             old_isolate = row.get('isolate_id') or ''
-            new_isolate = f"{source_dataset_id}-{old_isolate}" if old_isolate else f"{source_dataset_id}-isolate"
+            if old_isolate:
+                new_isolate = f"{source_dataset_id}-{old_isolate}"
+            else:
+                empty_isolate_counter += 1
+                new_isolate = f"{source_dataset_id}-isolate-{empty_isolate_counter}"
             cursor.execute(
                 """
                 INSERT OR REPLACE INTO ast_results
