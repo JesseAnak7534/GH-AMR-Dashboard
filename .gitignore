@@ -1,0 +1,61 @@
+# Python virtual environment
+venv/
+env/
+ENV/
+.env
+
+# Database files
+db/amr_data.db
+db/*.sqlite
+db/*.sqlite3
+
+# Excel files and templates (keep templates, ignore uploads)
+*.xlsx
+*.xls
+!templates/*.xlsx
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Streamlit cache
+.streamlit/
+*.streamlit/
+
+# Generated reports and data
+*.html
+*.pdf
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
