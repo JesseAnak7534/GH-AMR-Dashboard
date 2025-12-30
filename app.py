@@ -5,12 +5,124 @@ Main Streamlit application with multi-page support.
 import streamlit as st
 import pandas as pd
 import numpy as np
-        # Removed dataset management preview block
+import os
+import uuid
+import bcrypt
+import secrets
+from dotenv import load_dotenv
+from io import BytesIO
+from datetime import datetime, timedelta
+from typing import List, Dict
+import plotly.express as px
+import urllib.parse
+
+# Import modules
+from src import db, validate, plots, report, analytics
+from src import email_utils
+
+# Page configuration
+st.set_page_config(
+    page_title="AMR Surveillance Dashboard",
+    page_icon="🦠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Initialize database
+db.init_database()
+
+# Handle email verification via magic link query params
+try:
+    params = None
+    if hasattr(st, "query_params"):
+        params = st.query_params
+    else:
+        try:
+            params = st.experimental_get_query_params()
+        except Exception:
+            params = {}
+
+    email_q = None
+    code_q = None
+    if params:
+        email_q = params.get("verify_email")
+        code_q = params.get("verify_code")
+        if isinstance(email_q, list):
+            email_q = email_q[0] if email_q else None
+        if isinstance(code_q, list):
+            code_q = code_q[0] if code_q else None
+    if email_q and code_q:
+        ok, msg = db.verify_user_email(str(email_q), str(code_q))
+        if ok:
+            st.success("✅ Email verified via link! You can now log in.")
+        else:
+            st.error(f"❌ Verification failed: {msg}")
+except Exception:
+    pass
+
+# Authentication check
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+    st.session_state.user_email = None
+    st.session_state.is_admin = False
+
+def _get_admin_config():
+    admin_email = None
+    admin_password = None
+    try:
+        if hasattr(st, "secrets"):
+            if "ADMIN_EMAIL" in st.secrets and "ADMIN_PASSWORD" in st.secrets:
+                admin_email = st.secrets["ADMIN_EMAIL"]
+                admin_password = st.secrets["ADMIN_PASSWORD"]
+    except Exception:
+        pass
+    load_dotenv()
+    admin_email = admin_email or os.getenv("ADMIN_EMAIL")
+    admin_password = admin_password or os.getenv("ADMIN_PASSWORD")
+    return admin_email, admin_password
+
+ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
+if ADMIN_EMAIL and ADMIN_PASSWORD:
+    try:
+        admin_user = db.get_user_by_email(ADMIN_EMAIL)
+        password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        if not admin_user:
+            db.create_user(ADMIN_EMAIL, password_hash, is_admin=True)
+        else:
+            if not admin_user.get("is_admin"):
+                db.set_user_admin(ADMIN_EMAIL, True)
+            if not admin_user.get("is_active"):
+                db.update_user_status(admin_user["user_id"], True)
+            db.update_user_password(ADMIN_EMAIL, password_hash)
+        try:
+            db.set_user_verified(ADMIN_EMAIL, True)
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+def _get_flag(name: str) -> bool:
+    val = None
+    try:
+        if hasattr(st, "secrets") and name in st.secrets:
+            val = st.secrets.get(name)
+    except Exception:
+        pass
+    if val is None:
+        val = os.getenv(name)
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        return bool(val)
+    if isinstance(val, str):
+        return val.strip().lower() in ("1", "true", "yes", "on")
+    return False
+
+try:
     if _get_flag("PURGE_NON_ADMIN_ON_DEPLOY"):
         flag_path = os.path.join("db", "purge_non_admin.flag")
         if not os.path.exists(flag_path):
             deleted_count, msg = db.delete_non_admin_users(ADMIN_EMAIL)
-            # Create flag file to avoid repeated purge across restarts
             os.makedirs("db", exist_ok=True)
             with open(flag_path, "w", encoding="utf-8") as f:
                 f.write(f"{datetime.now().isoformat()} - {msg}")
@@ -120,21 +232,10 @@ if not st.session_state.authenticated:
                             if ok:
                                 st.success("✅ Account created! We've sent a verification email with a link.")
                             else:
-                                if verify_link:
-                                    st.info("✅ Account created! Use the verification link below to activate your account.")
-                                else:
-                                    st.info("If the email doesn't arrive, use the code below to verify.")
-
-                            # Do not display code or link on the page; email only
-                        else:
-                            st.error(f"❌ {msg}")
-                            # Verify Email tab removed; verification is via email link only.
+                                st.info("✅ Account created! Check your email for the verification link. If it doesn't arrive, try 'Resend Verification' below.")
                     except Exception as e:
-                        st.error(f"❌ Error: {str(e)}")
-
-            # Provide a resend option in the Sign Up tab
-            st.markdown("---")
-            st.caption("Didn't receive the email? Resend it below.")
+                        st.error(f"❌ Error creating account: {str(e)}")
+            # Resend verification UI
             colr1, colr2 = st.columns([2, 1])
             with colr1:
                 resend_email = st.text_input("Resend to Email", value=signup_email or "", key="resend_email")
@@ -148,15 +249,10 @@ if not st.session_state.authenticated:
                             expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
                             db.set_verification_code(resend_email, code, expires_at)
                             ok, send_msg = email_utils.send_verification_email(resend_email, code, country="Ghana")
-                            base_url = email_utils.get_app_base_url()
-                            verify_link = email_utils.build_verification_link(base_url, resend_email, code) if base_url else None
                             if ok:
                                 st.success("Verification email resent.")
                             else:
-                                if verify_link:
-                                    st.info("Verification email couldn't be sent. Use the link below to verify.")
-                                else:
-                                    st.info("If the email doesn't arrive, use the code below to verify.")
+                                st.info("If the email doesn't arrive, please try again later or contact the admin.")
                             # Do not display code or link on the page; email only
                         except Exception as e:
                             st.error(f"❌ Error resending email: {str(e)}")
@@ -383,201 +479,7 @@ elif page == "Admin - Datasets":
         except Exception as e:
             st.error(f"Error: {e}")
 
-        if selected_dataset_display:
-            # Extract dataset ID
-            try:
-                selected_dataset_id = selected_dataset_display.split("(ID: ")[1].rstrip(")")
-            except (IndexError, ValueError):
-                st.error("Error parsing dataset ID. Please refresh the page.")
-                selected_dataset_id = None
-
-            if selected_dataset_id:
-                # Get dataset details
-                dataset_details = next((ds for ds in datasets if ds['dataset_id'] == selected_dataset_id), None)
-
-                if dataset_details:
-                    st.markdown("---")
-
-                # Dataset overview
-                col1, col2, col3, col4 = st.columns(4)
-
-                with col1:
-                    st.metric("Dataset ID", dataset_details['dataset_id'])
-                with col2:
-                    st.metric("Samples", dataset_details['rows_samples'])
-                with col3:
-                    st.metric("Tests", dataset_details['rows_tests'])
-                with col4:
-                    st.metric("Uploaded", dataset_details['uploaded_at'][:10])
-
-                st.markdown("---")
-
-                # Load data for all tabs
-                try:
-                    samples_data = db.get_dataset_samples(selected_dataset_id)
-                    ast_data = db.get_dataset_ast(selected_dataset_id)
-                except Exception as e:
-                    st.error(f"Error loading dataset data: {str(e)}")
-                    samples_data = pd.DataFrame()
-                    ast_data = pd.DataFrame()
-
-                # Data preview tabs
-                tab1, tab2, tab3 = st.tabs(["📊 Samples Data", "🧪 AST Results", "📈 Summary Statistics"])
-
-                with tab1:
-                    st.subheader("Sample Data Preview")
-                    if not samples_data.empty:
-                        st.dataframe(samples_data.head(100), use_container_width=True)
-                        st.caption(f"Showing first 100 of {len(samples_data)} samples")
-
-                        # Download samples
-                        csv_samples = samples_data.to_csv(index=False)
-                        st.download_button(
-                            label="📥 Download Samples CSV",
-                            data=csv_samples,
-                            file_name=f"{dataset_details['dataset_name']}_samples.csv",
-                            mime="text/csv",
-                            key="download_samples"
-                        )
-                    else:
-                        st.warning("No sample data found for this dataset")
-
-                with tab2:
-                    st.subheader("AST Results Preview")
-                    if not ast_data.empty:
-                        st.dataframe(ast_data.head(100), use_container_width=True)
-                        st.caption(f"Showing first 100 of {len(ast_data)} test results")
-
-                        # Download AST results
-                        csv_ast = ast_data.to_csv(index=False)
-                        st.download_button(
-                            label="📥 Download AST Results CSV",
-                            data=csv_ast,
-                            file_name=f"{dataset_details['dataset_name']}_ast_results.csv",
-                            mime="text/csv",
-                            key="download_ast"
-                        )
-                    else:
-                        st.warning("No AST data found for this dataset")
-
-                with tab3:
-                    st.subheader("Dataset Summary Statistics")
-
-                    if not samples_data.empty and not ast_data.empty:
-                        col1, col2, col3 = st.columns(3)
-
-                        with col1:
-                            st.metric("Unique Organisms", ast_data['organism'].nunique())
-                            st.metric("Unique Antibiotics", ast_data['antibiotic'].nunique())
-
-                        with col2:
-                            resistant_count = (ast_data['result'] == 'R').sum()
-                            resistance_rate = resistant_count / len(ast_data) * 100 if len(ast_data) > 0 else 0
-                            st.metric("Resistance Rate", f"{resistance_rate:.1f}%")
-                            st.metric("Resistant Isolates", resistant_count)
-
-                        with col3:
-                            st.metric("Geographic Coverage", f"{samples_data['latitude'].notna().sum()} samples with coordinates")
-                            st.metric("Source Categories", samples_data['source_category'].nunique())
-
-                        # Data quality indicators
-                        st.markdown("---")
-                        st.subheader("Data Quality Indicators")
-
-                        quality_col1, quality_col2, quality_col3 = st.columns(3)
-
-                        with quality_col1:
-                            missing_coords = samples_data['latitude'].isna().sum()
-                            st.metric("Missing Coordinates", missing_coords)
-                            if missing_coords > 0:
-                                st.warning(f"{missing_coords} samples lack geographic coordinates")
-
-                        with quality_col2:
-                            missing_results = ast_data['result'].isna().sum()
-                            st.metric("Missing Results", missing_results)
-                            if missing_results > 0:
-                                st.error(f"{missing_results} tests have missing S/I/R results")
-
-                        with quality_col3:
-                            auto_interp = ast_data['auto_interpreted'].sum() if 'auto_interpreted' in ast_data.columns else 0
-                            st.metric("Auto-Interpreted", auto_interp)
-                            if auto_interp > 0:
-                                st.info(f"{auto_interp} results automatically interpreted using CLSI/EUCAST breakpoints")
-                            else:
-                                st.info("No automatic interpretation data available")
-                    else:
-                        st.warning("Unable to calculate statistics - missing data")
-
-                # Dataset actions
-                st.markdown("---")
-                st.subheader("Dataset Actions")
-
-                col1, col2, col3 = st.columns(3)
-
-                with col1:
-                    if st.button("🔄 Refresh Data", key="refresh_data"):
-                        st.rerun()
-
-                with col2:
-                    # Export complete dataset
-                    if st.button("📦 Export Complete Dataset", key="export_dataset"):
-                        try:
-                            # Create Excel file with both sheets
-                            from io import BytesIO
-                            import pandas as pd
-
-                            output = BytesIO()
-                            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                                samples_data.to_excel(writer, sheet_name='samples', index=False)
-                                ast_data.to_excel(writer, sheet_name='ast_results', index=False)
-
-                            output.seek(0)
-                            
-                            # Store the Excel data in session state for download
-                            st.session_state.excel_data = output.getvalue()
-                            st.session_state.excel_filename = f"{dataset_details['dataset_name']}_complete.xlsx"
-                            st.success("Excel file prepared! Click download button below.")
-                            
-                        except Exception as e:
-                            st.error(f"Error creating Excel file: {str(e)}")
-                    
-                    # Show download button if Excel data is ready
-                    if 'excel_data' in st.session_state and 'excel_filename' in st.session_state:
-                        st.download_button(
-                            label="📥 Download Excel File",
-                            data=st.session_state.excel_data,
-                            file_name=st.session_state.excel_filename,
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            key="download_excel"
-                        )
-
-                with col3:
-                    # Delete dataset (with confirmation)
-                    if "confirm_delete" not in st.session_state:
-                        st.session_state.confirm_delete = False
-                    
-                    if st.button("🗑️ Delete Dataset", key="delete_dataset_confirm"):
-                        st.session_state.confirm_delete = True
-                    
-                    if st.session_state.confirm_delete:
-                        st.error("⚠️ Are you sure you want to delete this dataset? This action cannot be undone!")
-                        
-                        col_confirm1, col_confirm2 = st.columns(2)
-                        with col_confirm1:
-                            if st.button("✅ Yes, Delete", key="confirm_delete_yes"):
-                                success, msg = db.delete_dataset(selected_dataset_id)
-                                if success:
-                                    st.success("Dataset deleted successfully!")
-                                    st.session_state.confirm_delete = False
-                                    st.rerun()
-                                else:
-                                    st.error(f"Error deleting dataset: {msg}")
-                                    st.session_state.confirm_delete = False
-                                    
-                        with col_confirm2:
-                            if st.button("❌ Cancel", key="confirm_delete_no"):
-                                st.info("Delete cancelled")
-                                st.session_state.confirm_delete = False
+        # Admin page continues without dataset preview block to avoid undefined variables
 
 # ============================================================================
 # PAGE 3: RESISTANCE OVERVIEW
