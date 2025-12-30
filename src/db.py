@@ -56,6 +56,17 @@ def init_database():
         )
     """)
 
+    # Add country and is_country_main columns if they don't exist
+    migration_cols = [
+        ("country", "TEXT"),
+        ("is_country_main", "BOOLEAN DEFAULT 0")
+    ]
+    for col_name, col_type in migration_cols:
+        try:
+            cursor.execute(f"ALTER TABLE datasets ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            pass
+
     # Create samples table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS samples (
@@ -217,6 +228,144 @@ def get_all_datasets() -> List[Dict]:
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
+
+
+def set_dataset_main(dataset_id: str, is_main: bool = True, country: Optional[str] = None) -> Tuple[bool, str]:
+    """Mark a dataset as the main country dataset and optionally set country."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        if is_main and country:
+            cursor.execute(
+                "UPDATE datasets SET is_country_main = 1, country = ? WHERE dataset_id = ?",
+                (country, dataset_id)
+            )
+        else:
+            cursor.execute(
+                "UPDATE datasets SET is_country_main = ?, country = COALESCE(country, ?) WHERE dataset_id = ?",
+                (1 if is_main else 0, country, dataset_id)
+            )
+        conn.commit()
+        return True, "Dataset main status updated"
+    except Exception as e:
+        conn.rollback()
+        return False, f"Error updating main status: {str(e)}"
+    finally:
+        conn.close()
+
+
+def get_main_datasets(country: Optional[str] = None) -> List[Dict]:
+    """Retrieve all datasets marked as main, optionally filtered by country."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    if country:
+        cursor.execute("SELECT * FROM datasets WHERE is_country_main = 1 AND country = ? ORDER BY uploaded_at DESC", (country,))
+    else:
+        cursor.execute("SELECT * FROM datasets WHERE is_country_main = 1 ORDER BY uploaded_at DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_datasets_by_uploader(email: str) -> List[Dict]:
+    """Retrieve datasets uploaded by a specific email."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM datasets WHERE uploaded_by = ? ORDER BY uploaded_at DESC", (email,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tuple[bool, str]:
+    """Physically merge source dataset rows into the main dataset.
+    Safeguards: prefix sample_id and isolate_id with source dataset id to avoid key conflicts.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        samples_df = get_dataset_samples(source_dataset_id)
+        ast_df = get_dataset_ast(source_dataset_id)
+        if samples_df.empty and ast_df.empty:
+            return False, "Source dataset is empty"
+
+        # Build mapping for sample_id prefixes
+        id_map = {}
+        for _, row in samples_df.iterrows():
+            old_sid = row.get('sample_id') or ''
+            new_sid = f"{source_dataset_id}-{old_sid}" if old_sid else f"{source_dataset_id}-sample"
+            id_map[old_sid] = new_sid
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO samples
+                (dataset_id, sample_id, collection_date, region, district, site_type,
+                 source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    main_dataset_id,
+                    new_sid,
+                    row.get('collection_date'),
+                    row.get('region'),
+                    row.get('district'),
+                    row.get('site_type'),
+                    row.get('source_category'),
+                    row.get('source_type'),
+                    row.get('food_matrix'),
+                    row.get('environment_matrix'),
+                    row.get('latitude'),
+                    row.get('longitude')
+                )
+            )
+
+        added_samples = len(id_map)
+
+        for _, row in ast_df.iterrows():
+            old_sid = row.get('sample_id') or ''
+            new_sid = id_map.get(old_sid, f"{source_dataset_id}-{old_sid}")
+            old_isolate = row.get('isolate_id') or ''
+            new_isolate = f"{source_dataset_id}-{old_isolate}" if old_isolate else f"{source_dataset_id}-isolate"
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO ast_results
+                (dataset_id, sample_id, isolate_id, organism, antibiotic, result, method, guideline, test_date, mic_value,
+                 zone_diameter, auto_interpreted, interpreted_result, interpretation_guideline, interpretation_confidence,
+                 suspected_mechanism, interpretation_notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    main_dataset_id,
+                    new_sid,
+                    new_isolate,
+                    row.get('organism'),
+                    row.get('antibiotic'),
+                    row.get('result'),
+                    row.get('method'),
+                    row.get('guideline'),
+                    row.get('test_date'),
+                    row.get('mic_value'),
+                    row.get('zone_diameter'),
+                    row.get('auto_interpreted'),
+                    row.get('interpreted_result'),
+                    row.get('interpretation_guideline'),
+                    row.get('interpretation_confidence'),
+                    row.get('suspected_mechanism'),
+                    row.get('interpretation_notes')
+                )
+            )
+
+        added_tests = len(ast_df)
+
+        cursor.execute("UPDATE datasets SET rows_samples = COALESCE(rows_samples,0) + ?, rows_tests = COALESCE(rows_tests,0) + ? WHERE dataset_id = ?",
+                       (added_samples, added_tests, main_dataset_id))
+
+        conn.commit()
+        return True, f"Merged {added_samples} samples and {added_tests} tests into main dataset"
+    except Exception as e:
+        conn.rollback()
+        return False, f"Error during merge: {str(e)}"
+    finally:
+        conn.close()
 
 
 def get_dataset_samples(dataset_id: str) -> pd.DataFrame:

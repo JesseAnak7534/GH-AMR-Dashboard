@@ -198,10 +198,10 @@ with st.sidebar:
     
     st.markdown("---")
 
+admin_pages = ["Admin - Users", "Admin - Datasets"] if st.session_state.is_admin else []
 page = st.sidebar.radio(
     "Navigation",
-    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "Report Export"] + 
-    (["Admin - Users"] if st.session_state.is_admin else [])
+    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "Report Export"] + admin_pages
 )
 
 # ============================================================================
@@ -333,6 +333,58 @@ elif page == "Data Management":
             dataset_names,
             key="data_mgmt_dataset"
         )
+elif page == "Admin - Datasets":
+    st.header("🛡️ Admin - Datasets")
+    config_admin_email, _ = _get_admin_config()
+    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+
+    all_datasets = db.get_all_datasets()
+
+    main_datasets = db.get_main_datasets(country="Ghana")
+    main_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets] or ["None"]
+    selected_main_display = st.selectbox("National Main Dataset (Ghana)", main_choices, key="main_ds_select")
+
+    st.markdown("---")
+    st.subheader("Mark a dataset as National Main")
+    ds_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in all_datasets]
+    target_display = st.selectbox("Select dataset", ds_choices, key="mark_main_select")
+    if st.button("Set as National Main (Ghana)", type="primary"):
+        try:
+            target_id = target_display.split("(")[-1].rstrip(")")
+            ok, msg = db.set_dataset_main(target_id, True, country="Ghana")
+            if ok:
+                st.success("Main dataset updated")
+                st.rerun()
+            else:
+                st.error(msg)
+        except Exception as e:
+            st.error(f"Error: {e}")
+
+    st.markdown("---")
+    st.subheader("Merge User Dataset into National Main")
+    user_datasets = [d for d in all_datasets if (d.get('uploaded_by') or '').strip().lower() != admin_email]
+    user_choices = [f"{d['uploaded_by'] or 'Unknown'}: {d['dataset_name']} ({d['dataset_id']})" for d in user_datasets] or ["No user datasets"]
+
+    src_display = st.selectbox("Select user dataset", user_choices, key="merge_src_select")
+    # Refresh main choices
+    main_datasets = db.get_main_datasets(country="Ghana")
+    main_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets] or ["None"]
+    merge_target_display = st.selectbox("Target main dataset", main_choices, key="merge_target_select")
+
+    if st.button("Merge into National Main", type="primary"):
+        try:
+            if not main_datasets:
+                st.error("Please mark a dataset as National Main first")
+            else:
+                src_id = src_display.split("(")[-1].rstrip(")")
+                target_id = merge_target_display.split("(")[-1].rstrip(")")
+                ok, msg = db.merge_dataset_into_main(src_id, target_id)
+                if ok:
+                    st.success(msg)
+                else:
+                    st.error(msg)
+        except Exception as e:
+            st.error(f"Error: {e}")
 
         if selected_dataset_display:
             # Extract dataset ID
