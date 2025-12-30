@@ -5,110 +5,17 @@ Main Streamlit application with multi-page support.
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
-import uuid
-import bcrypt
-import secrets
-from dotenv import load_dotenv
-from io import BytesIO
-from datetime import datetime, timedelta
-from typing import List, Dict
-import plotly.express as px
-import urllib.parse
-
-# Import modules
-from src import db, validate, plots, report, analytics
-from src import email_utils
-
-# Page configuration
-st.set_page_config(
-    page_title="AMR Surveillance Dashboard",
-    page_icon="🦠",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Initialize database
-db.init_database()
-
-# Handle email verification via magic link query params
-try:
-    # Prefer stable API; fallback to experimental
-    params = None
-    if hasattr(st, "query_params"):
-        params = st.query_params
-    else:
-        try:
-            params = st.experimental_get_query_params()
-        except Exception:
-            params = {}
-
-    email_q = None
-    code_q = None
-    if params:
-        email_q = params.get("verify_email")
-        code_q = params.get("verify_code")
-        if isinstance(email_q, list):
-            email_q = email_q[0] if email_q else None
-        if isinstance(code_q, list):
-            code_q = code_q[0] if code_q else None
-    if email_q and code_q:
-        ok, msg = db.verify_user_email(str(email_q), str(code_q))
-        if ok:
-            st.success("✅ Email verified via link! You can now log in.")
-        else:
-            st.error(f"❌ Verification failed: {msg}")
+    if _get_flag("PURGE_NON_ADMIN_ON_DEPLOY"):
+        flag_path = os.path.join("db", "purge_non_admin.flag")
+        if not os.path.exists(flag_path):
+            deleted_count, msg = db.delete_non_admin_users(ADMIN_EMAIL)
+            # Create flag file to avoid repeated purge across restarts
+            os.makedirs("db", exist_ok=True)
+            with open(flag_path, "w", encoding="utf-8") as f:
+                f.write(f"{datetime.now().isoformat()} - {msg}")
+            st.info(f"Startup maintenance: {msg}")
 except Exception:
     pass
-
-# Authentication check
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.user_email = None
-    st.session_state.is_admin = False
-
-def _get_admin_config():
-    """Retrieve admin bootstrap credentials from Streamlit secrets or environment variables."""
-    admin_email = None
-    admin_password = None
-    # Prefer Streamlit secrets on cloud
-    try:
-        if hasattr(st, "secrets"):
-            if "ADMIN_EMAIL" in st.secrets and "ADMIN_PASSWORD" in st.secrets:
-                admin_email = st.secrets["ADMIN_EMAIL"]
-                admin_password = st.secrets["ADMIN_PASSWORD"]
-    except Exception:
-        pass
-
-    # Fallback to local .env / environment
-    load_dotenv()
-    admin_email = admin_email or os.getenv("ADMIN_EMAIL")
-    admin_password = admin_password or os.getenv("ADMIN_PASSWORD")
-    return admin_email, admin_password
-
-# Create or promote main admin account if configured via secrets/env
-ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
-if ADMIN_EMAIL and ADMIN_PASSWORD:
-    try:
-        admin_user = db.get_user_by_email(ADMIN_EMAIL)
-        password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        if not admin_user:
-            db.create_user(ADMIN_EMAIL, password_hash, is_admin=True)
-        else:
-            # Ensure admin privileges and active status
-            if not admin_user.get("is_admin"):
-                db.set_user_admin(ADMIN_EMAIL, True)
-            if not admin_user.get("is_active"):
-                db.update_user_status(admin_user["user_id"], True)
-            # Keep password in sync with configured admin password
-            db.update_user_password(ADMIN_EMAIL, password_hash)
-        # Auto-verify admin email
-        try:
-            db.set_user_verified(ADMIN_EMAIL, True)
-        except Exception:
-            pass
-    except Exception:
-        pass
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:

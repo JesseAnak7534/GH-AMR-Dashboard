@@ -652,3 +652,26 @@ def set_user_admin(email: str, is_admin: bool) -> Tuple[bool, str]:
     finally:
         conn.close()
 
+
+def delete_non_admin_users(admin_email: Optional[str] = None) -> Tuple[int, str]:
+    """Delete all users except the admin(s).
+    If admin_email is provided, keep only that email and delete all others.
+    Otherwise, delete users where is_admin = 0 and keep admins.
+    Returns (deleted_count, message).
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        if admin_email:
+            cursor.execute("DELETE FROM users WHERE email <> ?", (admin_email,))
+        else:
+            cursor.execute("DELETE FROM users WHERE IFNULL(is_admin, 0) = 0")
+        deleted = cursor.rowcount or 0
+        conn.commit()
+        return deleted, f"Deleted {deleted} non-admin user(s)"
+    except Exception as e:
+        conn.rollback()
+        return 0, f"Error deleting non-admin users: {str(e)}"
+    finally:
+        conn.close()
+
