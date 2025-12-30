@@ -1,11 +1,10 @@
 """
 Enhanced interactive mapping module for Ghana with region and district labels.
-Uses folium for interactive Leaflet maps with resistance pattern visualization.
+Uses pydeck for interactive maps with resistance pattern visualization.
 """
 import pandas as pd
 import numpy as np
-import folium
-from folium import plugins
+import pydeck as pdk
 import streamlit as st
 from typing import Optional
 
@@ -69,9 +68,9 @@ def create_interactive_ghana_map(
     samples_df: pd.DataFrame, 
     ast_df: pd.DataFrame,
     title: str = "Ghana - Sample Locations & Resistance"
-) -> folium.Map:
+) -> dict:
     """
-    Create an interactive Folium map of Ghana showing sample locations and resistance patterns.
+    Create an interactive pydeck map of Ghana showing sample locations and resistance patterns.
     
     Args:
         samples_df: DataFrame with latitude, longitude, district, region columns
@@ -79,31 +78,11 @@ def create_interactive_ghana_map(
         title: Title for the map
         
     Returns:
-        folium.Map object that can be displayed in Streamlit
+        pydeck chart specification dictionary
     """
     
     # Center of Ghana
     ghana_center = [7.3697, -5.6789]
-    
-    # Create base map
-    m = folium.Map(
-        location=ghana_center,
-        zoom_start=7,
-        tiles="OpenStreetMap",
-        name="Base Layer"
-    )
-    
-    # Add title via HTML
-    title_html = '''
-                 <div style="position: fixed; 
-                     top: 10px; left: 50px; width: 300px; height: 60px; 
-                     background-color: white; border:2px solid grey; z-index:9999; 
-                     font-size: 16px; font-weight: bold; padding: 10px;
-                     border-radius: 5px;">
-                 📍 {} 
-                 </div>
-                 '''.format(title)
-    m.get_root().html.add_child(folium.Element(title_html))
     
     # Calculate resistance by location
     if 'latitude' in samples_df.columns and 'longitude' in samples_df.columns:
@@ -115,114 +94,72 @@ def create_interactive_ghana_map(
         
         # Merge with samples
         samples_with_resistance = samples_df.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
+        samples_with_resistance['resistance_rate'] = samples_with_resistance['resistance_rate'].fillna(0)
         
-        # Add markers for each location with district/region labels
-        for idx, row in samples_with_resistance.iterrows():
-            if pd.notna(row['latitude']) and pd.notna(row['longitude']):
-                resistance_rate = row.get('resistance_rate', 0)
-                
-                # Color based on resistance
-                if resistance_rate > 50:
-                    color = 'red'
-                    resistance_level = 'High'
-                elif resistance_rate > 30:
-                    color = 'orange'
-                    resistance_level = 'Medium'
-                else:
-                    color = 'green'
-                    resistance_level = 'Low'
-                
-                district = row.get('district', 'Unknown')
-                region = row.get('region', 'Unknown')
-                sample_id = row.get('sample_id', 'Unknown')
-                
-                popup_text = f"""
-                <b>Sample ID:</b> {sample_id}<br>
-                <b>District:</b> {district}<br>
-                <b>Region:</b> {region}<br>
-                <b>Resistance Rate:</b> {resistance_rate:.1f}%<br>
-                <b>Level:</b> {resistance_level}
-                """
-                
-                folium.CircleMarker(
-                    location=[row['latitude'], row['longitude']],
-                    radius=8 if resistance_rate > 50 else 6 if resistance_rate > 30 else 5,
-                    popup=folium.Popup(popup_text, max_width=250),
-                    color=color,
-                    fill=True,
-                    fillColor=color,
-                    fillOpacity=0.7,
-                    weight=2
-                ).add_to(m)
-    
-    # Add region labels to map
-    for region, (lat, lon) in GHANA_REGIONS.items():
-        folium.Marker(
-            location=[lat, lon],
-            popup=f"<b>{region}</b> (Region)",
-            icon=folium.Icon(color='blue', icon='info-sign', prefix='glyphicon'),
-            tooltip=f"{region}",
-        ).add_to(m)
-    
-    # Add district markers
-    for district, (lat, lon) in GHANA_DISTRICTS.items():
-        folium.Marker(
-            location=[lat, lon],
-            popup=f"<b>{district}</b> (District)",
-            icon=folium.Icon(color='purple', icon='map-marker', prefix='glyphicon'),
-            tooltip=f"{district}",
-        ).add_to(m)
-    
-    # Add a legend
-    legend_html = '''
-                  <div style="position: fixed; 
-                      bottom: 50px; right: 50px; width: 220px; 
-                      background-color: white; border:2px solid grey; z-index:9999; 
-                      font-size: 14px; padding: 10px; border-radius: 5px;">
-                  <p style="margin: 0; font-weight: bold; text-decoration: underline;">
-                  Resistance Levels
-                  </p>
-                  <p style="margin: 5px 0;">
-                  <i class="fa fa-circle" style="color:red"></i> High (&gt;50%)
-                  </p>
-                  <p style="margin: 5px 0;">
-                  <i class="fa fa-circle" style="color:orange"></i> Medium (30-50%)
-                  </p>
-                  <p style="margin: 5px 0;">
-                  <i class="fa fa-circle" style="color:green"></i> Low (&lt;30%)
-                  </p>
-                  <p style="margin: 10px 0 0 0; font-weight: bold; font-size: 12px;">
-                  🔵 Blue: Regions | 🟣 Purple: Districts
-                  </p>
-                  </div>
-                  '''
-    m.get_root().html.add_child(folium.Element(legend_html))
-    
-    # Add layer control
-    folium.LayerControl().add_to(m)
-    
-    return m
+        # Create color mapping based on resistance
+        def get_color(resistance_rate):
+            if resistance_rate > 50:
+                return [255, 0, 0, 200]  # Red
+            elif resistance_rate > 30:
+                return [255, 165, 0, 200]  # Orange
+            else:
+                return [0, 255, 0, 200]  # Green
+        
+        samples_with_resistance['color'] = samples_with_resistance['resistance_rate'].apply(get_color)
+        
+        # Create pydeck layer
+        layer = pdk.Layer(
+            "ScatterplotLayer",
+            data=samples_with_resistance,
+            get_position='[longitude, latitude]',
+            get_color='color',
+            get_radius=100,
+            pickable=True,
+        )
+        
+        # Create view state
+        view_state = pdk.ViewState(
+            latitude=ghana_center[0],
+            longitude=ghana_center[1],
+            zoom=7,
+            bearing=0,
+            pitch=0
+        )
+        
+        # Create deck
+        return pdk.Deck(
+            layers=[layer],
+            initial_view_state=view_state,
+            tooltip={"text": "{district}\n{region}\nResistance: {resistance_rate:.1f}%"}
+        )
+    else:
+        # Return empty deck if no location data
+        view_state = pdk.ViewState(
+            latitude=ghana_center[0],
+            longitude=ghana_center[1],
+            zoom=7,
+        )
+        return pdk.Deck(layers=[], initial_view_state=view_state)
 
 
 def create_regional_resistance_heatmap(
     ast_df: pd.DataFrame,
     samples_df: pd.DataFrame
-) -> folium.Map:
+):
     """
-    Create a heatmap showing resistance concentration by region.
+    Create a heatmap showing resistance concentration by region using pydeck.
     
     Args:
         ast_df: AST results DataFrame
         samples_df: Samples DataFrame with region/district information
         
     Returns:
-        folium.Map with heatmap layer
+        pydeck chart
     """
     
     ghana_center = [7.3697, -5.6789]
-    m = folium.Map(location=ghana_center, zoom_start=7)
     
-    # Calculate resistance by region
+    # Calculate resistance by location
     region_resistance = ast_df.merge(
         samples_df[['sample_id', 'latitude', 'longitude', 'region']],
         on='sample_id'
@@ -230,42 +167,51 @@ def create_regional_resistance_heatmap(
     
     region_resistance['is_resistant'] = (region_resistance['result'] == 'R').astype(int)
     
-    # Create heatmap data
-    heat_data = []
-    for idx, row in region_resistance.iterrows():
-        if pd.notna(row['latitude']) and pd.notna(row['longitude']):
-            # Intensity: 1 if resistant, 0.5 if susceptible
-            intensity = 1 if row['is_resistant'] else 0.3
-            heat_data.append([row['latitude'], row['longitude'], intensity])
+    # Group by location and calculate resistance
+    location_stats = region_resistance.groupby(['latitude', 'longitude']).agg({
+        'is_resistant': ['sum', 'count']
+    }).reset_index()
     
-    if heat_data:
-        plugins.HeatMap(heat_data, radius=50, blur=15, max_zoom=1).add_to(m)
+    location_stats.columns = ['latitude', 'longitude', 'resistant_count', 'total_count']
+    location_stats['resistance_rate'] = (location_stats['resistant_count'] / location_stats['total_count'] * 100)
+    location_stats['color'] = location_stats['resistance_rate'].apply(
+        lambda x: [255, 0, 0, 200] if x > 50 else [255, 165, 0, 200] if x > 30 else [0, 255, 0, 200]
+    )
     
-    return m
+    # Create heatmap layer
+    layer = pdk.Layer(
+        "HeatmapLayer",
+        data=location_stats,
+        get_position='[longitude, latitude]',
+        get_weight='resistance_rate',
+        radius_pixels=50,
+    )
+    
+    view_state = pdk.ViewState(
+        latitude=ghana_center[0],
+        longitude=ghana_center[1],
+        zoom=7,
+    )
+    
+    return pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        tooltip={"text": "Resistance Rate: {resistance_rate:.1f}%"}
+    )
 
 
 def display_interactive_map_streamlit(samples_df: pd.DataFrame, ast_df: pd.DataFrame):
     """
-    Display the interactive Folium map in Streamlit using streamlit-folium.
+    Display the interactive pydeck map in Streamlit.
     
     Args:
         samples_df: DataFrame with location data
         ast_df: AST results DataFrame
     """
-    try:
-        import streamlit_folium
-        
-        # Create the map
-        ghana_map = create_interactive_ghana_map(samples_df, ast_df)
-        
-        # Display in Streamlit
-        streamlit_folium.folium_static(ghana_map, width=1400, height=600)
-        
-    except ImportError:
-        st.warning("⚠️ streamlit-folium not installed. Install with: pip install streamlit-folium")
-        st.info("As an alternative, here's a summary of locations:")
-        
-        # Show as table
-        if 'latitude' in samples_df.columns and 'longitude' in samples_df.columns:
-            display_df = samples_df[['sample_id', 'district', 'region', 'latitude', 'longitude']].copy()
-            st.dataframe(display_df, use_container_width=True)
+    
+    # Create the map
+    ghana_map = create_interactive_ghana_map(samples_df, ast_df)
+    
+    # Display in Streamlit
+    st.pydeck_chart(ghana_map, use_container_width=True)
+

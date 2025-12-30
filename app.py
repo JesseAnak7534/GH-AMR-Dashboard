@@ -786,22 +786,11 @@ elif page == "Map Hotspots":
                 # Import the enhanced mapping module
                 from src import ghana_map
                 
-                # Create and display interactive folium map
+                # Create and display interactive pydeck map
                 m = ghana_map.create_interactive_ghana_map(samples_with_coords, all_ast)
                 
-                # Try to display with streamlit-folium, fallback to info message
-                try:
-                    import streamlit_folium
-                    streamlit_folium.folium_static(m, width=1400, height=600)
-                except ImportError:
-                    st.info("💡 For enhanced interactive maps, install streamlit-folium: `pip install streamlit-folium`")
-                    st.markdown("**Map Features Available When Installed:**")
-                    st.markdown("- 🎯 Click on region/district markers to see location names")
-                    st.markdown("- 🔴 Red circles = High resistance (>50%)")
-                    st.markdown("- 🟠 Orange circles = Medium resistance (30-50%)")
-                    st.markdown("- 🟢 Green circles = Low resistance (<30%)")
-                    st.markdown("- 🔵 Blue markers = Region centers")
-                    st.markdown("- 🟣 Purple markers = District locations")
+                # Display using pydeck
+                st.pydeck_chart(m, use_container_width=True)
                 
                 st.markdown("---")
                 
