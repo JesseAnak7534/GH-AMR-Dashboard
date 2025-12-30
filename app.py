@@ -167,23 +167,27 @@ if not st.session_state.authenticated:
                     if user and user['is_active']:
                         try:
                             if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
-                                # Require email verification
-                                if not user.get('is_verified'):
+                                # Identify configured admin email (allows direct login bypass of verification)
+                                config_admin_email, _ = _get_admin_config()
+                                target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+
+                                # Require email verification for normal users only
+                                if not user.get('is_verified') and login_email.strip().lower() != target_admin_email:
                                     st.error("❌ Please verify your email before logging in.")
                                     st.info("Check your email for the verification link and open it.")
                                     st.stop()
+
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
 
-                                # Enforce admin for configured email (secrets/env) or fallback fixed admin
-                                config_admin_email, _ = _get_admin_config()
-                                is_admin_flag = user['is_admin']
-                                target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+                                # Enforce admin role for configured admin email
+                                is_admin_flag = user.get('is_admin')
                                 if login_email.strip().lower() == target_admin_email:
                                     is_admin_flag = 1
                                     try:
                                         db.set_user_admin(login_email, True)
                                         db.update_user_status(user['user_id'], True)
+                                        db.set_user_verified(login_email, True)
                                     except Exception:
                                         pass
 

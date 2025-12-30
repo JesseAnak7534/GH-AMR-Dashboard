@@ -20,12 +20,19 @@ def _get_secrets() -> dict:
 def get_smtp_config() -> dict:
     """Retrieve SMTP configuration from env variables or Streamlit secrets if available."""
     secrets_cfg = _get_secrets()
+    host = (secrets_cfg.get("SMTP_HOST") or os.getenv("SMTP_HOST") or "").lower()
+    username = secrets_cfg.get("SMTP_USERNAME") or os.getenv("SMTP_USERNAME")
+    from_secret = secrets_cfg.get("SMTP_FROM") or os.getenv("SMTP_FROM") or os.getenv("ADMIN_EMAIL")
+
+    # Default from to username for better deliverability, especially on Gmail
+    effective_from = from_secret or username or "no-reply@example.com"
+
     config = {
         "host": secrets_cfg.get("SMTP_HOST") or os.getenv("SMTP_HOST"),
         "port": int(secrets_cfg.get("SMTP_PORT") or os.getenv("SMTP_PORT", "587")),
-        "username": secrets_cfg.get("SMTP_USERNAME") or os.getenv("SMTP_USERNAME"),
+        "username": username,
         "password": secrets_cfg.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD"),
-        "from_email": secrets_cfg.get("SMTP_FROM") or os.getenv("SMTP_FROM") or os.getenv("ADMIN_EMAIL") or "no-reply@example.com",
+        "from_email": effective_from,
         "use_tls": str(secrets_cfg.get("SMTP_USE_TLS") or os.getenv("SMTP_USE_TLS", "true")).lower() in ("1", "true", "yes"),
         "use_ssl": str(secrets_cfg.get("SMTP_USE_SSL") or os.getenv("SMTP_USE_SSL", "false")).lower() in ("1", "true", "yes"),
     }
@@ -100,6 +107,9 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
         msg = EmailMessage()
         msg["Subject"] = f"AMR Dashboard Email Verification ({country})"
         msg["From"] = cfg["from_email"]
+        # Optional: set Reply-To to admin
+        if os.getenv("ADMIN_EMAIL"):
+            msg["Reply-To"] = os.getenv("ADMIN_EMAIL")
         msg["To"] = to_email
         body_text = (
             "Hello,\n\n"
