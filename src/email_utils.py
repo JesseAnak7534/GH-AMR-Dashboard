@@ -1,5 +1,6 @@
 import os
 import smtplib
+import ssl
 from email.message import EmailMessage
 from typing import Optional, Tuple
 import requests
@@ -26,6 +27,7 @@ def get_smtp_config() -> dict:
         "password": secrets_cfg.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD"),
         "from_email": secrets_cfg.get("SMTP_FROM") or os.getenv("SMTP_FROM") or os.getenv("ADMIN_EMAIL") or "no-reply@example.com",
         "use_tls": str(secrets_cfg.get("SMTP_USE_TLS") or os.getenv("SMTP_USE_TLS", "true")).lower() in ("1", "true", "yes"),
+        "use_ssl": str(secrets_cfg.get("SMTP_USE_SSL") or os.getenv("SMTP_USE_SSL", "false")).lower() in ("1", "true", "yes"),
     }
     return config
 
@@ -109,11 +111,33 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
         )
         msg.set_content(body_text)
 
-        with smtplib.SMTP(cfg["host"], cfg["port"]) as server:
-            if cfg["use_tls"]:
-                server.starttls()
-            server.login(cfg["username"], cfg["password"])
-            server.send_message(msg)
+        host = (cfg.get("host") or "").lower()
+        use_ssl = cfg.get("use_ssl")
+        use_tls = cfg.get("use_tls")
+        port = cfg.get("port") or 587
+
+        # Prefer SSL on port 465 if explicitly requested or for Gmail with port 465
+        if use_ssl or ("gmail.com" in host and int(port) == 465):
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(cfg["host"], port, context=context) as server:
+                server.login(cfg["username"], cfg["password"])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(cfg["host"], port) as server:
+                server.ehlo()
+                if use_tls:
+                    server.starttls()
+                    server.ehlo()
+                server.login(cfg["username"], cfg["password"])
+                server.send_message(msg)
         return True, "Verification email sent"
     except Exception as e:
-        return False, f"Error sending email: {str(e)}"
+        err = str(e)
+        # Provide actionable guidance for Gmail's 5.7.8 bad credentials
+        if "gmail" in (cfg.get("host") or "").lower() and ("5.7.8" in err or "BadCredentials" in err or "Username and Password not accepted" in err):
+            return False, (
+                "Gmail SMTP rejected the credentials. Use a Gmail App Password "
+                "(requires 2‑Step Verification) and set it as SMTP_PASSWORD. "
+                "See https://support.google.com/mail/?p=BadCredentials"
+            )
+        return False, f"Error sending email: {err}"
