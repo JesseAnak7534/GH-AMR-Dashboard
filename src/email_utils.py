@@ -5,6 +5,7 @@ from email.message import EmailMessage
 from typing import Optional, Tuple
 import requests
 import urllib.parse
+import logging
 
 
 def _get_secrets() -> dict:
@@ -90,11 +91,56 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
             if 200 <= resp.status_code < 300:
                 return True, "Verification email sent"
             else:
-                # Fall through to SMTP
-                pass
+                logging.warning(f"SendGrid failed: HTTP {resp.status_code} - {resp.text[:200]}")
         except Exception as e:
-            # Fall through to SMTP
-            pass
+            logging.warning(f"SendGrid exception: {e}")
+
+    # Try MailChannels (Cloudflare) transactional API if configured
+    mc_enable = str(secrets_cfg.get("MAILCHANNELS_ENABLE") or os.getenv("MAILCHANNELS_ENABLE", "false")).lower() in ("1", "true", "yes", "on")
+    mc_from = secrets_cfg.get("MAILCHANNELS_FROM") or os.getenv("MAILCHANNELS_FROM") or secrets_cfg.get("SMTP_FROM") or os.getenv("SMTP_FROM")
+    mc_dkim_domain = secrets_cfg.get("MAILCHANNELS_DKIM_DOMAIN") or os.getenv("MAILCHANNELS_DKIM_DOMAIN")
+    mc_dkim_selector = secrets_cfg.get("MAILCHANNELS_DKIM_SELECTOR") or os.getenv("MAILCHANNELS_DKIM_SELECTOR") or "mailchannels"
+    mc_dkim_private_key = secrets_cfg.get("MAILCHANNELS_DKIM_PRIVATE_KEY") or os.getenv("MAILCHANNELS_DKIM_PRIVATE_KEY")
+
+    if mc_enable and mc_from:
+        try:
+            subject = f"AMR Dashboard Email Verification ({country})"
+            body_text = (
+                "Hello,\n\n"
+                "Use the code below to verify your email for the AMR Dashboard, or click the link provided.\n\n"
+                f"Verification Code: {code}\n"
+                + (f"Verification Link: {link}\n\n" if link else "") +
+                "This code expires in 30 minutes.\n\n"
+                "Regards,\nAMR Dashboard Team"
+            )
+
+            personalization = {"to": [{"email": to_email}]}
+            if mc_dkim_domain and mc_dkim_private_key:
+                personalization.update({
+                    "dkim_domain": mc_dkim_domain,
+                    "dkim_selector": mc_dkim_selector,
+                    "dkim_private_key": mc_dkim_private_key,
+                })
+
+            payload = {
+                "personalizations": [personalization],
+                "from": {"email": mc_from},
+                "subject": subject,
+                "content": [{"type": "text/plain", "value": body_text}],
+            }
+
+            resp = requests.post(
+                "https://api.mailchannels.net/tx/v1/send",
+                headers={"Content-Type": "application/json"},
+                json=payload,
+                timeout=20,
+            )
+            if 200 <= resp.status_code < 300:
+                return True, "Verification email sent"
+            else:
+                logging.warning(f"MailChannels failed: HTTP {resp.status_code} - {resp.text[:200]}")
+        except Exception as e:
+            logging.warning(f"MailChannels exception: {e}")
 
     # SMTP fallback
     cfg = get_smtp_config()
@@ -150,4 +196,5 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
                 "(requires 2‑Step Verification) and set it as SMTP_PASSWORD. "
                 "See https://support.google.com/mail/?p=BadCredentials"
             )
+        logging.error(f"SMTP exception: {err}")
         return False, f"Error sending email: {err}"
