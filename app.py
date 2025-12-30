@@ -123,7 +123,7 @@ if not st.session_state.authenticated:
         st.markdown("---")
         
         # Create two columns for better spacing
-        tab1, tab2, tab3 = st.tabs(["🔐 Login", "📝 Sign Up", "📧 Verify Email"])
+        tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
         
         with tab1:
             st.subheader("Welcome Back")
@@ -142,7 +142,7 @@ if not st.session_state.authenticated:
                                 # Require email verification
                                 if not user.get('is_verified'):
                                     st.error("❌ Please verify your email before logging in.")
-                                    st.info("Use the '📧 Verify Email' tab to complete verification.")
+                                    st.info("Check your email for the verification link and open it.")
                                     st.stop()
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
@@ -198,42 +198,14 @@ if not st.session_state.authenticated:
                             db.set_verification_code(signup_email, code, expires_at)
                             ok, send_msg = email_utils.send_verification_email(signup_email, code, country="Ghana")
                             if ok:
-                                st.success("✅ Account created! Check your email for the verification code.")
+                                st.success("✅ Account created! We've sent a verification email with a link.")
                             else:
                                 st.warning(send_msg)
-                                st.info("For testing, use the shown code if provided.")
-                            st.info("Go to the '📧 Verify Email' tab to complete verification.")
+                                st.info("If a link is shown, open it to verify.")
+                            st.info("Please open the verification link in your email to activate your account.")
                         else:
                             st.error(f"❌ {msg}")
-                            with tab3:
-                                st.subheader("Verify Your Email")
-                                verify_email = st.text_input("📧 Email Address", placeholder="your.email@example.com", key="verify_email")
-                                requested_code = st.text_input("🔢 Verification Code", placeholder="6-digit code", key="verify_code")
-
-                                colv1, colv2 = st.columns(2)
-                                with colv1:
-                                    if st.button("Resend Code"):
-                                        if not verify_email:
-                                            st.error("Enter your email to resend code")
-                                        else:
-                                            code = f"{secrets.randbelow(1000000):06d}"
-                                            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
-                                            db.set_verification_code(verify_email, code, expires_at)
-                                            ok, send_msg = email_utils.send_verification_email(verify_email, code, country="Ghana")
-                                            if ok:
-                                                st.success("Verification code sent")
-                                            else:
-                                                st.warning(send_msg)
-                                with colv2:
-                                    if st.button("Verify"):
-                                        if not verify_email or not requested_code:
-                                            st.error("Provide both email and code")
-                                        else:
-                                            ok, msg = db.verify_user_email(verify_email, requested_code)
-                                            if ok:
-                                                st.success("✅ Email verified! You can now log in.")
-                                            else:
-                                                st.error(f"❌ {msg}")
+                            # Verify Email tab removed; verification is via email link only.
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
         
