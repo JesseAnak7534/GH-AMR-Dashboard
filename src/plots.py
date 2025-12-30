@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 
 def calculate_resistance_percentage(ast_df: pd.DataFrame) -> pd.DataFrame:
