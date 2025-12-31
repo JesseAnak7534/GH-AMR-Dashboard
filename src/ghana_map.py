@@ -1,6 +1,6 @@
 """
 Enhanced interactive mapping module for Ghana using Folium.
-Displays sample locations and resistance patterns with clear, visible data points.
+Displays sample locations and resistance patterns with region names and clear, visible data points.
 """
 import pandas as pd
 import numpy as np
@@ -10,13 +10,34 @@ import streamlit as st
 from typing import Optional
 
 
+# Ghana Regions with approximate center coordinates
+GHANA_REGIONS = {
+    "Ahafo": (6.8, -2.2),
+    "Ashanti": (6.5, -1.5),
+    "Bono": (7.2, -2.5),
+    "Bono East": (7.5, -0.8),
+    "Central": (5.2, -1.2),
+    "Eastern": (6.0, -0.5),
+    "Greater Accra": (5.5, -0.2),
+    "Northern": (9.3, -1.0),
+    "North East": (10.2, -1.0),
+    "Oti": (8.5, 0.5),
+    "Savannah": (10.0, -2.0),
+    "Upper East": (10.8, -1.2),
+    "Upper West": (10.5, -2.5),
+    "Volta": (6.5, 0.8),
+    "Western": (5.0, -2.5),
+    "Western North": (5.5, -3.0)
+}
+
+
 def create_interactive_ghana_map(
     samples_df: pd.DataFrame, 
     ast_df: pd.DataFrame,
     title: str = "Ghana - Sample Locations & Resistance"
 ) -> folium.Map:
     """
-    Create an interactive Folium map of Ghana showing sample locations and resistance patterns.
+    Create an interactive Folium map of Ghana showing sample locations, region names, and resistance patterns.
     
     Args:
         samples_df: DataFrame with latitude, longitude, district, region columns
@@ -37,6 +58,36 @@ def create_interactive_ghana_map(
         tiles="OpenStreetMap",
         prefer_canvas=True
     )
+    
+    # Add region labels with markers
+    for region_name, (lat, lon) in GHANA_REGIONS.items():
+        folium.Marker(
+            location=[lat, lon],
+            popup=region_name,
+            tooltip=region_name,
+            icon=folium.Icon(
+                icon='info-sign',
+                color='blue',
+                icon_color='white',
+                prefix='glyphicon'
+            )
+        ).add_to(m)
+        
+        # Add region name label
+        folium.Marker(
+            location=[lat, lon],
+            popup=None,
+            icon=folium.DivIcon(
+                html=f'''
+                <div style="font-size: 11px; color: #0033cc; font-weight: bold; 
+                            background-color: rgba(255, 255, 255, 0.8); 
+                            padding: 2px 4px; border-radius: 3px; 
+                            text-align: center; white-space: nowrap;">
+                    {region_name}
+                </div>
+                '''
+            )
+        ).add_to(m)
     
     # Calculate resistance by location
     if 'latitude' in samples_df.columns and 'longitude' in samples_df.columns:
@@ -69,8 +120,8 @@ def create_interactive_ghana_map(
             samples_with_resistance = samples_clean.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
             samples_with_resistance['resistance_rate'] = samples_with_resistance['resistance_rate'].fillna(0)
             
-            # Add marker cluster group
-            marker_cluster = MarkerCluster().add_to(m)
+            # Add marker cluster group for sample locations
+            marker_cluster = MarkerCluster(name='Sample Locations').add_to(m)
             
             # Add individual markers with color coding
             for idx, row in samples_with_resistance.iterrows():
@@ -81,6 +132,7 @@ def create_interactive_ghana_map(
                 resist_rate = row.get('resistance_rate', 0)
                 total_tests = int(row.get('total_count', 0))
                 resistant_count = int(row.get('resistant_count', 0))
+                sample_id = row.get('sample_id', 'Unknown')
                 
                 # Determine color based on resistance rate
                 if resist_rate > 50:
@@ -96,6 +148,7 @@ def create_interactive_ghana_map(
                 # Create popup with detailed information
                 popup_text = f"""
                 <b>Sample Location</b><br>
+                <b>Sample ID:</b> {sample_id}<br>
                 <b>District:</b> {district}<br>
                 <b>Region:</b> {region}<br>
                 <b>Tests:</b> {total_tests}<br>
@@ -116,21 +169,24 @@ def create_interactive_ghana_map(
                     fillOpacity=0.7,
                     weight=2,
                     opacity=1.0,
-                    tooltip=f"{district} - {resist_rate:.1f}% resistance"
+                    tooltip=f"{district}, {region} - {resist_rate:.1f}% resistance ({total_tests} tests)"
                 ).add_to(m)
             
             # Add a legend
             legend_html = '''
             <div style="position: fixed; 
-                     top: 10px; right: 10px; width: 250px; height: auto; 
+                     bottom: 50px; right: 10px; width: 280px; height: auto; 
                      background-color: white; border:2px solid grey; z-index:9999; 
-                     font-size:14px; padding: 10px; border-radius: 5px;">
-                <p style="margin: 0 0 10px 0; font-weight: bold;">Resistance Legend</p>
-                <p style="margin: 5px 0;"><span style="color: red; font-size: 18px;">●</span> High (>50%)</p>
-                <p style="margin: 5px 0;"><span style="color: orange; font-size: 18px;">●</span> Medium (30-50%)</p>
-                <p style="margin: 5px 0;"><span style="color: green; font-size: 18px;">●</span> Low (<30%)</p>
-                <p style="margin: 10px 0 5px 0; font-size: 12px; color: #666;">
-                  Circle size = number of tests
+                     font-size:13px; padding: 12px; border-radius: 5px; box-shadow: 2px 2px 6px rgba(0,0,0,0.3);">
+                <p style="margin: 0 0 12px 0; font-weight: bold; text-align: center; font-size: 14px;">Resistance Legend</p>
+                <hr style="margin: 8px 0; border: none; border-top: 1px solid #ccc;">
+                <p style="margin: 8px 0;"><span style="color: red; font-size: 16px;">●</span> <b>High</b> - >50% resistance</p>
+                <p style="margin: 8px 0;"><span style="color: orange; font-size: 16px;">●</span> <b>Medium</b> - 30-50% resistance</p>
+                <p style="margin: 8px 0;"><span style="color: green; font-size: 16px;">●</span> <b>Low</b> - <30% resistance</p>
+                <hr style="margin: 8px 0; border: none; border-top: 1px solid #ccc;">
+                <p style="margin: 8px 0 2px 0; font-size: 12px; color: #666;">
+                  📍 <b>Blue markers</b> = Region centers<br>
+                  ⭕ <b>Circle size</b> = Number of tests
                 </p>
             </div>
             '''
