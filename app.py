@@ -905,7 +905,8 @@ elif page == "Map Hotspots":
         
         if has_coords:
             # Enhanced Interactive Folium Map
-            st.subheader("📍 Interactive Ghana Map - Resistance Hotspots & Regional Analysis")
+            st.subheader("📍 Interactive Ghana Map - Resistance Hotspots")
+            st.markdown(f"**{len(samples_with_coords)}** samples with geographic coordinates | Interactive map below")
             
             try:
                 # Import the enhanced mapping module
@@ -914,41 +915,42 @@ elif page == "Map Hotspots":
                 # Create and display interactive pydeck map
                 m = ghana_map.create_interactive_ghana_map(samples_with_coords, all_ast)
                 
-                # Display using pydeck
+                # Display using pydeck with full width
                 st.pydeck_chart(m, use_container_width=True)
                 
-                st.markdown("---")
-                
-                # Map features explanation
+                # Map instructions
                 with st.expander("📚 How to Use the Interactive Map", expanded=False):
                     st.markdown("""
-                    **Map Components:**
-                    - **Colored Circles**: Sample locations colored by resistance level
-                    - **Blue Markers 🔵**: Region centers (administrative boundaries)
-                    - **Purple Markers 🟣**: District locations (municipality centers)
+                    **Data Point Display:**
+                    - Each colored circle represents a sample location
+                    - Circle size = number of tests from that location
+                    - Circle color = resistance rate:
+                      - 🔴 **Red**: High resistance (>50%)
+                      - 🟠 **Orange**: Medium resistance (30-50%)
+                      - 🟢 **Green**: Low resistance (<30%)
                     
-                    **Interactions:**
-                    - Click any marker to see detailed information
-                    - Drag to pan around Ghana
-                    - Scroll to zoom in/out
-                    - Use the zoom controls in the top-left corner
-                    - Toggle layers on/off using the layer control (top-right)
-                    
-                    **Color Legend:**
-                    - 🔴 **Red**: High resistance (>50%) - Critical surveillance area
-                    - 🟠 **Orange**: Medium resistance (30-50%) - Monitor closely
-                    - 🟢 **Green**: Low resistance (<30%) - Lower risk
+                    **How to Interact:**
+                    - **Hover** over circles to see detailed information
+                    - **Click** on circles for more data
+                    - **Drag** to pan around the map
+                    - **Scroll** to zoom in/out
+                    - **3D Tilt**: Hold Shift and drag to rotate the map
                     """)
                 
             except Exception as e:
-                st.warning(f"⚠️ Could not load enhanced map: {str(e)}")
-                st.info("Displaying alternative map visualization below...")
+                st.warning(f"⚠️ Map rendering issue: {str(e)}")
+                st.info("Displaying data in tabular format...")
                 
-                # Fallback to Plotly map
-                st.plotly_chart(
-                    plots.plot_point_map(samples_with_coords, all_ast),
-                    use_container_width=True
-                )
+                # Fallback display: Show data as table
+                display_cols = ['sample_id', 'district', 'region', 'latitude', 'longitude']
+                available_cols = [col for col in display_cols if col in samples_with_coords.columns]
+                
+                if available_cols:
+                    st.dataframe(
+                        samples_with_coords[available_cols].head(50),
+                        use_container_width=True
+                    )
+                    st.caption(f"Showing first 50 of {len(samples_with_coords)} samples")
             
             st.markdown("---")
         else:

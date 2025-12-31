@@ -90,11 +90,26 @@ def create_interactive_ghana_map(
         samples_clean = samples_df.dropna(subset=['latitude', 'longitude']).copy()
         
         if len(samples_clean) > 0:
+            # Convert to numeric
+            samples_clean['latitude'] = pd.to_numeric(samples_clean['latitude'], errors='coerce')
+            samples_clean['longitude'] = pd.to_numeric(samples_clean['longitude'], errors='coerce')
+            samples_clean = samples_clean.dropna(subset=['latitude', 'longitude'])
+            
             # Merge with AST data
-            sample_resistance = ast_df.groupby('sample_id')['result'].apply(
-                lambda x: (x == 'R').sum() / len(x) * 100 if len(x) > 0 else 0
-            ).reset_index()
-            sample_resistance.columns = ['sample_id', 'resistance_rate']
+            sample_resistance = ast_df.groupby('sample_id').agg({
+                'result': lambda x: {
+                    'resistant': (x == 'R').sum(),
+                    'total': len(x),
+                    'rate': (x == 'R').sum() / len(x) * 100 if len(x) > 0 else 0
+                }
+            }).reset_index()
+            
+            # Extract resistance metrics
+            sample_resistance[['resistant_count', 'total_count', 'resistance_rate']] = pd.DataFrame(
+                sample_resistance['result'].apply(lambda x: [x['resistant'], x['total'], x['rate']]).tolist(),
+                index=sample_resistance.index
+            )
+            sample_resistance = sample_resistance[['sample_id', 'resistant_count', 'total_count', 'resistance_rate']]
             
             # Merge with samples
             samples_with_resistance = samples_clean.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
@@ -103,37 +118,52 @@ def create_interactive_ghana_map(
             # Create color mapping based on resistance
             def get_color(resistance_rate):
                 if resistance_rate > 50:
-                    return [255, 0, 0, 200]  # Red
+                    return [255, 50, 50, 255]  # Bright Red
                 elif resistance_rate > 30:
-                    return [255, 165, 0, 200]  # Orange
+                    return [255, 165, 0, 255]  # Orange
                 else:
-                    return [0, 255, 0, 200]  # Green
+                    return [50, 200, 50, 255]  # Bright Green
             
             samples_with_resistance['color'] = samples_with_resistance['resistance_rate'].apply(get_color)
             
-            # Ensure latitude and longitude are floats
-            samples_with_resistance['latitude'] = pd.to_numeric(samples_with_resistance['latitude'], errors='coerce')
-            samples_with_resistance['longitude'] = pd.to_numeric(samples_with_resistance['longitude'], errors='coerce')
-            samples_with_resistance = samples_with_resistance.dropna(subset=['latitude', 'longitude'])
+            # Add point size based on total tests
+            samples_with_resistance['point_size'] = (samples_with_resistance['total_count'] * 3).clip(lower=100, upper=500)
             
-            # Create pydeck layer
+            # Create tooltip data with proper formatting
+            samples_with_resistance['tooltip_text'] = samples_with_resistance.apply(
+                lambda row: f"District: {row.get('district', 'N/A')}\n"
+                            f"Region: {row.get('region', 'N/A')}\n"
+                            f"Tests: {int(row.get('total_count', 0))}\n"
+                            f"Resistant: {int(row.get('resistant_count', 0))}\n"
+                            f"Rate: {row.get('resistance_rate', 0):.1f}%",
+                axis=1
+            )
+            
+            # Create pydeck layer with improved settings
             layer = pdk.Layer(
                 "ScatterplotLayer",
                 data=samples_with_resistance,
                 get_position=['longitude', 'latitude'],
                 get_color='color',
-                get_radius=150,
+                get_radius='point_size',
                 pickable=True,
                 auto_highlight=True,
+                opacity=0.8,
+                stroked=True,
+                lineWidthScale=15,
+                lineWidthMinPixels=2,
+                lineWidthMaxPixels=10
             )
             
             # Create view state
             view_state = pdk.ViewState(
                 latitude=ghana_center[0],
                 longitude=ghana_center[1],
-                zoom=6,
+                zoom=6.5,
                 bearing=0,
-                pitch=0
+                pitch=20,
+                min_zoom=5,
+                max_zoom=15
             )
             
             # Create deck with proper map style
@@ -141,10 +171,18 @@ def create_interactive_ghana_map(
                 layers=[layer],
                 initial_view_state=view_state,
                 tooltip={
-                    "html": "<b>{district}</b><br/>Region: {region}<br/>Resistance Rate: {resistance_rate:.1f}%",
-                    "style": {"backgroundColor": "#f1f1f2", "color": "black"}
+                    "html": "<b style='font-size: 14px;'>{tooltip_text}</b>",
+                    "style": {
+                        "backgroundColor": "#ffffff",
+                        "color": "#000000",
+                        "padding": "10px",
+                        "border-radius": "5px",
+                        "border": "1px solid #ccc",
+                        "font-family": "Arial"
+                    }
                 },
-                map_style="mapbox://styles/mapbox/light-v9"
+                map_style="mapbox://styles/mapbox/light-v10",
+                mapbox_key="pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycW1qdm9wbXI5YW8ifQ.rJcFIG214AriISLbB6B5aw"
             )
     
     # Return empty deck if no location data
@@ -156,7 +194,7 @@ def create_interactive_ghana_map(
     return pdk.Deck(
         layers=[],
         initial_view_state=view_state,
-        map_style="mapbox://styles/mapbox/light-v9"
+        map_style="mapbox://styles/mapbox/light-v10"
     )
 
 
