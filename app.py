@@ -33,11 +33,33 @@ db.init_database()
 
 # Email verification via magic link is disabled
 
+# Session timeout: 10 minutes of inactivity
+SESSION_TIMEOUT_MINUTES = 10
+
 # Authentication check
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
     st.session_state.user_email = None
     st.session_state.is_admin = False
+    st.session_state.last_activity_time = None
+
+# Check for session timeout
+if st.session_state.authenticated and st.session_state.last_activity_time:
+    time_elapsed = (datetime.now() - st.session_state.last_activity_time).total_seconds() / 60
+    if time_elapsed > SESSION_TIMEOUT_MINUTES:
+        st.session_state.authenticated = False
+        st.session_state.user_email = None
+        st.session_state.is_admin = False
+        st.session_state.last_activity_time = None
+        st.warning("⏱️ Session expired due to inactivity. Please log in again.")
+        st.stop()
+    else:
+        # Update last activity time on each interaction
+        st.session_state.last_activity_time = datetime.now()
+else:
+    # Set initial activity time on login
+    if st.session_state.authenticated:
+        st.session_state.last_activity_time = datetime.now()
 
 def _get_admin_config():
     admin_email = None
@@ -146,6 +168,7 @@ if not st.session_state.authenticated:
 
                                 st.session_state.authenticated = True
                                 st.session_state.user_email = login_email
+                                st.session_state.last_activity_time = datetime.now()
 
                                 # Enforce admin role for configured admin email
                                 is_admin_flag = user.get('is_admin')
@@ -230,6 +253,7 @@ with st.sidebar:
         st.session_state.authenticated = False
         st.session_state.user_email = None
         st.session_state.is_admin = False
+        st.session_state.last_activity_time = None
         st.success("✅ Logged out successfully")
         st.rerun()
     
