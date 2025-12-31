@@ -1,76 +1,22 @@
 """
-Enhanced interactive mapping module for Ghana with region and district labels.
-Uses pydeck for interactive maps with resistance pattern visualization.
+Enhanced interactive mapping module for Ghana using Folium.
+Displays sample locations and resistance patterns with clear, visible data points.
 """
 import pandas as pd
 import numpy as np
-import pydeck as pdk
+import folium
+from folium.plugins import HeatMap, MarkerCluster
 import streamlit as st
 from typing import Optional
-
-
-# Ghana Regions and Districts with approximate coordinates
-GHANA_REGIONS = {
-    "Ahafo": (6.8, -2.2),
-    "Ashanti": (6.5, -1.5),
-    "Bono": (7.2, -2.5),
-    "Bono East": (7.5, -0.8),
-    "Central": (5.2, -1.2),
-    "Eastern": (6.0, -0.5),
-    "Greater Accra": (5.5, -0.2),
-    "Northern": (9.3, -1.0),
-    "North East": (10.2, -1.0),
-    "Oti": (8.5, 0.5),
-    "Savannah": (10.0, -2.0),
-    "Upper East": (10.8, -1.2),
-    "Upper West": (10.5, -2.5),
-    "Volta": (6.5, 0.8),
-    "Western": (5.0, -2.5),
-    "Western North": (5.5, -3.0)
-}
-
-# Ghana Districts (sample - commonly sampled areas)
-GHANA_DISTRICTS = {
-    # Greater Accra
-    "Accra": (5.603, -0.187),
-    "Tema": (5.627, -0.012),
-    "Lajja": (5.6, -0.15),
-    
-    # Ashanti
-    "Kumasi": (6.668, -1.616),
-    "Adum": (6.67, -1.62),
-    "Bekwai": (6.44, -1.58),
-    
-    # Central
-    "Cape Coast": (5.106, -1.247),
-    "Sekondi-Takoradi": (4.900, -1.754),
-    "Elmina": (5.088, -1.339),
-    
-    # Eastern
-    "Koforidua": (6.0824, -0.2624),
-    "Akyem": (5.98, -0.32),
-    
-    # Volta
-    "Ho": (6.615, 0.487),
-    "Keta": (5.925, 0.992),
-    
-    # Northern
-    "Tamale": (9.281, -0.853),
-    "Bolgatanga": (10.788, -0.832),
-    
-    # Upper East
-    "Bolgatanga": (10.788, -0.832),
-    "Navrongo": (10.897, -1.099),
-}
 
 
 def create_interactive_ghana_map(
     samples_df: pd.DataFrame, 
     ast_df: pd.DataFrame,
     title: str = "Ghana - Sample Locations & Resistance"
-) -> pdk.Deck:
+) -> folium.Map:
     """
-    Create an interactive pydeck map of Ghana showing sample locations and resistance patterns.
+    Create an interactive Folium map of Ghana showing sample locations and resistance patterns.
     
     Args:
         samples_df: DataFrame with latitude, longitude, district, region columns
@@ -78,11 +24,19 @@ def create_interactive_ghana_map(
         title: Title for the map
         
     Returns:
-        pydeck Deck object
+        folium.Map object
     """
     
     # Center of Ghana
     ghana_center = [7.3697, -5.6789]
+    
+    # Create base map
+    m = folium.Map(
+        location=ghana_center,
+        zoom_start=6.5,
+        tiles="OpenStreetMap",
+        prefer_canvas=True
+    )
     
     # Calculate resistance by location
     if 'latitude' in samples_df.columns and 'longitude' in samples_df.columns:
@@ -95,7 +49,7 @@ def create_interactive_ghana_map(
             samples_clean['longitude'] = pd.to_numeric(samples_clean['longitude'], errors='coerce')
             samples_clean = samples_clean.dropna(subset=['latitude', 'longitude'])
             
-            # Merge with AST data
+            # Merge with AST data to calculate resistance per sample
             sample_resistance = ast_df.groupby('sample_id').agg({
                 'result': lambda x: {
                     'resistant': (x == 'R').sum(),
@@ -115,87 +69,74 @@ def create_interactive_ghana_map(
             samples_with_resistance = samples_clean.merge(sample_resistance, left_on='sample_id', right_on='sample_id', how='left')
             samples_with_resistance['resistance_rate'] = samples_with_resistance['resistance_rate'].fillna(0)
             
-            # Create color mapping based on resistance
-            def get_color(resistance_rate):
-                if resistance_rate > 50:
-                    return [255, 50, 50, 255]  # Bright Red
-                elif resistance_rate > 30:
-                    return [255, 165, 0, 255]  # Orange
+            # Add marker cluster group
+            marker_cluster = MarkerCluster().add_to(m)
+            
+            # Add individual markers with color coding
+            for idx, row in samples_with_resistance.iterrows():
+                lat = row['latitude']
+                lon = row['longitude']
+                district = row.get('district', 'Unknown')
+                region = row.get('region', 'Unknown')
+                resist_rate = row.get('resistance_rate', 0)
+                total_tests = int(row.get('total_count', 0))
+                resistant_count = int(row.get('resistant_count', 0))
+                
+                # Determine color based on resistance rate
+                if resist_rate > 50:
+                    color = 'red'
+                    icon_color = 'red'
+                elif resist_rate > 30:
+                    color = 'orange'
+                    icon_color = 'orange'
                 else:
-                    return [50, 200, 50, 255]  # Bright Green
+                    color = 'green'
+                    icon_color = 'green'
+                
+                # Create popup with detailed information
+                popup_text = f"""
+                <b>Sample Location</b><br>
+                <b>District:</b> {district}<br>
+                <b>Region:</b> {region}<br>
+                <b>Tests:</b> {total_tests}<br>
+                <b>Resistant:</b> {resistant_count}<br>
+                <b>Resistance Rate:</b> {resist_rate:.1f}%
+                """
+                
+                # Add circle marker with size based on test count
+                radius = max(5, min(20, total_tests / 2))
+                
+                folium.CircleMarker(
+                    location=[lat, lon],
+                    radius=radius,
+                    popup=folium.Popup(popup_text, max_width=300),
+                    color=color,
+                    fill=True,
+                    fillColor=color,
+                    fillOpacity=0.7,
+                    weight=2,
+                    opacity=1.0,
+                    tooltip=f"{district} - {resist_rate:.1f}% resistance"
+                ).add_to(m)
             
-            samples_with_resistance['color'] = samples_with_resistance['resistance_rate'].apply(get_color)
-            
-            # Add point size based on total tests
-            samples_with_resistance['point_size'] = (samples_with_resistance['total_count'] * 3).clip(lower=100, upper=500)
-            
-            # Create tooltip data with proper formatting
-            samples_with_resistance['tooltip_text'] = samples_with_resistance.apply(
-                lambda row: f"District: {row.get('district', 'N/A')}\n"
-                            f"Region: {row.get('region', 'N/A')}\n"
-                            f"Tests: {int(row.get('total_count', 0))}\n"
-                            f"Resistant: {int(row.get('resistant_count', 0))}\n"
-                            f"Rate: {row.get('resistance_rate', 0):.1f}%",
-                axis=1
-            )
-            
-            # Create pydeck layer with improved settings
-            layer = pdk.Layer(
-                "ScatterplotLayer",
-                data=samples_with_resistance,
-                get_position=['longitude', 'latitude'],
-                get_color='color',
-                get_radius='point_size',
-                pickable=True,
-                auto_highlight=True,
-                opacity=0.8,
-                stroked=True,
-                lineWidthScale=15,
-                lineWidthMinPixels=2,
-                lineWidthMaxPixels=10
-            )
-            
-            # Create view state
-            view_state = pdk.ViewState(
-                latitude=ghana_center[0],
-                longitude=ghana_center[1],
-                zoom=6.5,
-                bearing=0,
-                pitch=20,
-                min_zoom=5,
-                max_zoom=15
-            )
-            
-            # Create deck with proper map style
-            return pdk.Deck(
-                layers=[layer],
-                initial_view_state=view_state,
-                tooltip={
-                    "html": "<b style='font-size: 14px;'>{tooltip_text}</b>",
-                    "style": {
-                        "backgroundColor": "#ffffff",
-                        "color": "#000000",
-                        "padding": "10px",
-                        "border-radius": "5px",
-                        "border": "1px solid #ccc",
-                        "font-family": "Arial"
-                    }
-                },
-                map_style="mapbox://styles/mapbox/light-v10",
-                mapbox_key="pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycW1qdm9wbXI5YW8ifQ.rJcFIG214AriISLbB6B5aw"
-            )
+            # Add a legend
+            legend_html = '''
+            <div style="position: fixed; 
+                     top: 10px; right: 10px; width: 250px; height: auto; 
+                     background-color: white; border:2px solid grey; z-index:9999; 
+                     font-size:14px; padding: 10px; border-radius: 5px;">
+                <p style="margin: 0 0 10px 0; font-weight: bold;">Resistance Legend</p>
+                <p style="margin: 5px 0;"><span style="color: red; font-size: 18px;">●</span> High (>50%)</p>
+                <p style="margin: 5px 0;"><span style="color: orange; font-size: 18px;">●</span> Medium (30-50%)</p>
+                <p style="margin: 5px 0;"><span style="color: green; font-size: 18px;">●</span> Low (<30%)</p>
+                <p style="margin: 10px 0 5px 0; font-size: 12px; color: #666;">
+                  Circle size = number of tests
+                </p>
+            </div>
+            '''
+            m.get_root().html.add_child(folium.Element(legend_html))
     
-    # Return empty deck if no location data
-    view_state = pdk.ViewState(
-        latitude=ghana_center[0],
-        longitude=ghana_center[1],
-        zoom=6,
-    )
-    return pdk.Deck(
-        layers=[],
-        initial_view_state=view_state,
-        map_style="mapbox://styles/mapbox/light-v10"
-    )
+    return m
 
 
 def create_regional_resistance_heatmap(

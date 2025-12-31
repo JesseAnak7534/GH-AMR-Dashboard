@@ -911,12 +911,13 @@ elif page == "Map Hotspots":
             try:
                 # Import the enhanced mapping module
                 from src import ghana_map
+                from streamlit_folium import folium_static
                 
-                # Create and display interactive pydeck map
+                # Create and display interactive Folium map
                 m = ghana_map.create_interactive_ghana_map(samples_with_coords, all_ast)
                 
-                # Display using pydeck with full width
-                st.pydeck_chart(m, use_container_width=True)
+                # Display using folium_static with full width
+                folium_static(m, width=1200, height=600)
                 
                 # Map instructions
                 with st.expander("📚 How to Use the Interactive Map", expanded=False):
@@ -931,10 +932,10 @@ elif page == "Map Hotspots":
                     
                     **How to Interact:**
                     - **Hover** over circles to see detailed information
-                    - **Click** on circles for more data
+                    - **Click** on circles for popup with detailed data
                     - **Drag** to pan around the map
                     - **Scroll** to zoom in/out
-                    - **3D Tilt**: Hold Shift and drag to rotate the map
+                    - **Double-click** to zoom to location
                     """)
                 
             except Exception as e:
