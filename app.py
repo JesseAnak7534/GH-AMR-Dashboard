@@ -42,6 +42,7 @@ if "authenticated" not in st.session_state:
     st.session_state.user_email = None
     st.session_state.is_admin = False
     st.session_state.last_activity_time = None
+    st.session_state.active_dataset_id = None  # Track selected dataset for filtering dashboards
 
 # Check for session timeout
 if st.session_state.authenticated and st.session_state.last_activity_time:
@@ -394,6 +395,13 @@ elif page == "Data Management":
             dataset_names,
             key="data_mgmt_dataset"
         )
+        # Extract dataset ID and store in session
+        try:
+            selected_dataset_id = selected_dataset_display.split("(ID: ")[1].rstrip(")")
+            st.session_state.active_dataset_id = selected_dataset_id
+            st.success(f"✅ Active dataset: {selected_dataset_id}")
+        except:
+            st.warning("Unable to parse dataset ID. Please reselect.")
 elif page == "Admin - Datasets":
     st.header("🛡️ Admin - Datasets")
     config_admin_email, _ = _get_admin_config()
@@ -455,12 +463,19 @@ elif page == "Admin - Datasets":
 elif page == "Resistance Overview":
     st.header("📈 Resistance Overview")
     
-    # Get all data
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    # Get data for active dataset only
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Filters
         st.sidebar.markdown("### Filters")
@@ -764,11 +779,18 @@ elif page == "Resistance Overview":
 elif page == "Trends":
     st.header("📊 Resistance Trends")
     
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Filters
         st.sidebar.markdown("### Trend Filters")
@@ -861,11 +883,18 @@ elif page == "Trends":
 elif page == "Map Hotspots":
     st.header("🗺️ Geographic Hotspots & Regional Analysis")
     
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Check if geographic data exists
         samples_with_coords = all_samples[
@@ -994,11 +1023,18 @@ elif page == "Map Hotspots":
 elif page == "Advanced Analytics":
     st.header("🔬 Advanced Analytics & Insights")
     
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Tab selection
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -1206,11 +1242,18 @@ elif page == "Advanced Analytics":
 elif page == "Risk Assessment":
     st.header("⚠️ Risk Assessment & Alerts")
     
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Tabs
         tab1, tab2, tab3 = st.tabs(["🔴 Risk Scores", "🏥 Resistance Burden", "📉 Organism Assessment"])
@@ -1371,11 +1414,18 @@ elif page == "Comparative Analysis":
     st.header("🔍 Comparative Analysis")
     st.markdown("Compare resistance patterns across different categories, time periods, and sources")
 
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # Analysis type selection
         analysis_type = st.selectbox(
@@ -2448,11 +2498,18 @@ elif page == "Comparative Analysis":
 elif page == "Report Export":
     st.header("📄 Report Export")
 
-    all_ast = db.get_all_ast_results()
-    all_samples = db.get_all_samples()
+    # Require dataset selection before showing dashboard
+    if not st.session_state.active_dataset_id:
+        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    
+    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available. Please upload data first.")
+        st.warning("No data available in the selected dataset.")
     else:
         # ============================================================================
         # FILTERING CONTROLS (Same as Resistance Overview)
