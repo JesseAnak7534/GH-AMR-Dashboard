@@ -1,0 +1,30 @@
+[logger]
+level = "info"
+
+[client]
+showErrorDetails = true
+# Prevent toolbar from being hidden which can affect data persistence
+toolbarMode = "viewer"
+# Enable fast reruns for better user experience
+fastReruns = true
+
+[server]
+# Prevent server from closing idle connections
+maxUploadSize = 200
+# Disable timeout for long-running operations
+maxMessageSize = 200
+# Run on a separate thread to prevent blocking
+runOnSave = false
+
+[runner]
+# Run on a separate thread to prevent blocking the main event loop
+fastReruns = true
+magicEnabled = true
+
+[theme]
+# Use light theme for better visibility
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"
