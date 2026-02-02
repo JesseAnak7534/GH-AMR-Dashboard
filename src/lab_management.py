@@ -427,9 +427,9 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
         samples_df['latitude'] = [x[0] for x in geopoint_data]
         samples_df['longitude'] = [x[1] for x in geopoint_data]
     
-    samples_df['site_type'] = df.get('site_type', 'Laboratory').fillna('Laboratory')
-    samples_df['food_matrix'] = df.get('food_matrix', '').fillna('')
-    samples_df['environment_matrix'] = df.get('environment_matrix', '').fillna('')
+    samples_df['site_type'] = df['site_type'].fillna('Laboratory') if 'site_type' in df.columns else 'Laboratory'
+    samples_df['food_matrix'] = df['food_matrix'].fillna('') if 'food_matrix' in df.columns else ''
+    samples_df['environment_matrix'] = df['environment_matrix'].fillna('') if 'environment_matrix' in df.columns else ''
 
     # Remove duplicates by sample_id
     if 'sample_id' in samples_df.columns:
