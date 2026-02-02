@@ -273,9 +273,12 @@ class KoboToolboxManager:
             if response.status_code == 200:
                 data = response.json()
                 
+                # Extract results from paginated response
+                results = data.get('results', []) if isinstance(data, dict) else data
+                
                 # Convert to DataFrame
-                if data:
-                    df = pd.DataFrame(data)
+                if results:
+                    df = pd.DataFrame(results)
                     return True, f"Retrieved {len(df)} submissions", df
                 else:
                     return True, "No submissions found", pd.DataFrame()
@@ -356,14 +359,29 @@ def get_lab_name_from_email(email: str) -> Optional[str]:
 
 def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Convert KoboToolbox submissions to samples and AST dataframes."""
-    if submissions_df is None or submissions_df.empty:
+    if submissions_df is None or (isinstance(submissions_df, pd.DataFrame) and submissions_df.empty):
+        return pd.DataFrame(), pd.DataFrame()
+
+    # Handle both raw API dict responses and pre-converted DataFrames
+    if isinstance(submissions_df, dict):
+        # If it's a paginated response from the API
+        if 'results' in submissions_df:
+            if not submissions_df['results']:
+                return pd.DataFrame(), pd.DataFrame()
+            df = pd.DataFrame(submissions_df['results'])
+        else:
+            # Single row dict
+            df = pd.DataFrame([submissions_df])
+    else:
+        df = submissions_df.copy() if isinstance(submissions_df, pd.DataFrame) else pd.DataFrame(submissions_df)
+    
+    if df.empty:
         return pd.DataFrame(), pd.DataFrame()
 
     # Normalize column names
-    df = submissions_df.copy()
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Build samples dataframe
+    # Build samples dataframe - extract only available columns
     samples_cols = {
         'sample_id': 'sample_id',
         'lab_name': 'lab_name',
@@ -374,13 +392,20 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
         'source_type': 'source_type'
     }
 
+    # Only include columns that exist in the dataframe
+    available_samples_cols = {k: v for k, v in samples_cols.items() if v in df.columns}
+    
     samples_df = pd.DataFrame({
-        key: df.get(src) for key, src in samples_cols.items()
+        key: df[src] for key, src in available_samples_cols.items()
     })
-
-    samples_df['site_type'] = 'Laboratory'
-    samples_df['food_matrix'] = ''
-    samples_df['environment_matrix'] = ''
+    
+    # Add missing columns with default values
+    for col in ['site_type', 'food_matrix', 'environment_matrix', 'latitude', 'longitude']:
+        if col not in samples_df.columns:
+            if col in ['latitude', 'longitude']:
+                samples_df[col] = None
+            else:
+                samples_df[col] = ''
     
     # Parse geopoint field if present (format: "latitude longitude altitude precision")
     if 'geolocation' in df.columns:
@@ -401,11 +426,12 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
         geopoint_data = df['geolocation'].apply(parse_geopoint)
         samples_df['latitude'] = [x[0] for x in geopoint_data]
         samples_df['longitude'] = [x[1] for x in geopoint_data]
-    else:
-        samples_df['latitude'] = None
-        samples_df['longitude'] = None
+    
+    samples_df['site_type'] = df.get('site_type', 'Laboratory').fillna('Laboratory')
+    samples_df['food_matrix'] = df.get('food_matrix', '').fillna('')
+    samples_df['environment_matrix'] = df.get('environment_matrix', '').fillna('')
 
-    # Remove duplicates by sample_id and lab_name
+    # Remove duplicates by sample_id
     if 'sample_id' in samples_df.columns:
         samples_df = samples_df.drop_duplicates(subset=['sample_id'])
 
@@ -421,12 +447,17 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
         'test_date': 'test_date'
     }
 
+    # Only include columns that exist
+    available_ast_cols = {k: v for k, v in ast_cols.items() if v in df.columns}
+    
     ast_df = pd.DataFrame({
-        key: df.get(src) for key, src in ast_cols.items()
+        key: df[src] for key, src in available_ast_cols.items()
     })
-
-    ast_df['mic_value'] = None
-    ast_df['zone_diameter'] = None
+    
+    # Add missing columns
+    for col in ['mic_value', 'zone_diameter']:
+        if col not in ast_df.columns:
+            ast_df[col] = None
 
     return samples_df, ast_df
 
