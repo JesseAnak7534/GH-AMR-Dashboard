@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Dict, List, Optional
 import base64
 import json
+from io import BytesIO
 import plotly
 import plotly.graph_objects as go
 import plotly.express as px
@@ -140,6 +141,20 @@ def generate_html_report(
 
     if ast_df.empty or samples_df.empty:
         return "<html><body><h1>No data available for report generation.</h1></body></html>"
+
+
+    def generate_pdf_from_html(html_content: str) -> bytes:
+        """Generate a PDF from HTML content."""
+        try:
+            from xhtml2pdf import pisa
+        except Exception as e:
+            raise RuntimeError("xhtml2pdf is required for PDF export. Please install it.") from e
+
+        output = BytesIO()
+        result = pisa.CreatePDF(src=html_content, dest=output)
+        if result.err:
+            raise RuntimeError("Failed to generate PDF from HTML.")
+        return output.getvalue()
 
     # Import required modules
     from src import analytics

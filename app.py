@@ -322,25 +322,18 @@ if page == "Upload & Data Quality":
     
     with col2:
         st.subheader("Template Download")
-        # Create template on demand
+        # Always generate the latest template with lab dropdown
         os.makedirs("templates", exist_ok=True)
-        template_path = "templates/AMR_ENV_FOOD_template_v1.xlsx"
-        
-        if not os.path.exists(template_path):
-            try:
-                validate.create_template_excel()
-                st.success("Template created!")
-            except Exception as e:
-                st.error(f"Error creating template: {e}")
-        
-        if os.path.exists(template_path):
-            with open(template_path, "rb") as f:
-                st.download_button(
-                    label="Download Template",
-                    data=f.read(),
-                    file_name="AMR_ENV_FOOD_template_v1.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+        try:
+            template_bytes = validate.create_template_excel()
+            st.download_button(
+                label="Download Template",
+                data=template_bytes,
+                file_name="AMR_ENV_FOOD_template_v1.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+        except Exception as e:
+            st.error(f"Error creating template: {e}")
     
     with col1:
         st.subheader("Upload Data")
@@ -2949,6 +2942,13 @@ elif page == "Report Export":
                 if selected_dataset_display != "None":
                     selected_dataset_name = selected_dataset_display.split('(')[0].strip()
 
+            report_format = st.radio(
+                "Report Format",
+                options=["HTML", "PDF"],
+                horizontal=True,
+                key="report_format"
+            )
+
             if st.button("Generate Technical Report", type="primary", use_container_width=True):
                 with st.spinner("Generating comprehensive technical report with filtered data..."):
                     try:
@@ -2978,15 +2978,25 @@ elif page == "Report Export":
 
                         # Download button
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                        filename = f"AMR_Report_Filtered_{timestamp}.html"
-
-                        st.download_button(
-                            label="Download Professional HTML Report",
-                            data=html_content,
-                            file_name=filename,
-                            mime="text/html",
-                            use_container_width=True
-                        )
+                        if report_format == "PDF":
+                            pdf_bytes = report.generate_pdf_from_html(html_content)
+                            filename = f"AMR_Report_Filtered_{timestamp}.pdf"
+                            st.download_button(
+                                label="Download PDF Report",
+                                data=pdf_bytes,
+                                file_name=filename,
+                                mime="application/pdf",
+                                use_container_width=True
+                            )
+                        else:
+                            filename = f"AMR_Report_Filtered_{timestamp}.html"
+                            st.download_button(
+                                label="Download HTML Report",
+                                data=html_content,
+                                file_name=filename,
+                                mime="text/html",
+                                use_container_width=True
+                            )
 
                     except Exception as e:
                         st.error(f"Error generating report: {str(e)}")
