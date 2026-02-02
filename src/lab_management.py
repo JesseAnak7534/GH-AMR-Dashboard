@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 # KoboToolbox API Configuration
 KOBO_API_BASE = "https://kf.kobotoolbox.org/api/v2"
 LAB_EMAIL_DOMAIN = "sentinel-amr.lab"
+KOBO_CONFIG_PATH = os.path.join("db", "kobo_config.json")
 
 load_dotenv()
 KOBO_USERNAME = os.getenv("KOBO_USERNAME")
@@ -362,3 +363,31 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
     ast_df['zone_diameter'] = None
 
     return samples_df, ast_df
+
+
+def save_kobo_form_id(form_id: str) -> Tuple[bool, str]:
+    """Persist KoboToolbox form ID to local config file."""
+    try:
+        os.makedirs("db", exist_ok=True)
+        payload = {
+            "form_id": str(form_id).strip(),
+            "updated_at": datetime.now().isoformat()
+        }
+        with open(KOBO_CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+        return True, "KoboToolbox form ID saved"
+    except Exception as e:
+        return False, f"Failed to save KoboToolbox form ID: {e}"
+
+
+def load_kobo_form_id() -> Optional[str]:
+    """Load KoboToolbox form ID from local config file if available."""
+    try:
+        if not os.path.exists(KOBO_CONFIG_PATH):
+            return None
+        with open(KOBO_CONFIG_PATH, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        form_id = payload.get("form_id")
+        return str(form_id).strip() if form_id else None
+    except Exception:
+        return None

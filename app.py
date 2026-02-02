@@ -23,7 +23,9 @@ from src.lab_management import (
     get_lab_email_map,
     is_lab_user,
     KoboToolboxManager,
-    kobo_submissions_to_frames
+    kobo_submissions_to_frames,
+    save_kobo_form_id,
+    load_kobo_form_id
 )
 
 # Page configuration
@@ -519,7 +521,37 @@ elif page == "Admin - Datasets":
     st.markdown("---")
     st.subheader("KoboToolbox Sync")
     with st.expander("Import submissions from KoboToolbox", expanded=False):
-        form_id = st.text_input("KoboToolbox Form ID", key="kobo_form_id")
+        saved_form_id = load_kobo_form_id() or ""
+        form_id = st.text_input("KoboToolbox Form ID", value=saved_form_id, key="kobo_form_id")
+
+        col_a, col_b = st.columns([1, 1])
+        with col_a:
+            if st.button("Create KoboToolbox Form", key="kobo_create_form"):
+                with st.spinner("Creating KoboToolbox form..."):
+                    kobo = KoboToolboxManager()
+                    ok, msg, form_data = kobo.create_amr_form()
+                    if not ok:
+                        st.error(msg)
+                    else:
+                        new_form_id = str(form_data.get("uid") or form_data.get("id") or "").strip()
+                        if new_form_id:
+                            save_ok, save_msg = save_kobo_form_id(new_form_id)
+                            st.success(f"Form created. Form ID: {new_form_id}")
+                            if not save_ok:
+                                st.warning(save_msg)
+                        else:
+                            st.warning("Form created but Form ID was not returned. Please copy it manually from KoboToolbox.")
+        with col_b:
+            if st.button("Save Form ID", key="kobo_save_form_id"):
+                if not form_id:
+                    st.error("Please enter a Form ID to save.")
+                else:
+                    ok, msg = save_kobo_form_id(form_id)
+                    if ok:
+                        st.success(msg)
+                    else:
+                        st.error(msg)
+
         if st.button("Sync KoboToolbox Submissions", key="kobo_sync"):
             if not form_id:
                 st.error("Please provide a KoboToolbox Form ID.")
