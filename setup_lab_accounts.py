@@ -27,13 +27,14 @@ def setup_lab_accounts():
     created_count = 0
     failed_count = 0
     
-    for lab_name in lab_names:
-        # Create email based on lab name
-        username = lab_credentials.get(lab_name, lab_name.lower().replace(" ", "_"))
-        password = f"Lab@{secrets.token_urlsafe(6)}"
+    for idx, lab_name in enumerate(lab_names, 1):
+        # Create short username: LAB01, LAB02, etc.
+        username = f"LAB{idx:02d}"
+        # Create short password: 6 characters (uppercase + number)
+        password = f"{secrets.token_urlsafe(3)[:4].upper()}{secrets.randbelow(100):02d}"
         
         # Create email format: lab_username@sentinel-amr.lab
-        email = f"{username}@sentinel-amr.lab"
+        email = f"{username.lower()}@sentinel-amr.lab"
         
         try:
             # Check if user already exists
@@ -54,8 +55,8 @@ def setup_lab_accounts():
                     db.set_user_verified(email, True)
                     db.update_user_status(db.get_user_by_email(email)['user_id'], True)
                     
-                    print(f"✓ Created: {email} ({lab_name})")
-                    print(f"  Username: {username}")
+                    print(f"✓ Lab {idx}: {lab_name}")
+                    print(f"  Email: {email}")
                     print(f"  Password: {password}")
                     print()
                     
@@ -75,7 +76,7 @@ def setup_lab_accounts():
     print("=" * 70)
     print()
     print("Lab users can now login with:")
-    print("  Email: {username}@sentinel-amr.lab")
+    print("  Email: lab##@sentinel-amr.lab")
     print("  Password: (provided above)")
     print()
     print("For security, request each lab to change their password on first login.")
