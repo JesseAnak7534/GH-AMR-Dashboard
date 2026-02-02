@@ -84,6 +84,7 @@ def init_database():
         CREATE TABLE IF NOT EXISTS samples (
             dataset_id TEXT,
             sample_id TEXT,
+            lab_name TEXT,
             collection_date TEXT,
             region TEXT,
             district TEXT,
@@ -98,6 +99,12 @@ def init_database():
             FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
         )
     """)
+    
+    # Add lab_name column if it doesn't exist (migration)
+    try:
+        cursor.execute("ALTER TABLE samples ADD COLUMN lab_name TEXT")
+    except sqlite3.OperationalError:
+        pass
 
     # Create ast_results table
     cursor.execute("""
@@ -186,12 +193,13 @@ def save_dataset(dataset_id: str, dataset_name: str, samples_df: pd.DataFrame,
         for _, row in samples_df.iterrows():
             cursor.execute("""
                 INSERT INTO samples 
-                (dataset_id, sample_id, collection_date, region, district, site_type, 
+                (dataset_id, sample_id, lab_name, collection_date, region, district, site_type, 
                  source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 dataset_id,
                 row.get('sample_id'),
+                row.get('lab_name'),
                 row.get('collection_date'),
                 row.get('region'),
                 row.get('district'),

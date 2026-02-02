@@ -11,3 +11,4 @@ openai>=1.0.0
 bcrypt>=4.0.0
 folium>=0.14.0
 streamlit-folium>=0.8.0
+requests>=2.31.0

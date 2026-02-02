@@ -19,11 +19,12 @@ import urllib.parse
 # Import modules
 from src import db, validate, plots, report, analytics
 from src import email_utils
+from src.lab_management import get_lab_credentials, is_lab_user
 
 # Page configuration
 st.set_page_config(
     page_title="AMR Surveillance Dashboard",
-    page_icon="🦠",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -52,7 +53,7 @@ if st.session_state.authenticated and st.session_state.last_activity_time:
         st.session_state.user_email = None
         st.session_state.is_admin = False
         st.session_state.last_activity_time = None
-        st.warning("⏱️ Session expired due to inactivity. Please log in again.")
+        st.warning("Session expired due to inactivity. Please log in again.")
         st.stop()
     else:
         # Update last activity time on each interaction
@@ -142,22 +143,22 @@ if not st.session_state.authenticated:
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.markdown('<div class="center-title">🦠 AMR Dashboard</div>', unsafe_allow_html=True)
+        st.markdown('<div class="center-title">AMR Dashboard</div>', unsafe_allow_html=True)
         st.markdown('<div class="center-subtitle">Antimicrobial Resistance Surveillance System</div>', unsafe_allow_html=True)
         st.markdown("---")
         
         # Create two columns for better spacing
-        tab1, tab2 = st.tabs(["🔐 Login", "📝 Sign Up"])
+        tab1, tab2 = st.tabs(["Login", "Sign Up"])
         
         with tab1:
             st.subheader("Welcome Back")
             
-            login_email = st.text_input("📧 Email Address", placeholder="Enter your email", key="login_email")
-            login_password = st.text_input("🔐 Password", type="password", placeholder="Enter your password", key="login_password")
+            login_email = st.text_input("Email Address", placeholder="Enter your email", key="login_email")
+            login_password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
             
-            if st.button("🔓 Sign In", use_container_width=True, type="primary"):
+            if st.button("Sign In", use_container_width=True, type="primary"):
                 if not login_email or not login_password:
-                    st.error("❌ Please fill in all fields")
+                    st.error("Please fill in all fields")
                 else:
                     user = db.get_user_by_email(login_email)
                     if user and user['is_active']:
@@ -184,52 +185,55 @@ if not st.session_state.authenticated:
 
                                 st.session_state.is_admin = bool(is_admin_flag)
                                 db.update_last_login(login_email)
-                                st.success("✅ Login successful!")
+                                st.success("Login successful!")
                                 st.balloons()
                                 st.rerun()
                             else:
-                                st.error("❌ Invalid email or password")
+                                st.error("Invalid email or password")
                         except Exception as e:
-                            st.error(f"❌ Login error: {str(e)}")
+                            st.error(f"Login error: {str(e)}")
                     else:
-                        st.error("❌ Invalid email or password, or account is inactive")
+                        st.error("Invalid email or password, or account is inactive")
         
         with tab2:
-            st.subheader("Create New Account")
+            st.subheader("Lab Registration")
+            st.info("""
+            Lab user accounts are pre-configured by the system administrator.
             
-            signup_email = st.text_input("📧 Email Address", placeholder="your.email@example.com", key="signup_email")
-            signup_password = st.text_input("🔐 Password", type="password", placeholder="At least 6 characters", key="signup_password")
-            signup_confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm your password", key="signup_confirm")
+            Only authorized personnel from approved sentinel site laboratories have access.
             
-            if st.button("✅ Create Account", use_container_width=True, type="primary"):
-                if not signup_email or not signup_password:
-                    st.error("❌ Please fill in all fields")
-                elif len(signup_password) < 6:
-                    st.error("❌ Password must be at least 6 characters")
-                elif signup_password != signup_confirm:
-                    st.error("❌ Passwords do not match")
-                elif "@" not in signup_email or "." not in signup_email.split("@")[1]:
-                    st.error("❌ Invalid email format")
-                else:
-                    try:
-                        password_hash = bcrypt.hashpw(signup_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-                        success, msg = db.create_user(signup_email, password_hash, is_admin=False)
-                        if success:
-                            # Email authentication removed: mark user verified and allow immediate login
-                            try:
-                                db.set_user_verified(signup_email, True)
-                            except Exception:
-                                pass
-                            st.success("✅ Account created! You can now log in.")
-                    except Exception as e:
-                        st.error(f"❌ Error creating account: {str(e)}")
-            # Resend verification removed; email authentication is disabled
+            If you represent an approved laboratory and do not have access credentials,
+            please contact the AMR Surveillance Program administrator.
+            
+            Approved Laboratories:
+            - Eastern Regional Hospital
+            - St. Martin De Porres Hospital Eikwe
+            - Sekondi Public Health Reference Laboratory
+            - Ho Teaching Hospital
+            - Tamale Teaching Hospital
+            - Komfo Anokye Teaching Hospital
+            - Korle-Bu Teaching Hospital
+            - Lekma Hospital
+            - Sunyani Teaching Hospital
+            - Cape Coast Teaching Hospital
+            - National Food Safety Laboratory
+            - CSIR Water Research Institute
+            - Accra Veterinary Laboratory
+            - Kumasi Veterinary Laboratory
+            - Quadushah Medical Diagnostic Limited
+            - Central Veterinary Laboratory
+            - Pong Tamale School
+            - Metropolis Health Care Limited
+            - Alma Medical Laboratory Ltd
+            """)
+            
+            st.warning("Account creation is restricted to authorized laboratories only.")
         
         st.markdown("---")
         
         st.markdown("""
             <div style="text-align: center; color: #999; font-size: 0.85em; margin-top: 2rem;">
-                <p>🦠 AMR Surveillance Dashboard</p>
+                <p>AMR Surveillance Dashboard</p>
                 <p style="font-size: 0.8em;">Multi-source Surveillance System | Ghana</p>
                 <p style="font-size: 0.75em; color: #ccc; margin-top: 1rem;">Please enter your credentials to continue</p>
             </div>
@@ -238,24 +242,24 @@ if not st.session_state.authenticated:
     st.stop()
 
 # App title and description (only shown when authenticated)
-st.title("🦠 AMR Surveillance Dashboard")
+st.title("AMR Surveillance Dashboard")
 st.markdown("### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
 st.markdown("---")
 
 # Sidebar navigation with user info and admin panel
 with st.sidebar:
-    st.markdown(f"👤 **Logged in as:** {st.session_state.user_email}")
+    st.markdown(f"**Logged in as:** {st.session_state.user_email}")
     if st.session_state.is_admin:
-        st.markdown("🛡️ **Admin Account**")
+        st.markdown("**Admin Account**")
     
     st.markdown("---")
     
-    if st.button("🚪 Logout", use_container_width=True):
+    if st.button("Logout", use_container_width=True):
         st.session_state.authenticated = False
         st.session_state.user_email = None
         st.session_state.is_admin = False
         st.session_state.last_activity_time = None
-        st.success("✅ Logged out successfully")
+        st.success("Logged out successfully")
         st.rerun()
     
     st.markdown("---")
@@ -270,7 +274,7 @@ page = st.sidebar.radio(
 # PAGE 1: UPLOAD & DATA QUALITY
 # ============================================================================
 if page == "Upload & Data Quality":
-    st.header("📤 Upload & Data Quality")
+    st.header("Upload & Data Quality")
     
     col1, col2 = st.columns([2, 1])
     
@@ -290,7 +294,7 @@ if page == "Upload & Data Quality":
         if os.path.exists(template_path):
             with open(template_path, "rb") as f:
                 st.download_button(
-                    label="📥 Download Template",
+                    label="Download Template",
                     data=f.read(),
                     file_name="AMR_ENV_FOOD_template_v1.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -304,17 +308,17 @@ if page == "Upload & Data Quality":
         )
         
         if uploaded_file:
-            if st.button("✓ Validate Upload"):
+            if st.button("Validate Upload"):
                 with st.spinner("Validating..."):
                     is_valid, errors, samples_df, ast_df = validate.validate_upload(uploaded_file)
                     
                     if is_valid:
-                        st.success("✓ Validation successful!")
+                        st.success("Validation successful!")
 
                         # Check for automated interpretation
                         auto_interpreted_count = ast_df['auto_interpreted'].sum() if 'auto_interpreted' in ast_df.columns else 0
                         if auto_interpreted_count > 0:
-                            st.info(f"🤖 Automated interpretation performed on {int(auto_interpreted_count)} AST results using CLSI/EUCAST breakpoints")
+                            st.info(f"Automated interpretation performed on {int(auto_interpreted_count)} AST results using CLSI/EUCAST breakpoints")
 
                         # Save to database
                         dataset_id = str(uuid.uuid4())[:8]
@@ -327,19 +331,19 @@ if page == "Upload & Data Quality":
                         )
 
                         if success:
-                            st.success(f"✓ Data saved with ID: {dataset_id}")
+                            st.success(f"Data saved with ID: {dataset_id}")
                             st.balloons()
                         else:
                             st.error(f"Database error: {msg}")
                     else:
-                        st.error("❌ Validation failed. Errors:")
+                        st.error("Validation failed. Errors:")
                         for i, error in enumerate(errors, 1):
                             st.markdown(f"  {i}. {error}")
     
     st.markdown("---")
     
     # Show existing datasets
-    st.subheader("📊 Existing Datasets")
+    st.subheader("Existing Datasets")
     datasets = db.get_all_datasets()
     # Hide admin-owned datasets from non-admin users
     config_admin_email, _ = _get_admin_config()
@@ -360,7 +364,7 @@ if page == "Upload & Data Quality":
                 st.metric("Tests", ds['rows_tests'])
             
             with col3:
-                if st.button("🗑️ Delete", key=f"del_{ds['dataset_id']}"):
+                if st.button("Delete", key=f"del_{ds['dataset_id']}"):
                     success, msg = db.delete_dataset(ds['dataset_id'])
                     if success:
                         st.success("Deleted!")
@@ -374,7 +378,7 @@ if page == "Upload & Data Quality":
 # PAGE 2: DATA MANAGEMENT
 # ============================================================================
 elif page == "Data Management":
-    st.header("🗂️ Data Management")
+    st.header("Data Management")
     st.markdown("Manage, review, and maintain your AMR surveillance datasets")
 
     # Get all datasets
@@ -399,11 +403,11 @@ elif page == "Data Management":
         try:
             selected_dataset_id = selected_dataset_display.split("(ID: ")[1].rstrip(")")
             st.session_state.active_dataset_id = selected_dataset_id
-            st.success(f"✅ Active dataset: {selected_dataset_id}")
+            st.success(f"Active dataset: {selected_dataset_id}")
         except:
             st.warning("Unable to parse dataset ID. Please reselect.")
 elif page == "Admin - Datasets":
-    st.header("🛡️ Admin - Datasets")
+    st.header("Admin - Datasets")
     config_admin_email, _ = _get_admin_config()
     admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
 
@@ -461,18 +465,18 @@ elif page == "Admin - Datasets":
 # PAGE 3: RESISTANCE OVERVIEW
 # ============================================================================
 elif page == "Resistance Overview":
-    st.header("📈 Resistance Overview")
+    st.header("Resistance Overview")
     
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     # Get data for active dataset only
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -679,7 +683,7 @@ elif page == "Resistance Overview":
             st.markdown("---")
             
             # Advanced AMR Features
-            st.subheader("🔬 Multi-Drug Resistance Analysis")
+            st.subheader("Multi-Drug Resistance Analysis")
             
             col1, col2 = st.columns([2, 1])
             with col1:
@@ -714,7 +718,7 @@ elif page == "Resistance Overview":
             with col2:
                 mdr_data = plots.detect_mdr_isolates(filtered_ast)
                 if not mdr_data.empty:
-                    st.warning(f"⚠️ {len(mdr_data)} multi-drug resistant isolates detected")
+                    st.warning(f"{len(mdr_data)} multi-drug resistant isolates detected")
                     st.dataframe(mdr_data[['isolate_id', 'organism', 'resistant_drug_classes']], use_container_width=True)
                 else:
                     st.info("No multi-drug resistant isolates detected (MDR threshold: 3+ drug classes)")
@@ -769,7 +773,7 @@ elif page == "Resistance Overview":
             st.markdown("---")
             
             # Data preview
-            st.subheader("📊 Data Preview")
+            st.subheader("Data Preview")
             display_df = filtered_ast[['sample_id', 'organism', 'antibiotic', 'result', 'method', 'test_date']].head(100)
             st.dataframe(display_df, use_container_width=True)
 
@@ -777,17 +781,17 @@ elif page == "Resistance Overview":
 # PAGE 4: TRENDS
 # ============================================================================
 elif page == "Trends":
-    st.header("📊 Resistance Trends")
+    st.header("Resistance Trends")
     
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -851,7 +855,7 @@ elif page == "Trends":
             st.markdown("---")
             
             # Show summary statistics
-            st.subheader("📈 Trend Summary")
+            st.subheader("Trend Summary")
             
             col1, col2, col3 = st.columns(3)
             
@@ -881,17 +885,17 @@ elif page == "Trends":
 # PAGE 5: MAP HOTSPOTS
 # ============================================================================
 elif page == "Map Hotspots":
-    st.header("🗺️ Geographic Hotspots & Regional Analysis")
+    st.header("Geographic Hotspots & Regional Analysis")
     
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -926,9 +930,9 @@ elif page == "Map Hotspots":
                     - Each colored circle represents a sample location
                     - Circle size = number of tests from that location
                     - Circle color = resistance rate:
-                      - 🔴 **Red**: High resistance (>50%)
-                      - 🟠 **Orange**: Medium resistance (30-50%)
-                      - 🟢 **Green**: Low resistance (<30%)
+                      - **Red**: High resistance (>50%)
+                      - **Orange**: Medium resistance (30-50%)
+                      - **Green**: Low resistance (<30%)
                     
                     **How to Interact:**
                     - **Hover** over circles to see detailed information
@@ -939,7 +943,7 @@ elif page == "Map Hotspots":
                     """)
                 
             except Exception as e:
-                st.warning(f"⚠️ Map rendering issue: {str(e)}")
+                st.warning(f"Map rendering issue: {str(e)}")
                 st.info("Displaying data in tabular format...")
                 
                 # Fallback display: Show data as table
@@ -958,7 +962,7 @@ elif page == "Map Hotspots":
             st.info("📍 No geographic coordinates in uploaded data. Add latitude/longitude to samples sheet to enable location mapping.")
         
         # Regional Analysis
-        st.subheader("🏘️ Resistance by Region")
+        st.subheader("Resistance by Region")
         col1, col2 = st.columns([1, 1])
         
         with col1:
@@ -976,7 +980,7 @@ elif page == "Map Hotspots":
         st.markdown("---")
         
         # District-level Analysis
-        st.subheader("🔴 District-Level Resistance Hotspots")
+        st.subheader("District-Level Resistance Hotspots")
         
         # Detailed district analysis
         st.plotly_chart(
@@ -987,7 +991,7 @@ elif page == "Map Hotspots":
         st.markdown("---")
         
         # Top districts table
-        st.subheader("📊 Top Districts Summary Table")
+        st.subheader("Top Districts Summary Table")
         
         top_districts = plots.get_resistance_by_district_detailed(all_ast, all_samples)
         
@@ -1003,20 +1007,20 @@ elif page == "Map Hotspots":
         st.markdown("---")
         
         # Surveillance alerts
-        st.subheader("⚠️ Surveillance Alerts & Warnings")
+        st.subheader("Surveillance Alerts & Warnings")
         
         alerts = plots.get_surveillance_alerts(all_ast, all_samples)
         
         if alerts:
             for alert in alerts:
                 if alert['severity'] == 'HIGH':
-                    st.error(f"🔴 **{alert['severity']}**: {alert['message']}")
+                    st.error(f"**{alert['severity']}**: {alert['message']}")
                 elif alert['severity'] == 'MEDIUM':
-                    st.warning(f"🟠 **{alert['severity']}**: {alert['message']}")
+                    st.warning(f"**{alert['severity']}**: {alert['message']}")
                 else:
-                    st.info(f"🔵 **{alert['severity']}**: {alert['message']}")
+                    st.info(f"**{alert['severity']}**: {alert['message']}")
         else:
-            st.success("✅ No critical alerts detected")
+            st.success("No critical alerts detected")
 
 
 
@@ -1024,28 +1028,28 @@ elif page == "Map Hotspots":
 # PAGE 6: ADVANCED ANALYTICS
 # ============================================================================
 elif page == "Advanced Analytics":
-    st.header("🔬 Advanced Analytics & Insights")
+    st.header("Advanced Analytics & Insights")
     
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
     else:
         # Tab selection
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "📊 Statistics", 
-            "📈 Trends & Forecasts", 
-            "🔍 Emerging Patterns",
-            "💊 Antibiotic Insights",
-            "📋 Data Quality"
+            "Statistics", 
+            "Trends & Forecasts", 
+            "Emerging Patterns",
+            "Antibiotic Insights",
+            "Data Quality"
         ])
         
         # TAB 1: STATISTICS
@@ -1069,11 +1073,11 @@ elif page == "Advanced Analytics":
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.info(f"🟢 **Susceptible**: {stats.get('susceptible_count', 0)} ({stats.get('susceptible_rate', 0):.1f}%)")
+                st.info(f"**Susceptible**: {stats.get('susceptible_count', 0)} ({stats.get('susceptible_rate', 0):.1f}%)")
             with col2:
-                st.warning(f"🟡 **Intermediate**: {stats.get('intermediate_count', 0)} ({stats.get('intermediate_rate', 0):.1f}%)")
+                st.warning(f"**Intermediate**: {stats.get('intermediate_count', 0)} ({stats.get('intermediate_rate', 0):.1f}%)")
             with col3:
-                st.error(f"🔴 **Resistant**: {stats.get('resistant_count', 0)} ({stats.get('resistance_rate', 0):.1f}%)")
+                st.error(f"**Resistant**: {stats.get('resistant_count', 0)} ({stats.get('resistance_rate', 0):.1f}%)")
             
             st.markdown("---")
             
@@ -1089,11 +1093,11 @@ elif page == "Advanced Analytics":
                     risk = trend_info.get('risk_level', 'LOW')
                     
                     if trend == 'INCREASING':
-                        st.error(f"📈 **{trend}** - Risk: {risk}")
+                        st.error(f"**{trend}** - Risk: {risk}")
                     elif trend == 'DECREASING':
-                        st.success(f"📉 **{trend}** - Risk: {risk}")
+                        st.success(f"**{trend}** - Risk: {risk}")
                     else:
-                        st.info(f"➡️ **{trend}** - Risk: {risk}")
+                        st.info(f"**{trend}** - Risk: {risk}")
                 
                 with col2:
                     st.metric(
@@ -1134,7 +1138,7 @@ elif page == "Advanced Analytics":
             forecast = analytics.forecast_resistance_trend(all_ast, forecast_periods)
             
             if 'forecasts' in forecast:
-                st.info(f"📊 Trend: {forecast['forecasts'][0]['trend'].upper()}")
+                st.info(f"Trend: {forecast['forecasts'][0]['trend'].upper()}")
                 
                 forecast_df = pd.DataFrame(forecast['forecasts'])
                 st.dataframe(forecast_df, use_container_width=True)
@@ -1150,7 +1154,7 @@ elif page == "Advanced Analytics":
                 )
                 st.plotly_chart(fig, use_container_width=True)
             elif 'error' in forecast:
-                st.warning(f"⚠️ {forecast['error']}")
+                st.warning(f"{forecast['error']}")
         
         # TAB 3: EMERGING PATTERNS
         with tab3:
@@ -1164,7 +1168,7 @@ elif page == "Advanced Analytics":
                 
                 st.warning(f"🚨 {len(emerging)} emerging resistance patterns detected in the last 3 months")
             else:
-                st.success("✅ No concerning emerging patterns detected")
+                st.success("No concerning emerging patterns detected")
         
         # TAB 4: ANTIBIOTIC INSIGHTS
         with tab4:
@@ -1182,13 +1186,13 @@ elif page == "Advanced Analytics":
                 avoid = len([r for r in recommendations if r['priority'] == 4])
                 
                 with col1:
-                    st.success(f"✅ **Preferred**: {preferred}")
+                    st.success(f"**Preferred**: {preferred}")
                 with col2:
-                    st.info(f"✓ **Good**: {good}")
+                    st.info(f"**Good**: {good}")
                 with col3:
-                    st.warning(f"⚠️ **Caution**: {caution}")
+                    st.warning(f"**Caution**: {caution}")
                 with col4:
-                    st.error(f"❌ **Avoid**: {avoid}")
+                    st.error(f"**Avoid**: {avoid}")
                 
                 st.markdown("---")
                 
@@ -1222,7 +1226,7 @@ elif page == "Advanced Analytics":
                     for issue in quality['data_quality_issues']:
                         st.warning(f"• {issue}")
                 else:
-                    st.success("✅ No data quality issues detected")
+                    st.success("No data quality issues detected")
                 
                 st.markdown("---")
                 
@@ -1243,23 +1247,23 @@ elif page == "Advanced Analytics":
 # PAGE 7: RISK ASSESSMENT
 # ============================================================================
 elif page == "Risk Assessment":
-    st.header("⚠️ Risk Assessment & Alerts")
+    st.header("Risk Assessment & Alerts")
     
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
     else:
         # Tabs
-        tab1, tab2, tab3 = st.tabs(["🔴 Risk Scores", "🏥 Resistance Burden", "📉 Organism Assessment"])
+        tab1, tab2, tab3 = st.tabs(["Risk Scores", "Resistance Burden", "Organism Assessment"])
         
         # TAB 1: ORGANISM RISK SCORES
         with tab1:
@@ -1288,13 +1292,13 @@ elif page == "Risk Assessment":
                         
                         # Recommendation
                         if risk_item['risk_level'] == 'CRITICAL':
-                            st.error("🔴 **Urgent intervention required** - Consider alternative treatment options")
+                            st.error("**Urgent intervention required** - Consider alternative treatment options")
                         elif risk_item['risk_level'] == 'HIGH':
-                            st.warning("🟠 **Enhanced surveillance** - Monitor trends closely")
+                            st.warning("**Enhanced surveillance** - Monitor trends closely")
                         else:
-                            st.info("🔵 **Monitor** - Continue standard surveillance")
+                            st.info("**Monitor** - Continue standard surveillance")
             else:
-                st.success(f"✅ No organisms above risk threshold ({risk_threshold})")
+                st.success(f"No organisms above risk threshold ({risk_threshold})")
         
         # TAB 2: RESISTANCE BURDEN
         with tab2:
@@ -1317,11 +1321,11 @@ elif page == "Risk Assessment":
                 # Public health impact
                 impact = burden.get('public_health_impact', '')
                 if 'CRITICAL' in impact:
-                    st.error(f"🔴 {impact}")
+                    st.error(f"{impact}")
                 elif 'HIGH' in impact:
-                    st.warning(f"🟠 {impact}")
+                    st.warning(f"{impact}")
                 else:
-                    st.info(f"🔵 {impact}")
+                    st.info(f"{impact}")
                 
                 st.markdown("---")
                 
@@ -1383,7 +1387,7 @@ elif page == "Risk Assessment":
                         
                         if org_risk['risk_level'] == 'CRITICAL':
                             st.error("""
-                            🔴 **CRITICAL RISK LEVEL**
+                            **CRITICAL RISK LEVEL**
                             
                             • Implement enhanced infection control measures
                             • Review treatment guidelines
@@ -1393,7 +1397,7 @@ elif page == "Risk Assessment":
                             """)
                         elif org_risk['risk_level'] == 'HIGH':
                             st.warning("""
-                            🟠 **HIGH RISK LEVEL**
+                            **HIGH RISK LEVEL**
                             
                             • Increase surveillance frequency
                             • Monitor trends closely
@@ -1402,7 +1406,7 @@ elif page == "Risk Assessment":
                             """)
                         else:
                             st.info("""
-                            🔵 **MODERATE/LOW RISK LEVEL**
+                            **MODERATE/LOW RISK LEVEL**
                             
                             • Continue routine surveillance
                             • Monitor for any changes in resistance patterns
@@ -1414,18 +1418,18 @@ elif page == "Risk Assessment":
 # PAGE 8: COMPARATIVE ANALYSIS
 # ============================================================================
 elif page == "Comparative Analysis":
-    st.header("🔍 Comparative Analysis")
+    st.header("Comparative Analysis")
     st.markdown("Compare resistance patterns across different categories, time periods, and sources")
 
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
 
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -1440,7 +1444,7 @@ elif page == "Comparative Analysis":
         st.markdown("---")
 
         if analysis_type == "Category Comparison":
-            st.subheader("📊 Category Comparison")
+            st.subheader("Category Comparison")
 
             # Get available categories
             available_categories = sorted(all_samples['source_category'].dropna().unique())
@@ -1466,7 +1470,7 @@ elif page == "Comparative Analysis":
                         key="category_b"
                     )
 
-                if st.button("🔍 Compare Categories", key="compare_categories"):
+                if st.button("Compare Categories", key="compare_categories"):
                     # Get data for each selected category
                     cat_a_samples = all_samples[all_samples['source_category'] == category_a]
                     cat_b_samples = all_samples[all_samples['source_category'] == category_b]
@@ -1599,7 +1603,7 @@ elif page == "Comparative Analysis":
 
                         with col3:
                             diff = p2_resistance - p1_resistance
-                            trend = "↗️ Increasing" if diff > 0 else "↘️ Decreasing" if diff < 0 else "➡️ Stable"
+                            trend = "Increasing" if diff > 0 else "Decreasing" if diff < 0 else "Stable"
                             st.metric("Trend", f"{diff:+.1f}%", trend)
 
                         # Trend visualization
@@ -1652,7 +1656,7 @@ elif page == "Comparative Analysis":
                 st.warning("Date information not available for time period comparison.")
 
         elif analysis_type == "Regional Comparison":
-            st.subheader("🗺️ Regional Comparison")
+            st.subheader("Regional Comparison")
 
             regions = sorted(all_samples['region'].dropna().unique())
             if len(regions) > 1:
@@ -1791,7 +1795,7 @@ elif page == "Comparative Analysis":
                 st.warning("Need data from multiple source types for comparison.")
 
         elif analysis_type == "Multi-Parameter Comparison":
-            st.subheader("🎲 Multi-Parameter Comparison")
+            st.subheader("Multi-Parameter Comparison")
             st.markdown("Compare resistance patterns across multiple values of a single parameter (e.g., multiple regions, organisms, or antibiotics)")
 
             # Parameter selection
@@ -2165,7 +2169,7 @@ elif page == "Comparative Analysis":
                     st.warning("Need data from at least 2 source types for comparison.")
 
         elif analysis_type == "Cross-Variable Comparison":
-            st.subheader("🔀 Cross-Variable Comparison")
+            st.subheader("Cross-Variable Comparison")
             st.markdown("Compare a specific organism-antibiotic combination across different variables (regions, source types, categories, etc.)")
 
             st.markdown("---")
@@ -2439,7 +2443,7 @@ elif page == "Comparative Analysis":
             group_a_name = st.text_input("Group A Name", value="Group A", key="group_a_name")
             group_b_name = st.text_input("Group B Name", value="Group B", key="group_b_name")
 
-            if st.button("🔍 Run Custom Comparison", key="custom_comparison"):
+            if st.button("Run Custom Comparison", key="custom_comparison"):
                 # Apply filters for Group A
                 group_a_samples = all_samples
                 if group_a_categories:
@@ -2499,17 +2503,17 @@ elif page == "Comparative Analysis":
 # PAGE 9: REPORT EXPORT
 # ============================================================================
 elif page == "Report Export":
-    st.header("📄 Report Export")
+    st.header("Report Export")
 
     # Require dataset selection before showing dashboard
     if not st.session_state.active_dataset_id:
-        st.warning("⚠️ Please select a dataset in the 'Data Management' page first.")
+        st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
     
-    st.info(f"📊 Viewing dataset: {st.session_state.active_dataset_id}")
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
 
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -2517,7 +2521,7 @@ elif page == "Report Export":
         # ============================================================================
         # FILTERING CONTROLS (Same as Resistance Overview)
         # ============================================================================
-        st.subheader("🔍 Report Filters")
+        st.subheader("Report Filters")
         st.markdown("Configure filters to generate reports based on specific data subsets:")
 
         col1, col2, col3 = st.columns(3)
@@ -2712,7 +2716,7 @@ elif page == "Report Export":
         filtered_ast = all_ast[base_ast_filter]
 
         # Display filter summary
-        st.subheader("📊 Filtered Data Summary")
+        st.subheader("Filtered Data Summary")
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
@@ -2731,7 +2735,7 @@ elif page == "Report Export":
         # ============================================================================
         # REPORT GENERATION
         # ============================================================================
-        st.subheader("📄 Generate Technical Report")
+        st.subheader("Generate Technical Report")
 
         if filtered_ast.empty:
             st.warning("No data matches the selected filters. Please adjust your filters.")
@@ -2762,7 +2766,7 @@ elif page == "Report Export":
                 if selected_dataset_display != "None":
                     selected_dataset_name = selected_dataset_display.split('(')[0].strip()
 
-            if st.button("📊 Generate Technical Report", type="primary", use_container_width=True):
+            if st.button("Generate Technical Report", type="primary", use_container_width=True):
                 with st.spinner("Generating comprehensive technical report with filtered data..."):
                     try:
                         # Generate HTML report with filtered data
@@ -2777,11 +2781,11 @@ elif page == "Report Export":
                         )
 
                         # Success message
-                        st.success("✅ Professional HTML report generated successfully!")
-                        st.info("📊 Report includes embedded interactive visualizations and comprehensive filtered data analysis")
+                        st.success("Professional HTML report generated successfully!")
+                        st.info("Report includes embedded interactive visualizations and comprehensive filtered data analysis")
 
                         # Preview section
-                        with st.expander("📋 Report Preview", expanded=False):
+                        with st.expander("Report Preview", expanded=False):
                             st.markdown("**Report will include:**")
                             st.markdown("- Executive summary with key metrics")
                             st.markdown("- Interactive resistance distribution charts")
@@ -2794,7 +2798,7 @@ elif page == "Report Export":
                         filename = f"AMR_Report_Filtered_{timestamp}.html"
 
                         st.download_button(
-                            label="📥 Download Professional HTML Report",
+                            label="Download Professional HTML Report",
                             data=html_content,
                             file_name=filename,
                             mime="text/html",
@@ -2824,7 +2828,7 @@ elif page == "Admin - Users":
         st.info("📭 No users registered yet.")
     else:
         # Display users in a table
-        st.subheader("📋 Registered Users")
+        st.subheader("Registered Users")
         
         # Create columns for display
         users_df = pd.DataFrame(all_users)
@@ -2832,8 +2836,8 @@ elif page == "Admin - Users":
         users_df['last_login'] = users_df['last_login'].apply(
             lambda x: pd.to_datetime(x).strftime('%Y-%m-%d %H:%M') if x else "Never"
         )
-        users_df['Status'] = users_df['is_active'].apply(lambda x: "🟢 Active" if x else "🔴 Inactive")
-        users_df['Role'] = users_df['is_admin'].apply(lambda x: "👨‍💼 Admin" if x else "👤 User")
+        users_df['Status'] = users_df['is_active'].apply(lambda x: "Active" if x else "Inactive")
+        users_df['Role'] = users_df['is_admin'].apply(lambda x: "Admin" if x else "User")
         
         # Display table
         display_df = users_df[['email', 'created_at', 'last_login', 'Status', 'Role']].copy()
@@ -2844,7 +2848,7 @@ elif page == "Admin - Users":
         st.markdown("---")
         
         # User management actions
-        st.subheader("🛠️ User Actions")
+        st.subheader("User Actions")
         
         col1, col2 = st.columns(2)
         
@@ -2856,7 +2860,7 @@ elif page == "Admin - Users":
                 format_func=lambda x: x['email'],
                 key="deactivate_user"
             )
-            if st.button("🔴 Deactivate", use_container_width=True, key="btn_deactivate"):
+            if st.button("Deactivate", use_container_width=True, key="btn_deactivate"):
                 success, msg = db.update_user_status(selected_user['user_id'], False)
                 if success:
                     st.success(msg)
@@ -2872,7 +2876,7 @@ elif page == "Admin - Users":
                 format_func=lambda x: x['email'],
                 key="reactivate_user"
             )
-            if st.button("🟢 Reactivate", use_container_width=True, key="btn_reactivate"):
+            if st.button("Reactivate", use_container_width=True, key="btn_reactivate"):
                 success, msg = db.update_user_status(selected_inactive['user_id'], True)
                 if success:
                     st.success(msg)
@@ -2883,7 +2887,7 @@ elif page == "Admin - Users":
         st.markdown("---")
         
         # Reset password section
-        st.subheader("🔐 Reset Password")
+        st.subheader("Reset Password")
         
         col1, col2 = st.columns([2, 1])
         
@@ -2897,7 +2901,7 @@ elif page == "Admin - Users":
         
         with col2:
             st.write("")  # Spacing
-            if st.button("🔑 Generate Temporary Password", use_container_width=True):
+            if st.button("Generate Temporary Password", use_container_width=True):
                 # Generate a temporary password
                 temp_password = f"Temp@{pd.Timestamp.now().strftime('%Y%m%d%H%M%S')}"
                 password_hash = bcrypt.hashpw(temp_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -2905,15 +2909,15 @@ elif page == "Admin - Users":
                 
                 if success:
                     st.success(msg)
-                    st.info(f"🔐 Temporary Password: `{temp_password}`")
-                    st.warning("⚠️ Please share this password securely with the user. They should change it on first login.")
+                    st.info(f"Temporary Password: `{temp_password}`")
+                    st.warning("Please share this password securely with the user. They should change it on first login.")
                 else:
                     st.error(msg)
         
         st.markdown("---")
         
         # User statistics
-        st.subheader("📊 User Statistics")
+        st.subheader("User Statistics")
         
         col1, col2, col3, col4 = st.columns(4)
         
@@ -2937,7 +2941,7 @@ elif page == "Admin - Users":
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 30px;">
-    <p>🦠 AMR Surveillance Dashboard | Multi-source Surveillance | Ghana</p>
+    <p>AMR Surveillance Dashboard | Multi-source Surveillance | Ghana</p>
     <p>Data stored locally in SQLite. No internet required.</p>
     <p><em>For academic and policy use. Always consult AMR experts for decision-making.</em></p>
 </div>

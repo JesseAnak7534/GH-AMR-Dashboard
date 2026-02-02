@@ -15,7 +15,7 @@ from src.interpretation import batch_interpret_results, interpret_ast_result
 
 # Required columns per sheet
 REQUIRED_SAMPLES_COLUMNS = {
-    'sample_id', 'collection_date', 'region', 'district', 'site_type',
+    'sample_id', 'lab_name', 'collection_date', 'region', 'district', 'site_type',
     'source_category', 'source_type', 'food_matrix', 'environment_matrix',
     'latitude', 'longitude'
 }
@@ -294,9 +294,20 @@ def validate_upload(file_obj) -> Tuple[bool, List[str], pd.DataFrame, pd.DataFra
 
 
 def create_template_excel() -> bytes:
-    """Create a template Excel file."""
+    """Create a template Excel file with lab names."""
+    lab_names = [
+        'Eastern Regional Hospital', 'St. Martin De Porres Hospital Eikwe',
+        'Sekondi Public Health Reference Laboratory', 'Ho Teaching Hospital',
+        'Tamale Teaching Hospital', 'Komfo Anokye Teaching Hospital',
+        'Korle-Bu Teaching Hospital', 'Lekma Hospital',
+        'Sunyani Teaching Hospital', 'Cape Coast Teaching Hospital',
+        'National Food Safety Laboratory', 'CSIR Water Research Institute',
+        'Accra Veterinary Laboratory', 'Kumasi Veterinary Laboratory'
+    ]
+    
     samples_data = {
         'sample_id': ['SAMPLE_001', 'SAMPLE_002', 'SAMPLE_003'],
+        'lab_name': [lab_names[0], lab_names[1], lab_names[2]],
         'collection_date': ['2024-01-15', '2024-01-20', '2024-01-25'],
         'region': ['Ashanti', 'Greater Accra', 'Eastern'],
         'district': ['Kumasi', 'Accra', 'Koforidua'],
