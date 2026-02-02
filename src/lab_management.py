@@ -469,8 +469,15 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
     })
     
     # Add missing columns and convert numeric fields
-    ast_df['mic_value'] = pd.to_numeric(df['mic_value'], errors='coerce') if 'mic_value' in df.columns else None
-    ast_df['zone_diameter'] = pd.to_numeric(df['zone_diameter'], errors='coerce') if 'zone_diameter' in df.columns else None
+    if 'mic_value' not in ast_df.columns:
+        ast_df['mic_value'] = None
+    else:
+        ast_df['mic_value'] = pd.to_numeric(ast_df['mic_value'], errors='coerce')
+    
+    if 'zone_diameter' not in ast_df.columns:
+        ast_df['zone_diameter'] = None
+    else:
+        ast_df['zone_diameter'] = pd.to_numeric(ast_df['zone_diameter'], errors='coerce')
 
     return samples_df, ast_df
 
