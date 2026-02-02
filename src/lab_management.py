@@ -362,6 +362,15 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
     if submissions_df is None or (isinstance(submissions_df, pd.DataFrame) and submissions_df.empty):
         return pd.DataFrame(), pd.DataFrame()
 
+    # Define mappings from choice codes to proper labels
+    choice_mappings = {
+        'source_category': {'env': 'ENVIRONMENT', 'food': 'FOOD', 'human': 'HUMAN', 'animal': 'ANIMAL', 'aqua': 'AQUACULTURE'},
+        'result': {'s': 'S', 'i': 'I', 'r': 'R'},
+        'method': {'dd': 'DD', 'mic': 'MIC'},
+        'guideline': {'clsi': 'CLSI', 'eucast': 'EUCAST'},
+        'lab_name': {v: k for k, v in APPROVED_LABS.items()}  # Map code back to full lab name
+    }
+    
     # Handle both raw API dict responses and pre-converted DataFrames
     if isinstance(submissions_df, dict):
         # If it's a paginated response from the API
@@ -380,6 +389,11 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
 
     # Normalize column names
     df.columns = [str(c).strip() for c in df.columns]
+    
+    # Apply choice mappings to convert codes to labels
+    for col, mapping in choice_mappings.items():
+        if col in df.columns:
+            df[col] = df[col].map(lambda x: mapping.get(str(x).lower(), x) if pd.notna(x) else x)
 
     # Build samples dataframe - extract only available columns
     samples_cols = {
@@ -454,10 +468,9 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
         key: df[src] for key, src in available_ast_cols.items()
     })
     
-    # Add missing columns
-    for col in ['mic_value', 'zone_diameter']:
-        if col not in ast_df.columns:
-            ast_df[col] = None
+    # Add missing columns and convert numeric fields
+    ast_df['mic_value'] = pd.to_numeric(df['mic_value'], errors='coerce') if 'mic_value' in df.columns else None
+    ast_df['zone_diameter'] = pd.to_numeric(df['zone_diameter'], errors='coerce') if 'zone_diameter' in df.columns else None
 
     return samples_df, ast_df
 
