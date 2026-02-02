@@ -156,15 +156,9 @@ class KoboToolboxManager:
                     "required": "false"
                 },
                 {
-                    "type": "decimal",
-                    "name": "latitude",
-                    "label": "Latitude (-90 to 90)",
-                    "required": "false"
-                },
-                {
-                    "type": "decimal",
-                    "name": "longitude",
-                    "label": "Longitude (-180 to 180)",
+                    "type": "geopoint",
+                    "name": "geolocation",
+                    "label": "Sample Collection Location (automatically captures GPS coordinates)",
                     "required": "false"
                 },
                 # AST Results Information
@@ -385,8 +379,29 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
     samples_df['site_type'] = 'Laboratory'
     samples_df['food_matrix'] = ''
     samples_df['environment_matrix'] = ''
-    samples_df['latitude'] = None
-    samples_df['longitude'] = None
+    
+    # Parse geopoint field if present (format: "latitude longitude altitude precision")
+    if 'geolocation' in df.columns:
+        def parse_geopoint(geopoint_str):
+            """Parse geopoint string to latitude and longitude."""
+            if pd.isna(geopoint_str) or geopoint_str == '':
+                return None, None
+            try:
+                parts = str(geopoint_str).strip().split()
+                if len(parts) >= 2:
+                    lat = float(parts[0])
+                    lon = float(parts[1])
+                    return lat, lon
+            except (ValueError, IndexError):
+                pass
+            return None, None
+        
+        geopoint_data = df['geolocation'].apply(parse_geopoint)
+        samples_df['latitude'] = [x[0] for x in geopoint_data]
+        samples_df['longitude'] = [x[1] for x in geopoint_data]
+    else:
+        samples_df['latitude'] = None
+        samples_df['longitude'] = None
 
     # Remove duplicates by sample_id and lab_name
     if 'sample_id' in samples_df.columns:
