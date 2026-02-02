@@ -265,20 +265,22 @@ class KoboToolboxManager:
                 if not success:
                     return False, msg, None
             
-            url = f"{KOBO_API_BASE}/data/{form_id}/"
+            # The form_id is actually the asset UID from KoboToolbox
+            # Use the correct endpoint: /api/v2/assets/{asset_uid}/data/
+            url = f"{KOBO_API_BASE}/assets/{form_id}/data/"
             response = self.session.get(url, params={"format": "json"}, timeout=10)
             
             if response.status_code == 200:
-                submissions = response.json()
+                data = response.json()
                 
                 # Convert to DataFrame
-                if submissions:
-                    df = pd.DataFrame(submissions)
+                if data:
+                    df = pd.DataFrame(data)
                     return True, f"Retrieved {len(df)} submissions", df
                 else:
                     return True, "No submissions found", pd.DataFrame()
             else:
-                return False, f"Failed to fetch data: {response.text}", None
+                return False, f"Failed to fetch data: {response.status_code} - {response.text[:200]}", None
         
         except Exception as e:
             return False, f"Data fetch error: {str(e)}", None
