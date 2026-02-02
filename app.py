@@ -574,18 +574,33 @@ elif page == "Admin - Datasets":
                             for err in errors[:10]:
                                 st.write(f"- {err}")
                         else:
-                            # Deduplicate by existing sample_id and isolate_id
+                            # Deduplicate by existing sample_id and (isolate_id + antibiotic) combination
                             existing_samples_df = db.get_all_samples()
                             existing_ast_df = db.get_all_ast_results()
 
                             existing_sample_ids = set(existing_samples_df['sample_id'].dropna().astype(str)) if not existing_samples_df.empty else set()
-                            existing_isolate_ids = set(existing_ast_df['isolate_id'].dropna().astype(str)) if not existing_ast_df.empty else set()
+                            
+                            # Create set of (isolate_id + antibiotic) combinations to allow same isolate tested against different antibiotics
+                            existing_ast_combos = set()
+                            if not existing_ast_df.empty:
+                                existing_ast_combos = set(
+                                    (str(row['isolate_id']), str(row['antibiotic'])) 
+                                    for idx, row in existing_ast_df.iterrows()
+                                    if pd.notna(row['isolate_id']) and pd.notna(row['antibiotic'])
+                                )
 
                             before_samples = len(samples_df)
                             before_tests = len(ast_df)
 
                             samples_df = samples_df[~samples_df['sample_id'].astype(str).isin(existing_sample_ids)]
-                            ast_df = ast_df[~ast_df['isolate_id'].astype(str).isin(existing_isolate_ids)]
+                            
+                            # Filter AST data by (isolate_id + antibiotic) combination
+                            ast_df['_combo'] = list(zip(
+                                ast_df['isolate_id'].astype(str),
+                                ast_df['antibiotic'].astype(str)
+                            ))
+                            ast_df = ast_df[~ast_df['_combo'].isin(existing_ast_combos)]
+                            ast_df = ast_df.drop(columns=['_combo'])
 
                             # Ensure AST rows correspond to remaining samples
                             ast_df = ast_df[ast_df['sample_id'].astype(str).isin(samples_df['sample_id'].astype(str))]
