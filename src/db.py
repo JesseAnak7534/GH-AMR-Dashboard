@@ -323,13 +323,14 @@ def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tup
             cursor.execute(
                 """
                 INSERT OR REPLACE INTO samples
-                (dataset_id, sample_id, collection_date, region, district, site_type,
+                (dataset_id, sample_id, lab_name, collection_date, region, district, site_type,
                  source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     main_dataset_id,
                     new_sid,
+                    row.get('lab_name'),
                     row.get('collection_date'),
                     row.get('region'),
                     row.get('district'),

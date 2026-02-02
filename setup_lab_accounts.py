@@ -7,31 +7,9 @@ Only labs and the admin can access the system.
 """
 
 import bcrypt
+import secrets
 from src import db
 from src.lab_management import get_lab_credentials, get_lab_names
-
-# Pre-defined passwords for each lab (should be changed on first login)
-LAB_CREDENTIALS = {
-    "Eastern Regional Hospital": "ERH@Sentinel2024",
-    "St. Martin De Porres Hospital Eikwe": "SMDP@Sentinel2024",
-    "Sekondi Public Health Reference Laboratory": "SPRL@Sentinel2024",
-    "Ho Teaching Hospital": "HTH@Sentinel2024",
-    "Tamale Teaching Hospital": "TTH@Sentinel2024",
-    "Komfo Anokye Teaching Hospital": "KATH@Sentinel2024",
-    "Korle-Bu Teaching Hospital": "KBTH@Sentinel2024",
-    "Lekma Hospital": "LEKMA@Sentinel2024",
-    "Sunyani Teaching Hospital": "STH@Sentinel2024",
-    "Cape Coast Teaching Hospital": "CCTH@Sentinel2024",
-    "National Food Safety Laboratory": "NFSL@Sentinel2024",
-    "CSIR – Water Research Institute (Microbiology Laboratory)": "CWRI@Sentinel2024",
-    "Accra Veterinary Laboratory": "AVL@Sentinel2024",
-    "Kumasi Veterinary Laboratory": "KVL@Sentinel2024",
-    "Quadushah Medical Diagnostic Limited": "QMDL@Sentinel2024",
-    "Central Veterinary Laboratory": "CVL@Sentinel2024",
-    "Pong Tamale School": "PTS@Sentinel2024",
-    "Metropolis Health Care Limited": "MHCL@Sentinel2024",
-    "Alma Medical Laboratory Ltd": "AML@Sentinel2024"
-}
 
 def setup_lab_accounts():
     """Create lab user accounts in the database."""
@@ -50,13 +28,9 @@ def setup_lab_accounts():
     failed_count = 0
     
     for lab_name in lab_names:
-        if lab_name not in LAB_CREDENTIALS:
-            print(f"WARNING: No password defined for {lab_name}")
-            continue
-        
         # Create email based on lab name
         username = lab_credentials.get(lab_name, lab_name.lower().replace(" ", "_"))
-        password = LAB_CREDENTIALS[lab_name]
+        password = f"Lab@{secrets.token_urlsafe(6)}"
         
         # Create email format: lab_username@sentinel-amr.lab
         email = f"{username}@sentinel-amr.lab"

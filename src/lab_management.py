@@ -13,8 +13,11 @@ from dotenv import load_dotenv
 
 # KoboToolbox API Configuration
 KOBO_API_BASE = "https://kf.kobotoolbox.org/api/v2"
-KOBO_USERNAME = os.getenv("KOBO_USERNAME", "jesseanak")
-KOBO_PASSWORD = os.getenv("KOBO_PASSWORD", "Jese@1998")
+LAB_EMAIL_DOMAIN = "sentinel-amr.lab"
+
+load_dotenv()
+KOBO_USERNAME = os.getenv("KOBO_USERNAME")
+KOBO_PASSWORD = os.getenv("KOBO_PASSWORD")
 
 # List of approved sentinel site laboratories
 APPROVED_LABS = {
@@ -42,16 +45,18 @@ APPROVED_LABS = {
 class KoboToolboxManager:
     """Manager for KoboToolbox form creation and data syncing."""
     
-    def __init__(self, username: str = KOBO_USERNAME, password: str = KOBO_PASSWORD):
+    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
         """Initialize KoboToolbox manager with credentials."""
-        self.username = username
-        self.password = password
+        self.username = username or KOBO_USERNAME
+        self.password = password or KOBO_PASSWORD
         self.session = None
         self.auth_token = None
         
     def authenticate(self) -> Tuple[bool, str]:
         """Authenticate with KoboToolbox API."""
         try:
+            if not self.username or not self.password:
+                return False, "KoboToolbox credentials are not configured. Set KOBO_USERNAME and KOBO_PASSWORD."
             auth_url = f"{KOBO_API_BASE}/auth/login/"
             response = requests.post(
                 auth_url,
@@ -270,7 +275,7 @@ def get_lab_credentials() -> Dict[str, str]:
         "Sunyani Teaching Hospital": "sunyani_teaching_hospital",
         "Cape Coast Teaching Hospital": "cape_coast_teaching_hospital",
         "National Food Safety Laboratory": "national_food_safety_laboratory",
-        "CSIR – Water Research Institute": "csir_water_research_institute",
+        "CSIR – Water Research Institute (Microbiology Laboratory)": "csir_water_research_institute",
         "Accra Veterinary Laboratory": "accra_veterinary_laboratory",
         "Kumasi Veterinary Laboratory": "kumasi_veterinary_laboratory",
         "Quadushah Medical Diagnostic Limited": "quadushah_medical_diagnostic",
@@ -283,3 +288,77 @@ def get_lab_credentials() -> Dict[str, str]:
 def get_lab_names() -> List[str]:
     """Get list of all approved lab names for dropdown selection."""
     return sorted(APPROVED_LABS.keys())
+
+
+def get_lab_email_map() -> Dict[str, str]:
+    """Build mapping of lab name to lab email address."""
+    credentials = get_lab_credentials()
+    return {
+        lab_name: f"{username}@{LAB_EMAIL_DOMAIN}"
+        for lab_name, username in credentials.items()
+    }
+
+
+def get_lab_name_from_email(email: str) -> Optional[str]:
+    """Return lab name for a given lab email, if matched."""
+    email_map = get_lab_email_map()
+    for lab_name, lab_email in email_map.items():
+        if email.strip().lower() == lab_email.lower():
+            return lab_name
+    return None
+
+
+def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Convert KoboToolbox submissions to samples and AST dataframes."""
+    if submissions_df is None or submissions_df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+
+    # Normalize column names
+    df = submissions_df.copy()
+    df.columns = [str(c).strip() for c in df.columns]
+
+    # Build samples dataframe
+    samples_cols = {
+        'sample_id': 'sample_id',
+        'lab_name': 'lab_name',
+        'collection_date': 'collection_date',
+        'region': 'region',
+        'district': 'district',
+        'source_category': 'source_category',
+        'source_type': 'source_type'
+    }
+
+    samples_df = pd.DataFrame({
+        key: df.get(src) for key, src in samples_cols.items()
+    })
+
+    samples_df['site_type'] = 'Laboratory'
+    samples_df['food_matrix'] = ''
+    samples_df['environment_matrix'] = ''
+    samples_df['latitude'] = None
+    samples_df['longitude'] = None
+
+    # Remove duplicates by sample_id and lab_name
+    if 'sample_id' in samples_df.columns:
+        samples_df = samples_df.drop_duplicates(subset=['sample_id'])
+
+    # Build AST dataframe
+    ast_cols = {
+        'sample_id': 'sample_id',
+        'isolate_id': 'isolate_id',
+        'organism': 'organism',
+        'antibiotic': 'antibiotic',
+        'result': 'result',
+        'method': 'method',
+        'guideline': 'guideline',
+        'test_date': 'test_date'
+    }
+
+    ast_df = pd.DataFrame({
+        key: df.get(src) for key, src in ast_cols.items()
+    })
+
+    ast_df['mic_value'] = None
+    ast_df['zone_diameter'] = None
+
+    return samples_df, ast_df

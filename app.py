@@ -12,14 +12,19 @@ import secrets
 from dotenv import load_dotenv
 from io import BytesIO
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import plotly.express as px
 import urllib.parse
 
 # Import modules
 from src import db, validate, plots, report, analytics
 from src import email_utils
-from src.lab_management import get_lab_credentials, is_lab_user
+from src.lab_management import (
+    get_lab_email_map,
+    is_lab_user,
+    KoboToolboxManager,
+    kobo_submissions_to_frames
+)
 
 # Page configuration
 st.set_page_config(
@@ -42,6 +47,7 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
     st.session_state.user_email = None
     st.session_state.is_admin = False
+    st.session_state.lab_name = None
     st.session_state.last_activity_time = None
     st.session_state.active_dataset_id = None  # Track selected dataset for filtering dashboards
 
@@ -53,6 +59,7 @@ if st.session_state.authenticated and st.session_state.last_activity_time:
         st.session_state.user_email = None
         st.session_state.is_admin = False
         st.session_state.last_activity_time = None
+        st.session_state.lab_name = None
         st.warning("Session expired due to inactivity. Please log in again.")
         st.stop()
     else:
@@ -77,6 +84,24 @@ def _get_admin_config():
     admin_email = admin_email or os.getenv("ADMIN_EMAIL")
     admin_password = admin_password or os.getenv("ADMIN_PASSWORD")
     return admin_email, admin_password
+
+
+def _get_lab_email_mapping() -> Dict[str, str]:
+    return get_lab_email_map()
+
+
+def _apply_lab_filter(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    lab_name = st.session_state.get("lab_name")
+    if st.session_state.get("is_admin") or not lab_name:
+        return samples_df, ast_df
+    if samples_df.empty:
+        return samples_df, ast_df
+    lab_mask = samples_df['lab_name'].astype(str).str.strip().str.lower() == lab_name.strip().lower()
+    filtered_samples = samples_df[lab_mask]
+    if ast_df.empty:
+        return filtered_samples, ast_df
+    filtered_ast = ast_df[ast_df['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str))]
+    return filtered_samples, filtered_ast
 
 ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
 if ADMIN_EMAIL and ADMIN_PASSWORD:
@@ -168,10 +193,6 @@ if not st.session_state.authenticated:
                                 config_admin_email, _ = _get_admin_config()
                                 target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
 
-                                st.session_state.authenticated = True
-                                st.session_state.user_email = login_email
-                                st.session_state.last_activity_time = datetime.now()
-
                                 # Enforce admin role for configured admin email
                                 is_admin_flag = user.get('is_admin')
                                 if login_email.strip().lower() == target_admin_email:
@@ -183,7 +204,23 @@ if not st.session_state.authenticated:
                                     except Exception:
                                         pass
 
+                                # Restrict to admin or approved lab users only
+                                lab_mapping = _get_lab_email_mapping()
+                                is_lab, lab_name = is_lab_user(login_email, lab_mapping)
+                                if not is_admin_flag and not is_lab:
+                                    st.error("Access denied. This system is restricted to approved labs.")
+                                    st.session_state.authenticated = False
+                                    st.session_state.user_email = None
+                                    st.session_state.is_admin = False
+                                    st.session_state.lab_name = None
+                                    st.stop()
+
+                                st.session_state.authenticated = True
+                                st.session_state.user_email = login_email
+                                st.session_state.last_activity_time = datetime.now()
                                 st.session_state.is_admin = bool(is_admin_flag)
+                                st.session_state.lab_name = lab_name if not is_admin_flag else None
+
                                 db.update_last_login(login_email)
                                 st.success("Login successful!")
                                 st.balloons()
@@ -251,6 +288,8 @@ with st.sidebar:
     st.markdown(f"**Logged in as:** {st.session_state.user_email}")
     if st.session_state.is_admin:
         st.markdown("**Admin Account**")
+    elif st.session_state.lab_name:
+        st.markdown(f"**Laboratory:** {st.session_state.lab_name}")
     
     st.markdown("---")
     
@@ -259,6 +298,7 @@ with st.sidebar:
         st.session_state.user_email = None
         st.session_state.is_admin = False
         st.session_state.last_activity_time = None
+        st.session_state.lab_name = None
         st.success("Logged out successfully")
         st.rerun()
     
@@ -315,6 +355,13 @@ if page == "Upload & Data Quality":
                     if is_valid:
                         st.success("Validation successful!")
 
+                        # Enforce lab_name for lab users
+                        if st.session_state.lab_name:
+                            lab_values = samples_df['lab_name'].astype(str).str.strip().unique().tolist()
+                            if len(lab_values) != 1 or lab_values[0].strip().lower() != st.session_state.lab_name.strip().lower():
+                                st.error("Uploaded data must contain only your laboratory in the lab_name column.")
+                                st.stop()
+
                         # Check for automated interpretation
                         auto_interpreted_count = ast_df['auto_interpreted'].sum() if 'auto_interpreted' in ast_df.columns else 0
                         if auto_interpreted_count > 0:
@@ -350,6 +397,11 @@ if page == "Upload & Data Quality":
     admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
     if not st.session_state.is_admin:
         datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
+    if st.session_state.lab_name:
+        datasets = [
+            ds for ds in datasets
+            if (ds.get('uploaded_by') or '').strip().lower() == (st.session_state.user_email or '').strip().lower()
+        ]
     
     if datasets:
         for ds in datasets:
@@ -388,6 +440,11 @@ elif page == "Data Management":
     admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
     if not st.session_state.is_admin:
         datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
+    if st.session_state.lab_name:
+        datasets = [
+            ds for ds in datasets
+            if (ds.get('uploaded_by') or '').strip().lower() == (st.session_state.user_email or '').strip().lower()
+        ]
 
     if not datasets:
         st.info("No datasets available. Please upload data first on the 'Upload & Data Quality' page.")
@@ -459,6 +516,46 @@ elif page == "Admin - Datasets":
         except Exception as e:
             st.error(f"Error: {e}")
 
+    st.markdown("---")
+    st.subheader("KoboToolbox Sync")
+    with st.expander("Import submissions from KoboToolbox", expanded=False):
+        form_id = st.text_input("KoboToolbox Form ID", key="kobo_form_id")
+        if st.button("Sync KoboToolbox Submissions", key="kobo_sync"):
+            if not form_id:
+                st.error("Please provide a KoboToolbox Form ID.")
+            else:
+                with st.spinner("Syncing data from KoboToolbox..."):
+                    kobo = KoboToolboxManager()
+                    ok, msg, submissions_df = kobo.fetch_submitted_data(form_id)
+                    if not ok:
+                        st.error(msg)
+                    elif submissions_df is None or submissions_df.empty:
+                        st.info("No submissions available for import.")
+                    else:
+                        samples_df, ast_df = kobo_submissions_to_frames(submissions_df)
+                        sample_valid, sample_errors = validate.validate_samples(samples_df)
+                        ast_valid, ast_errors = validate.validate_ast_results(ast_df, set(samples_df['sample_id'].dropna().astype(str)))
+                        errors = sample_errors + ast_errors
+
+                        if errors:
+                            st.error("KoboToolbox data validation failed.")
+                            for err in errors[:10]:
+                                st.write(f"- {err}")
+                        else:
+                            dataset_id = str(uuid.uuid4())[:8]
+                            dataset_name = f"Kobo Sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                            success, save_msg = db.save_dataset(
+                                dataset_id,
+                                dataset_name,
+                                samples_df,
+                                ast_df,
+                                uploaded_by=(st.session_state.user_email or "System")
+                            )
+                            if success:
+                                st.success(f"KoboToolbox data imported as dataset {dataset_id}")
+                            else:
+                                st.error(save_msg)
+
         # Admin page continues without dataset preview block to avoid undefined variables
 
 # ============================================================================
@@ -475,6 +572,8 @@ elif page == "Resistance Overview":
     # Get data for active dataset only
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
@@ -790,6 +889,8 @@ elif page == "Trends":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
@@ -894,6 +995,8 @@ elif page == "Map Hotspots":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
@@ -1037,6 +1140,8 @@ elif page == "Advanced Analytics":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
@@ -1256,6 +1361,8 @@ elif page == "Risk Assessment":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
     
@@ -1428,6 +1535,8 @@ elif page == "Comparative Analysis":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
 
@@ -2512,6 +2621,8 @@ elif page == "Report Export":
     
     all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
     all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
 

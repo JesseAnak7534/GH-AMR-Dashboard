@@ -8,6 +8,8 @@ from datetime import datetime
 from typing import Tuple, List, Dict
 from openpyxl import load_workbook
 import io
+from openpyxl.worksheet.datavalidation import DataValidation
+from src.lab_management import get_lab_names
 
 # Import interpretation engine
 from src.interpretation import batch_interpret_results, interpret_ast_result
@@ -86,6 +88,12 @@ def validate_samples(df: pd.DataFrame) -> Tuple[bool, List[str]]:
     if len(invalid_source) > 0:
         errors.append(f"Invalid source_category (must be one of ENVIRONMENT, FOOD, HUMAN, ANIMAL, AQUACULTURE): {', '.join(invalid_source)}")
 
+    # Validate lab_name
+    valid_labs = set(get_lab_names())
+    invalid_labs = df[~df['lab_name'].isin(valid_labs)]['lab_name'].unique()
+    if len(invalid_labs) > 0:
+        errors.append(f"Invalid lab_name (must be an approved laboratory): {', '.join(invalid_labs)}")
+
     # Validate dates
     for idx, row in df.iterrows():
         try:
@@ -108,7 +116,7 @@ def validate_samples(df: pd.DataFrame) -> Tuple[bool, List[str]]:
                 break
 
     # Check for empty required fields
-    for col in ['sample_id', 'region', 'district']:
+    for col in ['sample_id', 'lab_name', 'region', 'district']:
         if df[col].isna().any() or (df[col].astype(str).str.strip() == '').any():
             errors.append(f"Missing values in required column: {col}")
             break
@@ -295,15 +303,7 @@ def validate_upload(file_obj) -> Tuple[bool, List[str], pd.DataFrame, pd.DataFra
 
 def create_template_excel() -> bytes:
     """Create a template Excel file with lab names."""
-    lab_names = [
-        'Eastern Regional Hospital', 'St. Martin De Porres Hospital Eikwe',
-        'Sekondi Public Health Reference Laboratory', 'Ho Teaching Hospital',
-        'Tamale Teaching Hospital', 'Komfo Anokye Teaching Hospital',
-        'Korle-Bu Teaching Hospital', 'Lekma Hospital',
-        'Sunyani Teaching Hospital', 'Cape Coast Teaching Hospital',
-        'National Food Safety Laboratory', 'CSIR Water Research Institute',
-        'Accra Veterinary Laboratory', 'Kumasi Veterinary Laboratory'
-    ]
+    lab_names = get_lab_names()
     
     samples_data = {
         'sample_id': ['SAMPLE_001', 'SAMPLE_002', 'SAMPLE_003'],
@@ -336,6 +336,31 @@ def create_template_excel() -> bytes:
     with pd.ExcelWriter('templates/AMR_ENV_FOOD_template_v1.xlsx', engine='openpyxl') as writer:
         pd.DataFrame(samples_data).to_excel(writer, sheet_name='samples', index=False)
         pd.DataFrame(ast_data).to_excel(writer, sheet_name='ast_results', index=False)
+
+    # Add dropdown validation for lab_name
+    wb = load_workbook('templates/AMR_ENV_FOOD_template_v1.xlsx')
+    samples_ws = wb['samples']
+    
+    if 'lab_lists' not in wb.sheetnames:
+        list_ws = wb.create_sheet('lab_lists')
+    else:
+        list_ws = wb['lab_lists']
+
+    # Populate lab list
+    list_ws['A1'] = 'lab_name_list'
+    for idx, lab in enumerate(lab_names, start=2):
+        list_ws[f"A{idx}"] = lab
+
+    # Create data validation for lab_name column (column B)
+    list_range = f"lab_lists!$A$2:$A${len(lab_names) + 1}"
+    dv = DataValidation(type="list", formula1=list_range, allow_blank=False)
+    samples_ws.add_data_validation(dv)
+    dv.add("B2:B1000")
+
+    # Hide the lab list sheet
+    list_ws.sheet_state = 'hidden'
+
+    wb.save('templates/AMR_ENV_FOOD_template_v1.xlsx')
 
     # Read back as bytes
     with open('templates/AMR_ENV_FOOD_template_v1.xlsx', 'rb') as f:
