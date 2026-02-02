@@ -574,6 +574,29 @@ elif page == "Admin - Datasets":
                             for err in errors[:10]:
                                 st.write(f"- {err}")
                         else:
+                            # Deduplicate by existing sample_id and isolate_id
+                            existing_samples_df = db.get_all_samples()
+                            existing_ast_df = db.get_all_ast_results()
+
+                            existing_sample_ids = set(existing_samples_df['sample_id'].dropna().astype(str)) if not existing_samples_df.empty else set()
+                            existing_isolate_ids = set(existing_ast_df['isolate_id'].dropna().astype(str)) if not existing_ast_df.empty else set()
+
+                            before_samples = len(samples_df)
+                            before_tests = len(ast_df)
+
+                            samples_df = samples_df[~samples_df['sample_id'].astype(str).isin(existing_sample_ids)]
+                            ast_df = ast_df[~ast_df['isolate_id'].astype(str).isin(existing_isolate_ids)]
+
+                            # Ensure AST rows correspond to remaining samples
+                            ast_df = ast_df[ast_df['sample_id'].astype(str).isin(samples_df['sample_id'].astype(str))]
+
+                            dropped_samples = before_samples - len(samples_df)
+                            dropped_tests = before_tests - len(ast_df)
+
+                            if samples_df.empty or ast_df.empty:
+                                st.info("No new unique records found after deduplication.")
+                                st.stop()
+
                             dataset_id = str(uuid.uuid4())[:8]
                             dataset_name = f"Kobo Sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"
                             success, save_msg = db.save_dataset(
@@ -585,6 +608,8 @@ elif page == "Admin - Datasets":
                             )
                             if success:
                                 st.success(f"KoboToolbox data imported as dataset {dataset_id}")
+                                if dropped_samples or dropped_tests:
+                                    st.info(f"Skipped duplicates: {dropped_samples} samples, {dropped_tests} tests")
                             else:
                                 st.error(save_msg)
 
