@@ -17,8 +17,7 @@ LAB_EMAIL_DOMAIN = "sentinel-amr.lab"
 KOBO_CONFIG_PATH = os.path.join("db", "kobo_config.json")
 
 load_dotenv()
-KOBO_USERNAME = os.getenv("KOBO_USERNAME")
-KOBO_PASSWORD = os.getenv("KOBO_PASSWORD")
+KOBO_API_TOKEN = os.getenv("KOBO_API_TOKEN")
 
 # List of approved sentinel site laboratories
 APPROVED_LABS = {
@@ -46,170 +45,220 @@ APPROVED_LABS = {
 class KoboToolboxManager:
     """Manager for KoboToolbox form creation and data syncing."""
     
-    def __init__(self, username: Optional[str] = None, password: Optional[str] = None):
-        """Initialize KoboToolbox manager with credentials."""
-        self.username = username or KOBO_USERNAME
-        self.password = password or KOBO_PASSWORD
+    def __init__(self, api_token: Optional[str] = None):
+        """Initialize KoboToolbox manager with API token."""
+        self.api_token = api_token or KOBO_API_TOKEN
         self.session = None
-        self.auth_token = None
         
     def authenticate(self) -> Tuple[bool, str]:
-        """Authenticate with KoboToolbox API."""
+        """Authenticate with KoboToolbox API using Token Auth."""
         try:
-            if not self.username or not self.password:
-                return False, "KoboToolbox credentials are not configured. Set KOBO_USERNAME and KOBO_PASSWORD."
-            auth_url = f"{KOBO_API_BASE}/auth/login/"
-            response = requests.post(
-                auth_url,
-                json={"username": self.username, "password": self.password},
+            if not self.api_token:
+                return False, "KoboToolbox API token is not configured. Set KOBO_API_TOKEN."
+            
+            # Test authentication using Token auth on the assets endpoint
+            test_url = f"{KOBO_API_BASE}/assets/"
+            response = requests.get(
+                test_url,
+                headers={"Authorization": f"Token {self.api_token}"},
                 timeout=10
             )
             
             if response.status_code == 200:
-                self.auth_token = response.json().get("token")
+                # Authentication successful - create session with Token auth
                 self.session = requests.Session()
                 self.session.headers.update({
-                    "Authorization": f"Token {self.auth_token}",
+                    "Authorization": f"Token {self.api_token}",
                     "Content-Type": "application/json"
                 })
                 return True, "Authentication successful"
             else:
-                return False, f"Authentication failed: {response.text}"
+                return False, f"Authentication failed: {response.status_code} - {response.text[:200]}"
         except Exception as e:
             return False, f"Authentication error: {str(e)}"
     
     def create_amr_form(self, form_name: str = "AMR Surveillance Data Entry") -> Tuple[bool, str, Optional[Dict]]:
-        """Create KoboToolbox form for AMR data entry."""
+        """Create KoboToolbox form for AMR data entry with all required fields."""
         try:
             if not self.session:
                 success, msg = self.authenticate()
                 if not success:
                     return False, msg, None
             
-            # Form definition in XLSForm format
-            form_definition = {
-                "title": form_name,
-                "name": form_name.lower().replace(" ", "_"),
-                "sections": [
-                    {
-                        "name": "lab_info",
-                        "label": "Laboratory Information",
-                        "fields": [
-                            {
-                                "name": "lab_name",
-                                "label": "Select Your Laboratory",
-                                "type": "select_one",
-                                "required": True,
-                                "options": list(APPROVED_LABS.keys())
-                            },
-                            {
-                                "name": "collection_date",
-                                "label": "Sample Collection Date",
-                                "type": "date",
-                                "required": True
-                            }
-                        ]
-                    },
-                    {
-                        "name": "sample_info",
-                        "label": "Sample Information",
-                        "fields": [
-                            {
-                                "name": "sample_id",
-                                "label": "Sample ID",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "source_category",
-                                "label": "Source Category",
-                                "type": "select_one",
-                                "required": True,
-                                "options": ["ENVIRONMENT", "FOOD", "HUMAN", "ANIMAL", "AQUACULTURE"]
-                            },
-                            {
-                                "name": "source_type",
-                                "label": "Source Type",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "region",
-                                "label": "Region",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "district",
-                                "label": "District",
-                                "type": "text",
-                                "required": True
-                            }
-                        ]
-                    },
-                    {
-                        "name": "ast_results",
-                        "label": "Antibiotic Susceptibility Testing Results",
-                        "fields": [
-                            {
-                                "name": "isolate_id",
-                                "label": "Isolate ID",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "organism",
-                                "label": "Organism",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "antibiotic",
-                                "label": "Antibiotic Tested",
-                                "type": "text",
-                                "required": True
-                            },
-                            {
-                                "name": "result",
-                                "label": "AST Result",
-                                "type": "select_one",
-                                "required": True,
-                                "options": ["S", "I", "R"]
-                            },
-                            {
-                                "name": "method",
-                                "label": "Testing Method",
-                                "type": "select_one",
-                                "required": True,
-                                "options": ["DD", "MIC"]
-                            },
-                            {
-                                "name": "guideline",
-                                "label": "Breakpoint Guideline",
-                                "type": "select_one",
-                                "required": True,
-                                "options": ["CLSI", "EUCAST"]
-                            },
-                            {
-                                "name": "test_date",
-                                "label": "Test Date",
-                                "type": "date",
-                                "required": True
-                            }
-                        ]
-                    }
-                ]
+            # Build all lab choices
+            lab_choices = [
+                {"list_name": "approved_labs", "name": lab_code, "label": lab_name}
+                for lab_name, lab_code in APPROVED_LABS.items()
+            ]
+            
+            # Build survey questions for samples data
+            survey_questions = [
+                # Laboratory Information
+                {
+                    "type": "select_one approved_labs",
+                    "name": "lab_name",
+                    "label": "Select Your Laboratory",
+                    "required": "true"
+                },
+                {
+                    "type": "date",
+                    "name": "collection_date",
+                    "label": "Sample Collection Date",
+                    "required": "true"
+                },
+                # Sample Information
+                {
+                    "type": "text",
+                    "name": "sample_id",
+                    "label": "Sample ID",
+                    "required": "true"
+                },
+                {
+                    "type": "select_one source_categories",
+                    "name": "source_category",
+                    "label": "Source Category (ENVIRONMENT, FOOD, HUMAN, ANIMAL, AQUACULTURE)",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "source_type",
+                    "label": "Source Type",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "region",
+                    "label": "Region",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "district",
+                    "label": "District",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "site_type",
+                    "label": "Site Type",
+                    "required": "false"
+                },
+                {
+                    "type": "text",
+                    "name": "food_matrix",
+                    "label": "Food Matrix (if applicable)",
+                    "required": "false"
+                },
+                {
+                    "type": "text",
+                    "name": "environment_matrix",
+                    "label": "Environment Matrix (if applicable)",
+                    "required": "false"
+                },
+                {
+                    "type": "decimal",
+                    "name": "latitude",
+                    "label": "Latitude (-90 to 90)",
+                    "required": "false"
+                },
+                {
+                    "type": "decimal",
+                    "name": "longitude",
+                    "label": "Longitude (-180 to 180)",
+                    "required": "false"
+                },
+                # AST Results Information
+                {
+                    "type": "text",
+                    "name": "isolate_id",
+                    "label": "Isolate ID",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "organism",
+                    "label": "Organism",
+                    "required": "true"
+                },
+                {
+                    "type": "text",
+                    "name": "antibiotic",
+                    "label": "Antibiotic Tested",
+                    "required": "true"
+                },
+                {
+                    "type": "select_one ast_results",
+                    "name": "result",
+                    "label": "AST Result (S/I/R)",
+                    "required": "true"
+                },
+                {
+                    "type": "select_one testing_methods",
+                    "name": "method",
+                    "label": "Testing Method (DD/MIC)",
+                    "required": "true"
+                },
+                {
+                    "type": "select_one guidelines",
+                    "name": "guideline",
+                    "label": "Breakpoint Guideline (CLSI/EUCAST)",
+                    "required": "true"
+                },
+                {
+                    "type": "date",
+                    "name": "test_date",
+                    "label": "Test Date",
+                    "required": "true"
+                },
+                {
+                    "type": "decimal",
+                    "name": "mic_value",
+                    "label": "MIC Value (if applicable)",
+                    "required": "false"
+                },
+                {
+                    "type": "decimal",
+                    "name": "zone_diameter",
+                    "label": "Zone Diameter in mm (if applicable)",
+                    "required": "false"
+                }
+            ]
+            
+            # Build all choice options
+            all_choices = lab_choices + [
+                {"list_name": "source_categories", "name": "env", "label": "ENVIRONMENT"},
+                {"list_name": "source_categories", "name": "food", "label": "FOOD"},
+                {"list_name": "source_categories", "name": "human", "label": "HUMAN"},
+                {"list_name": "source_categories", "name": "animal", "label": "ANIMAL"},
+                {"list_name": "source_categories", "name": "aqua", "label": "AQUACULTURE"},
+                {"list_name": "ast_results", "name": "s", "label": "S"},
+                {"list_name": "ast_results", "name": "i", "label": "I"},
+                {"list_name": "ast_results", "name": "r", "label": "R"},
+                {"list_name": "testing_methods", "name": "dd", "label": "DD"},
+                {"list_name": "testing_methods", "name": "mic", "label": "MIC"},
+                {"list_name": "guidelines", "name": "clsi", "label": "CLSI"},
+                {"list_name": "guidelines", "name": "eucast", "label": "EUCAST"},
+            ]
+            
+            # Create form payload
+            form_payload = {
+                "name": form_name,
+                "asset_type": "survey",
+                "content": {
+                    "survey": survey_questions,
+                    "choices": all_choices
+                }
             }
             
-            # Create form via API
-            url = f"{KOBO_API_BASE}/forms/"
-            response = self.session.post(url, json=form_definition, timeout=10)
+            # Create form via assets endpoint
+            url = f"{KOBO_API_BASE}/assets/"
+            response = self.session.post(url, json=form_payload, timeout=10)
             
             if response.status_code in [200, 201]:
                 form_data = response.json()
                 return True, "Form created successfully", form_data
             else:
-                return False, f"Form creation failed: {response.text}", None
+                return False, f"Form creation failed: {response.status_code} - {response.text[:300]}", None
         
         except Exception as e:
             return False, f"Form creation error: {str(e)}", None

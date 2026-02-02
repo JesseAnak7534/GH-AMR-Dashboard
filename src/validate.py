@@ -302,12 +302,14 @@ def validate_upload(file_obj) -> Tuple[bool, List[str], pd.DataFrame, pd.DataFra
 
 
 def create_template_excel() -> bytes:
-    """Create a template Excel file with lab names."""
+    """Create a template Excel file with all required fields and lab names."""
     lab_names = get_lab_names()
     
     samples_data = {
         'sample_id': ['SAMPLE_001', 'SAMPLE_002', 'SAMPLE_003'],
-        'lab_name': [lab_names[0], lab_names[1], lab_names[2]],
+        'lab_name': [lab_names[0] if len(lab_names) > 0 else 'Lab 1', 
+                     lab_names[1] if len(lab_names) > 1 else 'Lab 2', 
+                     lab_names[2] if len(lab_names) > 2 else 'Lab 3'],
         'collection_date': ['2024-01-15', '2024-01-20', '2024-01-25'],
         'region': ['Ashanti', 'Greater Accra', 'Eastern'],
         'district': ['Kumasi', 'Accra', 'Koforidua'],
@@ -346,7 +348,7 @@ def create_template_excel() -> bytes:
     else:
         list_ws = wb['lab_lists']
 
-    # Populate lab list
+    # Populate lab list with all approved labs
     list_ws['A1'] = 'lab_name_list'
     for idx, lab in enumerate(lab_names, start=2):
         list_ws[f"A{idx}"] = lab
