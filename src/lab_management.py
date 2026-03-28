@@ -77,149 +77,95 @@ class KoboToolboxManager:
         except Exception as e:
             return False, f"Authentication error: {str(e)}"
     
-    def create_amr_form(self, form_name: str = "AMR Surveillance Data Entry") -> Tuple[bool, str, Optional[Dict]]:
-        """Create KoboToolbox form for AMR data entry with all required fields."""
+    def create_amr_form(self, form_name: str = "AMR One Health Surveillance") -> Tuple[bool, str, Optional[Dict]]:
+        """Create comprehensive KoboToolbox form – one form for AST, PPS, AMU, AMC data."""
         try:
             if not self.session:
                 success, msg = self.authenticate()
                 if not success:
                     return False, msg, None
             
-            # Build all lab choices
             lab_choices = [
                 {"list_name": "approved_labs", "name": lab_code, "label": lab_name}
                 for lab_name, lab_code in APPROVED_LABS.items()
             ]
             
-            # Build survey questions for samples data
             survey_questions = [
-                # Laboratory Information
-                {
-                    "type": "select_one approved_labs",
-                    "name": "lab_name",
-                    "label": "Select Your Laboratory",
-                    "required": "true"
-                },
-                {
-                    "type": "date",
-                    "name": "collection_date",
-                    "label": "Sample Collection Date",
-                    "required": "true"
-                },
-                # Sample Information
-                {
-                    "type": "text",
-                    "name": "sample_id",
-                    "label": "Sample ID",
-                    "required": "true"
-                },
-                {
-                    "type": "select_one source_categories",
-                    "name": "source_category",
-                    "label": "Source Category (ENVIRONMENT, FOOD, HUMAN, ANIMAL, AQUACULTURE)",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "source_type",
-                    "label": "Source Type",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "region",
-                    "label": "Region",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "district",
-                    "label": "District",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "site_type",
-                    "label": "Site Type",
-                    "required": "false"
-                },
-                {
-                    "type": "text",
-                    "name": "food_matrix",
-                    "label": "Food Matrix (if applicable)",
-                    "required": "false"
-                },
-                {
-                    "type": "text",
-                    "name": "environment_matrix",
-                    "label": "Environment Matrix (if applicable)",
-                    "required": "false"
-                },
-                {
-                    "type": "geopoint",
-                    "name": "geolocation",
-                    "label": "Sample Collection Location (automatically captures GPS coordinates)",
-                    "required": "false"
-                },
-                # AST Results Information
-                {
-                    "type": "text",
-                    "name": "isolate_id",
-                    "label": "Isolate ID",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "organism",
-                    "label": "Organism",
-                    "required": "true"
-                },
-                {
-                    "type": "text",
-                    "name": "antibiotic",
-                    "label": "Antibiotic Tested",
-                    "required": "true"
-                },
-                {
-                    "type": "select_one ast_results",
-                    "name": "result",
-                    "label": "AST Result (S/I/R)",
-                    "required": "true"
-                },
-                {
-                    "type": "select_one testing_methods",
-                    "name": "method",
-                    "label": "Testing Method (DD/MIC)",
-                    "required": "true"
-                },
-                {
-                    "type": "select_one guidelines",
-                    "name": "guideline",
-                    "label": "Breakpoint Guideline (CLSI/EUCAST)",
-                    "required": "true"
-                },
-                {
-                    "type": "date",
-                    "name": "test_date",
-                    "label": "Test Date",
-                    "required": "true"
-                },
-                {
-                    "type": "decimal",
-                    "name": "mic_value",
-                    "label": "MIC Value (if applicable)",
-                    "required": "false"
-                },
-                {
-                    "type": "decimal",
-                    "name": "zone_diameter",
-                    "label": "Zone Diameter in mm (if applicable)",
-                    "required": "false"
-                }
+                # ── DATA TYPE SELECTOR ──────────────────────────────────
+                {"type": "note", "name": "form_intro", "label": "## AMR One Health Surveillance\nSelect the type of data you are submitting, then fill the relevant sections."},
+                {"type": "select_multiple data_types", "name": "data_type", "label": "What data are you submitting?", "required": "true"},
+                # ── COMMON FIELDS ───────────────────────────────────────
+                {"type": "select_one approved_labs", "name": "lab_name", "label": "Select Your Laboratory", "required": "true"},
+                {"type": "text", "name": "region", "label": "Region", "required": "true"},
+                {"type": "text", "name": "district", "label": "District", "required": "true"},
+                # ── AST SECTION ─────────────────────────────────────────
+                {"type": "begin_group", "name": "ast_section", "label": "AST / Sample Data", "relevant": "selected(${data_type}, 'ast')"},
+                {"type": "date", "name": "collection_date", "label": "Sample Collection Date", "required": "true"},
+                {"type": "text", "name": "sample_id", "label": "Sample ID", "required": "true"},
+                {"type": "select_one source_categories", "name": "source_category", "label": "Source Category", "required": "true"},
+                {"type": "text", "name": "source_type", "label": "Source Type", "required": "true"},
+                {"type": "text", "name": "site_type", "label": "Site Type", "required": "false"},
+                {"type": "text", "name": "food_matrix", "label": "Food Matrix (if applicable)", "required": "false"},
+                {"type": "text", "name": "environment_matrix", "label": "Environment Matrix (if applicable)", "required": "false"},
+                {"type": "geopoint", "name": "geolocation", "label": "GPS Location", "required": "false"},
+                {"type": "text", "name": "isolate_id", "label": "Isolate ID", "required": "true"},
+                {"type": "text", "name": "organism", "label": "Organism", "required": "true"},
+                {"type": "text", "name": "antibiotic", "label": "Antibiotic Tested", "required": "true"},
+                {"type": "select_one ast_results", "name": "result", "label": "AST Result (S/I/R)", "required": "true"},
+                {"type": "select_one testing_methods", "name": "method", "label": "Testing Method", "required": "true"},
+                {"type": "select_one guidelines", "name": "guideline", "label": "Breakpoint Guideline", "required": "true"},
+                {"type": "date", "name": "test_date", "label": "Test Date", "required": "true"},
+                {"type": "decimal", "name": "mic_value", "label": "MIC Value", "required": "false"},
+                {"type": "decimal", "name": "zone_diameter", "label": "Zone Diameter (mm)", "required": "false"},
+                {"type": "end_group"},
+                # ── PPS SECTION ─────────────────────────────────────────
+                {"type": "begin_group", "name": "pps_section", "label": "Point Prevalence Survey (PPS)", "relevant": "selected(${data_type}, 'pps')"},
+                {"type": "text", "name": "pps_facility_name", "label": "Facility Name", "required": "true"},
+                {"type": "date", "name": "pps_survey_date", "label": "Survey Date", "required": "true"},
+                {"type": "integer", "name": "pps_total_patients", "label": "Total Patients in Facility", "required": "true"},
+                {"type": "integer", "name": "pps_patients_on_abx", "label": "Patients on Antibiotics", "required": "true"},
+                {"type": "text", "name": "pps_ward", "label": "Ward / Department", "required": "true"},
+                {"type": "text", "name": "pps_patient_age_group", "label": "Patient Age Group", "required": "false"},
+                {"type": "text", "name": "pps_antibiotic_name", "label": "Antibiotic Prescribed", "required": "true"},
+                {"type": "select_one routes", "name": "pps_route", "label": "Route of Administration", "required": "true"},
+                {"type": "text", "name": "pps_indication", "label": "Indication", "required": "false"},
+                {"type": "select_one yes_no", "name": "pps_indication_documented", "label": "Indication Documented?", "required": "true"},
+                {"type": "select_one yes_no", "name": "pps_guideline_compliant", "label": "Guideline Compliant?", "required": "true"},
+                {"type": "integer", "name": "pps_duration_days", "label": "Duration of Therapy (days)", "required": "false"},
+                {"type": "end_group"},
+                # ── AMU SECTION ─────────────────────────────────────────
+                {"type": "begin_group", "name": "amu_section", "label": "Antimicrobial Use (AMU)", "relevant": "selected(${data_type}, 'amu')"},
+                {"type": "text", "name": "amu_facility_name", "label": "Facility Name", "required": "true"},
+                {"type": "text", "name": "amu_report_period", "label": "Reporting Period (e.g. 2026-Q1)", "required": "true"},
+                {"type": "text", "name": "amu_antibiotic_name", "label": "Antibiotic Name", "required": "true"},
+                {"type": "text", "name": "amu_atc_code", "label": "ATC Code", "required": "false"},
+                {"type": "text", "name": "amu_formulation", "label": "Formulation", "required": "false"},
+                {"type": "decimal", "name": "amu_quantity_dispensed", "label": "Quantity Dispensed", "required": "true"},
+                {"type": "decimal", "name": "amu_ddd_per_1000", "label": "DDD per 1,000 Patient-Days", "required": "false"},
+                {"type": "integer", "name": "amu_patient_days", "label": "Patient-Days", "required": "false"},
+                {"type": "end_group"},
+                # ── AMC SECTION ─────────────────────────────────────────
+                {"type": "begin_group", "name": "amc_section", "label": "Antimicrobial Consumption – Animal (AMC)", "relevant": "selected(${data_type}, 'amc')"},
+                {"type": "text", "name": "amc_report_period", "label": "Reporting Period", "required": "true"},
+                {"type": "select_one amc_sectors", "name": "amc_sector", "label": "Sector", "required": "true"},
+                {"type": "text", "name": "amc_species", "label": "Species", "required": "true"},
+                {"type": "text", "name": "amc_production_type", "label": "Production Type", "required": "false"},
+                {"type": "text", "name": "amc_antibiotic_class", "label": "Antibiotic Class", "required": "true"},
+                {"type": "text", "name": "amc_antibiotic_name", "label": "Antibiotic Name", "required": "false"},
+                {"type": "text", "name": "amc_atc_vet_code", "label": "ATCvet Code", "required": "false"},
+                {"type": "decimal", "name": "amc_quantity_kg", "label": "Quantity (kg)", "required": "true"},
+                {"type": "decimal", "name": "amc_biomass_kg", "label": "Biomass (kg)", "required": "false"},
+                {"type": "decimal", "name": "amc_mg_per_kg_biomass", "label": "mg/kg Biomass", "required": "false"},
+                {"type": "select_one routes", "name": "amc_route", "label": "Route", "required": "false"},
+                {"type": "select_one amc_purposes", "name": "amc_purpose", "label": "Purpose of Use", "required": "false"},
+                {"type": "end_group"},
             ]
             
-            # Build all choice options
             all_choices = lab_choices + [
+                {"list_name": "data_types", "name": "ast", "label": "AST / Sample Data"},
+                {"list_name": "data_types", "name": "pps", "label": "Point Prevalence Survey (PPS)"},
+                {"list_name": "data_types", "name": "amu", "label": "Antimicrobial Use (AMU)"},
+                {"list_name": "data_types", "name": "amc", "label": "Antimicrobial Consumption – Animal (AMC)"},
                 {"list_name": "source_categories", "name": "env", "label": "ENVIRONMENT"},
                 {"list_name": "source_categories", "name": "food", "label": "FOOD"},
                 {"list_name": "source_categories", "name": "human", "label": "HUMAN"},
@@ -232,6 +178,17 @@ class KoboToolboxManager:
                 {"list_name": "testing_methods", "name": "mic", "label": "MIC"},
                 {"list_name": "guidelines", "name": "clsi", "label": "CLSI"},
                 {"list_name": "guidelines", "name": "eucast", "label": "EUCAST"},
+                {"list_name": "routes", "name": "oral", "label": "Oral"},
+                {"list_name": "routes", "name": "iv", "label": "IV"},
+                {"list_name": "routes", "name": "im", "label": "IM"},
+                {"list_name": "routes", "name": "topical", "label": "Topical"},
+                {"list_name": "yes_no", "name": "yes", "label": "Yes"},
+                {"list_name": "yes_no", "name": "no", "label": "No"},
+                {"list_name": "amc_sectors", "name": "animal", "label": "ANIMAL"},
+                {"list_name": "amc_sectors", "name": "aquaculture", "label": "AQUACULTURE"},
+                {"list_name": "amc_purposes", "name": "therapeutic", "label": "Therapeutic"},
+                {"list_name": "amc_purposes", "name": "prophylactic", "label": "Prophylactic"},
+                {"list_name": "amc_purposes", "name": "growth_promotion", "label": "Growth Promotion"},
             ]
             
             # Create form payload

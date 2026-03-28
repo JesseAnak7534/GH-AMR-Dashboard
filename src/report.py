@@ -142,20 +142,6 @@ def generate_html_report(
     if ast_df.empty or samples_df.empty:
         return "<html><body><h1>No data available for report generation.</h1></body></html>"
 
-
-    def generate_pdf_from_html(html_content: str) -> bytes:
-        """Generate a PDF from HTML content."""
-        try:
-            from xhtml2pdf import pisa
-        except Exception as e:
-            raise RuntimeError("xhtml2pdf is required for PDF export. Please install it.") from e
-
-        output = BytesIO()
-        result = pisa.CreatePDF(src=html_content, dest=output)
-        if result.err:
-            raise RuntimeError("Failed to generate PDF from HTML.")
-        return output.getvalue()
-
     # Import required modules
     from src import analytics
 
@@ -1052,7 +1038,11 @@ def generate_filtered_html_report(
     selected_categories: List[str],
     selected_regions: List[str],
     selected_organisms: List[str],
-    selected_antibiotics: List[str]
+    selected_antibiotics: List[str],
+    pps_df: Optional[pd.DataFrame] = None,
+    pps_rx_df: Optional[pd.DataFrame] = None,
+    amu_df: Optional[pd.DataFrame] = None,
+    amc_df: Optional[pd.DataFrame] = None,
 ) -> str:
     """Generate professional HTML report with filtered data and enhanced formatting."""
 
@@ -1268,22 +1258,6 @@ def generate_filtered_html_report(
             overflow: hidden;
         }}
 
-        .report-header::before {{
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 4s ease-in-out infinite;
-        }}
-
-        @keyframes pulse {{
-            0%, 100% {{ transform: scale(1); }}
-            50% {{ transform: scale(1.05); }}
-        }}
-
         .report-header h1 {{
             margin: 0 0 10px 0;
             font-size: 2.8em;
@@ -1338,12 +1312,6 @@ def generate_filtered_html_report(
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 30px;
             border: 1px solid #e2e8f0;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }}
-
-        .section:hover {{
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
         }}
 
         .section h2 {{
@@ -1388,12 +1356,6 @@ def generate_filtered_html_report(
             border-radius: 12px;
             text-align: center;
             border: 1px solid #e2e8f0;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }}
-
-        .stat-card:hover {{
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         }}
 
         .stat-number {{
@@ -2256,6 +2218,184 @@ def generate_filtered_html_report(
         </div>
 """
 
+    # ════════════════════════════════════════════════════════════════════
+    # ONE HEALTH SECTIONS: PPS / AMU / AMC
+    # ════════════════════════════════════════════════════════════════════
+
+    # ── PPS Section ─────────────────────────────────────────────────────
+    if pps_df is not None and not pps_df.empty:
+        total_surveys = len(pps_df)
+        avg_prescribing = 0
+        if 'total_patients' in pps_df.columns and 'patients_on_antibiotics' in pps_df.columns:
+            total_pts = pps_df['total_patients'].sum()
+            total_abx = pps_df['patients_on_antibiotics'].sum()
+            avg_prescribing = (total_abx / total_pts * 100) if total_pts > 0 else 0
+
+        html_report += f"""
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#667eea; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                Point Prevalence Survey (PPS)
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="text-align:center; background:#f0f4ff; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#667eea;">{total_surveys}</div>
+                    <div style="color:#4a5568;">Survey Records</div>
+                </div>
+                <div style="text-align:center; background:#f0fff4; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#27ae60;">{avg_prescribing:.1f}%</div>
+                    <div style="color:#4a5568;">Avg Prescribing Rate</div>
+                </div>
+                <div style="text-align:center; background:#fff8f0; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#f39c12;">{pps_df['facility_name'].nunique() if 'facility_name' in pps_df.columns else 0}</div>
+                    <div style="color:#4a5568;">Facilities Surveyed</div>
+                </div>
+            </div>
+"""
+        # PPS prescriptions summary
+        if pps_rx_df is not None and not pps_rx_df.empty and 'antibiotic' in pps_rx_df.columns:
+            top_pps_abx = pps_rx_df['antibiotic'].value_counts().head(10)
+            html_report += """
+            <h3>Top Antibiotics Prescribed (PPS)</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#667eea; color:white;">
+                    <th style="padding:8px; text-align:left;">Antibiotic</th>
+                    <th style="padding:8px; text-align:right;">Prescriptions</th>
+                </tr>
+"""
+            for abx_name, abx_count in top_pps_abx.items():
+                html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{abx_name}</td>
+                    <td style="padding:8px; text-align:right;">{abx_count}</td>
+                </tr>
+"""
+            html_report += "            </table>"
+
+        html_report += "        </div>"
+
+    # ── AMU Section ─────────────────────────────────────────────────────
+    if amu_df is not None and not amu_df.empty:
+        total_amu = len(amu_df)
+        amu_facilities = amu_df['facility_name'].nunique() if 'facility_name' in amu_df.columns else 0
+        total_dispensed = int(amu_df['quantity_dispensed'].sum()) if 'quantity_dispensed' in amu_df.columns else 0
+
+        html_report += f"""
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#8b5cf6; border-bottom: 2px solid #8b5cf6; padding-bottom: 8px;">
+                Antimicrobial Use (AMU) — Human Health
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="text-align:center; background:#f5f0ff; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#8b5cf6;">{total_amu:,}</div>
+                    <div style="color:#4a5568;">AMU Records</div>
+                </div>
+                <div style="text-align:center; background:#f0fff4; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#27ae60;">{amu_facilities}</div>
+                    <div style="color:#4a5568;">Facilities</div>
+                </div>
+                <div style="text-align:center; background:#fff8f0; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#f39c12;">{total_dispensed:,}</div>
+                    <div style="color:#4a5568;">Total Units Dispensed</div>
+                </div>
+            </div>
+"""
+        # Top antibiotics dispensed
+        if 'antibiotic_name' in amu_df.columns and 'quantity_dispensed' in amu_df.columns:
+            top_amu_abx = amu_df.groupby('antibiotic_name')['quantity_dispensed'].sum().sort_values(ascending=False).head(10)
+            html_report += """
+            <h3>Top Antibiotics by Quantity Dispensed</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#8b5cf6; color:white;">
+                    <th style="padding:8px; text-align:left;">Antibiotic</th>
+                    <th style="padding:8px; text-align:right;">Quantity Dispensed</th>
+                </tr>
+"""
+            for abx_name, qty in top_amu_abx.items():
+                html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{abx_name}</td>
+                    <td style="padding:8px; text-align:right;">{qty:,.0f}</td>
+                </tr>
+"""
+            html_report += "            </table>"
+
+        # DDD trend summary
+        if 'ddd_per_1000' in amu_df.columns and amu_df['ddd_per_1000'].notna().any():
+            mean_ddd = amu_df['ddd_per_1000'].mean()
+            html_report += f"""
+            <p style="color:#4a5568;">Average DDD per 1,000 patient-days: <strong>{mean_ddd:.1f}</strong></p>
+"""
+
+        html_report += "        </div>"
+
+    # ── AMC Section ─────────────────────────────────────────────────────
+    if amc_df is not None and not amc_df.empty:
+        total_amc = len(amc_df)
+        total_kg = amc_df['quantity_kg'].sum() if 'quantity_kg' in amc_df.columns else 0
+        unique_species = amc_df['species'].nunique() if 'species' in amc_df.columns else 0
+
+        html_report += f"""
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 8px;">
+                Antimicrobial Consumption (AMC) — Animal Health
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="text-align:center; background:#fff8f0; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#e67e22;">{total_amc:,}</div>
+                    <div style="color:#4a5568;">AMC Records</div>
+                </div>
+                <div style="text-align:center; background:#f0fff4; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#27ae60;">{unique_species}</div>
+                    <div style="color:#4a5568;">Species Reported</div>
+                </div>
+                <div style="text-align:center; background:#f0f4ff; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#667eea;">{total_kg:,.1f} kg</div>
+                    <div style="color:#4a5568;">Total Consumption</div>
+                </div>
+            </div>
+"""
+        # Sector breakdown
+        if 'sector' in amc_df.columns:
+            sector_summary = amc_df.groupby('sector')['quantity_kg'].sum().sort_values(ascending=False)
+            html_report += """
+            <h3>Consumption by Sector</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#e67e22; color:white;">
+                    <th style="padding:8px; text-align:left;">Sector</th>
+                    <th style="padding:8px; text-align:right;">Consumption (kg)</th>
+                </tr>
+"""
+            for sector_name, qty in sector_summary.items():
+                html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{sector_name}</td>
+                    <td style="padding:8px; text-align:right;">{qty:,.1f}</td>
+                </tr>
+"""
+            html_report += "            </table>"
+
+        # Antibiotic class breakdown
+        if 'antibiotic_class' in amc_df.columns:
+            class_summary = amc_df.groupby('antibiotic_class')['quantity_kg'].sum().sort_values(ascending=False).head(10)
+            html_report += """
+            <h3>Top Antibiotic Classes</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#e67e22; color:white;">
+                    <th style="padding:8px; text-align:left;">Antibiotic Class</th>
+                    <th style="padding:8px; text-align:right;">Consumption (kg)</th>
+                </tr>
+"""
+            for cls_name, qty in class_summary.items():
+                html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{cls_name}</td>
+                    <td style="padding:8px; text-align:right;">{qty:,.1f}</td>
+                </tr>
+"""
+            html_report += "            </table>"
+
+        html_report += "        </div>"
+
     # Format the current date/time
     current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -2265,7 +2405,7 @@ def generate_filtered_html_report(
     <div class="footer">
         <p><strong>AMR Surveillance Dashboard - Comprehensive Filtered Report</strong></p>
         <p>Generated on {current_datetime} | AMR Surveillance Dashboard</p>
-        <p>Includes Resistance Overview, Geographic Analysis, Trends, Advanced Analytics, and Risk Assessment</p>
+        <p>Includes Resistance Overview, Geographic Analysis, Trends, Advanced Analytics, Risk Assessment, PPS, AMU & AMC</p>
         <p>For questions or support, please contact the surveillance team.</p>
     </div>
 </body>

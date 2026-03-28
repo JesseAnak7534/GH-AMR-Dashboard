@@ -1,0 +1,51 @@
+{
+  "WHO_2024": {
+    "CRITICAL": [
+      {"organism": "Acinetobacter baumannii", "resistance": "Carbapenem-resistant"},
+      {"organism": "Pseudomonas aeruginosa", "resistance": "Carbapenem-resistant"},
+      {"organism": "Enterobacterales", "resistance": "3rd-gen cephalosporin-resistant, Carbapenem-resistant"},
+      {"organism": "Mycobacterium tuberculosis", "resistance": "Rifampicin-resistant"}
+    ],
+    "HIGH": [
+      {"organism": "Salmonella Typhi", "resistance": "Fluoroquinolone-resistant"},
+      {"organism": "Shigella spp.", "resistance": "Fluoroquinolone-resistant"},
+      {"organism": "Enterococcus faecium", "resistance": "Vancomycin-resistant"},
+      {"organism": "Staphylococcus aureus", "resistance": "Methicillin-resistant, Vancomycin-resistant"},
+      {"organism": "Helicobacter pylori", "resistance": "Clarithromycin-resistant"},
+      {"organism": "Campylobacter spp.", "resistance": "Fluoroquinolone-resistant"},
+      {"organism": "Neisseria gonorrhoeae", "resistance": "3rd-gen cephalosporin-resistant, Fluoroquinolone-resistant"}
+    ],
+    "MEDIUM": [
+      {"organism": "Streptococcus pneumoniae", "resistance": "Penicillin-non-susceptible"},
+      {"organism": "Haemophilus influenzae", "resistance": "Ampicillin-resistant"},
+      {"organism": "Group A Streptococcus", "resistance": "Macrolide-resistant"},
+      {"organism": "Group B Streptococcus", "resistance": "Penicillin-resistant"}
+    ]
+  },
+  "GHANA_PRIORITY": {
+    "CRITICAL": [
+      {"organism": "Klebsiella pneumoniae", "resistance": "ESBL-producing, Carbapenem-resistant"},
+      {"organism": "Escherichia coli", "resistance": "ESBL-producing, Carbapenem-resistant"},
+      {"organism": "Acinetobacter baumannii", "resistance": "Carbapenem-resistant"},
+      {"organism": "Pseudomonas aeruginosa", "resistance": "Carbapenem-resistant"}
+    ],
+    "HIGH": [
+      {"organism": "Staphylococcus aureus", "resistance": "Methicillin-resistant (MRSA)"},
+      {"organism": "Salmonella spp.", "resistance": "Fluoroquinolone-resistant, 3rd-gen cephalosporin-resistant"},
+      {"organism": "Enterococcus spp.", "resistance": "Vancomycin-resistant"},
+      {"organism": "Neisseria gonorrhoeae", "resistance": "Cephalosporin-resistant"}
+    ],
+    "MEDIUM": [
+      {"organism": "Streptococcus pneumoniae", "resistance": "Penicillin-non-susceptible"},
+      {"organism": "Haemophilus influenzae", "resistance": "Ampicillin-resistant"},
+      {"organism": "Shigella spp.", "resistance": "Fluoroquinolone-resistant"},
+      {"organism": "Non-typhoidal Salmonella", "resistance": "Multi-drug resistant"}
+    ]
+  },
+  "TRICYCLE_ESBL": {
+    "TARGET_ORGANISM": "Escherichia coli",
+    "RESISTANCE_MARKER": "ESBL-producing",
+    "SAMPLE_SOURCES": ["Sewage", "River water", "Abattoir wastewater", "Hospital effluent", "Community wastewater"],
+    "INDICATOR_ANTIBIOTICS": ["Cefotaxime", "Ceftriaxone", "Ceftazidime"]
+  }
+}

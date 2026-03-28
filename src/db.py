@@ -172,6 +172,158 @@ def init_database():
         )
     """)
 
+    # Create alerts table for tracking generated alerts
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS alerts (
+            alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alert_type TEXT NOT NULL,
+            severity TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            organism TEXT,
+            antibiotic TEXT,
+            lab_name TEXT,
+            region TEXT,
+            resistance_rate REAL,
+            threshold REAL,
+            affected_count INTEGER,
+            detected_at TEXT NOT NULL,
+            is_acknowledged INTEGER DEFAULT 0,
+            acknowledged_by TEXT,
+            acknowledged_at TEXT,
+            notes TEXT,
+            dataset_id TEXT,
+            FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
+        )
+    """)
+
+    # Create alert_subscriptions table for user preferences
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS alert_subscriptions (
+            subscription_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            alert_type TEXT,
+            severity_threshold TEXT DEFAULT 'MEDIUM',
+            email_enabled INTEGER DEFAULT 1,
+            sms_enabled INTEGER DEFAULT 0,
+            lab_filter TEXT,
+            organism_filter TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
+        )
+    """)
+
+    # Create scheduled_reports table for report scheduling
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scheduled_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            report_type TEXT NOT NULL,
+            frequency TEXT NOT NULL,
+            recipients TEXT NOT NULL,
+            filters TEXT,
+            day_of_week INTEGER DEFAULT 0,
+            day_of_month INTEGER DEFAULT 1,
+            hour INTEGER DEFAULT 8,
+            minute INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            last_run TEXT,
+            next_run TEXT,
+            created_at TEXT NOT NULL,
+            created_by TEXT
+        )
+    """)
+
+    # Create report_history table for tracking report execution
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS report_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            schedule_id INTEGER,
+            report_type TEXT,
+            run_time TEXT NOT NULL,
+            status TEXT NOT NULL,
+            recipients TEXT,
+            error_message TEXT,
+            file_path TEXT,
+            FOREIGN KEY (schedule_id) REFERENCES scheduled_reports(id)
+        )
+    """)
+
+    # ── PPS (Point Prevalence Survey) tables ──
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pps_surveys (
+            survey_id TEXT PRIMARY KEY,
+            facility_name TEXT NOT NULL,
+            survey_date TEXT NOT NULL,
+            region TEXT,
+            district TEXT,
+            total_patients INTEGER,
+            patients_on_antibiotics INTEGER,
+            uploaded_by TEXT,
+            uploaded_at TEXT NOT NULL,
+            dataset_id TEXT
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pps_prescriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            survey_id TEXT NOT NULL,
+            ward TEXT,
+            patient_age_group TEXT,
+            antibiotic_name TEXT NOT NULL,
+            route TEXT,
+            indication TEXT,
+            indication_documented INTEGER DEFAULT 0,
+            guideline_compliant INTEGER DEFAULT 0,
+            duration_days REAL,
+            FOREIGN KEY (survey_id) REFERENCES pps_surveys(survey_id)
+        )
+    """)
+
+    # ── AMU (Antimicrobial Use) tables ──
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS amu_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            facility_name TEXT NOT NULL,
+            report_period TEXT NOT NULL,
+            region TEXT,
+            district TEXT,
+            sector TEXT DEFAULT 'HUMAN',
+            antibiotic_name TEXT NOT NULL,
+            atc_code TEXT,
+            formulation TEXT,
+            unit_of_measure TEXT,
+            quantity_dispensed REAL,
+            ddd_per_1000 REAL,
+            patient_days INTEGER,
+            uploaded_by TEXT,
+            uploaded_at TEXT NOT NULL
+        )
+    """)
+
+    # ── AMC (Antimicrobial Consumption) tables ──
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS amc_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            report_period TEXT NOT NULL,
+            region TEXT,
+            sector TEXT NOT NULL DEFAULT 'ANIMAL',
+            species TEXT,
+            production_type TEXT,
+            antibiotic_class TEXT NOT NULL,
+            antibiotic_name TEXT,
+            atc_vet_code TEXT,
+            quantity_kg REAL,
+            biomass_kg REAL,
+            mg_per_kg_biomass REAL,
+            route TEXT,
+            purpose TEXT,
+            uploaded_by TEXT,
+            uploaded_at TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -694,3 +846,150 @@ def delete_non_admin_users(admin_email: Optional[str] = None) -> Tuple[int, str]
     finally:
         conn.close()
 
+
+# ════════════════════════════════════════════════════════════════════════════
+# PPS CRUD
+# ════════════════════════════════════════════════════════════════════════════
+
+def save_pps_survey(survey_id, facility_name, survey_date, region, district,
+                    total_patients, patients_on_antibiotics,
+                    prescriptions_df, uploaded_by="System"):
+    """Save a PPS survey and its prescription rows."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO pps_surveys
+            (survey_id, facility_name, survey_date, region, district,
+             total_patients, patients_on_antibiotics, uploaded_by, uploaded_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (survey_id, facility_name, survey_date, region, district,
+              total_patients, patients_on_antibiotics, uploaded_by,
+              datetime.now().isoformat()))
+
+        for _, row in prescriptions_df.iterrows():
+            cursor.execute("""
+                INSERT INTO pps_prescriptions
+                (survey_id, ward, patient_age_group, antibiotic_name,
+                 route, indication, indication_documented,
+                 guideline_compliant, duration_days)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (survey_id,
+                  row.get('ward'), row.get('patient_age_group'),
+                  row.get('antibiotic_name'), row.get('route'),
+                  row.get('indication'),
+                  1 if str(row.get('indication_documented', 0)).strip().lower() in ('1', 'yes', 'true') else 0,
+                  1 if str(row.get('guideline_compliant', 0)).strip().lower() in ('1', 'yes', 'true') else 0,
+                  row.get('duration_days')))
+
+        conn.commit()
+        return True, "PPS survey saved"
+    except Exception as e:
+        conn.rollback()
+        return False, f"PPS save error: {e}"
+    finally:
+        conn.close()
+
+
+def get_pps_surveys():
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT * FROM pps_surveys ORDER BY survey_date DESC", conn)
+    conn.close()
+    return df
+
+
+def get_pps_prescriptions(survey_id=None):
+    conn = get_connection()
+    if survey_id:
+        df = pd.read_sql_query(
+            "SELECT * FROM pps_prescriptions WHERE survey_id = ?", conn, params=(survey_id,))
+    else:
+        df = pd.read_sql_query("SELECT * FROM pps_prescriptions", conn)
+    conn.close()
+    return df
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# AMU CRUD
+# ════════════════════════════════════════════════════════════════════════════
+
+def save_amu_records(records_df, uploaded_by="System"):
+    """Bulk insert AMU records from a DataFrame."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    now = datetime.now().isoformat()
+    try:
+        for _, row in records_df.iterrows():
+            cursor.execute("""
+                INSERT INTO amu_records
+                (facility_name, report_period, region, district, sector,
+                 antibiotic_name, atc_code, formulation, unit_of_measure,
+                 quantity_dispensed, ddd_per_1000, patient_days,
+                 uploaded_by, uploaded_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                row.get('facility_name'), row.get('report_period'),
+                row.get('region'), row.get('district'),
+                row.get('sector', 'HUMAN'),
+                row.get('antibiotic_name'), row.get('atc_code'),
+                row.get('formulation'), row.get('unit_of_measure'),
+                row.get('quantity_dispensed'), row.get('ddd_per_1000'),
+                row.get('patient_days'), uploaded_by, now))
+        conn.commit()
+        return True, f"{len(records_df)} AMU records saved"
+    except Exception as e:
+        conn.rollback()
+        return False, f"AMU save error: {e}"
+    finally:
+        conn.close()
+
+
+def get_amu_records():
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT * FROM amu_records ORDER BY report_period DESC", conn)
+    conn.close()
+    return df
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# AMC CRUD
+# ════════════════════════════════════════════════════════════════════════════
+
+def save_amc_records(records_df, uploaded_by="System"):
+    """Bulk insert AMC records from a DataFrame."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    now = datetime.now().isoformat()
+    try:
+        for _, row in records_df.iterrows():
+            cursor.execute("""
+                INSERT INTO amc_records
+                (report_period, region, sector, species, production_type,
+                 antibiotic_class, antibiotic_name, atc_vet_code,
+                 quantity_kg, biomass_kg, mg_per_kg_biomass,
+                 route, purpose, uploaded_by, uploaded_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                row.get('report_period'), row.get('region'),
+                row.get('sector', 'ANIMAL'), row.get('species'),
+                row.get('production_type'),
+                row.get('antibiotic_class'), row.get('antibiotic_name'),
+                row.get('atc_vet_code'),
+                row.get('quantity_kg'), row.get('biomass_kg'),
+                row.get('mg_per_kg_biomass'),
+                row.get('route'), row.get('purpose'),
+                uploaded_by, now))
+        conn.commit()
+        return True, f"{len(records_df)} AMC records saved"
+    except Exception as e:
+        conn.rollback()
+        return False, f"AMC save error: {e}"
+    finally:
+        conn.close()
+
+
+def get_amc_records():
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT * FROM amc_records ORDER BY report_period DESC", conn)
+    conn.close()
+    return df

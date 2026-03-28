@@ -1,0 +1,37 @@
+{
+  "ONE_HEALTH_SECTORS": {
+    "HUMAN": {
+      "source_types": ["clinical_specimen", "blood_culture", "urine", "wound_swab", "sputum", "csf", "stool", "throat_swab", "nasal_swab"],
+      "site_types": ["Hospital Lab", "Clinic", "Community Health Centre", "Diagnostic Lab"]
+    },
+    "ANIMAL": {
+      "source_types": ["poultry_farm", "poultry_clinic", "bovine_farm", "bovine_clinic", "swine_farm", "swine_clinic", "caprine", "equine", "companion_animal", "wildlife"],
+      "site_types": ["Veterinary Lab", "Farm", "Abattoir", "Animal Clinic"]
+    },
+    "FOOD": {
+      "source_types": ["raw_chicken", "raw_beef", "raw_pork", "raw_fish", "raw_milk", "ready_to_eat", "vegetables", "fruits", "street_food", "processed_meat"],
+      "site_types": ["Retail Market", "Supermarket", "Street Vendor", "Processing Plant", "National Food Safety Laboratory"]
+    },
+    "ENVIRONMENT": {
+      "source_types": ["sewage", "river_water", "treated_water", "hospital_effluent", "abattoir_wastewater", "community_wastewater", "borehole_water", "soil", "air_sample"],
+      "site_types": ["Water Treatment Plant", "River Sampling Point", "Sewage Treatment Plant", "Hospital Outfall", "Abattoir Outfall"]
+    },
+    "AQUACULTURE": {
+      "source_types": ["tilapia_farm", "catfish_farm", "shrimp_farm", "pond_water", "fish_feed", "sediment"],
+      "site_types": ["Fish Farm", "Hatchery", "Landing Site", "Processing Unit"]
+    }
+  },
+  "ANIMAL_HEALTH_CATEGORIES": {
+    "species": ["Poultry", "Bovine", "Swine", "Caprine", "Ovine", "Equine", "Companion (Dog)", "Companion (Cat)", "Wildlife"],
+    "production_types": ["Layer", "Broiler", "Dairy", "Beef", "Fattening", "Breeding", "Pet", "Working"]
+  },
+  "ENVIRONMENT_MATRICES": {
+    "water": ["Sewage", "River water", "Treated water", "Borehole water", "Hospital effluent", "Abattoir wastewater"],
+    "soil": ["Farm soil", "Hospital grounds", "Landfill site"],
+    "air": ["Hospital air", "Farm air"]
+  },
+  "AGE_CATEGORIES": {
+    "HUMAN": ["Neonate (0-28 days)", "Infant (1-11 months)", "Child (1-4 years)", "Child (5-14 years)", "Adolescent (15-24 years)", "Adult (25-44 years)", "Adult (45-64 years)", "Geriatric (65+ years)"],
+    "ANIMAL": ["Juvenile", "Sub-adult", "Adult", "Aged"]
+  }
+}

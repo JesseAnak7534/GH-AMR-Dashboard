@@ -9,17 +9,19 @@ toolbarMode = "viewer"
 [server]
 # Prevent server from closing idle connections
 maxUploadSize = 200
-# Disable timeout for long-running operations
 maxMessageSize = 200
-# Run on a separate thread to prevent blocking
 runOnSave = false
+# Critical: keep connections alive
+enableCORS = false
+enableWebsocketCompression = true
+headless = true
 
 [runner]
-# Run on a separate thread to prevent blocking the main event loop
 magicEnabled = true
+# Faster reruns reduce perceived lag
+fastReruns = true
 
 [theme]
-# Use light theme for better visibility
 primaryColor = "#1f77b4"
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f0f2f6"

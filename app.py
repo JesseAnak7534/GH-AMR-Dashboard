@@ -9,6 +9,7 @@ import os
 import uuid
 import bcrypt
 import secrets
+import json
 from dotenv import load_dotenv
 from io import BytesIO
 from datetime import datetime, timedelta
@@ -27,22 +28,60 @@ from src.lab_management import (
     save_kobo_form_id,
     load_kobo_form_id
 )
+from src.page_pps import render_pps_page
+from src.page_amu import render_amu_page
+from src.page_amc import render_amc_page
 
 # Page configuration
 st.set_page_config(
     page_title="AMR Surveillance Dashboard",
-    page_icon="",
-    layout="wide",
+    page_icon="🔬",
+    layout="centered",
     initial_sidebar_state="expanded"
 )
 
 # Initialize database
 db.init_database()
 
+# ── Keep-alive: prevent idle WebSocket disconnection ────────────────────
+st.markdown(
+    """
+    <script>
+    // Ping the Streamlit server every 2 minutes to keep the WebSocket alive
+    (function keepAlive() {
+        setInterval(function() {
+            fetch(window.location.href, {method: 'HEAD', cache: 'no-store'})
+                .catch(function(){});
+        }, 120000);
+    })();
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Email verification via magic link is disabled
 
-# Session timeout: 10 minutes of inactivity
-SESSION_TIMEOUT_MINUTES = 10
+def _get_session_timeout_minutes():
+    timeout_value = None
+    try:
+        if hasattr(st, "secrets") and "SESSION_TIMEOUT_MINUTES" in st.secrets:
+            timeout_value = st.secrets.get("SESSION_TIMEOUT_MINUTES")
+    except Exception:
+        pass
+    if timeout_value is None:
+        timeout_value = os.getenv("SESSION_TIMEOUT_MINUTES")
+    if timeout_value is None:
+        return None
+    try:
+        timeout_minutes = int(timeout_value)
+    except (TypeError, ValueError):
+        return None
+    return timeout_minutes if timeout_minutes > 0 else None
+
+
+# Session timeout is disabled by default.
+# To enable it, set SESSION_TIMEOUT_MINUTES in env or Streamlit secrets.
+SESSION_TIMEOUT_MINUTES = _get_session_timeout_minutes()
 
 # Authentication check
 if "authenticated" not in st.session_state:
@@ -54,7 +93,7 @@ if "authenticated" not in st.session_state:
     st.session_state.active_dataset_id = None  # Track selected dataset for filtering dashboards
 
 # Check for session timeout
-if st.session_state.authenticated and st.session_state.last_activity_time:
+if SESSION_TIMEOUT_MINUTES and st.session_state.authenticated and st.session_state.last_activity_time:
     time_elapsed = (datetime.now() - st.session_state.last_activity_time).total_seconds() / 60
     if time_elapsed > SESSION_TIMEOUT_MINUTES:
         st.session_state.authenticated = False
@@ -156,144 +195,584 @@ except Exception:
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:
-    # Render login page (avoid calling set_page_config twice)
+    # Render login page with professional styling
     
     st.markdown("""
         <style>
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .main { background: white; border-radius: 10px; padding: 2rem; }
-        .center-title { text-align: center; color: #667eea; font-size: 2.5em; font-weight: bold; margin-bottom: 0.5rem; }
-        .center-subtitle { text-align: center; color: #666; font-size: 1.1em; margin-bottom: 2rem; }
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* Main background with microbiology-themed image */
+        .stApp {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.93) 0%, rgba(7, 89, 133, 0.93) 50%, rgba(14, 116, 144, 0.93) 100%),
+                        url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Hide default Streamlit elements */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        
+        /* Force centered, fixed-width login layout (even in wide mode) */
+        .main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .main .block-container {
+            max-width: 460px !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
+        
+        /* Login card effect */
+        .stTabs {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(22px);
+            border-radius: 22px;
+            padding: 2.2rem;
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .stTabs [data-baseweb="tab-panel"] {
+            padding-top: 0.5rem;
+        }
+        
+        /* Title styling */
+        .login-title {
+            text-align: center;
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0f766e 0%, #0891b2 50%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            color: #e2e8f0;
+            font-size: 1.05em;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+        }
+
+        .login-badge {
+            display: inline-block;
+            text-align: center;
+            margin: 0 auto 1.6rem auto;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.02em;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+        
+        .login-icon {
+            text-align: center;
+            font-size: 3.6em;
+            margin-bottom: 0.8rem;
+            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.25));
+        }
+        
+        /* Form inputs */
+        .stTextInput > div {
+            max-width: 360px;
+            margin: 0 auto;
+        }
+
+        .stTextInput > div > div > input {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stTextInput > div > div > input:focus {
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+        }
+        
+        /* Primary button styling */
+        .stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+        }
+
+        .stButton > button[kind="primary"] {
+            width: 100%;
+            max-width: 360px;
+            margin: 0.4rem auto 0;
+            display: block;
+        }
+        
+        .stButton > button[kind="primary"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.5);
+        }
+        
+        /* Tab styling */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 6px;
+            background: #f8fafc;
+            border-radius: 999px;
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            padding: 0.35rem 1rem;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background: #0f766e;
+            color: white;
+            box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35);
+        }
+        
+        /* Footer text */
+        .login-footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85em;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+        
+        .login-footer p {
+            margin: 0.3rem 0;
+        }
         </style>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Centered login form
+    st.markdown('<div class="login-icon">🔬</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">AMR Dashboard</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">Antimicrobial Resistance Surveillance System</div>', unsafe_allow_html=True)
+    st.markdown('<div style="text-align:center;"><span class="login-badge">Secure Access Portal</span></div>', unsafe_allow_html=True)
     
-    with col2:
-        st.markdown('<div class="center-title">AMR Dashboard</div>', unsafe_allow_html=True)
-        st.markdown('<div class="center-subtitle">Antimicrobial Resistance Surveillance System</div>', unsafe_allow_html=True)
-        st.markdown("---")
+    # Create tabs for login and info
+    tab1, tab2 = st.tabs(["Login", "Information"])
+    
+    with tab1:
+        st.subheader("Welcome Back")
         
-        # Create two columns for better spacing
-        tab1, tab2 = st.tabs(["Login", "Sign Up"])
+        login_email = st.text_input("Email Address", placeholder="Enter your email", key="login_email")
+        login_password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
         
-        with tab1:
-            st.subheader("Welcome Back")
-            
-            login_email = st.text_input("Email Address", placeholder="Enter your email", key="login_email")
-            login_password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
-            
-            if st.button("Sign In", use_container_width=True, type="primary"):
-                if not login_email or not login_password:
-                    st.error("Please fill in all fields")
+        if st.button("Sign In", use_container_width=True, type="primary"):
+            if not login_email or not login_password:
+                st.error("Please fill in all fields")
+            else:
+                user = db.get_user_by_email(login_email)
+                if user and user['is_active']:
+                    try:
+                        if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
+                            # Email verification requirement removed; allow login if credentials match
+                            config_admin_email, _ = _get_admin_config()
+                            target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+
+                            # Enforce admin role for configured admin email
+                            is_admin_flag = user.get('is_admin')
+                            if login_email.strip().lower() == target_admin_email:
+                                is_admin_flag = 1
+                                try:
+                                    db.set_user_admin(login_email, True)
+                                    db.update_user_status(user['user_id'], True)
+                                    db.set_user_verified(login_email, True)
+                                except Exception:
+                                    pass
+
+                            # Restrict to admin or approved lab users only
+                            lab_mapping = _get_lab_email_mapping()
+                            is_lab, lab_name = is_lab_user(login_email, lab_mapping)
+                            if not is_admin_flag and not is_lab:
+                                st.error("Access denied. This system is restricted to approved labs.")
+                                st.session_state.authenticated = False
+                                st.session_state.user_email = None
+                                st.session_state.is_admin = False
+                                st.session_state.lab_name = None
+                                st.stop()
+
+                            st.session_state.authenticated = True
+                            st.session_state.user_email = login_email
+                            st.session_state.last_activity_time = datetime.now()
+                            st.session_state.is_admin = bool(is_admin_flag)
+                            st.session_state.lab_name = lab_name if not is_admin_flag else None
+
+                            db.update_last_login(login_email)
+                            st.success("Login successful!")
+                            st.balloons()
+                            st.rerun()
+                        else:
+                            st.error("Invalid email or password")
+                    except Exception as e:
+                        st.error(f"Login error: {str(e)}")
                 else:
-                    user = db.get_user_by_email(login_email)
-                    if user and user['is_active']:
-                        try:
-                            if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
-                                # Email verification requirement removed; allow login if credentials match
-                                config_admin_email, _ = _get_admin_config()
-                                target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
-
-                                # Enforce admin role for configured admin email
-                                is_admin_flag = user.get('is_admin')
-                                if login_email.strip().lower() == target_admin_email:
-                                    is_admin_flag = 1
-                                    try:
-                                        db.set_user_admin(login_email, True)
-                                        db.update_user_status(user['user_id'], True)
-                                        db.set_user_verified(login_email, True)
-                                    except Exception:
-                                        pass
-
-                                # Restrict to admin or approved lab users only
-                                lab_mapping = _get_lab_email_mapping()
-                                is_lab, lab_name = is_lab_user(login_email, lab_mapping)
-                                if not is_admin_flag and not is_lab:
-                                    st.error("Access denied. This system is restricted to approved labs.")
-                                    st.session_state.authenticated = False
-                                    st.session_state.user_email = None
-                                    st.session_state.is_admin = False
-                                    st.session_state.lab_name = None
-                                    st.stop()
-
-                                st.session_state.authenticated = True
-                                st.session_state.user_email = login_email
-                                st.session_state.last_activity_time = datetime.now()
-                                st.session_state.is_admin = bool(is_admin_flag)
-                                st.session_state.lab_name = lab_name if not is_admin_flag else None
-
-                                db.update_last_login(login_email)
-                                st.success("Login successful!")
-                                st.balloons()
-                                st.rerun()
-                            else:
-                                st.error("Invalid email or password")
-                        except Exception as e:
-                            st.error(f"Login error: {str(e)}")
-                    else:
-                        st.error("Invalid email or password, or account is inactive")
+                    st.error("Invalid email or password, or account is inactive")
+    
+    with tab2:
+        st.subheader("Approved Laboratories")
+        st.info("""
+        Lab user accounts are pre-configured by the system administrator.
         
-        with tab2:
-            st.subheader("Lab Registration")
-            st.info("""
-            Lab user accounts are pre-configured by the system administrator.
-            
-            Only authorized personnel from approved sentinel site laboratories have access.
-            
-            If you represent an approved laboratory and do not have access credentials,
-            please contact the AMR Surveillance Program administrator.
-            
-            Approved Laboratories:
-            - Eastern Regional Hospital
-            - St. Martin De Porres Hospital Eikwe
-            - Sekondi Public Health Reference Laboratory
-            - Ho Teaching Hospital
-            - Tamale Teaching Hospital
-            - Komfo Anokye Teaching Hospital
-            - Korle-Bu Teaching Hospital
-            - Lekma Hospital
-            - Sunyani Teaching Hospital
-            - Cape Coast Teaching Hospital
-            - National Food Safety Laboratory
-            - CSIR Water Research Institute
-            - Accra Veterinary Laboratory
-            - Kumasi Veterinary Laboratory
-            - Quadushah Medical Diagnostic Limited
-            - Central Veterinary Laboratory
-            - Pong Tamale School
-            - Metropolis Health Care Limited
-            - Alma Medical Laboratory Ltd
-            """)
-            
-            st.warning("Account creation is restricted to authorized laboratories only.")
+        Only authorized personnel from approved sentinel site laboratories have access.
         
-        st.markdown("---")
+        **Approved Laboratories:**
+        • Eastern Regional Hospital
+        • St. Martin De Porres Hospital Eikwe
+        • Sekondi Public Health Reference Laboratory
+        • Ho Teaching Hospital
+        • Tamale Teaching Hospital
+        • Komfo Anokye Teaching Hospital
+        • Korle-Bu Teaching Hospital
+        • Lekma Hospital
+        • Sunyani Teaching Hospital
+        • Cape Coast Teaching Hospital
+        • National Food Safety Laboratory
+        • CSIR Water Research Institute
+        • Accra Veterinary Laboratory
+        • Kumasi Veterinary Laboratory
+        • Quadushah Medical Diagnostic Limited
+        • Central Veterinary Laboratory
+        • Pong Tamale School
+        • Metropolis Health Care Limited
+        • Alma Medical Laboratory Ltd
         
-        st.markdown("""
-            <div style="text-align: center; color: #999; font-size: 0.85em; margin-top: 2rem;">
-                <p>AMR Surveillance Dashboard</p>
-                <p style="font-size: 0.8em;">Multi-source Surveillance System | Ghana</p>
-                <p style="font-size: 0.75em; color: #ccc; margin-top: 1rem;">Please enter your credentials to continue</p>
-            </div>
-        """, unsafe_allow_html=True)
+        Contact the AMR Surveillance Program administrator for access.
+        """)
+    
+    st.markdown("""
+        <div class="login-footer">
+            <p>🇬🇭 AMR Surveillance Dashboard - Ghana</p>
+            <p>Multi-source Surveillance System</p>
+            <p style="margin-top: 0.5rem; opacity: 0.7;">Environment • Food • Human • Animal • Aquaculture</p>
+        </div>
+    """, unsafe_allow_html=True)
     
     st.stop()
 
+# ============================================================================
+# MAIN APP STYLING (After Authentication)
+# ============================================================================
+
+# Professional styling for authenticated users
+st.markdown("""
+    <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Main app background - subtle medical/lab pattern */
+    .stApp {
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.97) 0%, rgba(241, 245, 249, 0.97) 50%, rgba(226, 232, 240, 0.97) 100%),
+                    url('https://images.unsplash.com/photo-1579154204601-01588f351e67?w=1920&q=80');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    /* Sidebar styling with laboratory/microscope background */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, rgba(7, 89, 133, 0.95) 0%, rgba(14, 116, 144, 0.92) 50%, rgba(6, 78, 59, 0.95) 100%),
+                    url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=80');
+        background-size: cover;
+        background-position: center;
+        background-blend-mode: overlay;
+    }
+    
+    [data-testid="stSidebar"] > div:first-child {
+        background: transparent;
+    }
+    
+    /* Sidebar text styling */
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #ecfdf5 !important;
+    }
+    
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label {
+        color: #ecfdf5 !important;
+    }
+    
+    /* Sidebar radio buttons */
+    [data-testid="stSidebar"] .stRadio > label {
+        color: #ecfdf5 !important;
+        font-weight: 500;
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div > label {
+        background: transparent;
+        color: #d1fae5 !important;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin: 2px 0;
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div > label:hover {
+        background: rgba(20, 184, 166, 0.3);
+        color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+    }
+    
+    /* Sidebar button styling */
+    [data-testid="stSidebar"] .stButton > button {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    [data-testid="stSidebar"] .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    }
+    
+    /* Sidebar expander styling */
+    [data-testid="stSidebar"] .streamlit-expanderHeader {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #ecfdf5 !important;
+    }
+    
+    [data-testid="stSidebar"] .streamlit-expanderContent {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0 0 8px 8px;
+    }
+    
+    /* Main content area */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    /* Headers */
+    h1 {
+        background: linear-gradient(135deg, #0f766e 0%, #0891b2 50%, #0284c7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    
+    h2, h3 {
+        color: #0f766e;
+        font-weight: 600;
+    }
+    
+    /* Cards/Containers */
+    .stMetric {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 1.2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(20, 184, 166, 0.2);
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        font-weight: 600;
+        color: #0f766e;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+    }
+    
+    .stButton > button[kind="secondary"] {
+        background: white;
+        color: #0d9488;
+        border: 2px solid #0d9488;
+    }
+    
+    /* Download button */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .stDownloadButton > button:hover {
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+    }
+    
+    /* Select boxes and inputs */
+    .stSelectbox > div > div,
+    .stMultiSelect > div > div,
+    .stTextInput > div > div > input {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        background: rgba(255, 255, 255, 0.9);
+        transition: all 0.2s ease;
+    }
+    
+    .stSelectbox > div > div:focus-within,
+    .stMultiSelect > div > div:focus-within,
+    .stTextInput > div > div > input:focus {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background: rgba(241, 245, 249, 0.9);
+        border-radius: 12px;
+        padding: 4px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px;
+        font-weight: 500;
+        color: #64748b;
+        padding: 0.5rem 1rem;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: white;
+        color: #0d9488;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Success/Error/Info boxes */
+    .stSuccess {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-left: 4px solid #059669;
+        border-radius: 10px;
+    }
+    
+    .stError {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-left: 4px solid #ef4444;
+        border-radius: 10px;
+    }
+    
+    .stInfo {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-left: 4px solid #3b82f6;
+        border-radius: 10px;
+    }
+    
+    .stWarning {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-left: 4px solid #f59e0b;
+        border-radius: 10px;
+    }
+    
+    /* User info card in sidebar */
+    .user-info-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .user-info-card p {
+        margin: 0.3rem 0;
+        color: #ecfdf5;
+    }
+    
+    /* Divider styling */
+    hr {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+        margin: 1.5rem 0;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # App title and description (only shown when authenticated)
-st.title("AMR Surveillance Dashboard")
-st.markdown("### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
+st.markdown("# AMR Surveillance Dashboard")
+st.markdown("##### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
 st.markdown("---")
 
 # Sidebar navigation with user info and admin panel
 with st.sidebar:
-    st.markdown(f"**Logged in as:** {st.session_state.user_email}")
-    if st.session_state.is_admin:
-        st.markdown("**Admin Account**")
-    elif st.session_state.lab_name:
-        st.markdown(f"**Laboratory:** {st.session_state.lab_name}")
+    # Logo/Title
+    st.markdown("""
+        <div style="text-align: center; padding: 1rem 0 1.5rem 0;">
+            <div style="font-size: 2.5em; margin-bottom: 0.5rem;">🔬</div>
+            <div style="font-size: 1.2em; font-weight: 700; color: #e2e8f0;">AMR Dashboard</div>
+            <div style="font-size: 0.85em; color: #94a3b8;">Ghana Surveillance System</div>
+        </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
+    
+    # User info card
+    st.markdown(f"""
+        <div class="user-info-card">
+            <p style="font-size: 0.8em; color: #a7f3d0; margin-bottom: 0.5rem;">Logged in as</p>
+            <p style="font-weight: 600; color: #ecfdf5; font-size: 0.95em;">{st.session_state.user_email}</p>
+            {"<p style='color: #fcd34d; font-size: 0.85em;'>Administrator</p>" if st.session_state.is_admin else ""}
+            {f"<p style='color: #a7f3d0; font-size: 0.85em;'>{st.session_state.lab_name}</p>" if st.session_state.lab_name else ""}
+        </div>
+    """, unsafe_allow_html=True)
     
     if st.button("Logout", use_container_width=True):
         st.session_state.authenticated = False
@@ -305,12 +784,38 @@ with st.sidebar:
         st.rerun()
     
     st.markdown("---")
+    st.markdown("<p style='color: #a7f3d0; font-size: 0.9em; font-weight: 600;'>Navigation</p>", unsafe_allow_html=True)
 
 admin_pages = ["Admin - Users", "Admin - Datasets"] if st.session_state.is_admin else []
 page = st.sidebar.radio(
-    "Navigation",
-    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "Report Export"] + admin_pages
+    "",
+    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "PPS Dashboard", "AMU Dashboard", "AMC Dashboard", "Alerts Dashboard", "Antibiogram", "WHONET Export", "Report Export"] + admin_pages,
+    label_visibility="collapsed"
 )
+
+# ── Priority Pathogen Quick Filter (sidebar) ──────────────────────────
+_pp_filter_path = os.path.join("data", "lookups", "priority_pathogens.json")
+if os.path.exists(_pp_filter_path):
+    with open(_pp_filter_path, "r") as _pf:
+        _pp_lookup = json.load(_pf)
+    _who_pp = _pp_lookup.get("WHO_2024_PRIORITY_PATHOGENS", {})
+    _ghana_pp = _pp_lookup.get("GHANA_PRIORITY_PATHOGENS", {})
+    _all_pp_names = sorted(set(
+        p for pp_dict in [_who_pp, _ghana_pp]
+        for tier_list in pp_dict.values()
+        for p in tier_list
+    ))
+    if _all_pp_names:
+        with st.sidebar.expander("Priority Pathogen Filter", expanded=False):
+            pp_source = st.selectbox("List", ["WHO 2024", "Ghana"], key="pp_source")
+            pp_dict = _who_pp if pp_source == "WHO 2024" else _ghana_pp
+            pp_tier = st.selectbox("Tier", ["All"] + list(pp_dict.keys()), key="pp_tier")
+            if pp_tier == "All":
+                pp_names = sorted(set(p for lst in pp_dict.values() for p in lst))
+            else:
+                pp_names = pp_dict.get(pp_tier, [])
+            st.session_state['priority_pathogen_filter'] = pp_names
+            st.caption(f"{len(pp_names)} pathogens selected")
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
@@ -321,48 +826,48 @@ if page == "Upload & Data Quality":
     col1, col2 = st.columns([2, 1])
     
     with col2:
-        st.subheader("Template Download")
-        # Always generate the latest template with lab dropdown
+        st.subheader("📋 Template Download")
         os.makedirs("templates", exist_ok=True)
         try:
-            template_bytes = validate.create_template_excel()
+            from src.validate_onehealth import create_unified_template
+            unified_bytes = create_unified_template()
             st.download_button(
-                label="Download Template",
-                data=template_bytes,
-                file_name="AMR_ENV_FOOD_template_v1.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                label="⬇ Download Unified Template",
+                data=unified_bytes,
+                file_name="AMR_OneHealth_Unified_Template.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                help="Single workbook with all sheets: samples, ast_results, pps_survey, prescriptions, amu_data, amc_data",
+                use_container_width=True,
             )
         except Exception as e:
-            st.error(f"Error creating template: {e}")
+            st.error(f"Error creating unified template: {e}")
+        st.caption("One Excel file · 6 sheets · fill only what you need")
     
     with col1:
         st.subheader("Upload Data")
         uploaded_file = st.file_uploader(
-            "Upload Excel file with 'samples' and 'ast_results' sheets",
+            "Upload the unified Excel template (samples + AST + PPS + AMU + AMC sheets)",
             type=["xlsx", "xls"]
         )
         
         if uploaded_file:
-            if st.button("Validate Upload"):
-                with st.spinner("Validating..."):
+            if st.button("Validate & Upload", type="primary"):
+                with st.spinner("Validating all sheets..."):
+                    # ── Core AMR (samples + ast_results) ────────────────
                     is_valid, errors, samples_df, ast_df = validate.validate_upload(uploaded_file)
                     
+                    amr_saved = False
                     if is_valid:
-                        st.success("Validation successful!")
-
-                        # Enforce lab_name for lab users
                         if st.session_state.lab_name:
                             lab_values = samples_df['lab_name'].astype(str).str.strip().unique().tolist()
                             if len(lab_values) != 1 or lab_values[0].strip().lower() != st.session_state.lab_name.strip().lower():
                                 st.error("Uploaded data must contain only your laboratory in the lab_name column.")
                                 st.stop()
 
-                        # Check for automated interpretation
                         auto_interpreted_count = ast_df['auto_interpreted'].sum() if 'auto_interpreted' in ast_df.columns else 0
                         if auto_interpreted_count > 0:
-                            st.info(f"Automated interpretation performed on {int(auto_interpreted_count)} AST results using CLSI/EUCAST breakpoints")
+                            st.info(f"🔬 Automated interpretation: {int(auto_interpreted_count)} AST results (CLSI/EUCAST)")
 
-                        # Save to database
                         dataset_id = str(uuid.uuid4())[:8]
                         success, msg = db.save_dataset(
                             dataset_id,
@@ -371,16 +876,90 @@ if page == "Upload & Data Quality":
                             ast_df,
                             uploaded_by=(st.session_state.user_email or "Anonymous")
                         )
-
                         if success:
-                            st.success(f"Data saved with ID: {dataset_id}")
-                            st.balloons()
+                            st.success(f"✅ AMR data saved (ID: {dataset_id}) — {len(samples_df)} samples, {len(ast_df)} tests")
+                            amr_saved = True
                         else:
                             st.error(f"Database error: {msg}")
-                    else:
-                        st.error("Validation failed. Errors:")
-                        for i, error in enumerate(errors, 1):
-                            st.markdown(f"  {i}. {error}")
+                    elif errors:
+                        # Only show AMR errors if sheets existed
+                        uploaded_file.seek(0)
+                        from openpyxl import load_workbook as _lwb
+                        _wb = _lwb(uploaded_file, read_only=True)
+                        _has_amr = 'samples' in _wb.sheetnames or 'ast_results' in _wb.sheetnames
+                        _wb.close()
+                        if _has_amr:
+                            st.warning("⚠ AMR sheets (samples/ast_results) had errors:")
+                            for i, error in enumerate(errors, 1):
+                                st.markdown(f"  {i}. {error}")
+
+                    # ── One Health sheets (PPS / AMU / AMC) ─────────────
+                    uploaded_file.seek(0)
+                    from src.validate_onehealth import validate_unified_upload
+                    oh_ok, oh_errors, oh_result = validate_unified_upload(uploaded_file)
+
+                    oh_any = bool(oh_result)
+                    if oh_errors:
+                        for e in oh_errors:
+                            st.warning(f"⚠ {e}")
+
+                    user_email = st.session_state.get('user_email', 'unknown')
+
+                    # PPS
+                    if 'pps_survey' in oh_result and 'pps_prescriptions' in oh_result:
+                        import uuid as _uuid
+                        survey_raw = oh_result['pps_survey']
+                        # Handle both DataFrame and legacy dict
+                        survey_df = survey_raw if isinstance(survey_raw, pd.DataFrame) else pd.DataFrame([survey_raw])
+                        rx_df = oh_result['pps_prescriptions']
+                        n_surveys = len(survey_df)
+                        n_rx = len(rx_df)
+                        rx_per = max(1, n_rx // n_surveys) if n_surveys else 0
+                        rx_idx = 0
+                        pps_ok_count = 0
+                        for _, srow in survey_df.iterrows():
+                            sid = f"PPS-{_uuid.uuid4().hex[:8]}"
+                            end_idx = min(rx_idx + rx_per, n_rx)
+                            chunk = rx_df.iloc[rx_idx:end_idx] if rx_idx < n_rx else pd.DataFrame()
+                            rx_idx = end_idx
+                            ok, msg = db.save_pps_survey(
+                                sid,
+                                str(srow['facility_name']),
+                                str(srow['survey_date']),
+                                str(srow.get('region', '')),
+                                str(srow.get('district', '')),
+                                int(srow.get('total_patients', 0)),
+                                int(srow.get('patients_on_antibiotics', 0)),
+                                chunk,
+                                uploaded_by=user_email,
+                            )
+                            if ok:
+                                pps_ok_count += 1
+                        if pps_ok_count:
+                            st.success(f"✅ PPS saved — {pps_ok_count} surveys, {n_rx} prescriptions")
+                        else:
+                            st.error("PPS save error: no surveys could be saved")
+
+                    # AMU
+                    if 'amu_data' in oh_result:
+                        amu_df = oh_result['amu_data']
+                        ok_a, msg_a = db.save_amu_records(amu_df, user_email)
+                        if ok_a:
+                            st.success(f"✅ AMU saved — {len(amu_df)} records")
+                        else:
+                            st.error(f"AMU save error: {msg_a}")
+
+                    # AMC
+                    if 'amc_data' in oh_result:
+                        amc_df = oh_result['amc_data']
+                        ok_c, msg_c = db.save_amc_records(amc_df, user_email)
+                        if ok_c:
+                            st.success(f"✅ AMC saved — {len(amc_df)} records")
+                        else:
+                            st.error(f"AMC save error: {msg_c}")
+
+                    if amr_saved or oh_any:
+                        st.balloons()
     
     st.markdown("---")
     
@@ -648,6 +1227,22 @@ elif page == "Resistance Overview":
         # Filters
         st.sidebar.markdown("### Filters")
         
+        # Sentinel Site / Lab filter
+        labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+        if labs:
+            lab_options = ["All"] + labs
+            selected_lab_options = st.sidebar.multiselect(
+                "Sentinel Site / Lab",
+                lab_options,
+                default=["All"]
+            )
+            if "All" in selected_lab_options:
+                selected_labs = labs
+            else:
+                selected_labs = [opt for opt in selected_lab_options if opt != "All"]
+        else:
+            selected_labs = []
+        
         # Organism filter
         organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
         if organisms:
@@ -770,13 +1365,16 @@ elif page == "Resistance Overview":
         
         # Apply filters with validation
         if selected_categories and selected_regions and selected_districts:
-            filtered_samples = all_samples[
+            _mask = (
                 (all_samples['source_category'].astype(str).isin(selected_categories)) &
                 (all_samples['source_type'].astype(str).isin(selected_source_types)) &
                 (all_samples['site_type'].astype(str).isin(selected_site_types)) &
                 (all_samples['region'].astype(str).isin(selected_regions)) &
                 (all_samples['district'].astype(str).isin(selected_districts))
-            ]
+            )
+            if selected_labs and 'lab_name' in all_samples.columns:
+                _mask = _mask & (all_samples['lab_name'].astype(str).isin(selected_labs))
+            filtered_samples = all_samples[_mask]
         else:
             filtered_samples = all_samples
         
@@ -965,6 +1563,15 @@ elif page == "Trends":
         # Filters
         st.sidebar.markdown("### Trend Filters")
         
+        # Sentinel Site / Lab filter
+        _labs_tr = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+        if _labs_tr:
+            _lab_opts_tr = ["All"] + _labs_tr
+            _sel_lab_opts_tr = st.sidebar.multiselect("Sentinel Site / Lab (Trends)", _lab_opts_tr, default=["All"])
+            if "All" not in _sel_lab_opts_tr and _sel_lab_opts_tr:
+                all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_tr)]
+                all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
+        
         organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
         if organisms:
             organism_options = ["All"] + organisms
@@ -1064,7 +1671,17 @@ elif page == "Map Hotspots":
     all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+
+    # Sentinel Site / Lab sidebar filter
+    _labs_map = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _labs_map:
+        st.sidebar.markdown("### Map Filters")
+        _lab_opts_map = ["All"] + _labs_map
+        _sel_lab_opts_map = st.sidebar.multiselect("Sentinel Site / Lab (Map)", _lab_opts_map, default=["All"])
+        if "All" not in _sel_lab_opts_map and _sel_lab_opts_map:
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_map)]
+            all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
+
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
     else:
@@ -1209,7 +1826,17 @@ elif page == "Advanced Analytics":
     all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+
+    # Sentinel Site / Lab sidebar filter
+    _labs_aa = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _labs_aa:
+        st.sidebar.markdown("### Analytics Filters")
+        _lab_opts_aa = ["All"] + _labs_aa
+        _sel_lab_opts_aa = st.sidebar.multiselect("Sentinel Site / Lab (Analytics)", _lab_opts_aa, default=["All"])
+        if "All" not in _sel_lab_opts_aa and _sel_lab_opts_aa:
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_aa)]
+            all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
+
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
     else:
@@ -1430,7 +2057,17 @@ elif page == "Risk Assessment":
     all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+
+    # Sentinel Site / Lab sidebar filter
+    _labs_risk = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _labs_risk:
+        st.sidebar.markdown("### Risk Filters")
+        _lab_opts_risk = ["All"] + _labs_risk
+        _sel_lab_opts_risk = st.sidebar.multiselect("Sentinel Site / Lab (Risk)", _lab_opts_risk, default=["All"])
+        if "All" not in _sel_lab_opts_risk and _sel_lab_opts_risk:
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_risk)]
+            all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
+
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
     else:
@@ -1604,6 +2241,16 @@ elif page == "Comparative Analysis":
     all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
     
     st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+
+    # Sentinel Site / Lab sidebar filter
+    _labs_comp = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _labs_comp:
+        st.sidebar.markdown("### Comparison Filters")
+        _lab_opts_comp = ["All"] + _labs_comp
+        _sel_lab_opts_comp = st.sidebar.multiselect("Sentinel Site / Lab (Comparison)", _lab_opts_comp, default=["All"])
+        if "All" not in _sel_lab_opts_comp and _sel_lab_opts_comp:
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_comp)]
+            all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
 
     if all_ast.empty or all_samples.empty:
         st.warning("No data available in the selected dataset.")
@@ -2674,7 +3321,479 @@ elif page == "Comparative Analysis":
                     st.warning("One or both groups have no data. Please adjust your filters.")
 
 # ============================================================================
-# PAGE 9: REPORT EXPORT
+# PAGE 9: ALERTS DASHBOARD
+# ============================================================================
+elif page == "Alerts Dashboard":
+    st.header("Alerts Dashboard")
+    
+    # Require dataset selection
+    if not st.session_state.active_dataset_id:
+        st.warning("Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    # Import alerts module
+    from src.alerts import (
+        generate_all_alerts, alerts_to_dataframe, get_alert_summary,
+        AlertSeverity, AlertType
+    )
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
+    
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    
+    if all_ast.empty:
+        st.warning("No AST data available for alert generation.")
+    else:
+        # Alert Configuration
+        with st.expander("Alert Configuration", expanded=False):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                critical_threshold = st.slider("Critical Threshold (%)", 50, 95, 80, 5)
+            with col2:
+                high_threshold = st.slider("High Threshold (%)", 30, 80, 60, 5)
+            with col3:
+                medium_threshold = st.slider("Medium Threshold (%)", 20, 60, 40, 5)
+        
+        # Build thresholds dict
+        custom_thresholds = {
+            'critical': critical_threshold,
+            'high': high_threshold,
+            'medium': medium_threshold
+        }
+        
+        # Generate alerts
+        with st.spinner("Analyzing data for alerts..."):
+            alerts = generate_all_alerts(
+                all_ast, 
+                all_samples,
+                thresholds=custom_thresholds
+            )
+        
+        # Alert Summary Cards
+        summary = get_alert_summary(alerts)
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; font-weight: bold;">{summary['critical']}</div>
+                <div>Critical Alerts</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; font-weight: bold;">{summary['high']}</div>
+                <div>High Priority</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #eab308, #ca8a04); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; font-weight: bold;">{summary['medium']}</div>
+                <div>Medium Priority</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col4:
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 32px; font-weight: bold;">{summary['low']}</div>
+                <div>Low Priority</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        if alerts:
+            # Filter alerts by type
+            st.subheader("Alert Details")
+            
+            alert_type_filter = st.multiselect(
+                "Filter by Alert Type",
+                options=[t.value.replace('_', ' ').title() for t in AlertType],
+                default=[t.value.replace('_', ' ').title() for t in AlertType]
+            )
+            
+            severity_filter = st.multiselect(
+                "Filter by Severity",
+                options=[s.value.upper() for s in AlertSeverity],
+                default=[s.value.upper() for s in AlertSeverity]
+            )
+            
+            # Convert to dataframe for display
+            alerts_df = alerts_to_dataframe(alerts)
+            
+            # Apply filters using correct column names
+            filtered_alerts = alerts_df[
+                (alerts_df['Type'].isin(alert_type_filter)) &
+                (alerts_df['Severity'].isin(severity_filter))
+            ]
+            
+            if not filtered_alerts.empty:
+                # Display alerts
+                for _, alert in filtered_alerts.iterrows():
+                    severity_color = {
+                        'CRITICAL': '#ef4444',
+                        'HIGH': '#f97316',
+                        'MEDIUM': '#eab308',
+                        'LOW': '#22c55e'
+                    }.get(alert['Severity'], '#64748b')
+                    
+                    with st.expander(f"{alert['Title']}", expanded=alert['Severity'] == 'CRITICAL'):
+                        st.markdown(f"""
+                        <div style="border-left: 4px solid {severity_color}; padding-left: 15px;">
+                            <p><strong>Severity:</strong> <span style="color: {severity_color}; font-weight: bold;">{alert['Severity']}</span></p>
+                            <p><strong>Type:</strong> {alert['Type']}</p>
+                            <p><strong>Description:</strong> {alert['Description']}</p>
+                            <p><strong>Detected:</strong> {alert['Created']}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if alert['Organism'] != '-':
+                            st.write(f"**Organism:** {alert['Organism']}")
+                        if alert['Antibiotic'] != '-':
+                            st.write(f"**Antibiotic:** {alert['Antibiotic']}")
+                        if alert['Current Value'] != '-':
+                            st.write(f"**Current Value:** {alert['Current Value']}")
+            else:
+                st.info("No alerts match the selected filters.")
+        else:
+            st.success("No alerts detected based on current thresholds. Your data looks good!")
+
+# ============================================================================
+# PAGE 10: ANTIBIOGRAM
+# ============================================================================
+elif page == "Antibiogram":
+    st.header("Cumulative Antibiogram")
+    
+    # Require dataset selection
+    if not st.session_state.active_dataset_id:
+        st.warning("Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    # Import antibiogram module
+    from src.antibiogram import (
+        generate_antibiogram, antibiogram_to_html, antibiogram_to_excel,
+        generate_quarterly_antibiograms, compare_antibiograms,
+        CLSI_MIN_ISOLATES
+    )
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
+    
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    
+    if all_ast.empty:
+        st.warning("No AST data available for antibiogram generation.")
+    else:
+        # Configuration
+        st.subheader("Antibiogram Configuration")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            min_isolates = st.slider(
+                "Minimum Isolates for Reporting",
+                min_value=5, max_value=50, value=30, step=5,
+                help=f"CLSI recommends minimum {CLSI_MIN_ISOLATES} isolates for cumulative antibiograms"
+            )
+        with col2:
+            include_all = st.checkbox(
+                "Include combinations below threshold",
+                value=False,
+                help="Show all combinations (marked with *) even if below minimum isolates"
+            )
+        with col3:
+            lab_filter = st.selectbox(
+                "Filter by Laboratory",
+                options=["All Laboratories"] + sorted(all_samples['lab_name'].dropna().unique().tolist())
+            )
+        
+        # Apply lab filter
+        if lab_filter != "All Laboratories":
+            filtered_samples = all_samples[all_samples['lab_name'] == lab_filter]
+            filtered_ast = all_ast[all_ast['sample_id'].isin(filtered_samples['sample_id'])]
+            lab_name = lab_filter
+        else:
+            filtered_ast = all_ast
+            lab_name = "All Laboratories"
+        
+        # Generate antibiogram
+        with st.spinner("Generating antibiogram..."):
+            antibiogram = generate_antibiogram(
+                filtered_ast,
+                lab_name=lab_name,
+                min_isolates=min_isolates,
+                include_all=include_all
+            )
+        
+        if 'error' in antibiogram and antibiogram.get('matrix') is None:
+            st.error(antibiogram['error'])
+        else:
+            # Summary statistics
+            st.subheader("Summary")
+            summary = antibiogram.get('summary', {})
+            
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Total Isolates", summary.get('total_isolates', 0))
+            with col2:
+                st.metric("Organisms", summary.get('total_organisms', 0))
+            with col3:
+                st.metric("Antibiotics", summary.get('total_antibiotics', 0))
+            with col4:
+                avg_susc = summary.get('overall_susceptibility', 0)
+                st.metric("Avg Susceptibility", f"{avg_susc:.1f}%" if avg_susc else "N/A")
+            
+            st.markdown("---")
+            
+            # Display antibiogram
+            st.subheader("Antibiogram Matrix")
+            st.markdown("*Values show % Susceptible (number tested)*")
+            
+            # Display as interactive DataFrame with color styling
+            matrix = antibiogram.get('matrix', pd.DataFrame())
+            numeric_matrix = antibiogram.get('numeric_matrix', pd.DataFrame())
+            
+            if not matrix.empty:
+                # Create styled dataframe
+                def color_cells(val):
+                    try:
+                        # Extract numeric value from string like "85 (20)"
+                        if pd.isna(val) or val == '-':
+                            return 'background-color: #f0f0f0'
+                        num_str = str(val).split('(')[0].strip().replace('*', '')
+                        num = float(num_str) if num_str else 0
+                        if num >= 90:
+                            return 'background-color: #10b981; color: white'
+                        elif num >= 70:
+                            return 'background-color: #84cc16; color: white'
+                        elif num >= 50:
+                            return 'background-color: #fbbf24; color: #1f2937'
+                        elif num >= 30:
+                            return 'background-color: #f97316; color: white'
+                        else:
+                            return 'background-color: #ef4444; color: white'
+                    except:
+                        return 'background-color: #f0f0f0'
+                
+                styled_df = matrix.style.applymap(color_cells)
+                st.dataframe(styled_df, use_container_width=True, height=400)
+                
+                # Legend
+                st.markdown("""
+                <div style="margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                    <p style="font-weight: 600; margin-bottom: 5px;">Legend:</p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; font-size: 12px;">
+                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #10b981; margin-right: 5px; vertical-align: middle;"></span>≥90% Susceptible</span>
+                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #84cc16; margin-right: 5px; vertical-align: middle;"></span>70-89%</span>
+                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #fbbf24; margin-right: 5px; vertical-align: middle;"></span>50-69%</span>
+                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #f97316; margin-right: 5px; vertical-align: middle;"></span>30-49%</span>
+                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #ef4444; margin-right: 5px; vertical-align: middle;"></span>&lt;30%</span>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 11px; color: #64748b;">* indicates fewer than minimum isolates (interpret with caution)</p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.warning("No antibiogram matrix data available.")
+            
+            # High resistance alerts
+            if summary.get('lowest_susceptibility_combinations'):
+                st.markdown("---")
+                st.subheader("High Resistance Alerts")
+                st.markdown("*Organism-antibiotic combinations with lowest susceptibility:*")
+                
+                for combo in summary['lowest_susceptibility_combinations']:
+                    resistance = 100 - combo['pct_susceptible']
+                    color = '#ef4444' if resistance >= 70 else '#f97316' if resistance >= 50 else '#eab308'
+                    st.markdown(f"""
+                    <div style="background: #f8fafc; padding: 10px; margin: 5px 0; border-radius: 5px; border-left: 4px solid {color};">
+                        <strong>{combo['organism']}</strong> vs <strong>{combo['antibiotic']}</strong>: 
+                        <span style="color: {color}; font-weight: bold;">{resistance:.0f}% resistant</span>
+                        ({combo['total']} tested)
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            # Export options
+            st.markdown("---")
+            st.subheader("Export Antibiogram")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                # HTML export
+                html_data = antibiogram_to_html(antibiogram)
+                st.download_button(
+                    label="Download as HTML",
+                    data=html_data,
+                    file_name=f"antibiogram_{lab_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.html",
+                    mime="text/html"
+                )
+            with col2:
+                # Excel export
+                try:
+                    excel_data = antibiogram_to_excel(antibiogram)
+                    st.download_button(
+                        label="Download as Excel",
+                        data=excel_data,
+                        file_name=f"antibiogram_{lab_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                except Exception as e:
+                    st.warning(f"Excel export requires openpyxl: {e}")
+
+# ============================================================================
+# PAGE 11: WHONET EXPORT
+# ============================================================================
+elif page == "WHONET Export":
+    st.header("WHONET Data Export")
+    st.markdown("*Export data in WHONET format for integration with WHO GLASS and global surveillance networks.*")
+    
+    # Require dataset selection
+    if not st.session_state.active_dataset_id:
+        st.warning("Please select a dataset in the 'Data Management' page first.")
+        st.stop()
+    
+    # Import WHONET module
+    from src.whonet import (
+        convert_to_whonet_format, export_to_whonet_txt, export_to_whonet_excel,
+        generate_glass_report, validate_whonet_data, generate_glass_html_report
+    )
+    
+    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
+    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
+    
+    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    
+    if all_ast.empty or all_samples.empty:
+        st.warning("No data available for WHONET export.")
+    else:
+        # Lab configuration
+        st.subheader("Laboratory Information")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            lab_code = st.text_input("Laboratory Code", value="GH001", help="WHONET laboratory identifier")
+        with col2:
+            lab_name = st.text_input("Laboratory Name", value="AMR Surveillance Lab Ghana")
+        
+        lab_info = {'code': lab_code, 'name': lab_name}
+        
+        # Convert to WHONET format
+        with st.spinner("Converting data to WHONET format..."):
+            whonet_df = convert_to_whonet_format(all_samples, all_ast, lab_info)
+        
+        if whonet_df.empty:
+            st.error("Unable to convert data to WHONET format.")
+        else:
+            # Validate data
+            validation = validate_whonet_data(whonet_df)
+            
+            # Summary
+            st.subheader("Export Summary")
+            
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Total Records", len(whonet_df))
+            with col2:
+                st.metric("Unique Organisms", validation['statistics'].get('unique_organisms', 0))
+            with col3:
+                st.metric("Antibiotics", len(validation['statistics'].get('antibiotics', [])))
+            with col4:
+                status_icon = "Valid" if validation['is_valid'] else "Issues"
+                st.metric("Status", status_icon)
+            
+            # Validation results
+            if not validation['is_valid'] or validation['warnings']:
+                with st.expander("Validation Details", expanded=not validation['is_valid']):
+                    if validation['errors']:
+                        for error in validation['errors']:
+                            st.error(error)
+                    if validation['warnings']:
+                        for warning in validation['warnings']:
+                            st.warning(warning)
+            
+            # Preview
+            st.subheader("Data Preview")
+            st.dataframe(whonet_df.head(20), use_container_width=True)
+            
+            st.markdown("---")
+            
+            # GLASS Report
+            st.subheader("WHO GLASS Summary")
+            
+            glass_report = generate_glass_report(whonet_df)
+            
+            if 'error' not in glass_report:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("**Organism Distribution:**")
+                    for org, count in list(glass_report.get('organisms', {}).items())[:10]:
+                        st.write(f"- {org}: {count}")
+                
+                with col2:
+                    st.markdown("**Specimen Types:**")
+                    for spec, count in glass_report.get('specimen_distribution', {}).items():
+                        st.write(f"- {spec}: {count}")
+                
+                # Priority pathogen resistance rates
+                if glass_report.get('resistance_rates'):
+                    st.markdown("---")
+                    st.markdown("**Priority Pathogen Resistance Rates:**")
+                    
+                    for org, data in glass_report['resistance_rates'].items():
+                        with st.expander(f"{org} (n={data['isolate_count']})"):
+                            for ab, ab_data in data.get('antibiotics', {}).items():
+                                rate = ab_data.get('resistance_rate', 0)
+                                color = 'red' if rate >= 50 else 'orange' if rate >= 30 else 'green'
+                                st.markdown(f"- **{ab}**: {rate:.1f}% resistant ({ab_data['tested']} tested)")
+            
+            st.markdown("---")
+            
+            # Export options
+            st.subheader("Export Options")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                # Tab-delimited text (standard WHONET format)
+                txt_data = export_to_whonet_txt(whonet_df)
+                st.download_button(
+                    label="Download WHONET Text",
+                    data=txt_data,
+                    file_name=f"WHONET_export_{datetime.now().strftime('%Y%m%d')}.txt",
+                    mime="text/plain",
+                    help="Standard WHONET tab-delimited format"
+                )
+            
+            with col2:
+                # Excel format
+                try:
+                    excel_data = export_to_whonet_excel(whonet_df)
+                    st.download_button(
+                        label="Download WHONET Excel",
+                        data=excel_data,
+                        file_name=f"WHONET_export_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                except Exception as e:
+                    st.warning(f"Excel export requires openpyxl: {e}")
+            
+            with col3:
+                # GLASS summary HTML report
+                glass_html = generate_glass_html_report(glass_report)
+                st.download_button(
+                    label="Download GLASS Report",
+                    data=glass_html,
+                    file_name=f"GLASS_Report_{datetime.now().strftime('%Y%m%d')}.html",
+                    mime="text/html",
+                    help="WHO GLASS formatted HTML report"
+                )
+
+# ============================================================================
+# PAGE 12: REPORT EXPORT
 # ============================================================================
 elif page == "Report Export":
     st.header("Report Export")
@@ -2942,13 +4061,6 @@ elif page == "Report Export":
                 if selected_dataset_display != "None":
                     selected_dataset_name = selected_dataset_display.split('(')[0].strip()
 
-            report_format = st.radio(
-                "Report Format",
-                options=["HTML", "PDF"],
-                horizontal=True,
-                key="report_format"
-            )
-
             if st.button("Generate Technical Report", type="primary", use_container_width=True):
                 with st.spinner("Generating comprehensive technical report with filtered data..."):
                     try:
@@ -2960,7 +4072,11 @@ elif page == "Report Export":
                             selected_categories,
                             selected_regions,
                             selected_organisms,
-                            selected_antibiotics
+                            selected_antibiotics,
+                            pps_df=db.get_pps_surveys(),
+                            pps_rx_df=db.get_pps_prescriptions(),
+                            amu_df=db.get_amu_records(),
+                            amc_df=db.get_amc_records(),
                         )
 
                         # Success message
@@ -2978,29 +4094,36 @@ elif page == "Report Export":
 
                         # Download button
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                        if report_format == "PDF":
-                            pdf_bytes = report.generate_pdf_from_html(html_content)
-                            filename = f"AMR_Report_Filtered_{timestamp}.pdf"
-                            st.download_button(
-                                label="Download PDF Report",
-                                data=pdf_bytes,
-                                file_name=filename,
-                                mime="application/pdf",
-                                use_container_width=True
-                            )
-                        else:
-                            filename = f"AMR_Report_Filtered_{timestamp}.html"
-                            st.download_button(
-                                label="Download HTML Report",
-                                data=html_content,
-                                file_name=filename,
-                                mime="text/html",
-                                use_container_width=True
-                            )
+                        filename = f"AMR_Report_Filtered_{timestamp}.html"
+                        st.download_button(
+                            label="Download HTML Report",
+                            data=html_content,
+                            file_name=filename,
+                            mime="text/html",
+                            use_container_width=True
+                        )
 
                     except Exception as e:
                         st.error(f"Error generating report: {str(e)}")
                         st.info("Please check your data and try again. If the error persists, contact support.")
+
+# ============================================================================
+# PAGE 14: PPS DASHBOARD
+# ============================================================================
+elif page == "PPS Dashboard":
+    render_pps_page()
+
+# ============================================================================
+# PAGE 16: AMU DASHBOARD
+# ============================================================================
+elif page == "AMU Dashboard":
+    render_amu_page()
+
+# ============================================================================
+# PAGE 17: AMC DASHBOARD
+# ============================================================================
+elif page == "AMC Dashboard":
+    render_amc_page()
 
 # ============================================================================
 # PAGE 10: ADMIN - USER MANAGEMENT

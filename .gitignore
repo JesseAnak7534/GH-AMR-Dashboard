@@ -27,23 +27,20 @@ __pycache__/
 *.swp
 *.swo
 *~
-.DS_Store
-
-# Streamlit cache
-.streamlit/
-*.streamlit/
-
-# Generated reports and data
-*.html
-*.pdf
-
-# Logs
-*.log
-logs/
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Archive folder (old docs, generators, personal files)
+_archive/
+
+# Generated reports and data
+*.html
+
+# Logs
+*.log
+logs/
 
 # Testing
 .pytest_cache/
@@ -58,4 +55,5 @@ dist/
 # Temporary files
 tmp/
 temp/
+~$*
 *.tmp
