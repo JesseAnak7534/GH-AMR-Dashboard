@@ -9,6 +9,186 @@ from datetime import datetime, timedelta
 
 
 # ============================================================================
+# SENTINEL PHENOTYPE DETECTION (WHO Priority)
+# ============================================================================
+
+# WHO priority phenotype definitions
+_SENTINEL_PHENOTYPES = {
+    "MRSA": {
+        "label": "Methicillin-Resistant S. aureus",
+        "organism_kw": ["staphylococcus aureus"],
+        "antibiotics": ["oxacillin", "methicillin", "cefoxitin"],
+        "min_resistant": 1,
+        "who_tier": "High",
+    },
+    "ESBL-Ec": {
+        "label": "ESBL-producing E. coli",
+        "organism_kw": ["escherichia coli"],
+        "antibiotics": ["ceftriaxone", "cefotaxime", "ceftazidime", "cefpodoxime"],
+        "min_resistant": 2,
+        "who_tier": "Critical",
+    },
+    "ESBL-Kp": {
+        "label": "ESBL-producing K. pneumoniae",
+        "organism_kw": ["klebsiella pneumoniae"],
+        "antibiotics": ["ceftriaxone", "cefotaxime", "ceftazidime", "cefpodoxime"],
+        "min_resistant": 2,
+        "who_tier": "Critical",
+    },
+    "CRE": {
+        "label": "Carbapenem-Resistant Enterobacterales",
+        "organism_kw": ["escherichia", "klebsiella", "enterobacter", "salmonella",
+                        "proteus", "citrobacter", "serratia"],
+        "antibiotics": ["imipenem", "meropenem", "ertapenem", "doripenem"],
+        "min_resistant": 1,
+        "who_tier": "Critical",
+    },
+    "CRPA": {
+        "label": "Carbapenem-Resistant P. aeruginosa",
+        "organism_kw": ["pseudomonas aeruginosa"],
+        "antibiotics": ["imipenem", "meropenem", "doripenem"],
+        "min_resistant": 1,
+        "who_tier": "Critical",
+    },
+    "CRAB": {
+        "label": "Carbapenem-Resistant A. baumannii",
+        "organism_kw": ["acinetobacter baumannii", "acinetobacter sp"],
+        "antibiotics": ["imipenem", "meropenem", "doripenem"],
+        "min_resistant": 1,
+        "who_tier": "Critical",
+    },
+    "VRE": {
+        "label": "Vancomycin-Resistant Enterococcus",
+        "organism_kw": ["enterococcus"],
+        "antibiotics": ["vancomycin"],
+        "min_resistant": 1,
+        "who_tier": "High",
+    },
+    "3GCRKP": {
+        "label": "3rd-Gen Cephalosporin-Resistant K. pneumoniae",
+        "organism_kw": ["klebsiella pneumoniae"],
+        "antibiotics": ["ceftriaxone", "cefotaxime", "ceftazidime"],
+        "min_resistant": 1,
+        "who_tier": "Critical",
+    },
+    "FQ-Salm": {
+        "label": "Fluoroquinolone-Resistant Salmonella",
+        "organism_kw": ["salmonella"],
+        "antibiotics": ["ciprofloxacin", "levofloxacin", "norfloxacin"],
+        "min_resistant": 1,
+        "who_tier": "High",
+    },
+}
+
+
+def detect_sentinel_phenotypes(ast_df: pd.DataFrame) -> List[Dict]:
+    """Detect WHO-priority sentinel phenotypes in AST data.
+
+    Returns a list of dicts: {code, label, who_tier, isolate_count,
+    resistance_rate, total_tested, isolate_ids}
+    """
+    if ast_df.empty:
+        return []
+
+    results = []
+    for code, spec in _SENTINEL_PHENOTYPES.items():
+        org_kws = spec["organism_kw"]
+        target_abs = [a.lower() for a in spec["antibiotics"]]
+        min_r = spec["min_resistant"]
+
+        # Filter to matching organisms
+        org_mask = ast_df["organism"].str.lower().apply(
+            lambda o: any(kw in o for kw in org_kws) if pd.notna(o) else False
+        )
+        org_ast = ast_df[org_mask]
+        if org_ast.empty:
+            continue
+
+        # For each isolate, check if it meets the resistance criterion
+        positive_ids = set()
+        tested_ids = set()
+        for iso_id, grp in org_ast.groupby("isolate_id"):
+            ab_tested = grp[grp["antibiotic"].str.lower().isin(target_abs)]
+            if ab_tested.empty:
+                continue
+            tested_ids.add(iso_id)
+            n_resistant = (ab_tested["result"] == "R").sum()
+            if n_resistant >= min_r:
+                positive_ids.add(iso_id)
+
+        if not tested_ids:
+            continue
+
+        results.append({
+            "code": code,
+            "label": spec["label"],
+            "who_tier": spec["who_tier"],
+            "isolate_count": len(positive_ids),
+            "total_tested": len(tested_ids),
+            "resistance_rate": round(len(positive_ids) / len(tested_ids) * 100, 1),
+            "isolate_ids": list(positive_ids),
+        })
+
+    return sorted(results, key=lambda r: r["isolate_count"], reverse=True)
+
+
+def calculate_mdro_incidence(ast_df: pd.DataFrame, total_admissions: int = 0) -> Dict:
+    """Calculate MDRO incidence metrics.
+
+    If *total_admissions* > 0, computes per-1 000-admissions rate (GASS-style KPI).
+    Always returns absolute MDR counts and MDR rate (% of isolates).
+    """
+    if ast_df.empty:
+        return {"mdr_isolates": 0, "total_isolates": 0, "mdr_rate_pct": 0,
+                "mdro_per_1000_admissions": None}
+
+    _CLASS_MAP = {
+        "amoxicillin": "PEN", "ampicillin": "PEN", "piperacillin": "PEN",
+        "oxacillin": "PEN", "penicillin": "PEN",
+        "cefazolin": "C1G", "cephalexin": "C1G",
+        "cefuroxime": "C2G", "cefoxitin": "C2G",
+        "ceftriaxone": "C3G", "cefotaxime": "C3G", "ceftazidime": "C3G",
+        "cefepime": "C4G",
+        "imipenem": "CAR", "meropenem": "CAR", "ertapenem": "CAR",
+        "doripenem": "CAR",
+        "gentamicin": "AMG", "amikacin": "AMG", "tobramycin": "AMG",
+        "ciprofloxacin": "FQ", "levofloxacin": "FQ", "moxifloxacin": "FQ",
+        "norfloxacin": "FQ",
+        "tetracycline": "TET", "doxycycline": "TET", "minocycline": "TET",
+        "tigecycline": "TET",
+        "trimethoprim-sulfamethoxazole": "SUL", "trimethoprim": "SUL",
+        "azithromycin": "MAC", "erythromycin": "MAC", "clarithromycin": "MAC",
+        "colistin": "POL", "polymyxin b": "POL",
+        "vancomycin": "GLY", "teicoplanin": "GLY",
+        "chloramphenicol": "CHL", "nitrofurantoin": "NIT",
+    }
+
+    mdr_ids = set()
+    all_isolates = set()
+    for iso_id, grp in ast_df.groupby("isolate_id"):
+        all_isolates.add(iso_id)
+        resistant = grp[grp["result"] == "R"]
+        if resistant.empty:
+            continue
+        classes = {_CLASS_MAP.get(a.strip().lower(), "OTH") for a in resistant["antibiotic"]}
+        classes.discard("OTH")
+        if len(classes) >= 3:
+            mdr_ids.add(iso_id)
+
+    total = len(all_isolates)
+    mdr = len(mdr_ids)
+    result = {
+        "mdr_isolates": mdr,
+        "total_isolates": total,
+        "mdr_rate_pct": round(mdr / max(total, 1) * 100, 1),
+        "mdro_per_1000_admissions": None,
+    }
+    if total_admissions > 0:
+        result["mdro_per_1000_admissions"] = round(mdr / total_admissions * 1000, 2)
+    return result
+
+
+# ============================================================================
 # RESISTANCE MECHANISM DETECTION
 # ============================================================================
 

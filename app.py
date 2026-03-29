@@ -31,6 +31,9 @@ from src.lab_management import (
 from src.page_pps import render_pps_page
 from src.page_amu import render_amu_page
 from src.page_amc import render_amc_page
+from src.page_heatmap import render_heatmap_page
+from src.page_pathogen_profile import render_pathogen_profile_page
+from src.page_hai import render_hai_page
 
 # Page configuration
 st.set_page_config(
@@ -789,7 +792,7 @@ with st.sidebar:
 admin_pages = ["Admin - Users", "Admin - Datasets"] if st.session_state.is_admin else []
 page = st.sidebar.radio(
     "",
-    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "PPS Dashboard", "AMU Dashboard", "AMC Dashboard", "Alerts Dashboard", "Antibiogram", "WHONET Export", "Report Export"] + admin_pages,
+    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Resistance Heat Map", "Pathogen Profile", "HAI Profile", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "PPS Dashboard", "AMU Dashboard", "AMC Dashboard", "Alerts Dashboard", "Antibiogram", "WHONET Export", "Report Export"] + admin_pages,
     label_visibility="collapsed"
 )
 
@@ -1410,6 +1413,61 @@ elif page == "Resistance Overview":
             with col4:
                 st.metric("Unique Organisms", filtered_ast['organism'].nunique())
             
+            # ── Sentinel Phenotype & MDRO KPI Row ──────────────────────
+            from src.analytics import detect_sentinel_phenotypes, calculate_mdro_incidence
+            _sentinel = detect_sentinel_phenotypes(filtered_ast)
+            _mdro = calculate_mdro_incidence(filtered_ast)
+
+            if _sentinel or _mdro.get("mdr_isolates", 0) > 0:
+                st.markdown("""
+                <style>
+                .sentinel-row { display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1rem; }
+                .sentinel-card {
+                    flex:1; min-width:110px; padding:0.7rem 0.6rem; border-radius:10px;
+                    text-align:center; border:1px solid rgba(0,0,0,0.08);
+                }
+                .sentinel-card.crit { background:linear-gradient(135deg,#5c1e1e,#3d1010); }
+                .sentinel-card.high { background:linear-gradient(135deg,#5c4a1e,#3d3010); }
+                .sentinel-card.info { background:linear-gradient(135deg,#1e3a5f,#0d253f); }
+                .sentinel-card .sv { font-size:1.5rem; font-weight:700; color:#fff; }
+                .sentinel-card .sl { font-size:0.72rem; color:rgba(255,255,255,0.65); margin-top:0.15rem; }
+                </style>
+                """, unsafe_allow_html=True)
+
+                cards_html = '<div class="sentinel-row">'
+                # MDRO card
+                _mdr_n = _mdro.get("mdr_isolates", 0)
+                _mdr_pct = _mdro.get("mdr_rate_pct", 0)
+                cards_html += (
+                    f'<div class="sentinel-card {"crit" if _mdr_pct >= 30 else "info"}">'
+                    f'<div class="sv">{_mdr_n}</div>'
+                    f'<div class="sl">MDR Isolates ({_mdr_pct:.0f}%)</div></div>'
+                )
+                # Sentinel phenotype cards (top 5)
+                for sp in _sentinel[:5]:
+                    tier_class = "crit" if sp["who_tier"] == "Critical" else "high"
+                    cards_html += (
+                        f'<div class="sentinel-card {tier_class}">'
+                        f'<div class="sv">{sp["isolate_count"]}</div>'
+                        f'<div class="sl">{sp["code"]} ({sp["resistance_rate"]:.0f}%)</div></div>'
+                    )
+                cards_html += '</div>'
+                st.markdown(cards_html, unsafe_allow_html=True)
+
+                with st.expander("Sentinel Phenotype Details", expanded=False):
+                    if _sentinel:
+                        _sp_df = pd.DataFrame([{
+                            "Phenotype": s["code"],
+                            "Description": s["label"],
+                            "WHO Tier": s["who_tier"],
+                            "Positive Isolates": s["isolate_count"],
+                            "Tested": s["total_tested"],
+                            "Rate %": s["resistance_rate"],
+                        } for s in _sentinel])
+                        st.dataframe(_sp_df, use_container_width=True, hide_index=True)
+                    else:
+                        st.info("No WHO sentinel phenotypes detected in the current data.")
+
             st.markdown("---")
             
             # Charts
@@ -1538,6 +1596,24 @@ elif page == "Resistance Overview":
             st.subheader("Data Preview")
             display_df = filtered_ast[['sample_id', 'organism', 'antibiotic', 'result', 'method', 'test_date']].head(100)
             st.dataframe(display_df, use_container_width=True)
+
+# ============================================================================
+# PAGE: RESISTANCE HEAT MAP
+# ============================================================================
+elif page == "Resistance Heat Map":
+    render_heatmap_page()
+
+# ============================================================================
+# PAGE: PATHOGEN PROFILE
+# ============================================================================
+elif page == "Pathogen Profile":
+    render_pathogen_profile_page()
+
+# ============================================================================
+# PAGE: HAI PROFILE
+# ============================================================================
+elif page == "HAI Profile":
+    render_hai_page()
 
 # ============================================================================
 # PAGE 4: TRENDS
