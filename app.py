@@ -37,7 +37,7 @@ from src.page_hai import render_hai_page
 
 # Page configuration
 st.set_page_config(
-    page_title="AMR Surveillance Dashboard",
+    page_title="ICBB-AMRSS",
     page_icon="🔬",
     layout="centered",
     initial_sidebar_state="expanded"
@@ -379,8 +379,8 @@ if not st.session_state.authenticated:
     
     # Centered login form
     st.markdown('<div class="login-icon">🔬</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-title">AMR Dashboard</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitle">Antimicrobial Resistance Surveillance System</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">ICBB-AMRSS</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">ICBB AMR Surveillance System</div>', unsafe_allow_html=True)
     st.markdown('<div style="text-align:center;"><span class="login-badge">Secure Access Portal</span></div>', unsafe_allow_html=True)
     
     # Create tabs for login and info
@@ -476,8 +476,8 @@ if not st.session_state.authenticated:
     
     st.markdown("""
         <div class="login-footer">
-            <p>🇬🇭 AMR Surveillance Dashboard - Ghana</p>
-            <p>Multi-source Surveillance System</p>
+            <p>🇬🇭 ICBB-AMRSS</p>
+            <p>ICBB AMR Surveillance System</p>
             <p style="margin-top: 0.5rem; opacity: 0.7;">Environment • Food • Human • Animal • Aquaculture</p>
         </div>
     """, unsafe_allow_html=True)
@@ -750,8 +750,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # App title and description (only shown when authenticated)
-st.markdown("# AMR Surveillance Dashboard")
-st.markdown("##### Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
+st.markdown("# ICBB-AMRSS")
+st.markdown("##### ICBB AMR Surveillance System — Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
 st.markdown("---")
 
 # Sidebar navigation with user info and admin panel
@@ -760,8 +760,8 @@ with st.sidebar:
     st.markdown("""
         <div style="text-align: center; padding: 1rem 0 1.5rem 0;">
             <div style="font-size: 2.5em; margin-bottom: 0.5rem;">🔬</div>
-            <div style="font-size: 1.2em; font-weight: 700; color: #e2e8f0;">AMR Dashboard</div>
-            <div style="font-size: 0.85em; color: #94a3b8;">Ghana Surveillance System</div>
+            <div style="font-size: 1.2em; font-weight: 700; color: #e2e8f0;">ICBB-AMRSS</div>
+            <div style="font-size: 0.85em; color: #94a3b8;">ICBB AMR Surveillance System</div>
         </div>
     """, unsafe_allow_html=True)
     
@@ -4170,7 +4170,7 @@ elif page == "Admin - Users":
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 30px;">
-    <p>AMR Surveillance Dashboard | Multi-source Surveillance | Ghana</p>
+    <p>ICBB-AMRSS | ICBB AMR Surveillance System | Ghana</p>
     <p>Data stored locally in SQLite. No internet required.</p>
     <p><em>For academic and policy use. Always consult AMR experts for decision-making.</em></p>
 </div>

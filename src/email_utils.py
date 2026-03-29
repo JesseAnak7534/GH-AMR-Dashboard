@@ -70,16 +70,16 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
         try:
             body_text = (
                 "Hello,\n\n"
-                "Use the code below to verify your email for the AMR Dashboard, or click the link provided.\n\n"
+                "Use the code below to verify your email for ICBB-AMRSS, or click the link provided.\n\n"
                 f"Verification Code: {code}\n"
                 + (f"Verification Link: {link}\n\n" if link else "") +
                 "This code expires in 30 minutes.\n\n"
-                "Regards,\nAMR Dashboard Team"
+                "Regards,\nICBB-AMRSS Team"
             )
             payload = {
                 "personalizations": [{"to": [{"email": to_email}]}],
                 "from": {"email": sg_from},
-                "subject": f"AMR Dashboard Email Verification ({country})",
+                "subject": f"ICBB-AMRSS Email Verification ({country})",
                 "content": [{"type": "text/plain", "value": body_text}],
             }
             resp = requests.post(
@@ -104,14 +104,14 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
 
     if mc_enable and mc_from:
         try:
-            subject = f"AMR Dashboard Email Verification ({country})"
+            subject = f"ICBB-AMRSS Email Verification ({country})"
             body_text = (
                 "Hello,\n\n"
-                "Use the code below to verify your email for the AMR Dashboard, or click the link provided.\n\n"
+                "Use the code below to verify your email for ICBB-AMRSS, or click the link provided.\n\n"
                 f"Verification Code: {code}\n"
                 + (f"Verification Link: {link}\n\n" if link else "") +
                 "This code expires in 30 minutes.\n\n"
-                "Regards,\nAMR Dashboard Team"
+                "Regards,\nICBB-AMRSS Team"
             )
 
             personalization = {"to": [{"email": to_email}]}
@@ -151,7 +151,7 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
 
     try:
         msg = EmailMessage()
-        msg["Subject"] = f"AMR Dashboard Email Verification ({country})"
+        msg["Subject"] = f"ICBB-AMRSS Email Verification ({country})"
         msg["From"] = cfg["from_email"]
         # Optional: set Reply-To to admin
         if os.getenv("ADMIN_EMAIL"):
@@ -159,11 +159,11 @@ def send_verification_email(to_email: str, code: str, country: str = "Ghana") ->
         msg["To"] = to_email
         body_text = (
             "Hello,\n\n"
-            "Use the code below to verify your email for the AMR Dashboard, or click the link provided.\n\n"
+            "Use the code below to verify your email for ICBB-AMRSS, or click the link provided.\n\n"
             f"Verification Code: {code}\n"
             + (f"Verification Link: {link}\n\n" if link else "") +
             "This code expires in 30 minutes.\n\n"
-            "Regards,\nAMR Dashboard Team"
+            "Regards,\nICBB-AMRSS Team"
         )
         msg.set_content(body_text)
 

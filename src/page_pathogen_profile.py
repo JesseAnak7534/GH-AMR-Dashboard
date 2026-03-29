@@ -87,6 +87,8 @@ def render_pathogen_profile_page():
         return
 
     # ── organism selector ───────────────────────────────────────────────
+    all_ast = all_ast.dropna(subset=["organism", "result"])
+    all_ast = all_ast[all_ast["result"].isin(["R", "I", "S"])]
     org_counts = all_ast["organism"].value_counts()
     org_list = org_counts.index.tolist()
 

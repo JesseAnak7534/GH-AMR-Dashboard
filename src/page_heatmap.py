@@ -137,6 +137,8 @@ def render_heatmap_page():
     )
 
     # ── compute resistance matrix ───────────────────────────────────────
+    all_ast = all_ast.dropna(subset=["organism", "antibiotic", "result"])
+    all_ast = all_ast[all_ast["result"].isin(["R", "I", "S"])]
     combo = all_ast.groupby(["organism", "antibiotic", "result"]).size().reset_index(name="n")
     pivot = combo.pivot_table(index=["organism", "antibiotic"], columns="result", values="n", fill_value=0)
     pivot = pivot.reset_index()

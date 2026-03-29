@@ -709,7 +709,7 @@ def generate_glass_html_report(glass_report: Dict) -> str:
             <div class="footer">
                 <p><strong>WHO GLASS Summary Report</strong></p>
                 <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
-                <p>Ghana Food Safety Authority - AMR Surveillance Dashboard</p>
+                <p>Ghana Food Safety Authority — ICBB-AMRSS</p>
                 <p><em>For official GLASS submission, please use the WHONET software with the exported data file.</em></p>
             </div>
         </div>

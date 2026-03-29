@@ -171,8 +171,16 @@ def render_hai_page():
         st.info("No AST results linked to hospital samples.")
         return
 
-    # ── Flag nosocomial organisms ───────────────────────────────────────
+    # ── Clean result values ──────────────────────────────────────────────
     hospital_ast = hospital_ast.copy()
+    hospital_ast = hospital_ast.dropna(subset=["result", "organism"])
+    hospital_ast = hospital_ast[hospital_ast["result"].isin(["R", "I", "S"])]
+
+    if hospital_ast.empty:
+        st.info("No valid AST results linked to hospital samples.")
+        return
+
+    # ── Flag nosocomial organisms ───────────────────────────────────────
     hospital_ast["is_nosocomial"] = hospital_ast["organism"].apply(_is_nosocomial)
     nosocomial_ast = hospital_ast[hospital_ast["is_nosocomial"]]
 

@@ -6,7 +6,7 @@ param(
 )
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "AMR Surveillance Dashboard" -ForegroundColor Cyan
+Write-Host "ICBB-AMRSS | ICBB AMR Surveillance System" -ForegroundColor Cyan
 Write-Host "Starting with Data Persistence" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""

@@ -569,7 +569,7 @@ class ReportGenerator:
         
         html += """
                 <div class="footer">
-                    <p>This is an automated report from the AMR Surveillance Dashboard.</p>
+                    <p>This is an automated report from ICBB-AMRSS (ICBB AMR Surveillance System).</p>
                     <p>Ghana Food Safety Authority</p>
                 </div>
             </div>
@@ -592,7 +592,7 @@ class EmailSender:
         self.smtp_port = int(smtp_port or os.environ.get('SMTP_PORT', 587))
         self.username = username or os.environ.get('SMTP_USERNAME', '')
         self.password = password or os.environ.get('SMTP_PASSWORD', '')
-        self.from_name = os.environ.get('SMTP_FROM_NAME', 'AMR Surveillance Dashboard')
+        self.from_name = os.environ.get('SMTP_FROM_NAME', 'ICBB-AMRSS')
         self.use_tls = use_tls
     
     def is_configured(self) -> bool:

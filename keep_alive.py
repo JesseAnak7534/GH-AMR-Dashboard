@@ -86,7 +86,7 @@ def prevent_system_sleep():
 def main():
     """Main entry point for the keep-alive service."""
     print("=" * 70)
-    print("AMR Surveillance Dashboard - Keep-Alive Service")
+    print("ICBB-AMRSS - Keep-Alive Service")
     print("=" * 70)
     print(f"Started at: {datetime.now()}")
     print()

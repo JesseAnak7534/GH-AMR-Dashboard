@@ -14,6 +14,10 @@ def calculate_resistance_percentage(ast_df: pd.DataFrame) -> pd.DataFrame:
     if ast_df.empty:
         return pd.DataFrame()
 
+    # Filter out invalid/missing results
+    ast_df = ast_df.dropna(subset=['organism', 'antibiotic', 'result'])
+    ast_df = ast_df[ast_df['result'].isin(['R', 'I', 'S'])]
+
     # Group by organism and antibiotic, count each result type
     result_counts = ast_df.groupby(['organism', 'antibiotic', 'result']).size().reset_index(name='count')
     
@@ -111,7 +115,8 @@ def plot_resistance_by_category(ast_df: pd.DataFrame, samples_df: pd.DataFrame) 
 
     # Merge to get source_category
     merged = ast_df.merge(samples_df[['sample_id', 'source_category']], on='sample_id', how='left')
-    merged = merged.dropna(subset=['source_category'])
+    merged = merged.dropna(subset=['source_category', 'result'])
+    merged = merged[merged['result'].isin(['R', 'I', 'S'])]
     
     if merged.empty:
         fig = go.Figure()
@@ -178,7 +183,8 @@ def plot_resistance_by_source_type(ast_df: pd.DataFrame, samples_df: pd.DataFram
         return fig
 
     merged = ast_df.merge(samples_df[['sample_id', 'source_type']], on='sample_id', how='left')
-    merged = merged.dropna(subset=['source_type'])
+    merged = merged.dropna(subset=['source_type', 'result'])
+    merged = merged[merged['result'].isin(['R', 'I', 'S'])]
     
     if merged.empty:
         fig = go.Figure()
@@ -246,7 +252,8 @@ def plot_resistance_trends(ast_df: pd.DataFrame, time_aggregation: str = 'Monthl
     # Parse dates
     ast_df = ast_df.copy()
     ast_df['test_date'] = pd.to_datetime(ast_df['test_date'], errors='coerce')
-    ast_df = ast_df.dropna(subset=['test_date'])
+    ast_df = ast_df.dropna(subset=['test_date', 'result'])
+    ast_df = ast_df[ast_df['result'].isin(['R', 'I', 'S'])]
     
     if ast_df.empty:
         fig = go.Figure()
@@ -503,7 +510,8 @@ def get_resistance_by_region(ast_df: pd.DataFrame, samples_df: pd.DataFrame) -> 
         return pd.DataFrame()
 
     merged = ast_df.merge(samples_df[['sample_id', 'region']], on='sample_id', how='left')
-    merged = merged.dropna(subset=['region'])
+    merged = merged.dropna(subset=['region', 'result'])
+    merged = merged[merged['result'].isin(['R', 'I', 'S'])]
     
     if merged.empty:
         return pd.DataFrame()
@@ -628,7 +636,8 @@ def get_resistance_by_district_detailed(ast_df: pd.DataFrame, samples_df: pd.Dat
         return pd.DataFrame()
 
     merged = ast_df.merge(samples_df[['sample_id', 'district', 'region']], on='sample_id', how='left')
-    merged = merged.dropna(subset=['district'])
+    merged = merged.dropna(subset=['district', 'result'])
+    merged = merged[merged['result'].isin(['R', 'I', 'S'])]
     
     if merged.empty:
         return pd.DataFrame()
@@ -840,16 +849,17 @@ def plot_resistance_distribution(ast_df: pd.DataFrame) -> go.Figure:
     # Count results
     result_counts = ast_df['result'].value_counts().reset_index()
     result_counts.columns = ['result', 'count']
+    result_counts = result_counts[result_counts['result'].isin(['R', 'I', 'S'])]
 
     # Map to labels
     result_labels = {'R': 'Resistant', 'I': 'Intermediate', 'S': 'Susceptible'}
-    result_counts['label'] = result_counts['result'].map(result_labels)
+    result_counts['label'] = result_counts['result'].map(result_labels).fillna('Unknown')
 
     # Calculate percentages
     result_counts['percentage'] = (result_counts['count'] / result_counts['count'].sum() * 100).round(1)
 
     # Sort by resistance level (S, I, R)
-    result_counts['sort_order'] = result_counts['result'].map({'S': 0, 'I': 1, 'R': 2})
+    result_counts['sort_order'] = result_counts['result'].map({'S': 0, 'I': 1, 'R': 2}).fillna(3)
     result_counts = result_counts.sort_values('sort_order')
 
     colors = {'R': '#d62728', 'I': '#ff7f0e', 'S': '#2ca02c'}
