@@ -16,6 +16,16 @@ from src import analytics
 from src import plots
 
 
+def html_to_pdf(html_content: str) -> bytes:
+    """Convert HTML report to PDF bytes using xhtml2pdf."""
+    from xhtml2pdf import pisa
+    pdf_buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(html_content, dest=pdf_buffer)
+    if pisa_status.err:
+        raise RuntimeError(f"PDF generation failed with {pisa_status.err} errors")
+    return pdf_buffer.getvalue()
+
+
 def generate_chart_description(chart_type: str, data_stats: Dict) -> str:
     """Generate dynamic, data-driven descriptions for charts in reported speech."""
     descriptions = {
@@ -2395,6 +2405,165 @@ def generate_filtered_html_report(
             html_report += "            </table>"
 
         html_report += "        </div>"
+
+    # ════════════════════════════════════════════════════════════════════
+    # RESISTANCE HEAT MAP SUMMARY
+    # ════════════════════════════════════════════════════════════════════
+    ast_clean = ast_df.dropna(subset=['organism', 'antibiotic', 'result'])
+    ast_clean = ast_clean[ast_clean['result'].isin(['R', 'I', 'S'])]
+    combo = ast_clean.groupby(['organism', 'antibiotic', 'result']).size().reset_index(name='n')
+    hm_pivot = combo.pivot_table(index=['organism', 'antibiotic'], columns='result', values='n', fill_value=0).reset_index()
+    for c in ('R', 'I', 'S'):
+        if c not in hm_pivot.columns:
+            hm_pivot[c] = 0
+    hm_pivot['total'] = hm_pivot['R'] + hm_pivot['I'] + hm_pivot['S']
+    hm_pivot = hm_pivot[hm_pivot['total'] >= 5]
+    if not hm_pivot.empty:
+        hm_pivot['pct_r'] = (hm_pivot['R'] / hm_pivot['total'] * 100).round(1)
+        critical = hm_pivot[hm_pivot['pct_r'] >= 70].sort_values('pct_r', ascending=False).head(15)
+        if not critical.empty:
+            html_report += """
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#dc2626; border-bottom: 2px solid #dc2626; padding-bottom: 8px;">
+                Resistance Heat Map — Critical Combinations (≥70%)
+            </h2>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#dc2626; color:white;">
+                    <th style="padding:8px; text-align:left;">Organism</th>
+                    <th style="padding:8px; text-align:left;">Antibiotic</th>
+                    <th style="padding:8px; text-align:right;">Resistance %</th>
+                    <th style="padding:8px; text-align:right;">Tests</th>
+                </tr>
+"""
+            for _, row in critical.iterrows():
+                html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{row['organism']}</td>
+                    <td style="padding:8px;">{row['antibiotic']}</td>
+                    <td style="padding:8px; text-align:right; font-weight:bold; color:#dc2626;">{row['pct_r']:.1f}%</td>
+                    <td style="padding:8px; text-align:right;">{int(row['total'])}</td>
+                </tr>
+"""
+            html_report += """
+            </table>
+            <p style="color:#6b7280; font-size:0.9em;">Showing top 15 organism–antibiotic combinations with ≥70% resistance and ≥5 tests.</p>
+        </div>
+"""
+
+    # ════════════════════════════════════════════════════════════════════
+    # PATHOGEN PROFILE SUMMARY (Top 5 organisms)
+    # ════════════════════════════════════════════════════════════════════
+    top_orgs = ast_clean.groupby('organism').size().nlargest(5).index.tolist()
+    if top_orgs:
+        html_report += """
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#7c3aed; border-bottom: 2px solid #7c3aed; padding-bottom: 8px;">
+                Pathogen Profile — Top 5 Organisms
+            </h2>
+"""
+        for org_name in top_orgs:
+            org_data = ast_clean[ast_clean['organism'] == org_name]
+            org_tests = len(org_data)
+            org_r = (org_data['result'] == 'R').sum()
+            org_rate = round(org_r / org_tests * 100, 1) if org_tests else 0
+            org_abx = org_data['antibiotic'].nunique()
+            # Top resistant antibiotics for this organism
+            abx_r = org_data[org_data['result'] == 'R']['antibiotic'].value_counts().head(5)
+
+            bg = "#fef2f2" if org_rate >= 50 else "#fffbeb" if org_rate >= 30 else "#f0fdf4"
+            html_report += f"""
+            <div style="background:{bg}; border-radius:10px; padding:15px; margin-bottom:15px; border-left:4px solid {'#dc2626' if org_rate >= 50 else '#f59e0b' if org_rate >= 30 else '#22c55e'};">
+                <h3 style="margin:0 0 8px 0; color:#1e293b;">{org_name}</h3>
+                <div style="display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:8px;">
+                    <span><strong>Tests:</strong> {org_tests:,}</span>
+                    <span><strong>Resistance:</strong> {org_rate}%</span>
+                    <span><strong>Antibiotics tested:</strong> {org_abx}</span>
+                </div>
+"""
+            if not abx_r.empty:
+                html_report += "<p style='margin:4px 0; color:#4a5568;'><strong>Top resistant antibiotics:</strong> "
+                html_report += ", ".join(f"{a} ({c})" for a, c in abx_r.items())
+                html_report += "</p>"
+            html_report += "            </div>"
+
+        html_report += "        </div>"
+
+    # ════════════════════════════════════════════════════════════════════
+    # HAI PROFILE SUMMARY
+    # ════════════════════════════════════════════════════════════════════
+    _nosocomial_kw = [
+        "enterococcus", "staphylococcus aureus", "klebsiella",
+        "acinetobacter", "pseudomonas aeruginosa", "enterobacter",
+        "escherichia coli", "serratia", "citrobacter", "proteus",
+        "stenotrophomonas", "clostridioides", "candida",
+    ]
+    # Filter to human/hospital samples
+    human_samples = samples_df[samples_df['source_category'].astype(str).str.lower() == 'human'] if 'source_category' in samples_df.columns else samples_df
+    if not human_samples.empty:
+        hosp_ast = ast_clean[ast_clean['sample_id'].astype(str).isin(human_samples['sample_id'].astype(str))]
+        if not hosp_ast.empty:
+            hosp_total = len(hosp_ast)
+            hosp_r = (hosp_ast['result'] == 'R').sum()
+            hosp_rate = round(hosp_r / hosp_total * 100, 1)
+            hosp_isolates = hosp_ast['isolate_id'].nunique() if 'isolate_id' in hosp_ast.columns else 0
+            # Flag nosocomial
+            noso_mask = hosp_ast['organism'].astype(str).str.lower().apply(
+                lambda o: any(kw in o for kw in _nosocomial_kw)
+            )
+            noso_count = hosp_ast[noso_mask]['isolate_id'].nunique() if 'isolate_id' in hosp_ast.columns else int(noso_mask.sum())
+            noso_pct = round(noso_count / max(1, hosp_isolates) * 100, 1)
+
+            # ESKAPE check
+            eskape_names = ["Enterococcus faecium", "Staphylococcus aureus", "Klebsiella pneumoniae",
+                            "Acinetobacter baumannii", "Pseudomonas aeruginosa", "Enterobacter"]
+            eskape_rows = []
+            for ek in eskape_names:
+                ek_data = hosp_ast[hosp_ast['organism'].str.contains(ek, case=False, na=False)]
+                if ek_data.empty:
+                    continue
+                ek_r = round((ek_data['result'] == 'R').sum() / len(ek_data) * 100, 1)
+                eskape_rows.append({"Organism": ek, "Tests": len(ek_data), "Resistance %": ek_r})
+
+            html_report += f"""
+        <div class="chart-container" style="page-break-before: always;">
+            <h2 style="color:#b91c1c; border-bottom: 2px solid #b91c1c; padding-bottom: 8px;">
+                Hospital-Acquired Infection (HAI) Profile
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="text-align:center; background:#eff6ff; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#1d4ed8;">{hosp_isolates:,}</div>
+                    <div style="color:#4a5568;">Hospital Isolates</div>
+                </div>
+                <div style="text-align:center; background:#fef3c7; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#b45309;">{noso_count:,} ({noso_pct}%)</div>
+                    <div style="color:#4a5568;">Nosocomial Pathogens</div>
+                </div>
+                <div style="text-align:center; background:#fef2f2; padding:15px; border-radius:10px;">
+                    <div style="font-size:1.8em; font-weight:bold; color:#dc2626;">{hosp_rate}%</div>
+                    <div style="color:#4a5568;">Hospital Resistance Rate</div>
+                </div>
+            </div>
+"""
+            if eskape_rows:
+                html_report += """
+            <h3>ESKAPE Pathogen Surveillance</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+                <tr style="background:#b91c1c; color:white;">
+                    <th style="padding:8px; text-align:left;">ESKAPE Organism</th>
+                    <th style="padding:8px; text-align:right;">Tests</th>
+                    <th style="padding:8px; text-align:right;">Resistance %</th>
+                </tr>
+"""
+                for er in sorted(eskape_rows, key=lambda x: x['Resistance %'], reverse=True):
+                    html_report += f"""
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:8px;">{er['Organism']}</td>
+                    <td style="padding:8px; text-align:right;">{er['Tests']}</td>
+                    <td style="padding:8px; text-align:right; font-weight:bold; color:{'#dc2626' if er['Resistance %'] >= 50 else '#f59e0b'};">{er['Resistance %']}%</td>
+                </tr>
+"""
+                html_report += "            </table>"
+            html_report += "        </div>"
 
     # Format the current date/time
     current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')

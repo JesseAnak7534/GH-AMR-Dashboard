@@ -175,6 +175,10 @@ def render_hai_page():
     hospital_ast = hospital_ast.copy()
     hospital_ast = hospital_ast.dropna(subset=["result", "organism", "antibiotic", "isolate_id"])
     hospital_ast = hospital_ast[hospital_ast["result"].isin(["R", "I", "S"])]
+    # Also strip empty strings that survive dropna
+    for _col in ("organism", "antibiotic", "isolate_id"):
+        hospital_ast[_col] = hospital_ast[_col].astype(str).str.strip()
+        hospital_ast = hospital_ast[hospital_ast[_col] != ""]
 
     if hospital_ast.empty:
         st.info("No valid AST results linked to hospital samples.")
@@ -259,6 +263,7 @@ def render_hai_page():
                 eskape_df, x="Organism", y="Resistance %",
                 color="Resistance %", color_continuous_scale="RdYlGn_r",
                 text="Resistance %", hover_data=["Isolates", "MDR %"],
+                title="ESKAPE Pathogen Resistance Rates",
             )
             fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
             fig.update_layout(**CHART_LAYOUT, height=400, showlegend=False, coloraxis_showscale=False)
@@ -287,6 +292,7 @@ def render_hai_page():
             color_discrete_map={"Yes": "#ef4444", "No": "#94a3b8"},
             text="Resistance %",
             hover_data=["Tests"],
+            title="Top 15 Organisms — Hospital Resistance",
         )
         fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
         fig.update_layout(**CHART_LAYOUT, height=max(350, 28 * len(org_stats) + 80))
@@ -328,6 +334,7 @@ def render_hai_page():
                 y="Organism", x="MDR Isolates", orientation="h",
                 color="MDR Isolates", color_continuous_scale="Reds",
                 text="MDR Isolates",
+                title="MDR Organism Distribution",
             )
             fig.update_traces(textposition="outside")
             fig.update_layout(**CHART_LAYOUT, height=max(300, 28 * len(mdr_org) + 80),
@@ -376,6 +383,7 @@ def render_hai_page():
                 y="Sentinel Site", x="Resistance %", orientation="h",
                 color="Resistance %", color_continuous_scale="RdYlGn_r",
                 text="Resistance %", hover_data=["Tests", "MDR Isolates"],
+                title="Resistance by Sentinel Site",
             )
             fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
             fig.update_layout(**CHART_LAYOUT, height=max(300, 30 * len(lab_stats) + 80),
@@ -443,6 +451,7 @@ def render_hai_page():
             ))
             fig.update_layout(
                 **CHART_LAYOUT, height=420,
+                title="Hospital Infection Trends — Monthly",
                 xaxis_title="Month", yaxis_title="Percentage (%)",
                 legend=dict(orientation="h", y=-0.15),
             )

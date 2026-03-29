@@ -4001,20 +4001,39 @@ elif page == "Report Export":
                             st.markdown("**Report will include:**")
                             st.markdown("- Executive summary with key metrics")
                             st.markdown("- Interactive resistance distribution charts")
+                            st.markdown("- Resistance Heat Map — Critical Combinations")
+                            st.markdown("- Pathogen Profile — Top 5 Organisms")
+                            st.markdown("- HAI Profile with ESKAPE Surveillance")
                             st.markdown("- Geographic and temporal analysis")
                             st.markdown("- Advanced analytics and risk assessment")
+                            st.markdown("- One Health: PPS, AMU & AMC summaries")
                             st.markdown("- Professional formatting with no text overlap")
 
                         # Download button
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                         filename = f"AMR_Report_Filtered_{timestamp}.html"
-                        st.download_button(
-                            label="Download HTML Report",
-                            data=html_content,
-                            file_name=filename,
-                            mime="text/html",
-                            use_container_width=True
-                        )
+                        col_html, col_pdf = st.columns(2)
+                        with col_html:
+                            st.download_button(
+                                label="Download HTML Report",
+                                data=html_content,
+                                file_name=filename,
+                                mime="text/html",
+                                use_container_width=True
+                            )
+                        with col_pdf:
+                            try:
+                                from src.report import html_to_pdf
+                                pdf_bytes = html_to_pdf(html_content)
+                                st.download_button(
+                                    label="Download PDF Report",
+                                    data=pdf_bytes,
+                                    file_name=filename.replace('.html', '.pdf'),
+                                    mime="application/pdf",
+                                    use_container_width=True
+                                )
+                            except Exception as pdf_err:
+                                st.warning(f"PDF generation unavailable: {pdf_err}")
 
                     except Exception as e:
                         st.error(f"Error generating report: {str(e)}")
