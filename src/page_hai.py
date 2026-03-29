@@ -173,7 +173,7 @@ def render_hai_page():
 
     # ── Clean result values ──────────────────────────────────────────────
     hospital_ast = hospital_ast.copy()
-    hospital_ast = hospital_ast.dropna(subset=["result", "organism"])
+    hospital_ast = hospital_ast.dropna(subset=["result", "organism", "antibiotic", "isolate_id"])
     hospital_ast = hospital_ast[hospital_ast["result"].isin(["R", "I", "S"])]
 
     if hospital_ast.empty:
@@ -355,6 +355,7 @@ def render_hai_page():
         lab_col = "lab_name" if "lab_name" in hospital_samples.columns else None
         if lab_col:
             merged = hospital_ast.merge(hospital_samples[["sample_id", lab_col]], on="sample_id", how="left")
+            merged = merged.dropna(subset=[lab_col])
             lab_stats = merged.groupby(lab_col).apply(
                 lambda g: pd.Series({
                     "Tests": len(g),
@@ -388,6 +389,7 @@ def render_hai_page():
             st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
             st.markdown("**HAI by Region**")
             merged_r = hospital_ast.merge(hospital_samples[["sample_id", "region"]], on="sample_id", how="left")
+            merged_r = merged_r.dropna(subset=["region"])
             region_stats = merged_r.groupby("region").apply(
                 lambda g: pd.Series({
                     "Tests": len(g),
