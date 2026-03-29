@@ -4009,7 +4009,7 @@ elif page == "Report Export":
                             st.markdown("- One Health: PPS, AMU & AMC summaries")
                             st.markdown("- Professional formatting with no text overlap")
 
-                        # Download button
+                        # Download buttons
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                         filename = f"AMR_Report_Filtered_{timestamp}.html"
                         col_html, col_pdf = st.columns(2)
@@ -4032,8 +4032,8 @@ elif page == "Report Export":
                                     mime="application/pdf",
                                     use_container_width=True
                                 )
-                            except Exception as pdf_err:
-                                st.warning(f"PDF generation unavailable: {pdf_err}")
+                            except Exception:
+                                st.info("💡 To save as PDF: download the HTML report, open it in your browser, then press **Ctrl+P → Save as PDF**.")
 
                     except Exception as e:
                         st.error(f"Error generating report: {str(e)}")
