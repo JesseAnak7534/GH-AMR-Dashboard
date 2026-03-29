@@ -267,7 +267,7 @@ def render_hai_page():
             lambda g: pd.Series({
                 "Tests": len(g),
                 "Resistance %": round((g["result"] == "R").sum() / len(g) * 100, 1),
-                "Nosocomial": "Yes" if _is_nosocomial(g["organism"].iloc[0]) else "No",
+                "Nosocomial": "Yes" if _is_nosocomial(g.name) else "No",
             }),
             include_groups=False,
         ).reset_index().sort_values("Tests", ascending=False).head(15)
