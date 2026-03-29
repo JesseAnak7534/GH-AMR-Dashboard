@@ -1495,53 +1495,7 @@ elif page == "Resistance Overview":
                 use_container_width=True
             )
             
-            st.plotly_chart(
-                plots.plot_organism_antibiotic_heatmap(filtered_ast),
-                use_container_width=True
-            )
-            
-            st.markdown("---")
-            
-            # Advanced AMR Features
-            st.subheader("Multi-Drug Resistance Analysis")
-            
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                # MDR distribution graph
-                mdr_data = plots.detect_mdr_isolates(filtered_ast)
-                if not mdr_data.empty:
-                    # Create MDR distribution chart
-                    import plotly.graph_objects as go
-                    
-                    # Count MDR by drug class count
-                    mdr_counts = mdr_data['resistant_drug_classes'].value_counts().sort_index()
-                    
-                    fig = go.Figure()
-                    fig.add_trace(go.Bar(
-                        x=mdr_counts.index,
-                        y=mdr_counts.values,
-                        marker_color='#e74c3c',
-                        name='MDR Isolates'
-                    ))
-                    
-                    fig.update_layout(
-                        title='Multi-Drug Resistant Isolates by Drug Class Count',
-                        xaxis_title='Number of Resistant Drug Classes',
-                        yaxis_title='Number of Isolates',
-                        height=400
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.info("No multi-drug resistant isolates detected")
-            
-            with col2:
-                mdr_data = plots.detect_mdr_isolates(filtered_ast)
-                if not mdr_data.empty:
-                    st.warning(f"{len(mdr_data)} multi-drug resistant isolates detected")
-                    st.dataframe(mdr_data[['isolate_id', 'organism', 'resistant_drug_classes']], use_container_width=True)
-                else:
-                    st.info("No multi-drug resistant isolates detected (MDR threshold: 3+ drug classes)")
+            st.info("📊 For a detailed organism × antibiotic resistance matrix, visit the **Resistance Heat Map** page.")
             
             st.markdown("---")
             
@@ -2148,7 +2102,7 @@ elif page == "Risk Assessment":
         st.warning("No data available in the selected dataset.")
     else:
         # Tabs
-        tab1, tab2, tab3 = st.tabs(["Risk Scores", "Resistance Burden", "Organism Assessment"])
+        tab1, tab2 = st.tabs(["Risk Scores", "Resistance Burden"])
         
         # TAB 1: ORGANISM RISK SCORES
         with tab1:
@@ -2184,6 +2138,34 @@ elif page == "Risk Assessment":
                             st.info("**Monitor** - Continue standard surveillance")
             else:
                 st.success(f"No organisms above risk threshold ({risk_threshold})")
+
+            # Detailed single-organism assessment
+            st.markdown("---")
+            st.subheader("Detailed Organism Assessment")
+            organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
+            if organisms:
+                selected_org = st.selectbox("Select Organism for Detail", organisms, key="risk_org_detail")
+                if selected_org:
+                    org_risk = analytics.calculate_organism_risk_score(all_ast, selected_org)
+                    if org_risk:
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Risk Score", org_risk['risk_score'])
+                        with col2:
+                            st.metric("Risk Level", org_risk['risk_level'])
+                        with col3:
+                            st.metric("Resistance Rate", f"{org_risk['resistance_rate']:.1f}%")
+                        with col4:
+                            st.metric("Tests", org_risk['test_count'])
+                        st.markdown("**Risk Factors:**")
+                        for factor in org_risk['risk_factors']:
+                            st.write(f"• {factor}")
+                        if org_risk['risk_level'] == 'CRITICAL':
+                            st.error("**CRITICAL** — Implement enhanced infection control, review treatment guidelines, consider alternative antimicrobials, report to national health authorities.")
+                        elif org_risk['risk_level'] == 'HIGH':
+                            st.warning("**HIGH** — Increase surveillance frequency, review empiric treatment protocols, consider antimicrobial stewardship interventions.")
+                        else:
+                            st.info("**MODERATE/LOW** — Continue routine surveillance, monitor for changes in resistance patterns.")
         
         # TAB 2: RESISTANCE BURDEN
         with tab2:
@@ -2232,71 +2214,6 @@ elif page == "Risk Assessment":
                         title='Resistance Burden by Source Category'
                     )
                     st.plotly_chart(fig, use_container_width=True)
-        
-        # TAB 3: ORGANISM ASSESSMENT
-        with tab3:
-            st.subheader("Detailed Organism Risk Assessment")
-            
-            organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
-            
-            if organisms:
-                selected_org = st.selectbox("Select Organism", organisms)
-                
-                if selected_org:
-                    org_risk = analytics.calculate_organism_risk_score(all_ast, selected_org)
-                    
-                    if org_risk:
-                        col1, col2, col3, col4 = st.columns(4)
-                        
-                        with col1:
-                            st.metric("Risk Score", org_risk['risk_score'])
-                        with col2:
-                            st.metric("Risk Level", org_risk['risk_level'])
-                        with col3:
-                            st.metric("Resistance Rate", f"{org_risk['resistance_rate']:.1f}%")
-                        with col4:
-                            st.metric("Tests", org_risk['test_count'])
-                        
-                        st.markdown("---")
-                        
-                        st.subheader("Risk Assessment Details")
-                        
-                        st.markdown("**Risk Factors:**")
-                        for factor in org_risk['risk_factors']:
-                            st.write(f"• {factor}")
-                        
-                        st.markdown("---")
-                        
-                        # Recommendations
-                        st.subheader("Clinical Recommendations")
-                        
-                        if org_risk['risk_level'] == 'CRITICAL':
-                            st.error("""
-                            **CRITICAL RISK LEVEL**
-                            
-                            • Implement enhanced infection control measures
-                            • Review treatment guidelines
-                            • Consider alternative antimicrobials
-                            • Increase surveillance frequency
-                            • Report to national health authorities
-                            """)
-                        elif org_risk['risk_level'] == 'HIGH':
-                            st.warning("""
-                            **HIGH RISK LEVEL**
-                            
-                            • Increase surveillance frequency
-                            • Monitor trends closely
-                            • Review empiric treatment protocols
-                            • Consider antimicrobial stewardship interventions
-                            """)
-                        else:
-                            st.info("""
-                            **MODERATE/LOW RISK LEVEL**
-                            
-                            • Continue routine surveillance
-                            • Monitor for any changes in resistance patterns
-                            • Maintain current treatment protocols
-                            """)
 
 
 # ============================================================================
@@ -2334,7 +2251,7 @@ elif page == "Comparative Analysis":
         # Analysis type selection
         analysis_type = st.selectbox(
             "Select Comparison Type",
-            ["Category Comparison", "Time Period Comparison", "Regional Comparison", "Source Type Comparison", "Multi-Parameter Comparison", "Cross-Variable Comparison", "Custom Comparison"],
+            ["Category Comparison", "Time Period Comparison", "Source Type Comparison", "Multi-Parameter Comparison", "Cross-Variable Comparison", "Custom Comparison"],
             key="comparison_type"
         )
 
@@ -2551,86 +2468,6 @@ elif page == "Comparative Analysis":
                         st.warning("One or both periods have no data. Please adjust the date ranges.")
             else:
                 st.warning("Date information not available for time period comparison.")
-
-        elif analysis_type == "Regional Comparison":
-            st.subheader("Regional Comparison")
-
-            regions = sorted(all_samples['region'].dropna().unique())
-            if len(regions) > 1:
-                selected_regions_comp = st.multiselect(
-                    "Select Regions to Compare",
-                    regions,
-                    default=regions[:3] if len(regions) >= 3 else regions,
-                    key="regional_comparison"
-                )
-
-                if len(selected_regions_comp) >= 2 and st.button("Compare Regions", key="compare_regions"):
-                    # Get data for each region
-                    regional_data = {}
-
-                    for region in selected_regions_comp:
-                        region_samples = all_samples[all_samples['region'] == region]
-                        region_ast = all_ast[all_ast['sample_id'].isin(region_samples['sample_id'])]
-
-                        if not region_ast.empty:
-                            resistance_rate = (region_ast['result'] == 'R').sum() / len(region_ast) * 100
-                            regional_data[region] = {
-                                'resistance_rate': resistance_rate,
-                                'total_tests': len(region_ast),
-                                'resistant_count': (region_ast['result'] == 'R').sum(),
-                                'data': region_ast
-                            }
-
-                    if len(regional_data) >= 2:
-                        # Create comparison table
-                        comparison_table = []
-                        for region, data in regional_data.items():
-                            comparison_table.append({
-                                'Region': region,
-                                'Resistance Rate (%)': round(data['resistance_rate'], 1),
-                                'Total Tests': data['total_tests'],
-                                'Resistant Isolates': data['resistant_count']
-                            })
-
-                        st.dataframe(pd.DataFrame(comparison_table))
-
-                        # Resistance rate comparison chart
-                        fig = px.bar(
-                            pd.DataFrame(comparison_table),
-                            x='Region',
-                            y='Resistance Rate (%)',
-                            title='Regional Resistance Comparison',
-                            color='Resistance Rate (%)',
-                            color_continuous_scale='Reds'
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-
-                        # Top organisms by region
-                        st.markdown("### Top Organisms by Region")
-
-                        col1, col2 = st.columns(2)
-
-                        region_list = list(regional_data.keys())
-                        if len(region_list) >= 2:
-                            with col1:
-                                st.markdown(f"**{region_list[0]}**")
-                                org_data = regional_data[region_list[0]]['data'].groupby('organism').agg({
-                                    'result': lambda x: (x == 'R').sum() / len(x) * 100
-                                }).round(1).sort_values(by='result', ascending=False).head(5)
-                                st.dataframe(org_data)
-
-                            with col2:
-                                st.markdown(f"**{region_list[1]}**")
-                                org_data = regional_data[region_list[1]]['data'].groupby('organism').agg({
-                                    'result': lambda x: (x == 'R').sum() / len(x) * 100
-                                }).round(1).sort_values(by='result', ascending=False).head(5)
-                                st.dataframe(org_data)
-                    else:
-                        st.warning("Need data from at least 2 regions for comparison.")
-                else:
-                    st.info("Select at least 2 regions to compare.")
-            else:
-                st.warning("Need data from multiple regions for comparison.")
 
         elif analysis_type == "Source Type Comparison":
             st.subheader("🏭 Source Type Comparison")
