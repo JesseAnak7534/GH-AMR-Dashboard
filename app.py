@@ -528,7 +528,7 @@ st.markdown("""
         color: #ecfdf5 !important;
     }
     
-    /* Sidebar radio buttons */
+    /* Sidebar radio buttons — hidden now (replaced by grouped nav) */
     [data-testid="stSidebar"] .stRadio > label {
         color: #ecfdf5 !important;
         font-weight: 500;
@@ -587,6 +587,77 @@ st.markdown("""
     [data-testid="stSidebar"] .streamlit-expanderContent {
         background: rgba(255, 255, 255, 0.05);
         border-radius: 0 0 8px 8px;
+    }
+
+    /* ── Grouped Navigation Styling ──────────────────────────── */
+    .nav-group-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.75rem;
+        margin: 0.25rem 0 0.15rem 0;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.08);
+        color: #a7f3d0 !important;
+        font-weight: 600;
+        font-size: 0.82em;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        cursor: default;
+        border: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-group-header .nav-icon { font-size: 1.05em; }
+
+    /* Nav item buttons — override Streamlit button style */
+    [data-testid="stSidebar"] .nav-item-btn button {
+        background: transparent !important;
+        color: #d1fae5 !important;
+        border: none !important;
+        text-align: left !important;
+        padding: 0.45rem 0.75rem 0.45rem 2.1rem !important;
+        border-radius: 7px !important;
+        font-size: 0.88em !important;
+        font-weight: 400 !important;
+        transition: all 0.15s ease !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        margin: 1px 0 !important;
+        line-height: 1.35 !important;
+    }
+    [data-testid="stSidebar"] .nav-item-btn button:hover {
+        background: rgba(20, 184, 166, 0.25) !important;
+        color: #ffffff !important;
+    }
+    [data-testid="stSidebar"] .nav-item-btn.nav-active button {
+        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        box-shadow: 0 3px 12px rgba(20, 184, 166, 0.35) !important;
+    }
+
+    /* Last-updated badge */
+    .last-updated-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 0.45rem 0.7rem;
+        margin-top: 0.5rem;
+        color: #94a3b8;
+        font-size: 0.78em;
+    }
+    .last-updated-badge .pulse-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #34d399;
+        display: inline-block;
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+        50% { box-shadow: 0 0 0 4px rgba(52,211,153,0); }
     }
     
     /* Main content area */
@@ -787,14 +858,94 @@ with st.sidebar:
         st.rerun()
     
     st.markdown("---")
-    st.markdown("<p style='color: #a7f3d0; font-size: 0.9em; font-weight: 600;'>Navigation</p>", unsafe_allow_html=True)
 
-admin_pages = ["Admin - Users", "Admin - Datasets"] if st.session_state.is_admin else []
-page = st.sidebar.radio(
-    "",
-    ["Upload & Data Quality", "Data Management", "Resistance Overview", "Resistance Heat Map", "Pathogen Profile", "HAI Profile", "Trends", "Map Hotspots", "Advanced Analytics", "Risk Assessment", "Comparative Analysis", "PPS Dashboard", "AMU Dashboard", "AMC Dashboard", "Alerts Dashboard", "Antibiogram", "WHONET Export", "Report Export"] + admin_pages,
-    label_visibility="collapsed"
-)
+    # ── Last Updated indicator ────────────────────────────────────
+    try:
+        _conn = db.get_connection()
+        _last_row = _conn.execute(
+            "SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1"
+        ).fetchone()
+        if _last_row and _last_row[0]:
+            _last_ts = datetime.fromisoformat(_last_row[0])
+            _delta = datetime.now() - _last_ts
+            if _delta.days > 0:
+                _ago = f"{_delta.days}d ago"
+            elif _delta.seconds >= 3600:
+                _ago = f"{_delta.seconds // 3600}h ago"
+            else:
+                _ago = f"{max(1, _delta.seconds // 60)}m ago"
+            st.markdown(f"""
+                <div class="last-updated-badge">
+                    <span class="pulse-dot"></span>
+                    <span>Last data update: <strong>{_last_ts.strftime('%d %b %Y, %H:%M')}</strong> ({_ago})</span>
+                </div>
+            """, unsafe_allow_html=True)
+    except Exception:
+        pass
+
+    st.markdown("---")
+
+    # ── Grouped Navigation ─────────────────────────────────────────
+    # Initialise active page in session state
+    if "active_page" not in st.session_state:
+        st.session_state.active_page = "Upload & Data Quality"
+
+    _NAV_GROUPS = [
+        ("📂", "Data Management", [
+            ("📤", "Upload & Data Quality"),
+            ("🗄️", "Data Management"),
+        ]),
+        ("🔬", "Surveillance", [
+            ("📊", "Resistance Overview"),
+            ("🟥", "Resistance Heat Map"),
+            ("🦠", "Pathogen Profile"),
+            ("🏥", "HAI Profile"),
+        ]),
+        ("📈", "Analytics", [
+            ("📉", "Trends"),
+            ("🗺️", "Map Hotspots"),
+            ("🧠", "Advanced Analytics"),
+            ("⚠️", "Risk Assessment"),
+            ("🔄", "Comparative Analysis"),
+        ]),
+        ("🌍", "One Health", [
+            ("💊", "PPS Dashboard"),
+            ("💉", "AMU Dashboard"),
+            ("🧪", "AMC Dashboard"),
+        ]),
+        ("📋", "Reports & Tools", [
+            ("🔔", "Alerts Dashboard"),
+            ("🧬", "Antibiogram"),
+            ("📁", "WHONET Export"),
+            ("📄", "Report Export"),
+        ]),
+    ]
+    if st.session_state.is_admin:
+        _NAV_GROUPS.append(("⚙️", "Administration", [
+            ("👥", "Admin - Users"),
+            ("📂", "Admin - Datasets"),
+        ]))
+
+    # Determine which group the current page belongs to
+    _active = st.session_state.active_page
+    _active_group = None
+    for _gicon, _gname, _gitems in _NAV_GROUPS:
+        if any(pname == _active for _, pname in _gitems):
+            _active_group = _gname
+            break
+
+    for _gicon, _gname, _gitems in _NAV_GROUPS:
+        _is_open = (_gname == _active_group)
+        with st.expander(f"{_gicon}  {_gname}", expanded=_is_open):
+            for _picon, _pname in _gitems:
+                _css_class = "nav-item-btn nav-active" if _pname == _active else "nav-item-btn"
+                st.markdown(f'<div class="{_css_class}">', unsafe_allow_html=True)
+                if st.button(f"{_picon}  {_pname}", key=f"nav_{_pname}", use_container_width=True):
+                    st.session_state.active_page = _pname
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+
+    page = st.session_state.active_page
 
 # ── Priority Pathogen Quick Filter (sidebar) ──────────────────────────
 _pp_filter_path = os.path.join("data", "lookups", "priority_pathogens.json")
