@@ -516,13 +516,13 @@ st.markdown("""
     
     /* Sidebar text styling */
     [data-testid="stSidebar"] .stMarkdown {
-        color: #cbd5e1 !important;
+        color: #f1f5f9 !important;
     }
     
     [data-testid="stSidebar"] p, 
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] label {
-        color: #cbd5e1 !important;
+        color: #f1f5f9 !important;
     }
 
     /* Hide default Streamlit radio/expander chrome in sidebar */
@@ -563,14 +563,14 @@ st.markdown("""
         padding: 0.5rem 0.6rem !important;
         margin: 0 !important;
         border-radius: 6px;
-        color: #64748b !important;
+        color: #a5b4c8 !important;
         font-size: 0.7em !important;
         font-weight: 600 !important;
         letter-spacing: 0.08em !important;
         text-transform: uppercase !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {
-        color: #94a3b8 !important;
+        color: #e2e8f0 !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] summary p,
     [data-testid="stSidebar"] [data-testid="stExpander"] summary span {
@@ -579,11 +579,11 @@ st.markdown("""
         font-weight: inherit !important;
         letter-spacing: inherit !important;
     }
-    /* Hide the expander arrow/icon for cleaner look */
+    /* Expander arrow */
     [data-testid="stSidebar"] [data-testid="stExpander"] summary svg {
         width: 14px !important;
         height: 14px !important;
-        color: #475569 !important;
+        color: #94a3b8 !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
         background: transparent !important;
@@ -598,7 +598,7 @@ st.markdown("""
     }
     [data-testid="stSidebar"] .nav-item-btn button {
         background: transparent !important;
-        color: #94a3b8 !important;
+        color: #c8d6e5 !important;
         border: none !important;
         text-align: left !important;
         padding: 0.5rem 0.75rem 0.5rem 1.6rem !important;
@@ -614,15 +614,15 @@ st.markdown("""
         position: relative !important;
     }
     [data-testid="stSidebar"] .nav-item-btn button:hover {
-        background: rgba(255, 255, 255, 0.06) !important;
-        color: #e2e8f0 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
     }
-    /* Active page — subtle left accent bar + light background */
+    /* Active page — left accent bar + bright highlight */
     [data-testid="stSidebar"] .nav-item-btn.nav-active button {
-        background: rgba(56, 189, 248, 0.1) !important;
-        color: #38bdf8 !important;
-        font-weight: 550 !important;
-        box-shadow: inset 3px 0 0 0 #38bdf8 !important;
+        background: rgba(56, 189, 248, 0.15) !important;
+        color: #7dd3fc !important;
+        font-weight: 600 !important;
+        box-shadow: inset 3px 0 0 0 #7dd3fc !important;
         border-radius: 0 8px 8px 0 !important;
     }
 
@@ -631,15 +631,15 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
         border-radius: 8px;
         padding: 0.5rem 0.65rem;
         margin: 0.25rem 0;
-        color: #64748b;
+        color: #a5b4c8;
         font-size: 0.75em;
     }
-    .last-updated-badge strong { color: #94a3b8; }
+    .last-updated-badge strong { color: #e2e8f0; }
     .last-updated-badge .pulse-dot {
         width: 6px; height: 6px;
         border-radius: 50%;
@@ -655,16 +655,16 @@ st.markdown("""
 
     /* User card */
     .sidebar-user-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
         border-radius: 10px;
         padding: 0.75rem 0.85rem;
         margin-bottom: 0.5rem;
     }
-    .sidebar-user-card .user-label { font-size: 0.7em; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-    .sidebar-user-card .user-email { font-weight: 600; color: #e2e8f0; font-size: 0.9em; margin: 2px 0; }
+    .sidebar-user-card .user-label { font-size: 0.7em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+    .sidebar-user-card .user-email { font-weight: 600; color: #f1f5f9; font-size: 0.9em; margin: 2px 0; }
     .sidebar-user-card .user-role  { font-size: 0.78em; margin: 2px 0; }
-    .sidebar-user-card .user-lab   { font-size: 0.78em; color: #64748b; margin: 2px 0; }
+    .sidebar-user-card .user-lab   { font-size: 0.78em; color: #a5b4c8; margin: 2px 0; }
 
     /* Sidebar brand */
     .sidebar-brand {
@@ -672,13 +672,13 @@ st.markdown("""
         padding: 1.2rem 0 0.8rem 0;
     }
     .sidebar-brand .brand-icon { font-size: 1.8em; margin-bottom: 0.3rem; }
-    .sidebar-brand .brand-name { font-size: 1.05em; font-weight: 700; color: #e2e8f0; letter-spacing: 0.04em; }
-    .sidebar-brand .brand-sub  { font-size: 0.72em; color: #475569; margin-top: 2px; letter-spacing: 0.02em; }
+    .sidebar-brand .brand-name { font-size: 1.05em; font-weight: 700; color: #ffffff; letter-spacing: 0.04em; }
+    .sidebar-brand .brand-sub  { font-size: 0.72em; color: #a5b4c8; margin-top: 2px; letter-spacing: 0.02em; }
 
     /* Thin dividers */
     .sidebar-divider {
         height: 1px;
-        background: rgba(255,255,255,0.06);
+        background: rgba(255,255,255,0.12);
         margin: 0.6rem 0;
         border: none;
     }
