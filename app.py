@@ -504,135 +504,126 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
-    /* Sidebar styling with laboratory/microscope background */
+    /* Sidebar styling — clean dark professional */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(7, 89, 133, 0.95) 0%, rgba(14, 116, 144, 0.92) 50%, rgba(6, 78, 59, 0.95) 100%),
-                    url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=600&q=80');
-        background-size: cover;
-        background-position: center;
-        background-blend-mode: overlay;
+        background: linear-gradient(180deg, #0c2d48 0%, #0a3d5c 40%, #093028 100%);
     }
     
     [data-testid="stSidebar"] > div:first-child {
         background: transparent;
+        padding-top: 0;
     }
     
     /* Sidebar text styling */
     [data-testid="stSidebar"] .stMarkdown {
-        color: #ecfdf5 !important;
+        color: #cbd5e1 !important;
     }
     
     [data-testid="stSidebar"] p, 
     [data-testid="stSidebar"] span,
     [data-testid="stSidebar"] label {
-        color: #ecfdf5 !important;
+        color: #cbd5e1 !important;
     }
-    
-    /* Sidebar radio buttons — hidden now (replaced by grouped nav) */
-    [data-testid="stSidebar"] .stRadio > label {
-        color: #ecfdf5 !important;
-        font-weight: 500;
-    }
-    
-    [data-testid="stSidebar"] .stRadio > div {
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 0.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    [data-testid="stSidebar"] .stRadio > div > label {
-        background: transparent;
-        color: #d1fae5 !important;
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        margin: 2px 0;
-    }
-    
-    [data-testid="stSidebar"] .stRadio > div > label:hover {
-        background: rgba(20, 184, 166, 0.3);
-        color: #ffffff !important;
-    }
-    
-    [data-testid="stSidebar"] .stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-        color: white !important;
-        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
-    }
-    
-    /* Sidebar button styling */
+
+    /* Hide default Streamlit radio/expander chrome in sidebar */
+    [data-testid="stSidebar"] .stRadio > label { display: none; }
+
+    /* Sidebar button styling — logout only */
     [data-testid="stSidebar"] .stButton > button {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px;
-        font-weight: 600;
+        background: rgba(220, 38, 38, 0.15) !important;
+        color: #fca5a5 !important;
+        border: 1px solid rgba(220, 38, 38, 0.3) !important;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85em;
+        padding: 0.4rem 1rem;
         transition: all 0.2s ease;
     }
     
     [data-testid="stSidebar"] .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        background: rgba(220, 38, 38, 0.3) !important;
+        color: #fecaca !important;
+        transform: none;
+        box-shadow: none;
     }
     
-    /* Sidebar expander styling */
-    [data-testid="stSidebar"] .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        color: #ecfdf5 !important;
+    /* Sidebar expander styling — navigation groups */
+    [data-testid="stSidebar"] [data-testid="stExpander"] {
+        background: transparent !important;
+        border: none !important;
+        margin-bottom: 0 !important;
     }
-    
-    [data-testid="stSidebar"] .streamlit-expanderContent {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 0 0 8px 8px;
+    [data-testid="stSidebar"] [data-testid="stExpander"] details {
+        border: none !important;
+        background: transparent !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary {
+        background: transparent !important;
+        border: none !important;
+        padding: 0.5rem 0.6rem !important;
+        margin: 0 !important;
+        border-radius: 6px;
+        color: #64748b !important;
+        font-size: 0.7em !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.08em !important;
+        text-transform: uppercase !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {
+        color: #94a3b8 !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary p,
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary span {
+        color: inherit !important;
+        font-size: inherit !important;
+        font-weight: inherit !important;
+        letter-spacing: inherit !important;
+    }
+    /* Hide the expander arrow/icon for cleaner look */
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary svg {
+        width: 14px !important;
+        height: 14px !important;
+        color: #475569 !important;
+    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
     }
 
-    /* ── Grouped Navigation Styling ──────────────────────────── */
-    .nav-group-header {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.55rem 0.75rem;
-        margin: 0.25rem 0 0.15rem 0;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.08);
-        color: #a7f3d0 !important;
-        font-weight: 600;
-        font-size: 0.82em;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-        cursor: default;
-        border: 1px solid rgba(255,255,255,0.06);
+    /* Nav item buttons — the actual page links */
+    [data-testid="stSidebar"] .nav-item-btn {
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    .nav-group-header .nav-icon { font-size: 1.05em; }
-
-    /* Nav item buttons — override Streamlit button style */
     [data-testid="stSidebar"] .nav-item-btn button {
         background: transparent !important;
-        color: #d1fae5 !important;
+        color: #94a3b8 !important;
         border: none !important;
         text-align: left !important;
-        padding: 0.45rem 0.75rem 0.45rem 2.1rem !important;
-        border-radius: 7px !important;
-        font-size: 0.88em !important;
+        padding: 0.5rem 0.75rem 0.5rem 1.6rem !important;
+        border-radius: 8px !important;
+        font-size: 0.855em !important;
         font-weight: 400 !important;
-        transition: all 0.15s ease !important;
+        transition: all 0.18s cubic-bezier(.4,0,.2,1) !important;
         box-shadow: none !important;
         width: 100% !important;
-        margin: 1px 0 !important;
-        line-height: 1.35 !important;
+        margin: 1px 4px !important;
+        line-height: 1.4 !important;
+        letter-spacing: 0.01em !important;
+        position: relative !important;
     }
     [data-testid="stSidebar"] .nav-item-btn button:hover {
-        background: rgba(20, 184, 166, 0.25) !important;
-        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: #e2e8f0 !important;
     }
+    /* Active page — subtle left accent bar + light background */
     [data-testid="stSidebar"] .nav-item-btn.nav-active button {
-        background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%) !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        box-shadow: 0 3px 12px rgba(20, 184, 166, 0.35) !important;
+        background: rgba(56, 189, 248, 0.1) !important;
+        color: #38bdf8 !important;
+        font-weight: 550 !important;
+        box-shadow: inset 3px 0 0 0 #38bdf8 !important;
+        border-radius: 0 8px 8px 0 !important;
     }
 
     /* Last-updated badge */
@@ -640,24 +631,56 @@ st.markdown("""
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
         border-radius: 8px;
-        padding: 0.45rem 0.7rem;
-        margin-top: 0.5rem;
-        color: #94a3b8;
-        font-size: 0.78em;
+        padding: 0.5rem 0.65rem;
+        margin: 0.25rem 0;
+        color: #64748b;
+        font-size: 0.75em;
     }
+    .last-updated-badge strong { color: #94a3b8; }
     .last-updated-badge .pulse-dot {
-        width: 7px; height: 7px;
+        width: 6px; height: 6px;
         border-radius: 50%;
         background: #34d399;
         display: inline-block;
-        animation: pulse-glow 2s ease-in-out infinite;
+        flex-shrink: 0;
+        animation: pulse-glow 2.5s ease-in-out infinite;
     }
     @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.45); }
         50% { box-shadow: 0 0 0 4px rgba(52,211,153,0); }
+    }
+
+    /* User card */
+    .sidebar-user-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        padding: 0.75rem 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    .sidebar-user-card .user-label { font-size: 0.7em; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+    .sidebar-user-card .user-email { font-weight: 600; color: #e2e8f0; font-size: 0.9em; margin: 2px 0; }
+    .sidebar-user-card .user-role  { font-size: 0.78em; margin: 2px 0; }
+    .sidebar-user-card .user-lab   { font-size: 0.78em; color: #64748b; margin: 2px 0; }
+
+    /* Sidebar brand */
+    .sidebar-brand {
+        text-align: center;
+        padding: 1.2rem 0 0.8rem 0;
+    }
+    .sidebar-brand .brand-icon { font-size: 1.8em; margin-bottom: 0.3rem; }
+    .sidebar-brand .brand-name { font-size: 1.05em; font-weight: 700; color: #e2e8f0; letter-spacing: 0.04em; }
+    .sidebar-brand .brand-sub  { font-size: 0.72em; color: #475569; margin-top: 2px; letter-spacing: 0.02em; }
+
+    /* Thin dividers */
+    .sidebar-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+        margin: 0.6rem 0;
+        border: none;
     }
     
     /* Main content area */
@@ -796,20 +819,6 @@ st.markdown("""
         border-radius: 10px;
     }
     
-    /* User info card in sidebar */
-    .user-info-card {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .user-info-card p {
-        margin: 0.3rem 0;
-        color: #ecfdf5;
-    }
-    
     /* Divider styling */
     hr {
         border: none;
@@ -829,26 +838,26 @@ st.markdown("---")
 with st.sidebar:
     # Logo/Title
     st.markdown("""
-        <div style="text-align: center; padding: 1rem 0 1.5rem 0;">
-            <div style="font-size: 2.5em; margin-bottom: 0.5rem;">🔬</div>
-            <div style="font-size: 1.2em; font-weight: 700; color: #e2e8f0;">ICBB-AMRSS</div>
-            <div style="font-size: 0.85em; color: #94a3b8;">ICBB AMR Surveillance System</div>
+        <div class="sidebar-brand">
+            <div class="brand-icon">🔬</div>
+            <div class="brand-name">ICBB-AMRSS</div>
+            <div class="brand-sub">AMR Surveillance System</div>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
     
     # User info card
     st.markdown(f"""
-        <div class="user-info-card">
-            <p style="font-size: 0.8em; color: #a7f3d0; margin-bottom: 0.5rem;">Logged in as</p>
-            <p style="font-weight: 600; color: #ecfdf5; font-size: 0.95em;">{st.session_state.user_email}</p>
-            {"<p style='color: #fcd34d; font-size: 0.85em;'>Administrator</p>" if st.session_state.is_admin else ""}
-            {f"<p style='color: #a7f3d0; font-size: 0.85em;'>{st.session_state.lab_name}</p>" if st.session_state.lab_name else ""}
+        <div class="sidebar-user-card">
+            <div class="user-label">Signed in</div>
+            <div class="user-email">{st.session_state.user_email}</div>
+            {"<div class='user-role' style='color:#fbbf24;'>Administrator</div>" if st.session_state.is_admin else ""}
+            {f"<div class='user-lab'>{st.session_state.lab_name}</div>" if st.session_state.lab_name else ""}
         </div>
     """, unsafe_allow_html=True)
     
-    if st.button("Logout", use_container_width=True):
+    if st.button("Sign out", use_container_width=True):
         st.session_state.authenticated = False
         st.session_state.user_email = None
         st.session_state.is_admin = False
@@ -856,8 +865,6 @@ with st.sidebar:
         st.session_state.lab_name = None
         st.success("Logged out successfully")
         st.rerun()
-    
-    st.markdown("---")
 
     # ── Last Updated indicator ────────────────────────────────────
     try:
@@ -877,13 +884,13 @@ with st.sidebar:
             st.markdown(f"""
                 <div class="last-updated-badge">
                     <span class="pulse-dot"></span>
-                    <span>Last data update: <strong>{_last_ts.strftime('%d %b %Y, %H:%M')}</strong> ({_ago})</span>
+                    <span>Updated: <strong>{_last_ts.strftime('%d %b %Y, %H:%M')}</strong> · {_ago}</span>
                 </div>
             """, unsafe_allow_html=True)
     except Exception:
         pass
 
-    st.markdown("---")
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
 
     # ── Grouped Navigation ─────────────────────────────────────────
     # Initialise active page in session state
