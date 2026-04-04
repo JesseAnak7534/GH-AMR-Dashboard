@@ -846,25 +846,6 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-    
-    # User info card
-    st.markdown(f"""
-        <div class="sidebar-user-card">
-            <div class="user-label">Signed in</div>
-            <div class="user-email">{st.session_state.user_email}</div>
-            {"<div class='user-role' style='color:#fbbf24;'>Administrator</div>" if st.session_state.is_admin else ""}
-            {f"<div class='user-lab'>{st.session_state.lab_name}</div>" if st.session_state.lab_name else ""}
-        </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("Sign out", use_container_width=True):
-        st.session_state.authenticated = False
-        st.session_state.user_email = None
-        st.session_state.is_admin = False
-        st.session_state.last_activity_time = None
-        st.session_state.lab_name = None
-        st.success("Logged out successfully")
-        st.rerun()
 
     # ── Last Updated indicator ────────────────────────────────────
     try:
@@ -951,6 +932,17 @@ with st.sidebar:
                     st.session_state.active_page = _pname
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Sign out at bottom ─────────────────────────────────────────
+    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+    if st.button("Sign out", use_container_width=True):
+        st.session_state.authenticated = False
+        st.session_state.user_email = None
+        st.session_state.is_admin = False
+        st.session_state.last_activity_time = None
+        st.session_state.lab_name = None
+        st.success("Logged out successfully")
+        st.rerun()
 
     page = st.session_state.active_page
 
