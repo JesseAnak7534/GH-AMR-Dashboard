@@ -220,6 +220,12 @@ if not st.session_state.authenticated:
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
+
+        /* Hide sidebar completely on login page */
+        [data-testid="stSidebar"],
+        [data-testid="collapsedControl"] {
+            display: none !important;
+        }
         
         /* Force centered, fixed-width login layout (even in wide mode) */
         .main {

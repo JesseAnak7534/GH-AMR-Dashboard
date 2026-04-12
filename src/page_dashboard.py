@@ -1,5 +1,5 @@
 """
-Landing / Dashboard page for ICBB-AMRSS.
+Landing / Home page for ICBB-AMRSS.
 Shows national KPI summary, sparkline trends, alert status,
 and quick-access cards. Works for both admin and lab users.
 """
@@ -10,36 +10,139 @@ from datetime import datetime, timedelta
 from src import db, analytics
 
 
-# ── Cached data loaders to prevent UI freeze on every rerun ───────────
-@st.cache_data(ttl=120, show_spinner="Loading surveillance data…")
-def _load_all_samples():
-    return db.get_all_samples()
+# ── Single cached function: load + compute everything once ────────────
+@st.cache_data(ttl=120, show_spinner="Loading dashboard…")
+def _compute_dashboard_data(lab_filter: str = ""):
+    """Return all pre-computed values the dashboard needs.
 
-@st.cache_data(ttl=120, show_spinner="Loading surveillance data…")
-def _load_all_ast():
-    return db.get_all_ast_results()
+    *lab_filter*: empty string for admin (all data), or lab_name for lab users.
+    Returns a dict (all serialisable, no DataFrames in heavy sections).
+    """
+    all_samples = db.get_all_samples()
+    all_ast = db.get_all_ast_results()
 
-@st.cache_data(ttl=120, show_spinner=False)
-def _get_admin_stats():
+    # Lab filter
+    if lab_filter:
+        if not all_samples.empty and "lab_name" in all_samples.columns:
+            mask = all_samples["lab_name"].astype(str).str.strip().str.lower() == lab_filter.strip().lower()
+            all_samples = all_samples[mask]
+            if not all_ast.empty:
+                all_ast = all_ast[all_ast["sample_id"].astype(str).isin(all_samples["sample_id"].astype(str))]
+
+    if all_ast.empty or all_samples.empty:
+        return None  # sentinel: no data
+
+    ast_clean = all_ast.dropna(subset=["organism", "antibiotic", "result"])
+    ast_clean = ast_clean[ast_clean["result"].isin(["R", "I", "S"])]
+    if ast_clean.empty:
+        return None
+
+    # ── KPIs ───────────────────────────────────────────────────
+    total_samples = len(all_samples)
+    total_tests = len(ast_clean)
+    total_isolates = int(ast_clean["isolate_id"].nunique()) if "isolate_id" in ast_clean.columns else 0
+    total_organisms = int(ast_clean["organism"].nunique())
+    total_antibiotics = int(ast_clean["antibiotic"].nunique())
+    r_count = int((ast_clean["result"] == "R").sum())
+    overall_r_rate = round(r_count / max(total_tests, 1) * 100, 1)
+    regions_covered = int(all_samples["region"].nunique()) if "region" in all_samples.columns else 0
+    labs_reporting = int(all_samples["lab_name"].nunique()) if "lab_name" in all_samples.columns else 0
+    source_cats = int(all_samples["source_category"].nunique()) if "source_category" in all_samples.columns else 0
+
+    # MDR (iterates isolates — heavy, but now cached)
+    mdro = analytics.calculate_mdro_incidence(ast_clean)
+    mdr_rate = mdro.get("mdr_rate_pct", 0)
+
+    # Alerts
+    try:
+        conn = db.get_connection()
+        alert_count = conn.execute(
+            "SELECT COUNT(*) FROM alerts WHERE is_acknowledged = 0"
+        ).fetchone()[0]
+    except Exception:
+        alert_count = 0
+
+    # ── Monthly trend (vectorised, no lambda) ──────────────────
+    monthly_data = []
+    if "test_date" in ast_clean.columns:
+        _ast_t = ast_clean[["test_date", "result"]].copy()
+        _ast_t["test_date"] = pd.to_datetime(_ast_t["test_date"], errors="coerce")
+        _ast_t = _ast_t.dropna(subset=["test_date"])
+        if not _ast_t.empty:
+            _ast_t["month"] = _ast_t["test_date"].dt.to_period("M")
+            grp = _ast_t.groupby("month")["result"]
+            monthly = pd.DataFrame({
+                "total": grp.count(),
+                "resistant": grp.apply(lambda x: (x == "R").sum()),
+            })
+            monthly["r_pct"] = (monthly["resistant"] / monthly["total"].clip(lower=1) * 100).round(1)
+            monthly = monthly.sort_index()
+            monthly_data = [
+                {"month": str(idx), "r_pct": float(row["r_pct"])}
+                for idx, row in monthly.iterrows()
+            ]
+
+    # ── Source category breakdown ──────────────────────────────
+    source_data = []
+    if "source_category" in all_samples.columns:
+        src_counts = all_samples["source_category"].value_counts()
+        source_data = [{"cat": str(c), "n": int(v)} for c, v in src_counts.items()]
+
+    # ── Top resistant organisms (vectorised) ───────────────────
+    grp_org = ast_clean.groupby("organism")["result"]
+    org_stats = pd.DataFrame({
+        "total": grp_org.count(),
+        "resistant": grp_org.apply(lambda x: (x == "R").sum()),
+    })
+    org_stats["r_pct"] = (org_stats["resistant"] / org_stats["total"].clip(lower=1) * 100).round(1)
+    top_orgs = [
+        {"org": str(idx), "pct": float(row["r_pct"])}
+        for idx, row in org_stats.nlargest(6, "r_pct").iterrows()
+    ]
+
+    # ── Region breakdown ───────────────────────────────────────
+    region_data = []
+    if "region" in all_samples.columns:
+        reg = all_samples["region"].value_counts().head(8)
+        region_data = [{"region": str(r), "n": int(v)} for r, v in reg.items()]
+
+    # ── Sentinel phenotypes (iterates isolates — heavy, cached) ─
+    raw_pheno = analytics.detect_sentinel_phenotypes(ast_clean)
+    pheno_data = [
+        {
+            "label": p.get("label", ""),
+            "code": p.get("code", ""),
+            "who_tier": p.get("who_tier", ""),
+            "isolate_count": int(p.get("isolate_count", 0)),
+            "resistance_rate": float(p.get("resistance_rate", 0)),
+        }
+        for p in (raw_pheno or [])[:6]
+    ]
+
+    # ── Admin stats ────────────────────────────────────────────
     try:
         conn = db.get_connection()
         total_users = conn.execute("SELECT COUNT(*) FROM users WHERE is_active = 1").fetchone()[0]
         total_datasets = conn.execute("SELECT COUNT(*) FROM datasets").fetchone()[0]
         last_upload = conn.execute("SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1").fetchone()
         last_upload_str = last_upload[0][:10] if last_upload and last_upload[0] else "—"
-        return total_users, total_datasets, last_upload_str
     except Exception:
-        return 0, 0, "—"
+        total_users = total_datasets = 0
+        last_upload_str = "—"
 
-@st.cache_data(ttl=120, show_spinner=False)
-def _get_alert_count():
-    try:
-        conn = db.get_connection()
-        return conn.execute(
-            "SELECT COUNT(*) FROM alerts WHERE is_acknowledged = 0"
-        ).fetchone()[0]
-    except Exception:
-        return 0
+    return {
+        "total_samples": total_samples, "total_tests": total_tests,
+        "total_isolates": total_isolates, "total_organisms": total_organisms,
+        "total_antibiotics": total_antibiotics, "overall_r_rate": overall_r_rate,
+        "regions_covered": regions_covered, "labs_reporting": labs_reporting,
+        "source_cats": source_cats, "mdr_rate": mdr_rate,
+        "alert_count": alert_count,
+        "monthly_data": monthly_data, "source_data": source_data,
+        "top_orgs": top_orgs, "region_data": region_data,
+        "pheno_data": pheno_data,
+        "total_users": total_users, "total_datasets": total_datasets,
+        "last_upload_str": last_upload_str,
+    }
 
 
 # ── Tiny sparkline helper ─────────────────────────────────────────────
@@ -115,46 +218,26 @@ def render_dashboard_page():
         </div>
     """, unsafe_allow_html=True)
 
-    # ── Load data (cached — prevents freeze on rerun) ───────────
-    all_samples = _load_all_samples().copy()
-    all_ast = _load_all_ast().copy()
+    # ── Load ALL pre-computed data (single cache call) ────────────
+    lab_filter = "" if is_admin else (lab_name or "")
+    data = _compute_dashboard_data(lab_filter)
 
-    # Lab users see only their data
-    if not is_admin and lab_name:
-        if not all_samples.empty and "lab_name" in all_samples.columns:
-            mask = all_samples["lab_name"].astype(str).str.strip().str.lower() == lab_name.strip().lower()
-            all_samples = all_samples[mask]
-            if not all_ast.empty:
-                all_ast = all_ast[all_ast["sample_id"].astype(str).isin(all_samples["sample_id"].astype(str))]
-
-    has_data = not all_ast.empty and not all_samples.empty
-
-    if not has_data:
+    if data is None:
         st.info("No surveillance data available yet. Upload data via **Upload & Data Quality** to get started.")
         return
 
-    # Clean AST
-    ast_clean = all_ast.dropna(subset=["organism", "antibiotic", "result"])
-    ast_clean = ast_clean[ast_clean["result"].isin(["R", "I", "S"])]
-
-    # ── Compute KPIs ──────────────────────────────────────────────
-    total_samples = len(all_samples)
-    total_tests = len(ast_clean)
-    total_isolates = ast_clean["isolate_id"].nunique() if "isolate_id" in ast_clean.columns else 0
-    total_organisms = ast_clean["organism"].nunique()
-    total_antibiotics = ast_clean["antibiotic"].nunique()
-    r_count = (ast_clean["result"] == "R").sum()
-    overall_r_rate = round(r_count / max(total_tests, 1) * 100, 1)
-    regions_covered = all_samples["region"].nunique() if "region" in all_samples.columns else 0
-    labs_reporting = all_samples["lab_name"].nunique() if "lab_name" in all_samples.columns else 0
-    source_cats = all_samples["source_category"].nunique() if "source_category" in all_samples.columns else 0
-
-    # MDR
-    mdro = analytics.calculate_mdro_incidence(ast_clean)
-    mdr_rate = mdro.get("mdr_rate_pct", 0)
-
-    # Alerts count (cached)
-    alert_count = _get_alert_count()
+    # Unpack
+    total_samples = data["total_samples"]
+    total_tests = data["total_tests"]
+    total_isolates = data["total_isolates"]
+    total_organisms = data["total_organisms"]
+    total_antibiotics = data["total_antibiotics"]
+    overall_r_rate = data["overall_r_rate"]
+    regions_covered = data["regions_covered"]
+    labs_reporting = data["labs_reporting"]
+    source_cats = data["source_cats"]
+    mdr_rate = data["mdr_rate"]
+    alert_count = data["alert_count"]
 
     # ── KPI Row 1 — Core numbers ──────────────────────────────────
     st.markdown("#### At a Glance")
@@ -184,20 +267,13 @@ def render_dashboard_page():
                     Resistance Trend (Monthly)
                 </div>
         """, unsafe_allow_html=True)
-        _ast_t = ast_clean.copy()
-        _ast_t["test_date"] = pd.to_datetime(_ast_t["test_date"], errors="coerce")
-        _ast_t = _ast_t.dropna(subset=["test_date"])
-        if not _ast_t.empty:
-            _ast_t["month"] = _ast_t["test_date"].dt.to_period("M")
-            monthly = _ast_t.groupby("month").apply(
-                lambda g: round((g["result"] == "R").sum() / max(len(g), 1) * 100, 1),
-                include_groups=False,
-            ).reset_index(name="r_pct").sort_values("month")
-            monthly["month_str"] = monthly["month"].astype(str)
-
+        monthly_data = data["monthly_data"]
+        if monthly_data:
+            months = [m["month"] for m in monthly_data]
+            r_pcts = [m["r_pct"] for m in monthly_data]
             fig = go.Figure()
             fig.add_trace(go.Scatter(
-                x=monthly["month_str"], y=monthly["r_pct"],
+                x=months, y=r_pcts,
                 mode="lines+markers",
                 line=dict(color="#0d9488", width=2.5, shape="spline"),
                 marker=dict(size=5, color="#0d9488"),
@@ -225,14 +301,16 @@ def render_dashboard_page():
                     One Health Sources
                 </div>
         """, unsafe_allow_html=True)
-        if "source_category" in all_samples.columns:
-            src_counts = all_samples["source_category"].value_counts()
+        source_data = data["source_data"]
+        if source_data:
+            src_labels = [s["cat"] for s in source_data]
+            src_values = [s["n"] for s in source_data]
             colors = {"HUMAN": "#3b82f6", "ANIMAL": "#f59e0b", "FOOD": "#22c55e", "ENVIRONMENT": "#8b5cf6", "AQUACULTURE": "#06b6d4"}
             fig2 = go.Figure(go.Pie(
-                labels=src_counts.index.tolist(),
-                values=src_counts.values.tolist(),
+                labels=src_labels,
+                values=src_values,
                 hole=0.55,
-                marker=dict(colors=[colors.get(str(c).upper(), "#94a3b8") for c in src_counts.index]),
+                marker=dict(colors=[colors.get(str(c).upper(), "#94a3b8") for c in src_labels]),
                 textinfo="label+percent",
                 textfont=dict(size=11),
                 hovertemplate="%{label}: %{value:,} samples (%{percent})<extra></extra>",
@@ -256,12 +334,10 @@ def render_dashboard_page():
                     Top Resistant Pathogens
                 </div>
         """, unsafe_allow_html=True)
-        org_r = ast_clean.groupby("organism").apply(
-            lambda g: round((g["result"] == "R").sum() / max(len(g), 1) * 100, 1),
-            include_groups=False,
-        ).nlargest(6)
-        if not org_r.empty:
-            for org, pct in org_r.items():
+        top_orgs = data["top_orgs"]
+        if top_orgs:
+            for item in top_orgs:
+                org, pct = item["org"], item["pct"]
                 bar_color = "#dc2626" if pct >= 60 else "#f59e0b" if pct >= 30 else "#22c55e"
                 st.markdown(f"""
                     <div style="margin-bottom:8px;">
@@ -288,11 +364,13 @@ def render_dashboard_page():
                     Geographic Coverage
                 </div>
         """, unsafe_allow_html=True)
-        if "region" in all_samples.columns:
-            reg = all_samples["region"].value_counts().head(8)
+        region_data = data["region_data"]
+        if region_data:
+            reg_labels = [r["region"] for r in region_data]
+            reg_values = [r["n"] for r in region_data]
             fig3 = go.Figure(go.Bar(
-                y=reg.index.tolist()[::-1],
-                x=reg.values.tolist()[::-1],
+                y=reg_labels[::-1],
+                x=reg_values[::-1],
                 orientation="h",
                 marker_color="#0d9488",
                 hovertemplate="%{y}: %{x:,} samples<extra></extra>",
@@ -318,9 +396,9 @@ def render_dashboard_page():
                     Sentinel Phenotypes Detected
                 </div>
         """, unsafe_allow_html=True)
-        phenotypes = analytics.detect_sentinel_phenotypes(ast_clean)
-        if phenotypes:
-            for ph in phenotypes[:6]:
+        pheno_data = data["pheno_data"]
+        if pheno_data:
+            for ph in pheno_data:
                 who_tier = ph.get("who_tier", "")
                 badge_bg = "#fef2f2" if who_tier == "CRITICAL" else "#fffbeb" if who_tier == "HIGH" else "#eff6ff"
                 badge_color = "#dc2626" if who_tier == "CRITICAL" else "#d97706" if who_tier == "HIGH" else "#2563eb"
@@ -372,7 +450,7 @@ def render_dashboard_page():
         st.markdown("#### System Health")
         a1, a2, a3, a4 = st.columns(4)
 
-        total_users, total_datasets, last_upload_str = _get_admin_stats()
+        total_users, total_datasets, last_upload_str = data["total_users"], data["total_datasets"], data["last_upload_str"]
 
         with a1:
             _kpi_card("Active Users", f"{total_users}", "registered accounts", "👥", _P_BLUE)
