@@ -20,6 +20,7 @@ import urllib.parse
 # Import modules
 from src import db, validate, plots, report, analytics
 from src import email_utils
+from src.page_dashboard import render_dashboard_page
 from src.lab_management import (
     get_lab_email_map,
     is_lab_user,
@@ -876,9 +877,12 @@ with st.sidebar:
     # ── Grouped Navigation ─────────────────────────────────────────
     # Initialise active page in session state
     if "active_page" not in st.session_state:
-        st.session_state.active_page = "Upload & Data Quality"
+        st.session_state.active_page = "Dashboard"
 
     _NAV_GROUPS = [
+        ("🏠", "Home", [
+            ("📊", "Dashboard"),
+        ]),
         ("📂", "Data Management", [
             ("📤", "Upload & Data Quality"),
             ("🗄️", "Data Management"),
@@ -971,9 +975,15 @@ if os.path.exists(_pp_filter_path):
             st.caption(f"{len(pp_names)} pathogens selected")
 
 # ============================================================================
+# DASHBOARD LANDING PAGE
+# ============================================================================
+if page == "Dashboard":
+    render_dashboard_page()
+
+# ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
 # ============================================================================
-if page == "Upload & Data Quality":
+elif page == "Upload & Data Quality":
     st.header("Upload & Data Quality")
     
     col1, col2 = st.columns([2, 1])
