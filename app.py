@@ -229,18 +229,27 @@ if not st.session_state.authenticated:
         
         /* Force centered, fixed-width login layout (even in wide mode) */
         .main {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 100vh !important;
         }
 
-        .main .block-container {
+        .main .block-container,
+        .main .stMainBlockContainer,
+        .main [data-testid="stAppViewBlockContainer"],
+        [data-testid="stAppViewBlockContainer"],
+        .stApp .stMainBlockContainer {
             max-width: 460px !important;
             width: 100% !important;
             margin: 0 auto !important;
             padding-top: 2rem !important;
             padding-bottom: 2rem !important;
+        }
+
+        /* Also hide the header bar on login */
+        header[data-testid="stHeader"] {
+            display: none !important;
         }
         
         /* Login card effect */
@@ -697,9 +706,13 @@ st.markdown("""
         justify-content: unset !important;
         min-height: unset !important;
     }
-    .main .block-container {
+    .main .block-container,
+    .main .stMainBlockContainer,
+    .main [data-testid="stAppViewBlockContainer"],
+    [data-testid="stAppViewBlockContainer"] {
         max-width: none !important;
         width: auto !important;
+        margin: 0 !important;
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
