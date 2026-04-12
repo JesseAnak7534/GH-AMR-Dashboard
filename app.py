@@ -40,7 +40,7 @@ from src.page_hai import render_hai_page
 st.set_page_config(
     page_title="ICBB-AMRSS",
     page_icon="🔬",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded"
 )
 
@@ -877,12 +877,9 @@ with st.sidebar:
     # ── Grouped Navigation ─────────────────────────────────────────
     # Initialise active page in session state
     if "active_page" not in st.session_state:
-        st.session_state.active_page = "Dashboard"
+        st.session_state.active_page = "Home"
 
     _NAV_GROUPS = [
-        ("🏠", "Home", [
-            ("📊", "Dashboard"),
-        ]),
         ("📂", "Data Management", [
             ("📤", "Upload & Data Quality"),
             ("🗄️", "Data Management"),
@@ -925,6 +922,14 @@ with st.sidebar:
         if any(pname == _active for _, pname in _gitems):
             _active_group = _gname
             break
+
+    # ── Home button (standalone, always visible) ──
+    _home_cls = "nav-item-btn nav-active" if _active == "Home" else "nav-item-btn"
+    st.markdown(f'<div class="{_home_cls}">', unsafe_allow_html=True)
+    if st.button("🏠  Home", key="nav_Home", use_container_width=True):
+        st.session_state.active_page = "Home"
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     for _gicon, _gname, _gitems in _NAV_GROUPS:
         _is_open = (_gname == _active_group)
@@ -977,7 +982,7 @@ if os.path.exists(_pp_filter_path):
 # ============================================================================
 # DASHBOARD LANDING PAGE
 # ============================================================================
-if page == "Dashboard":
+if page == "Home":
     render_dashboard_page()
 
 # ============================================================================

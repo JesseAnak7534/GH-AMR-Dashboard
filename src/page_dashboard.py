@@ -10,6 +10,38 @@ from datetime import datetime, timedelta
 from src import db, analytics
 
 
+# ── Cached data loaders to prevent UI freeze on every rerun ───────────
+@st.cache_data(ttl=120, show_spinner="Loading surveillance data…")
+def _load_all_samples():
+    return db.get_all_samples()
+
+@st.cache_data(ttl=120, show_spinner="Loading surveillance data…")
+def _load_all_ast():
+    return db.get_all_ast_results()
+
+@st.cache_data(ttl=120, show_spinner=False)
+def _get_admin_stats():
+    try:
+        conn = db.get_connection()
+        total_users = conn.execute("SELECT COUNT(*) FROM users WHERE is_active = 1").fetchone()[0]
+        total_datasets = conn.execute("SELECT COUNT(*) FROM datasets").fetchone()[0]
+        last_upload = conn.execute("SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1").fetchone()
+        last_upload_str = last_upload[0][:10] if last_upload and last_upload[0] else "—"
+        return total_users, total_datasets, last_upload_str
+    except Exception:
+        return 0, 0, "—"
+
+@st.cache_data(ttl=120, show_spinner=False)
+def _get_alert_count():
+    try:
+        conn = db.get_connection()
+        return conn.execute(
+            "SELECT COUNT(*) FROM alerts WHERE is_acknowledged = 0"
+        ).fetchone()[0]
+    except Exception:
+        return 0
+
+
 # ── Tiny sparkline helper ─────────────────────────────────────────────
 def _sparkline(values: list, color: str = "#38bdf8", height: int = 40) -> go.Figure:
     """Return a minimal sparkline figure."""
@@ -83,9 +115,9 @@ def render_dashboard_page():
         </div>
     """, unsafe_allow_html=True)
 
-    # ── Load data ─────────────────────────────────────────────────
-    all_samples = db.get_all_samples()
-    all_ast = db.get_all_ast_results()
+    # ── Load data (cached — prevents freeze on rerun) ───────────
+    all_samples = _load_all_samples().copy()
+    all_ast = _load_all_ast().copy()
 
     # Lab users see only their data
     if not is_admin and lab_name:
@@ -121,14 +153,8 @@ def render_dashboard_page():
     mdro = analytics.calculate_mdro_incidence(ast_clean)
     mdr_rate = mdro.get("mdr_rate_pct", 0)
 
-    # Alerts count
-    try:
-        conn = db.get_connection()
-        alert_count = conn.execute(
-            "SELECT COUNT(*) FROM alerts WHERE is_acknowledged = 0"
-        ).fetchone()[0]
-    except Exception:
-        alert_count = 0
+    # Alerts count (cached)
+    alert_count = _get_alert_count()
 
     # ── KPI Row 1 — Core numbers ──────────────────────────────────
     st.markdown("#### At a Glance")
@@ -295,20 +321,16 @@ def render_dashboard_page():
         phenotypes = analytics.detect_sentinel_phenotypes(ast_clean)
         if phenotypes:
             for ph in phenotypes[:6]:
-                sev = ph.get("severity", "medium")
-                badge_bg = "#fef2f2" if sev == "critical" else "#fffbeb" if sev == "high" else "#eff6ff"
-                badge_color = "#dc2626" if sev == "critical" else "#d97706" if sev == "high" else "#2563eb"
-                # Handle count - it may be a DataFrame, int, or other
-                count_val = ph.get("count", 0)
-                if isinstance(count_val, pd.DataFrame):
-                    count_display = len(count_val)
-                else:
-                    count_display = int(count_val) if count_val else 0
+                who_tier = ph.get("who_tier", "")
+                badge_bg = "#fef2f2" if who_tier == "CRITICAL" else "#fffbeb" if who_tier == "HIGH" else "#eff6ff"
+                badge_color = "#dc2626" if who_tier == "CRITICAL" else "#d97706" if who_tier == "HIGH" else "#2563eb"
+                count_display = ph.get("isolate_count", 0)
+                r_rate = ph.get("resistance_rate", 0)
                 st.markdown(f"""
                     <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f1f5f9;">
                         <div>
-                            <div style="font-size:0.85em; font-weight:500; color:#1e293b;">{ph.get('name', '')}</div>
-                            <div style="font-size:0.72em; color:#64748b;">{ph.get('organism', '')}</div>
+                            <div style="font-size:0.85em; font-weight:500; color:#1e293b;">{ph.get('label', '')}</div>
+                            <div style="font-size:0.72em; color:#64748b;">{ph.get('code', '')} · {r_rate}% resistance</div>
                         </div>
                         <div style="background:{badge_bg}; color:{badge_color}; padding:2px 8px; border-radius:10px; font-size:0.75em; font-weight:600;">
                             {count_display} isolates
@@ -350,15 +372,7 @@ def render_dashboard_page():
         st.markdown("#### System Health")
         a1, a2, a3, a4 = st.columns(4)
 
-        try:
-            conn = db.get_connection()
-            total_users = conn.execute("SELECT COUNT(*) FROM users WHERE is_active = 1").fetchone()[0]
-            total_datasets = conn.execute("SELECT COUNT(*) FROM datasets").fetchone()[0]
-            last_upload = conn.execute("SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1").fetchone()
-            last_upload_str = last_upload[0][:10] if last_upload and last_upload[0] else "—"
-        except Exception:
-            total_users = total_datasets = 0
-            last_upload_str = "—"
+        total_users, total_datasets, last_upload_str = _get_admin_stats()
 
         with a1:
             _kpi_card("Active Users", f"{total_users}", "registered accounts", "👥", _P_BLUE)
