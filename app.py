@@ -690,8 +690,16 @@ st.markdown("""
         border: none;
     }
     
-    /* Main content area */
+    /* Main content area — override login-page 460px cap */
+    .main {
+        display: block !important;
+        align-items: unset !important;
+        justify-content: unset !important;
+        min-height: unset !important;
+    }
     .main .block-container {
+        max-width: none !important;
+        width: auto !important;
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
