@@ -4,18 +4,19 @@ Main Streamlit application with multi-page support.
 """
 import streamlit as st
 import pandas as pd
-import numpy as np
 import os
 import uuid
 import bcrypt
-import secrets
 import json
+import logging
 from dotenv import load_dotenv
-from io import BytesIO
 from datetime import datetime, timedelta
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import plotly.express as px
-import urllib.parse
+
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 # Import modules
 from src import db, validate, plots, report, analytics
@@ -70,7 +71,7 @@ def _get_session_timeout_minutes():
     try:
         if hasattr(st, "secrets") and "SESSION_TIMEOUT_MINUTES" in st.secrets:
             timeout_value = st.secrets.get("SESSION_TIMEOUT_MINUTES")
-    except Exception:
+    except (FileNotFoundError, KeyError, AttributeError):
         pass
     if timeout_value is None:
         timeout_value = os.getenv("SESSION_TIMEOUT_MINUTES")
@@ -123,7 +124,7 @@ def _get_admin_config():
             if "ADMIN_EMAIL" in st.secrets and "ADMIN_PASSWORD" in st.secrets:
                 admin_email = st.secrets["ADMIN_EMAIL"]
                 admin_password = st.secrets["ADMIN_PASSWORD"]
-    except Exception:
+    except (FileNotFoundError, KeyError, AttributeError):
         pass
     load_dotenv()
     admin_email = admin_email or os.getenv("ADMIN_EMAIL")
@@ -148,6 +149,79 @@ def _apply_lab_filter(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> Tuple[p
     filtered_ast = ast_df[ast_df['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str))]
     return filtered_samples, filtered_ast
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared UI / data helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def sidebar_multiselect_all(label: str, options, key: str) -> list:
+    """Render an 'All'-aware sidebar multiselect.
+
+    Returns the effective selection: all options when "All" is picked or
+    nothing is picked, otherwise just the user-chosen values.
+    `key` must be unique per call site to isolate widget state across pages.
+    """
+    options = list(options)
+    if not options:
+        return []
+    opts = ["All"] + options
+    picked = st.sidebar.multiselect(label, opts, default=["All"], key=key)
+    if not picked or "All" in picked:
+        return options
+    return [p for p in picked if p != "All"]
+
+
+@st.cache_data(ttl=300, show_spinner="Loading dataset…")
+def _load_dataset_bundle(dataset_id: str, lab_name: Optional[str]):
+    """Cached loader for the (samples, ast) dataframes of a dataset.
+
+    Scoped to a single lab when `lab_name` is non-empty; admins pass ``None``.
+    Cache entries are keyed on (dataset_id, lab_name), so switching datasets
+    or lab users doesn't leak cached rows.
+    """
+    samples = db.get_dataset_samples(dataset_id)
+    ast = db.get_dataset_ast(dataset_id)
+    if lab_name and not samples.empty and 'lab_name' in samples.columns:
+        mask = samples['lab_name'].astype(str).str.strip().str.lower() == lab_name.strip().lower()
+        samples = samples[mask]
+        if not ast.empty:
+            ast = ast[ast['sample_id'].astype(str).isin(samples['sample_id'].astype(str))]
+    return samples, ast
+
+
+def _load_active_dataset():
+    """Convenience wrapper for the common 'load the page's active dataset' pattern.
+
+    Returns (samples_df, ast_df). Callers that have already guarded on
+    ``st.session_state.active_dataset_id`` can rely on a non-empty id.
+    """
+    ds_id = st.session_state.active_dataset_id
+    lab = None if st.session_state.get("is_admin") else st.session_state.get("lab_name")
+    return _load_dataset_bundle(ds_id, lab)
+
+
+def _render_dataset_banner(dataset_id):
+    """Uniform banner shown above each dataset-scoped page."""
+    st.info(f"Viewing dataset: {dataset_id}")
+
+
+def _csv_download(df: pd.DataFrame, filename: str, key: str, label: str = "⬇ Download CSV"):
+    """Render a CSV download button below a chart or table."""
+    if df is None or df.empty:
+        return
+    try:
+        csv = df.to_csv(index=False).encode("utf-8")
+    except Exception:
+        logger.exception("CSV encoding failed for %s", filename)
+        return
+    st.download_button(label, data=csv, file_name=filename, mime="text/csv", key=key)
+
+
+def _empty_state(msg: str, icon: str = "📊"):
+    """Consistent empty-state helper used in place of ad-hoc st.warning()."""
+    st.info(f"{icon} {msg}")
+
+
 ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
 if ADMIN_EMAIL and ADMIN_PASSWORD:
     try:
@@ -164,16 +238,16 @@ if ADMIN_EMAIL and ADMIN_PASSWORD:
         try:
             db.set_user_verified(ADMIN_EMAIL, True)
         except Exception:
-            pass
+            logger.exception("admin verified flag write failed")
     except Exception:
-        pass
+        logger.exception("admin account bootstrap failed")
 
 def _get_flag(name: str) -> bool:
     val = None
     try:
         if hasattr(st, "secrets") and name in st.secrets:
             val = st.secrets.get(name)
-    except Exception:
+    except (FileNotFoundError, KeyError, AttributeError):
         pass
     if val is None:
         val = os.getenv(name)
@@ -195,7 +269,7 @@ try:
                 f.write(f"{datetime.now().isoformat()} - {msg}")
             st.info(f"Startup maintenance: {msg}")
 except Exception:
-    pass
+    logger.exception("startup maintenance PURGE_NON_ADMIN_ON_DEPLOY failed")
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:
@@ -418,18 +492,18 @@ if not st.session_state.authenticated:
                         if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
                             # Email verification requirement removed; allow login if credentials match
                             config_admin_email, _ = _get_admin_config()
-                            target_admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+                            target_admin_email = (config_admin_email or "").strip().lower()
 
-                            # Enforce admin role for configured admin email
+                            # Enforce admin role for configured admin email (only when configured)
                             is_admin_flag = user.get('is_admin')
-                            if login_email.strip().lower() == target_admin_email:
+                            if target_admin_email and login_email.strip().lower() == target_admin_email:
                                 is_admin_flag = 1
                                 try:
                                     db.set_user_admin(login_email, True)
                                     db.update_user_status(user['user_id'], True)
                                     db.set_user_verified(login_email, True)
                                 except Exception:
-                                    pass
+                                    logger.exception("admin role enforcement at login failed for %s", login_email)
 
                             # Restrict to admin or approved lab users only
                             lab_mapping = _get_lab_email_mapping()
@@ -897,7 +971,7 @@ with st.sidebar:
                 </div>
             """, unsafe_allow_html=True)
     except Exception:
-        pass
+        logger.exception("last-updated sidebar badge render failed")
 
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
 
@@ -1163,8 +1237,8 @@ elif page == "Upload & Data Quality":
     datasets = db.get_all_datasets()
     # Hide admin-owned datasets from non-admin users
     config_admin_email, _ = _get_admin_config()
-    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
-    if not st.session_state.is_admin:
+    admin_email = (config_admin_email or "").strip().lower()
+    if not st.session_state.is_admin and admin_email:
         datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
     if st.session_state.lab_name:
         datasets = [
@@ -1206,8 +1280,8 @@ elif page == "Data Management":
     datasets = db.get_all_datasets()
     # Hide admin-owned datasets from non-admin users
     config_admin_email, _ = _get_admin_config()
-    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
-    if not st.session_state.is_admin:
+    admin_email = (config_admin_email or "").strip().lower()
+    if not st.session_state.is_admin and admin_email:
         datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
     if st.session_state.lab_name:
         datasets = [
@@ -1218,38 +1292,44 @@ elif page == "Data Management":
     if not datasets:
         st.info("No datasets available. Please upload data first on the 'Upload & Data Quality' page.")
     else:
-        # Dataset selection
-        dataset_names = [f"{ds['dataset_name']} (ID: {ds['dataset_id']})" for ds in datasets]
-        selected_dataset_display = st.selectbox(
+        # Dataset selection — option values are raw dataset_ids; format_func shows the friendly label
+        ds_label_by_id = {ds['dataset_id']: f"{ds['dataset_name']} (ID: {ds['dataset_id']})" for ds in datasets}
+        selected_dataset_id = st.selectbox(
             "Select Dataset to Manage",
-            dataset_names,
+            list(ds_label_by_id.keys()),
+            format_func=lambda ds_id: ds_label_by_id.get(ds_id, ds_id),
             key="data_mgmt_dataset"
         )
-        # Extract dataset ID and store in session
-        try:
-            selected_dataset_id = selected_dataset_display.split("(ID: ")[1].rstrip(")")
+        if selected_dataset_id:
             st.session_state.active_dataset_id = selected_dataset_id
             st.success(f"Active dataset: {selected_dataset_id}")
-        except:
-            st.warning("Unable to parse dataset ID. Please reselect.")
 elif page == "Admin - Datasets":
     st.header("Admin - Datasets")
     config_admin_email, _ = _get_admin_config()
-    admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
+    admin_email = (config_admin_email or "").strip().lower()
 
     all_datasets = db.get_all_datasets()
 
     main_datasets = db.get_main_datasets(country="Ghana")
-    main_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets] or ["None"]
-    selected_main_display = st.selectbox("National Main Dataset (Ghana)", main_choices, key="main_ds_select")
+    main_label_by_id = {d['dataset_id']: f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets}
+    st.selectbox(
+        "National Main Dataset (Ghana)",
+        list(main_label_by_id.keys()) or [""],
+        format_func=lambda k: main_label_by_id.get(k, "None"),
+        key="main_ds_select",
+    )
 
     st.markdown("---")
     st.subheader("Mark a dataset as National Main")
-    ds_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in all_datasets]
-    target_display = st.selectbox("Select dataset", ds_choices, key="mark_main_select")
+    all_label_by_id = {d['dataset_id']: f"{d['dataset_name']} ({d['dataset_id']})" for d in all_datasets}
+    target_id = st.selectbox(
+        "Select dataset",
+        list(all_label_by_id.keys()),
+        format_func=lambda k: all_label_by_id.get(k, k),
+        key="mark_main_select",
+    )
     if st.button("Set as National Main (Ghana)", type="primary"):
         try:
-            target_id = target_display.split("(")[-1].rstrip(")")
             ok, msg = db.set_dataset_main(target_id, True, country="Ghana")
             if ok:
                 st.success("Main dataset updated")
@@ -1262,22 +1342,34 @@ elif page == "Admin - Datasets":
     st.markdown("---")
     st.subheader("Merge User Dataset into National Main")
     user_datasets = [d for d in all_datasets if (d.get('uploaded_by') or '').strip().lower() != admin_email]
-    user_choices = [f"{d['uploaded_by'] or 'Unknown'}: {d['dataset_name']} ({d['dataset_id']})" for d in user_datasets] or ["No user datasets"]
-
-    src_display = st.selectbox("Select user dataset", user_choices, key="merge_src_select")
+    user_label_by_id = {
+        d['dataset_id']: f"{d['uploaded_by'] or 'Unknown'}: {d['dataset_name']} ({d['dataset_id']})"
+        for d in user_datasets
+    }
+    src_id = st.selectbox(
+        "Select user dataset",
+        list(user_label_by_id.keys()) or [""],
+        format_func=lambda k: user_label_by_id.get(k, "No user datasets"),
+        key="merge_src_select",
+    )
     # Refresh main choices
     main_datasets = db.get_main_datasets(country="Ghana")
-    main_choices = [f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets] or ["None"]
-    merge_target_display = st.selectbox("Target main dataset", main_choices, key="merge_target_select")
+    merge_main_label_by_id = {d['dataset_id']: f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets}
+    merge_target_id = st.selectbox(
+        "Target main dataset",
+        list(merge_main_label_by_id.keys()) or [""],
+        format_func=lambda k: merge_main_label_by_id.get(k, "None"),
+        key="merge_target_select",
+    )
 
     if st.button("Merge into National Main", type="primary"):
         try:
             if not main_datasets:
                 st.error("Please mark a dataset as National Main first")
+            elif not src_id or not merge_target_id:
+                st.error("Please select a source and a target dataset")
             else:
-                src_id = src_display.split("(")[-1].rstrip(")")
-                target_id = merge_target_display.split("(")[-1].rstrip(")")
-                ok, msg = db.merge_dataset_into_main(src_id, target_id)
+                ok, msg = db.merge_dataset_into_main(src_id, merge_target_id)
                 if ok:
                     st.success(msg)
                 else:
@@ -1408,156 +1500,45 @@ elif page == "Resistance Overview":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    # Get data for active dataset only
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    # Get data for active dataset only (cached loader applies lab-filter)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+    _render_dataset_banner(st.session_state.active_dataset_id)
+
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Filters
         st.sidebar.markdown("### Filters")
-        
-        # Sentinel Site / Lab filter
-        labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-        if labs:
-            lab_options = ["All"] + labs
-            selected_lab_options = st.sidebar.multiselect(
-                "Sentinel Site / Lab",
-                lab_options,
-                default=["All"]
-            )
-            if "All" in selected_lab_options:
-                selected_labs = labs
-            else:
-                selected_labs = [opt for opt in selected_lab_options if opt != "All"]
-        else:
-            selected_labs = []
-        
-        # Organism filter
-        organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
-        if organisms:
-            organism_options = ["All"] + organisms
-            selected_organism_options = st.sidebar.multiselect(
-                "Organism", 
-                organism_options, 
-                default=["All"]
-            )
-            # If "All" is selected, use all organisms; otherwise use selected ones
-            if "All" in selected_organism_options:
-                selected_organisms = organisms
-            else:
-                selected_organisms = [opt for opt in selected_organism_options if opt != "All"]
-        else:
-            selected_organisms = []
-            st.sidebar.warning("No organisms found")
-        
-        # Antibiotic filter
-        antibiotics = sorted(all_ast['antibiotic'].dropna().astype(str).unique().tolist())
-        if antibiotics:
-            antibiotic_options = ["All"] + antibiotics
-            selected_antibiotic_options = st.sidebar.multiselect(
-                "Antibiotic",
-                antibiotic_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all antibiotics; otherwise use selected ones
-            if "All" in selected_antibiotic_options:
-                selected_antibiotics = antibiotics
-            else:
-                selected_antibiotics = [opt for opt in selected_antibiotic_options if opt != "All"]
-        else:
-            selected_antibiotics = []
-        
-        # Source category filter
-        categories = sorted(all_samples['source_category'].dropna().astype(str).unique().tolist())
-        if categories:
-            category_options = ["All"] + categories
-            selected_category_options = st.sidebar.multiselect(
-                "Source Category",
-                category_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all categories; otherwise use selected ones
-            if "All" in selected_category_options:
-                selected_categories = categories
-            else:
-                selected_categories = [opt for opt in selected_category_options if opt != "All"]
-        else:
-            selected_categories = []
-        
-        # Source type filter
-        source_types = sorted(all_samples['source_type'].dropna().astype(str).unique().tolist())
-        if source_types:
-            source_type_options = ["All"] + source_types
-            selected_source_type_options = st.sidebar.multiselect(
-                "Source Type",
-                source_type_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all source types; otherwise use selected ones
-            if "All" in selected_source_type_options:
-                selected_source_types = source_types
-            else:
-                selected_source_types = [opt for opt in selected_source_type_options if opt != "All"]
-        else:
-            selected_source_types = []
-        
-        # Site type filter
-        site_types = sorted(all_samples['site_type'].dropna().astype(str).unique().tolist())
-        if site_types:
-            site_type_options = ["All"] + site_types
-            selected_site_type_options = st.sidebar.multiselect(
-                "Site Type",
-                site_type_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all site types; otherwise use selected ones
-            if "All" in selected_site_type_options:
-                selected_site_types = site_types
-            else:
-                selected_site_types = [opt for opt in selected_site_type_options if opt != "All"]
-        else:
-            selected_site_types = []
-        
-        # Region filter
-        regions = sorted(all_samples['region'].dropna().astype(str).unique().tolist())
-        if regions:
-            region_options = ["All"] + regions
-            selected_region_options = st.sidebar.multiselect(
-                "Region",
-                region_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all regions; otherwise use selected ones
-            if "All" in selected_region_options:
-                selected_regions = regions
-            else:
-                selected_regions = [opt for opt in selected_region_options if opt != "All"]
-        else:
-            selected_regions = []
-        
-        # District filter
-        districts = sorted(all_samples['district'].dropna().astype(str).unique().tolist())
-        if districts:
-            district_options = ["All"] + districts
-            selected_district_options = st.sidebar.multiselect(
-                "District",
-                district_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all districts; otherwise use selected ones
-            if "All" in selected_district_options:
-                selected_districts = districts
-            else:
-                selected_districts = [opt for opt in selected_district_options if opt != "All"]
-        else:
-            selected_districts = []
-        
+
+        def _uniq(df, col):
+            return sorted(df[col].dropna().astype(str).unique().tolist()) if col in df.columns else []
+
+        selected_labs = sidebar_multiselect_all(
+            "Sentinel Site / Lab", _uniq(all_samples, "lab_name"), key="ro_lab"
+        )
+        selected_organisms = sidebar_multiselect_all(
+            "Organism", _uniq(all_ast, "organism"), key="ro_org"
+        )
+        selected_antibiotics = sidebar_multiselect_all(
+            "Antibiotic", _uniq(all_ast, "antibiotic"), key="ro_abx"
+        )
+        selected_categories = sidebar_multiselect_all(
+            "Source Category", _uniq(all_samples, "source_category"), key="ro_cat"
+        )
+        selected_source_types = sidebar_multiselect_all(
+            "Source Type", _uniq(all_samples, "source_type"), key="ro_src"
+        )
+        selected_site_types = sidebar_multiselect_all(
+            "Site Type", _uniq(all_samples, "site_type"), key="ro_site"
+        )
+        selected_regions = sidebar_multiselect_all(
+            "Region", _uniq(all_samples, "region"), key="ro_region"
+        )
+        selected_districts = sidebar_multiselect_all(
+            "District", _uniq(all_samples, "district"), key="ro_district"
+        )
+
         # Apply filters with validation
         if selected_categories and selected_regions and selected_districts:
             _mask = (
@@ -1772,62 +1753,35 @@ elif page == "Trends":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+    _render_dataset_banner(st.session_state.active_dataset_id)
+
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Filters
         st.sidebar.markdown("### Trend Filters")
-        
-        # Sentinel Site / Lab filter
-        _labs_tr = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-        if _labs_tr:
-            _lab_opts_tr = ["All"] + _labs_tr
-            _sel_lab_opts_tr = st.sidebar.multiselect("Sentinel Site / Lab (Trends)", _lab_opts_tr, default=["All"])
-            if "All" not in _sel_lab_opts_tr and _sel_lab_opts_tr:
-                all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_tr)]
-                all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
-        
-        organisms = sorted(all_ast['organism'].dropna().astype(str).unique().tolist())
-        if organisms:
-            organism_options = ["All"] + organisms
-            selected_organism_options = st.sidebar.multiselect(
-                "Organism (Trends)",
-                organism_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all organisms; otherwise use selected ones
-            if "All" in selected_organism_options:
-                selected_organisms = organisms
-            else:
-                selected_organisms = [opt for opt in selected_organism_options if opt != "All"]
-        else:
-            selected_organisms = []
-        
-        antibiotics = sorted(all_ast['antibiotic'].dropna().astype(str).unique().tolist())
-        if antibiotics:
-            antibiotic_options = ["All"] + antibiotics
-            selected_antibiotic_options = st.sidebar.multiselect(
-                "Antibiotic (Trends)",
-                antibiotic_options,
-                default=["All"]
-            )
-            # If "All" is selected, use all antibiotics; otherwise use selected ones
-            if "All" in selected_antibiotic_options:
-                selected_antibiotics = antibiotics
-            else:
-                selected_antibiotics = [opt for opt in selected_antibiotic_options if opt != "All"]
-        else:
-            selected_antibiotics = []
-        
+
+        def _uniq(df, col):
+            return sorted(df[col].dropna().astype(str).unique().tolist()) if col in df.columns else []
+
+        _sel_labs_tr = sidebar_multiselect_all(
+            "Sentinel Site / Lab", _uniq(all_samples, "lab_name"), key="tr_lab"
+        )
+        if 'lab_name' in all_samples.columns and _sel_labs_tr != _uniq(all_samples, "lab_name"):
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_labs_tr)]
+            all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
+
+        selected_organisms = sidebar_multiselect_all(
+            "Organism", _uniq(all_ast, "organism"), key="tr_org"
+        )
+        selected_antibiotics = sidebar_multiselect_all(
+            "Antibiotic", _uniq(all_ast, "antibiotic"), key="tr_abx"
+        )
+
         # Time aggregation
-        time_agg = st.sidebar.selectbox("Time Aggregation", ["Monthly", "Quarterly", "Yearly"])
+        time_agg = st.sidebar.selectbox("Time Aggregation", ["Monthly", "Quarterly", "Yearly"], key="tr_time")
         
         # Apply filters
         if selected_organisms and selected_antibiotics:
@@ -1887,25 +1841,21 @@ elif page == "Map Hotspots":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    _render_dataset_banner(st.session_state.active_dataset_id)
 
     # Sentinel Site / Lab sidebar filter
-    _labs_map = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-    if _labs_map:
+    _map_labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _map_labs:
         st.sidebar.markdown("### Map Filters")
-        _lab_opts_map = ["All"] + _labs_map
-        _sel_lab_opts_map = st.sidebar.multiselect("Sentinel Site / Lab (Map)", _lab_opts_map, default=["All"])
-        if "All" not in _sel_lab_opts_map and _sel_lab_opts_map:
-            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_map)]
+        _sel_map_labs = sidebar_multiselect_all("Sentinel Site / Lab", _map_labs, key="map_lab")
+        if _sel_map_labs != _map_labs:
+            all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_map_labs)]
             all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Check if geographic data exists
         samples_with_coords = all_samples[
@@ -2042,30 +1992,26 @@ elif page == "Advanced Analytics":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    _render_dataset_banner(st.session_state.active_dataset_id)
 
     # Sentinel Site / Lab sidebar filter
-    _labs_aa = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-    if _labs_aa:
+    _aa_labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _aa_labs:
         st.sidebar.markdown("### Analytics Filters")
-        _lab_opts_aa = ["All"] + _labs_aa
-        _sel_lab_opts_aa = st.sidebar.multiselect("Sentinel Site / Lab (Analytics)", _lab_opts_aa, default=["All"])
-        if "All" not in _sel_lab_opts_aa and _sel_lab_opts_aa:
+        _sel_lab_opts_aa = sidebar_multiselect_all("Sentinel Site / Lab", _aa_labs, key="aa_lab")
+        if _sel_lab_opts_aa != _aa_labs:
             all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_aa)]
             all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Tab selection
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "Statistics", 
-            "Trends & Forecasts", 
+            "Statistics",
+            "Trends & Forecasts",
             "Emerging Patterns",
             "Antibiotic Insights",
             "Data Quality"
@@ -2273,25 +2219,21 @@ elif page == "Risk Assessment":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    _render_dataset_banner(st.session_state.active_dataset_id)
 
     # Sentinel Site / Lab sidebar filter
-    _labs_risk = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-    if _labs_risk:
+    _risk_labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _risk_labs:
         st.sidebar.markdown("### Risk Filters")
-        _lab_opts_risk = ["All"] + _labs_risk
-        _sel_lab_opts_risk = st.sidebar.multiselect("Sentinel Site / Lab (Risk)", _lab_opts_risk, default=["All"])
-        if "All" not in _sel_lab_opts_risk and _sel_lab_opts_risk:
+        _sel_lab_opts_risk = sidebar_multiselect_all("Sentinel Site / Lab", _risk_labs, key="risk_lab")
+        if _sel_lab_opts_risk != _risk_labs:
             all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_risk)]
             all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Tabs
         tab1, tab2 = st.tabs(["Risk Scores", "Resistance Burden"])
@@ -2420,25 +2362,21 @@ elif page == "Comparative Analysis":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    _render_dataset_banner(st.session_state.active_dataset_id)
 
     # Sentinel Site / Lab sidebar filter
-    _labs_comp = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
-    if _labs_comp:
+    _comp_labs = sorted(all_samples['lab_name'].dropna().astype(str).unique().tolist()) if 'lab_name' in all_samples.columns else []
+    if _comp_labs:
         st.sidebar.markdown("### Comparison Filters")
-        _lab_opts_comp = ["All"] + _labs_comp
-        _sel_lab_opts_comp = st.sidebar.multiselect("Sentinel Site / Lab (Comparison)", _lab_opts_comp, default=["All"])
-        if "All" not in _sel_lab_opts_comp and _sel_lab_opts_comp:
+        _sel_lab_opts_comp = sidebar_multiselect_all("Sentinel Site / Lab", _comp_labs, key="comp_lab")
+        if _sel_lab_opts_comp != _comp_labs:
             all_samples = all_samples[all_samples['lab_name'].astype(str).isin(_sel_lab_opts_comp)]
             all_ast = all_ast[all_ast['sample_id'].astype(str).isin(all_samples['sample_id'].astype(str))]
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # Analysis type selection
         analysis_type = st.selectbox(
@@ -3442,14 +3380,11 @@ elif page == "Alerts Dashboard":
         AlertSeverity, AlertType
     )
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+    all_samples, all_ast = _load_active_dataset()
+    _render_dataset_banner(st.session_state.active_dataset_id)
+
     if all_ast.empty:
-        st.warning("No AST data available for alert generation.")
+        _empty_state("No AST data available for alert generation.")
     else:
         # Alert Configuration
         with st.expander("Alert Configuration", expanded=False):
@@ -3585,14 +3520,11 @@ elif page == "Antibiogram":
         CLSI_MIN_ISOLATES
     )
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+    all_samples, all_ast = _load_active_dataset()
+    _render_dataset_banner(st.session_state.active_dataset_id)
+
     if all_ast.empty:
-        st.warning("No AST data available for antibiogram generation.")
+        _empty_state("No AST data available for antibiogram generation.")
     else:
         # Configuration
         st.subheader("Antibiogram Configuration")
@@ -3766,14 +3698,11 @@ elif page == "WHONET Export":
         generate_glass_report, validate_whonet_data, generate_glass_html_report
     )
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
-    
+    all_samples, all_ast = _load_active_dataset()
+    _render_dataset_banner(st.session_state.active_dataset_id)
+
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available for WHONET export.")
+        _empty_state("No data available for WHONET export.")
     else:
         # Lab configuration
         st.subheader("Laboratory Information")
@@ -3908,15 +3837,12 @@ elif page == "Report Export":
         st.warning("Please select a dataset in the 'Data Management' page first.")
         st.stop()
     
-    all_ast = db.get_dataset_ast(st.session_state.active_dataset_id)
-    all_samples = db.get_dataset_samples(st.session_state.active_dataset_id)
+    all_samples, all_ast = _load_active_dataset()
 
-    all_samples, all_ast = _apply_lab_filter(all_samples, all_ast)
-    
-    st.info(f"Viewing dataset: {st.session_state.active_dataset_id}")
+    _render_dataset_banner(st.session_state.active_dataset_id)
 
     if all_ast.empty or all_samples.empty:
-        st.warning("No data available in the selected dataset.")
+        _empty_state("No data available in the selected dataset.")
     else:
         # ============================================================================
         # FILTERING CONTROLS (Same as Resistance Overview)
@@ -4151,8 +4077,8 @@ elif page == "Report Export":
             datasets = db.get_all_datasets()
             # Hide admin-owned datasets from non-admin users
             config_admin_email, _ = _get_admin_config()
-            admin_email = (config_admin_email or "jesseanak98@gmail.com").strip().lower()
-            if not st.session_state.is_admin:
+            admin_email = (config_admin_email or "").strip().lower()
+            if not st.session_state.is_admin and admin_email:
                 datasets = [d for d in datasets if (d.get('uploaded_by') or '').strip().lower() != admin_email]
             dataset_names = [f"{d['dataset_name']} ({d['dataset_id']})" for d in datasets]
 
@@ -4225,6 +4151,7 @@ elif page == "Report Export":
                                     use_container_width=True
                                 )
                             except Exception:
+                                logger.exception("PDF report generation failed; falling back to HTML")
                                 st.info("💡 To save as PDF: download the HTML report, open it in your browser, then press **Ctrl+P → Save as PDF**.")
 
                     except Exception as e:

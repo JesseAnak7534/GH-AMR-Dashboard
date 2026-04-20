@@ -68,16 +68,28 @@ streamlit run app.py
 
 The app will open at `http://localhost:8501`
 
-### Optional: Admin Account Setup
+### Admin Account & Environment Variables
 
-To enable an initial admin user, create a `.env` file in the project root:
+Admin credentials are read from environment variables (or Streamlit secrets) — there is no hardcoded fallback. Configure them before launch by creating a `.env` file in the project root:
 
 ```env
+# Required for admin access
 ADMIN_EMAIL=your.admin@example.com
 ADMIN_PASSWORD=StrongPassword123!
+
+# Optional — minutes of inactivity before auto-logout (default: 30)
+SESSION_TIMEOUT_MINUTES=30
 ```
 
-On first launch, the app will create this admin account if it does not exist. Otherwise, you can use the Sign Up tab to create standard users.
+Streamlit secrets (`.streamlit/secrets.toml`) are also honoured:
+
+```toml
+ADMIN_EMAIL = "your.admin@example.com"
+ADMIN_PASSWORD = "StrongPassword123!"
+SESSION_TIMEOUT_MINUTES = 30
+```
+
+On first launch, the app creates the admin account from these credentials if it does not already exist and enforces the admin role on each login. If `ADMIN_EMAIL` is not configured, admin-only behaviour (such as hiding admin-owned datasets from non-admins) is skipped and the login flow will not promote any user to admin. Lab users sign up via the Sign Up tab.
 
 
 ## Project Structure

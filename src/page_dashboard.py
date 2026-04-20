@@ -2,10 +2,13 @@
 Home page for ICBB-AMRSS.
 Clean overview: KPI metrics, resistance trend, top pathogens, sentinel alerts.
 """
+import logging
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from src import db, analytics
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Colour system — one palette, used everywhere
@@ -67,6 +70,7 @@ def _compute(lab_filter: str = ""):
         conn = db.get_connection()
         alert_count = conn.execute("SELECT COUNT(*) FROM alerts WHERE is_acknowledged = 0").fetchone()[0]
     except Exception:
+        logger.exception("alert count query failed")
         alert_count = 0
 
     # Monthly resistance trend
@@ -107,6 +111,7 @@ def _compute(lab_filter: str = ""):
         row = conn.execute("SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1").fetchone()
         last_upload = row[0][:10] if row and row[0] else "—"
     except Exception:
+        logger.exception("admin stats query failed")
         n_users = n_datasets = 0
         last_upload = "—"
 

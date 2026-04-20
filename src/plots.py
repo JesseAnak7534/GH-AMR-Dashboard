@@ -9,6 +9,22 @@ import plotly.graph_objects as go
 from typing import Optional, List, Tuple, Dict
 
 
+def _safe_text(series):
+    """Coerce a pandas Series to strings with NaN replaced by empty strings.
+
+    Plotly renders JS `undefined` when a trace's `text` or `customdata` argument
+    sees NaN — this helper prevents that.
+    """
+    if isinstance(series, pd.Series):
+        return series.fillna("").astype(str)
+    return pd.Series(series).fillna("").astype(str)
+
+
+def _safe_customdata(df, columns):
+    """Return a numpy array for plotly `customdata=` with NaN filled to ''."""
+    return df[list(columns)].fillna("").values
+
+
 def calculate_resistance_percentage(ast_df: pd.DataFrame) -> pd.DataFrame:
     """Calculate resistance percentage by organism and antibiotic."""
     if ast_df.empty:
@@ -375,9 +391,14 @@ def plot_point_map(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> go.Figure:
     ]
 
     # Add sample points as red dots
+    # fillna on string columns prevents plotly from rendering 'undefined' in hover
+    _str_cols = ['region', 'district', 'source_category', 'source_type']
+    _hover_df = map_data.copy()
+    _hover_df[_str_cols] = _hover_df[_str_cols].fillna('—').astype(str)
+    _hover_df['resistance_percent'] = _hover_df['resistance_percent'].fillna(0)
     fig.add_trace(go.Scattergeo(
-        lat=map_data['latitude'],
-        lon=map_data['longitude'],
+        lat=_hover_df['latitude'],
+        lon=_hover_df['longitude'],
         mode='markers',
         marker=dict(
             size=8,
@@ -386,7 +407,7 @@ def plot_point_map(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> go.Figure:
             line=dict(width=1, color='darkred'),
             opacity=0.8
         ),
-        text=map_data['sample_id'],
+        text=_safe_text(_hover_df['sample_id']),
         hovertemplate=
             '<b>Sample ID:</b> %{text}<br>' +
             '<b>Region:</b> %{customdata[0]}<br>' +
@@ -395,7 +416,7 @@ def plot_point_map(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> go.Figure:
             '<b>Type:</b> %{customdata[3]}<br>' +
             '<b>Resistance Rate:</b> %{customdata[4]:.1f}%<br>' +
             '<b>Coordinates:</b> (%{lat:.4f}, %{lon:.4f})<extra></extra>',
-        customdata=map_data[['region', 'district', 'source_category', 'source_type', 'resistance_percent']].values,
+        customdata=_hover_df[['region', 'district', 'source_category', 'source_type', 'resistance_percent']].values,
         name='Sample Locations'
     ))
 
@@ -579,10 +600,11 @@ def plot_resistance_by_region(ast_df: pd.DataFrame, samples_df: pd.DataFrame) ->
         hover_data={'hover_text': False}
     )
     
-    # Update hover text for each trace
+    # Update hover text for each trace (fillna prevents 'undefined' in tooltip)
+    _cd = plot_data[['hover_text']].fillna('').values
     for trace in fig.data:
         trace.hovertemplate = '%{customdata[0]}<extra></extra>'
-        trace.customdata = plot_data[['hover_text']].values
+        trace.customdata = _cd
     
     fig.update_layout(
         xaxis_tickangle=-45,
