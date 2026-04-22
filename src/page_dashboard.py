@@ -11,16 +11,18 @@ from src import db, analytics
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Colour system — one palette, used everywhere
+# Colour system — warm editorial palette, matches the app shell tokens
 # ---------------------------------------------------------------------------
-CLR_PRIMARY = "#0f766e"      # teal-700  – headings, chart lines
-CLR_DANGER = "#dc2626"       # red-600   – high resistance
-CLR_WARN = "#d97706"         # amber-600 – moderate
-CLR_OK = "#16a34a"           # green-600 – low / good
-CLR_TEXT = "#1e293b"         # slate-800 – primary text
-CLR_TEXT_SEC = "#64748b"     # slate-500 – secondary text
-CLR_BORDER = "#e2e8f0"      # slate-200 – borders
-CLR_BG_SUBTLE = "#f8fafc"   # slate-50  – subtle fills
+CLR_PRIMARY = "#194238"      # forest    – headings, chart lines
+CLR_PRIMARY_SOFT = "rgba(25, 66, 56, 0.12)"
+CLR_DANGER = "#741a10"       # oxide     – high resistance
+CLR_WARN = "#a27117"          # ochre     – moderate
+CLR_OK = "#2f5430"            # moss      – low / good
+CLR_TEXT = "#12100a"          # warm ink  – primary text
+CLR_TEXT_SEC = "#55503e"      # warm muted – secondary text
+CLR_BORDER = "#c9bc98"        # warm 200  – borders
+CLR_BG_SUBTLE = "#ddd1b4"     # paper-alt – subtle fills
+CLR_SURFACE = "#f9f2e0"       # surface-alt – blend with paper
 
 
 def _severity_colour(value, warn_at=25, danger_at=50):
@@ -172,7 +174,7 @@ def render_dashboard_page():
                     line=dict(color=CLR_PRIMARY, width=2.5, shape="spline"),
                     marker=dict(size=5, color=CLR_PRIMARY),
                     fill="tozeroy",
-                    fillcolor="rgba(15,118,110,0.07)",
+                    fillcolor=CLR_PRIMARY_SOFT,
                     hovertemplate="%{x}<br>%{y:.1f}% resistant<extra></extra>",
                 ))
                 fig.update_layout(
@@ -220,7 +222,7 @@ def render_dashboard_page():
                 for ph in phenos:
                     tier = ph["tier"]
                     colour = CLR_DANGER if tier == "CRITICAL" else CLR_WARN if tier == "HIGH" else CLR_PRIMARY
-                    bg = "#fef2f2" if tier == "CRITICAL" else "#fffbeb" if tier == "HIGH" else CLR_BG_SUBTLE
+                    bg = "rgba(116, 26, 16, 0.1)" if tier == "CRITICAL" else "rgba(162, 113, 23, 0.12)" if tier == "HIGH" else CLR_BG_SUBTLE
                     st.markdown(
                         f"<div style='display:flex;justify-content:space-between;align-items:center;"
                         f"padding:8px 0;border-bottom:1px solid {CLR_BORDER};'>"

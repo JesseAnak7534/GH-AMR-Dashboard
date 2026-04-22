@@ -277,391 +277,515 @@ if not st.session_state.authenticated:
     
     st.markdown("""
         <style>
-        /* Import Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        /* Main background with microbiology-themed image */
-        .stApp {
-            background: linear-gradient(135deg, rgba(6, 78, 59, 0.93) 0%, rgba(7, 89, 133, 0.93) 50%, rgba(14, 116, 144, 0.93) 100%),
-                        url('https://images.unsplash.com/photo-1576086213369-97a306d36557?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            font-family: 'Inter', sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+        /* Palette — deep editorial, scientific institutional */
+        :root {
+            --paper:         #ebe2cd;
+            --paper-alt:     #ddd1b4;
+            --surface:       #f5ecd7;
+            --surface-alt:   #f9f2e0;
+            --border:        #c9bc98;
+            --border-strong: #a89777;
+            --ink:           #12100a;
+            --ink-muted:     #55503e;
+            --ink-soft:      #7a735f;
+            --forest:        #194238;
+            --forest-dark:   #0c2620;
+            --forest-deep:   #061712;
+            --forest-soft:   #d8e2dc;
+            --gold:          #b18a3a;
+            --gold-soft:     #e6d39c;
+            --terracotta:    #964517;
+            --ochre:         #a27117;
+            --oxide:         #741a10;
+            --moss:          #2f5430;
+            --steel:         #164161;
         }
-        
-        /* Hide default Streamlit elements */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
 
-        /* Hide sidebar completely on login page */
+        #MainMenu, footer { visibility: hidden; }
         [data-testid="stSidebar"],
-        [data-testid="collapsedControl"] {
-            display: none !important;
+        [data-testid="collapsedControl"],
+        header[data-testid="stHeader"] { display: none !important; }
+
+        .stApp {
+            background: var(--paper);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--ink);
         }
-        
-        /* Force centered, fixed-width login layout (even in wide mode) */
+
+        /* Card sits in the middle of the viewport */
         .main {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             min-height: 100vh !important;
+            padding: 2.5rem 1.5rem !important;
         }
-
         .main .block-container,
         .main .stMainBlockContainer,
         .main [data-testid="stAppViewBlockContainer"],
         [data-testid="stAppViewBlockContainer"],
         .stApp .stMainBlockContainer {
-            max-width: 460px !important;
+            max-width: 960px !important;
             width: 100% !important;
             margin: 0 auto !important;
-            padding-top: 2rem !important;
-            padding-bottom: 2rem !important;
+            padding: 0 !important;
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 18px !important;
+            overflow: hidden !important;
         }
 
-        /* Also hide the header bar on login */
-        header[data-testid="stHeader"] {
-            display: none !important;
+        /* Two-column split — brand | form */
+        .main [data-testid="stHorizontalBlock"] {
+            gap: 0 !important;
+            min-height: 560px;
         }
-        
-        /* Login card effect */
-        .stTabs {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(22px);
-            border-radius: 22px;
-            padding: 2.2rem;
-            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
-            border: 1px solid rgba(255, 255, 255, 0.35);
+        .main [data-testid="stHorizontalBlock"] > [data-testid="column"],
+        .main [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            padding: 0 !important;
+            align-self: stretch;
         }
 
-        .stTabs [data-baseweb="tab-panel"] {
-            padding-top: 0.5rem;
+        /* ── Left brand panel ───────────────────────────────────── */
+        .login-brand-pane {
+            background:
+              radial-gradient(circle at 18% 22%, rgba(230, 211, 156, 0.09) 1px, transparent 1.4px) 0 0/34px 34px,
+              radial-gradient(circle at 78% 68%, rgba(230, 211, 156, 0.06) 1px, transparent 1.4px) 17px 17px/44px 44px,
+              linear-gradient(165deg, #194238 0%, #0c2620 55%, #061712 100%);
+            color: #f4eedd;
+            padding: 3rem 2.75rem;
+            height: 100%;
+            min-height: 580px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
         }
-        
-        /* Title styling */
-        .login-title {
-            text-align: center;
-            font-size: 2.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #0f766e 0%, #0891b2 50%, #0ea5e9 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.3rem;
-            letter-spacing: -0.02em;
+        .login-brand-pane::after {
+            content: "";
+            position: absolute;
+            top: 0; right: -1px;
+            width: 3px; height: 100%;
+            background: linear-gradient(180deg, transparent 0%, rgba(177, 138, 58, 0.35) 25%, rgba(177, 138, 58, 0.35) 75%, transparent 100%);
         }
-        
-        .login-subtitle {
-            text-align: center;
-            color: #e2e8f0;
-            font-size: 1.05em;
-            font-weight: 400;
-            margin-bottom: 1rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-        }
-
-        .login-badge {
+        .login-brand-pane .brand-mark {
+            margin-bottom: 2rem;
+            color: #e6d39c;
             display: inline-block;
-            text-align: center;
-            margin: 0 auto 1.6rem auto;
-            padding: 0.35rem 0.75rem;
-            border-radius: 999px;
+            line-height: 0;
+        }
+        .login-brand-pane .brand-mark svg { display: block; }
+        .login-brand-pane .brand-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #e6d39c;
+            margin-bottom: 0.6rem;
+        }
+        .login-brand-pane .brand-title {
+            font-family: 'Fraunces', 'Georgia', serif;
+            font-size: 2.4rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            color: #f4eedd;
+            margin: 0 0 0.75rem 0;
+        }
+        .login-brand-pane .brand-sub {
+            font-size: 0.98rem;
+            color: rgba(244, 238, 221, 0.82);
+            line-height: 1.55;
+            max-width: 360px;
+            margin: 0 0 2rem 0;
+        }
+        .login-brand-pane .brand-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            border-top: 1px solid rgba(244, 238, 221, 0.14);
+        }
+        .login-brand-pane .brand-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(244, 238, 221, 0.14);
+            font-size: 0.88rem;
+            color: rgba(244, 238, 221, 0.88);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .login-brand-pane .brand-features li::before {
+            content: "";
+            width: 6px; height: 6px;
+            background: #c9a85a;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .login-brand-pane .brand-footer {
             font-size: 0.78rem;
-            font-weight: 600;
-            color: #0f172a;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            letter-spacing: 0.02em;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-        }
-        
-        .login-icon {
-            text-align: center;
-            font-size: 3.6em;
-            margin-bottom: 0.8rem;
-            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.25));
-        }
-        
-        /* Form inputs */
-        .stTextInput > div {
-            max-width: 360px;
-            margin: 0 auto;
+            color: rgba(244, 238, 221, 0.55);
+            letter-spacing: 0.04em;
         }
 
-        .stTextInput > div > div > input {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .stTextInput > div > div > input:focus {
-            border-color: #14b8a6;
-            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
-        }
-        
-        /* Primary button styling */
-        .stButton > button[kind="primary"] {
-            background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 0.8rem 2rem;
+        /* ── Right form panel ───────────────────────────────────── */
+        .login-form-pane { padding: 3rem 2.75rem 2rem 2.75rem; }
+        .login-form-pane .form-eyebrow {
+            font-size: 0.72rem;
             font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--ink-muted);
+            margin-bottom: 0.5rem;
+        }
+        .login-form-pane .form-title {
+            font-family: 'Fraunces', 'Georgia', serif;
+            font-size: 1.9rem;
+            font-weight: 600;
+            color: var(--ink);
+            letter-spacing: -0.015em;
+            margin: 0 0 0.4rem 0;
+        }
+        .login-form-pane .form-sub {
+            font-size: 0.95rem;
+            color: var(--ink-muted);
+            margin: 0 0 1.75rem 0;
         }
 
-        .stButton > button[kind="primary"] {
-            width: 100%;
-            max-width: 360px;
-            margin: 0.4rem auto 0;
-            display: block;
-        }
-        
-        .stButton > button[kind="primary"]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.5);
-        }
-        
-        /* Tab styling */
+        /* Tabs */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 6px;
-            background: #f8fafc;
-            border-radius: 999px;
-            padding: 6px;
-            border: 1px solid #e2e8f0;
+            gap: 2rem;
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+            border-radius: 0;
         }
-
         .stTabs [data-baseweb="tab"] {
-            border-radius: 999px;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0.75rem 0 !important;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            font-size: 0.92rem;
+            color: var(--ink-muted);
+            position: relative;
+        }
+        .stTabs [aria-selected="true"] {
+            background: transparent !important;
+            color: var(--forest) !important;
             font-weight: 600;
-            font-size: 0.9rem;
-            color: #64748b;
-            padding: 0.35rem 1rem;
+        }
+        .stTabs [aria-selected="true"]::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: -1px;
+            height: 2px;
+            background: var(--forest);
+        }
+        .stTabs [data-baseweb="tab-panel"] { padding-top: 1.5rem; }
+
+        /* Form inputs */
+        .stTextInput > div { max-width: none; margin: 0; }
+        .stTextInput > label {
+            font-size: 0.82rem !important;
+            font-weight: 500 !important;
+            color: var(--ink) !important;
+            letter-spacing: 0.01em;
+            margin-bottom: 0.35rem !important;
+        }
+        .stTextInput > div > div > input {
+            background: var(--surface) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 10px !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 0.95rem !important;
+            color: var(--ink) !important;
+            transition: border-color 0.15s ease;
+        }
+        .stTextInput > div > div > input::placeholder { color: var(--ink-soft) !important; }
+        .stTextInput > div > div > input:focus {
+            border-color: var(--forest) !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
 
-        .stTabs [aria-selected="true"] {
-            background: #0f766e;
-            color: white;
-            box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35);
+        /* Primary button */
+        .stButton > button[kind="primary"] {
+            background: var(--forest) !important;
+            color: #f4eedd !important;
+            border: 1px solid var(--forest) !important;
+            border-radius: 10px !important;
+            padding: 0.8rem 1.5rem !important;
+            font-weight: 600 !important;
+            font-size: 0.95rem !important;
+            width: 100% !important;
+            margin: 1rem 0 0 0 !important;
+            display: block !important;
+            transition: background 0.15s ease, border-color 0.15s ease;
         }
-        
-        /* Footer text */
+        .stButton > button[kind="primary"]:hover {
+            background: var(--forest-dark) !important;
+            border-color: var(--forest-dark) !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Alerts inside login */
+        .stAlert,
+        .stSuccess, .stError, .stInfo, .stWarning {
+            border-radius: 10px;
+            background: var(--paper) !important;
+            border: 1px solid var(--border);
+        }
+        .stError   { border-left: 3px solid var(--oxide); }
+        .stSuccess { border-left: 3px solid var(--moss); }
+        .stInfo    { border-left: 3px solid var(--forest); }
+        .stWarning { border-left: 3px solid var(--ochre); }
+
+        /* Information tab list prose */
+        .login-form-pane .stSubheader,
+        .login-form-pane h3 {
+            font-family: 'Fraunces', 'Georgia', serif !important;
+            color: var(--ink) !important;
+            font-weight: 600 !important;
+            font-size: 1.15rem !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        /* Footer under card */
         .login-footer {
             text-align: center;
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 0.85em;
-            margin-top: 2rem;
-            padding: 1rem;
+            color: var(--ink-muted);
+            font-size: 0.8rem;
+            margin-top: 1.25rem;
         }
-        
-        .login-footer p {
-            margin: 0.3rem 0;
-        }
+        .login-footer p { margin: 0.2rem 0; }
         </style>
     """, unsafe_allow_html=True)
-    
-    # Centered login form
-    st.markdown('<div class="login-icon">🔬</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-title">ICBB-AMRSS</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitle">ICBB AMR Surveillance System</div>', unsafe_allow_html=True)
-    st.markdown('<div style="text-align:center;"><span class="login-badge">Secure Access Portal</span></div>', unsafe_allow_html=True)
-    
-    # Create tabs for login and info
-    tab1, tab2 = st.tabs(["Login", "Information"])
-    
-    with tab1:
-        st.subheader("Welcome Back")
-        
-        login_email = st.text_input("Email Address", placeholder="Enter your email", key="login_email")
-        login_password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
-        
-        if st.button("Sign In", use_container_width=True, type="primary"):
-            if not login_email or not login_password:
-                st.error("Please fill in all fields")
-            else:
-                user = db.get_user_by_email(login_email)
-                if user and user['is_active']:
-                    try:
-                        if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
-                            # Email verification requirement removed; allow login if credentials match
-                            config_admin_email, _ = _get_admin_config()
-                            target_admin_email = (config_admin_email or "").strip().lower()
 
-                            # Enforce admin role for configured admin email (only when configured)
-                            is_admin_flag = user.get('is_admin')
-                            if target_admin_email and login_email.strip().lower() == target_admin_email:
-                                is_admin_flag = 1
-                                try:
-                                    db.set_user_admin(login_email, True)
-                                    db.update_user_status(user['user_id'], True)
-                                    db.set_user_verified(login_email, True)
-                                except Exception:
-                                    logger.exception("admin role enforcement at login failed for %s", login_email)
+    # Two-column split — left brand panel, right form panel
+    left, right = st.columns([5, 6], gap="medium")
 
-                            # Restrict to admin or approved lab users only
-                            lab_mapping = _get_lab_email_mapping()
-                            is_lab, lab_name = is_lab_user(login_email, lab_mapping)
-                            if not is_admin_flag and not is_lab:
-                                st.error("Access denied. This system is restricted to approved labs.")
-                                st.session_state.authenticated = False
-                                st.session_state.user_email = None
-                                st.session_state.is_admin = False
-                                st.session_state.lab_name = None
-                                st.stop()
+    with left:
+        st.markdown("""
+            <div class="login-brand-pane">
+                <div>
+                    <div class="brand-mark">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" aria-label="ICBB">
+                            <path d="M28 3 L50 15.5 L50 40.5 L28 53 L6 40.5 L6 15.5 Z"
+                                  fill="none" stroke="#e6d39c" stroke-width="1.4" stroke-linejoin="round"/>
+                            <path d="M28 3 L50 15.5 L50 40.5 L28 53 L6 40.5 L6 15.5 Z"
+                                  fill="none" stroke="#e6d39c" stroke-width="0.5" stroke-linejoin="round"
+                                  transform="translate(0 0) scale(0.86 0.86) translate(2.3 3.9)"/>
+                            <circle cx="28" cy="17" r="1.8" fill="#e6d39c"/>
+                            <text x="28" y="36" text-anchor="middle"
+                                  font-family="'Fraunces', Georgia, serif"
+                                  font-size="11" font-weight="700"
+                                  fill="#f4eedd" letter-spacing="1.2">ICBB</text>
+                        </svg>
+                    </div>
+                    <div class="brand-eyebrow">National Surveillance</div>
+                    <h1 class="brand-title">ICBB AMR Surveillance System</h1>
+                    <p class="brand-sub">
+                        A unified national platform for antimicrobial resistance reporting
+                        across the environment, food, human, animal, and aquaculture sectors.
+                    </p>
+                    <ul class="brand-features">
+                        <li>Sentinel-site laboratory network</li>
+                        <li>WHONET &amp; GLASS aligned reporting</li>
+                        <li>Geospatial hotspot &amp; trend analytics</li>
+                    </ul>
+                </div>
+                <div class="brand-footer">© ICBB · AMR Surveillance Programme</div>
+            </div>
+        """, unsafe_allow_html=True)
 
-                            st.session_state.authenticated = True
-                            st.session_state.user_email = login_email
-                            st.session_state.last_activity_time = datetime.now()
-                            st.session_state.is_admin = bool(is_admin_flag)
-                            st.session_state.lab_name = lab_name if not is_admin_flag else None
+    with right:
+        st.markdown('<div class="login-form-pane">', unsafe_allow_html=True)
+        st.markdown('<div class="form-eyebrow">Secure Access</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-title">Welcome back</div>', unsafe_allow_html=True)
+        st.markdown('<div class="form-sub">Sign in to continue to your surveillance workspace.</div>', unsafe_allow_html=True)
 
-                            db.update_last_login(login_email)
-                            st.success("Login successful!")
-                            st.balloons()
-                            st.rerun()
-                        else:
-                            st.error("Invalid email or password")
-                    except Exception as e:
-                        st.error(f"Login error: {str(e)}")
+        tab1, tab2 = st.tabs(["Sign in", "Information"])
+
+        with tab1:
+            login_email = st.text_input("Email address", placeholder="name@institution.gh", key="login_email")
+            login_password = st.text_input("Password", type="password", placeholder="••••••••", key="login_password")
+
+            if st.button("Sign in", use_container_width=True, type="primary"):
+                if not login_email or not login_password:
+                    st.error("Please fill in all fields")
                 else:
-                    st.error("Invalid email or password, or account is inactive")
-    
-    with tab2:
-        st.subheader("Approved Laboratories")
-        st.info("""
-        Lab user accounts are pre-configured by the system administrator.
-        
-        Only authorized personnel from approved sentinel site laboratories have access.
-        
-        **Approved Laboratories:**
-        • Eastern Regional Hospital
-        • St. Martin De Porres Hospital Eikwe
-        • Sekondi Public Health Reference Laboratory
-        • Ho Teaching Hospital
-        • Tamale Teaching Hospital
-        • Komfo Anokye Teaching Hospital
-        • Korle-Bu Teaching Hospital
-        • Lekma Hospital
-        • Sunyani Teaching Hospital
-        • Cape Coast Teaching Hospital
-        • National Food Safety Laboratory
-        • CSIR Water Research Institute
-        • Accra Veterinary Laboratory
-        • Kumasi Veterinary Laboratory
-        • Quadushah Medical Diagnostic Limited
-        • Central Veterinary Laboratory
-        • Pong Tamale School
-        • Metropolis Health Care Limited
-        • Alma Medical Laboratory Ltd
-        
-        Contact the AMR Surveillance Program administrator for access.
-        """)
-    
-    st.markdown("""
-        <div class="login-footer">
-            <p>🇬🇭 ICBB-AMRSS</p>
-            <p>ICBB AMR Surveillance System</p>
-            <p style="margin-top: 0.5rem; opacity: 0.7;">Environment • Food • Human • Animal • Aquaculture</p>
-        </div>
-    """, unsafe_allow_html=True)
-    
+                    user = db.get_user_by_email(login_email)
+                    if user and user['is_active']:
+                        try:
+                            if bcrypt.checkpw(login_password.encode("utf-8"), user['password_hash'].encode("utf-8")):
+                                config_admin_email, _ = _get_admin_config()
+                                target_admin_email = (config_admin_email or "").strip().lower()
+
+                                is_admin_flag = user.get('is_admin')
+                                if target_admin_email and login_email.strip().lower() == target_admin_email:
+                                    is_admin_flag = 1
+                                    try:
+                                        db.set_user_admin(login_email, True)
+                                        db.update_user_status(user['user_id'], True)
+                                        db.set_user_verified(login_email, True)
+                                    except Exception:
+                                        logger.exception("admin role enforcement at login failed for %s", login_email)
+
+                                lab_mapping = _get_lab_email_mapping()
+                                is_lab, lab_name = is_lab_user(login_email, lab_mapping)
+                                if not is_admin_flag and not is_lab:
+                                    st.error("Access denied. This system is restricted to approved labs.")
+                                    st.session_state.authenticated = False
+                                    st.session_state.user_email = None
+                                    st.session_state.is_admin = False
+                                    st.session_state.lab_name = None
+                                    st.stop()
+
+                                st.session_state.authenticated = True
+                                st.session_state.user_email = login_email
+                                st.session_state.last_activity_time = datetime.now()
+                                st.session_state.is_admin = bool(is_admin_flag)
+                                st.session_state.lab_name = lab_name if not is_admin_flag else None
+
+                                db.update_last_login(login_email)
+                                st.success("Signed in. Loading your workspace…")
+                                st.rerun()
+                            else:
+                                st.error("Invalid email or password")
+                        except Exception as e:
+                            st.error(f"Login error: {str(e)}")
+                    else:
+                        st.error("Invalid email or password, or account is inactive")
+
+        with tab2:
+            st.markdown("#### Approved laboratories")
+            st.caption("Lab accounts are pre-configured by the programme administrator. Only personnel from the sentinel sites below have access.")
+            st.markdown(
+                """
+                - Eastern Regional Hospital
+                - St. Martin De Porres Hospital Eikwe
+                - Sekondi Public Health Reference Laboratory
+                - Ho Teaching Hospital
+                - Tamale Teaching Hospital
+                - Komfo Anokye Teaching Hospital
+                - Korle-Bu Teaching Hospital
+                - Lekma Hospital
+                - Sunyani Teaching Hospital
+                - Cape Coast Teaching Hospital
+                - National Food Safety Laboratory
+                - CSIR Water Research Institute
+                - Accra Veterinary Laboratory
+                - Kumasi Veterinary Laboratory
+                - Quadushah Medical Diagnostic Limited
+                - Central Veterinary Laboratory
+                - Pong Tamale School
+                - Metropolis Health Care Limited
+                - Alma Medical Laboratory Ltd
+                """
+            )
+            st.caption("Contact the AMR Surveillance Programme administrator for access.")
+
+        st.markdown('</div>', unsafe_allow_html=True)  # /login-form-pane
+
+    st.markdown(
+        '<div class="login-footer">Environment · Food · Human · Animal · Aquaculture</div>',
+        unsafe_allow_html=True,
+    )
+
     st.stop()
 
 # ============================================================================
 # MAIN APP STYLING (After Authentication)
 # ============================================================================
 
-# Professional styling for authenticated users
+# Editorial, warm, human-designed theme for the authenticated app shell
 st.markdown("""
     <style>
-    /* Import Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    /* Main app background - subtle medical/lab pattern */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+    :root {
+        --paper:         #ebe2cd;
+        --paper-alt:     #ddd1b4;
+        --surface:       #f5ecd7;
+        --surface-alt:   #f9f2e0;
+        --border:        #c9bc98;
+        --border-strong: #a89777;
+        --ink:           #12100a;
+        --ink-muted:     #55503e;
+        --ink-soft:      #7a735f;
+        --forest:        #194238;
+        --forest-dark:   #0c2620;
+        --forest-deep:   #061712;
+        --forest-soft:   #d8e2dc;
+        --gold:          #b18a3a;
+        --gold-soft:     #e6d39c;
+        --terracotta:    #964517;
+        --ochre:         #a27117;
+        --oxide:         #741a10;
+        --moss:          #2f5430;
+        --steel:         #164161;
+        --radius-sm: 8px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+    }
+
     .stApp {
-        background: linear-gradient(135deg, rgba(248, 250, 252, 0.97) 0%, rgba(241, 245, 249, 0.97) 50%, rgba(226, 232, 240, 0.97) 100%),
-                    url('https://images.unsplash.com/photo-1579154204601-01588f351e67?w=1920&q=80');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
+        background: var(--paper) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
     }
-    
-    /* Sidebar styling — clean dark professional */
+
+    /* ── Sidebar — deep forest, restrained ─────────────────────── */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0c2d48 0%, #0a3d5c 40%, #093028 100%);
+        background: var(--forest-deep) !important;
+        border-right: 1px solid rgba(244, 238, 221, 0.06);
     }
-    
     [data-testid="stSidebar"] > div:first-child {
         background: transparent;
         padding-top: 0;
     }
-    
-    /* Sidebar text styling */
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #f1f5f9 !important;
-    }
-    
-    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label {
-        color: #f1f5f9 !important;
-    }
-
-    /* Hide default Streamlit radio/expander chrome in sidebar */
+    [data-testid="stSidebar"] label { color: #e8e0cc !important; }
     [data-testid="stSidebar"] .stRadio > label { display: none; }
 
-    /* Sidebar button styling — logout only */
     [data-testid="stSidebar"] .stButton > button {
-        background: rgba(220, 38, 38, 0.15) !important;
-        color: #fca5a5 !important;
-        border: 1px solid rgba(220, 38, 38, 0.3) !important;
-        border-radius: 8px;
+        background: rgba(138, 36, 25, 0.15) !important;
+        color: #f2c8bc !important;
+        border: 1px solid rgba(138, 36, 25, 0.35) !important;
+        border-radius: var(--radius-sm);
         font-weight: 500;
         font-size: 0.85em;
-        padding: 0.4rem 1rem;
-        transition: all 0.2s ease;
+        padding: 0.45rem 1rem;
+        transition: background 0.15s ease, color 0.15s ease;
     }
-    
     [data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(220, 38, 38, 0.3) !important;
-        color: #fecaca !important;
+        background: rgba(138, 36, 25, 0.28) !important;
+        color: #fadcd1 !important;
         transform: none;
-        box-shadow: none;
     }
-    
-    /* Sidebar expander styling — navigation groups */
-    [data-testid="stSidebar"] [data-testid="stExpander"] {
+
+    [data-testid="stSidebar"] [data-testid="stExpander"],
+    [data-testid="stSidebar"] [data-testid="stExpander"] details {
         background: transparent !important;
         border: none !important;
         margin-bottom: 0 !important;
-    }
-    [data-testid="stSidebar"] [data-testid="stExpander"] details {
-        border: none !important;
-        background: transparent !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] summary {
         background: transparent !important;
         border: none !important;
         padding: 0.5rem 0.6rem !important;
-        margin: 0 !important;
-        border-radius: 6px;
-        color: #a5b4c8 !important;
+        color: #a59d85 !important;
         font-size: 0.7em !important;
         font-weight: 600 !important;
-        letter-spacing: 0.08em !important;
+        letter-spacing: 0.14em !important;
         text-transform: uppercase !important;
     }
-    [data-testid="stSidebar"] [data-testid="stExpander"] summary:hover {
-        color: #e2e8f0 !important;
-    }
+    [data-testid="stSidebar"] [data-testid="stExpander"] summary:hover { color: #e8e0cc !important; }
     [data-testid="stSidebar"] [data-testid="stExpander"] summary p,
     [data-testid="stSidebar"] [data-testid="stExpander"] summary span {
         color: inherit !important;
@@ -669,11 +793,9 @@ st.markdown("""
         font-weight: inherit !important;
         letter-spacing: inherit !important;
     }
-    /* Expander arrow */
     [data-testid="stSidebar"] [data-testid="stExpander"] summary svg {
-        width: 14px !important;
-        height: 14px !important;
-        color: #94a3b8 !important;
+        width: 12px !important; height: 12px !important;
+        color: #7a7260 !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
         background: transparent !important;
@@ -681,104 +803,96 @@ st.markdown("""
         padding: 0 !important;
     }
 
-    /* Nav item buttons — the actual page links */
-    [data-testid="stSidebar"] .nav-item-btn {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+    /* Nav items — left accent, flat */
+    [data-testid="stSidebar"] .nav-item-btn { margin: 0 !important; padding: 0 !important; }
     [data-testid="stSidebar"] .nav-item-btn button {
         background: transparent !important;
-        color: #c8d6e5 !important;
+        color: #cfc7b0 !important;
         border: none !important;
+        border-left: 3px solid transparent !important;
         text-align: left !important;
-        padding: 0.5rem 0.75rem 0.5rem 1.6rem !important;
-        border-radius: 8px !important;
-        font-size: 0.855em !important;
+        padding: 0.55rem 0.75rem 0.55rem 1rem !important;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+        font-size: 0.88em !important;
         font-weight: 400 !important;
-        transition: all 0.18s cubic-bezier(.4,0,.2,1) !important;
-        box-shadow: none !important;
         width: 100% !important;
-        margin: 1px 4px !important;
+        margin: 1px 0 !important;
         line-height: 1.4 !important;
-        letter-spacing: 0.01em !important;
-        position: relative !important;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     [data-testid="stSidebar"] .nav-item-btn button:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(244, 238, 221, 0.05) !important;
         color: #ffffff !important;
     }
-    /* Active page — left accent bar + bright highlight */
     [data-testid="stSidebar"] .nav-item-btn.nav-active button {
-        background: rgba(56, 189, 248, 0.15) !important;
-        color: #7dd3fc !important;
+        background: rgba(201, 168, 90, 0.1) !important;
+        color: #f1d990 !important;
         font-weight: 600 !important;
-        box-shadow: inset 3px 0 0 0 #7dd3fc !important;
-        border-radius: 0 8px 8px 0 !important;
+        border-left-color: #c9a85a !important;
     }
 
     /* Last-updated badge */
     .last-updated-badge {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 8px;
-        padding: 0.5rem 0.65rem;
+        display: flex; align-items: center; gap: 0.5rem;
+        background: rgba(244, 238, 221, 0.04);
+        border: 1px solid rgba(244, 238, 221, 0.08);
+        border-radius: var(--radius-sm);
+        padding: 0.55rem 0.65rem;
         margin: 0.25rem 0;
-        color: #a5b4c8;
+        color: #a59d85;
         font-size: 0.75em;
     }
-    .last-updated-badge strong { color: #e2e8f0; }
+    .last-updated-badge strong { color: #e8e0cc; }
     .last-updated-badge .pulse-dot {
         width: 6px; height: 6px;
         border-radius: 50%;
-        background: #34d399;
-        display: inline-block;
-        flex-shrink: 0;
-        animation: pulse-glow 2.5s ease-in-out infinite;
-    }
-    @keyframes pulse-glow {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.45); }
-        50% { box-shadow: 0 0 0 4px rgba(52,211,153,0); }
+        background: #c9a85a;
+        display: inline-block; flex-shrink: 0;
     }
 
-    /* User card */
     .sidebar-user-card {
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 10px;
+        background: rgba(244, 238, 221, 0.04);
+        border: 1px solid rgba(244, 238, 221, 0.08);
+        border-radius: var(--radius-md);
         padding: 0.75rem 0.85rem;
         margin-bottom: 0.5rem;
     }
-    .sidebar-user-card .user-label { font-size: 0.7em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-    .sidebar-user-card .user-email { font-weight: 600; color: #f1f5f9; font-size: 0.9em; margin: 2px 0; }
+    .sidebar-user-card .user-label { font-size: 0.68em; color: #a59d85; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+    .sidebar-user-card .user-email { font-weight: 600; color: #f4eedd; font-size: 0.9em; margin: 2px 0; }
     .sidebar-user-card .user-role  { font-size: 0.78em; margin: 2px 0; }
-    .sidebar-user-card .user-lab   { font-size: 0.78em; color: #a5b4c8; margin: 2px 0; }
+    .sidebar-user-card .user-lab   { font-size: 0.78em; color: #a59d85; margin: 2px 0; }
 
-    /* Sidebar brand */
-    .sidebar-brand {
-        text-align: center;
-        padding: 1.2rem 0 0.8rem 0;
+    .sidebar-brand { text-align: center; padding: 1.4rem 0 0.9rem 0; }
+    .sidebar-brand .brand-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 46px; height: 46px;
+        margin-bottom: 0.55rem;
     }
-    .sidebar-brand .brand-icon { font-size: 1.8em; margin-bottom: 0.3rem; }
-    .sidebar-brand .brand-name { font-size: 1.05em; font-weight: 700; color: #ffffff; letter-spacing: 0.04em; }
-    .sidebar-brand .brand-sub  { font-size: 0.72em; color: #a5b4c8; margin-top: 2px; letter-spacing: 0.02em; }
+    .sidebar-brand .brand-icon svg { width: 46px; height: 46px; display: block; }
+    .sidebar-brand .brand-name {
+        font-family: 'Fraunces', 'Georgia', serif;
+        font-size: 1.12rem; font-weight: 600; color: #f4eedd;
+        letter-spacing: 0.005em;
+    }
+    .sidebar-brand .brand-sub {
+        font-size: 0.7em; color: #c7b88a; margin-top: 4px;
+        letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+    }
 
-    /* Thin dividers */
     .sidebar-divider {
         height: 1px;
-        background: rgba(255,255,255,0.12);
-        margin: 0.6rem 0;
+        background: rgba(244, 238, 221, 0.08);
+        margin: 0.7rem 0;
         border: none;
     }
-    
-    /* Main content area — override login-page 460px cap */
+
+    /* Main content area */
     .main {
         display: block !important;
         align-items: unset !important;
         justify-content: unset !important;
         min-height: unset !important;
+        padding: 0 !important;
     }
     .main .block-container,
     .main .stMainBlockContainer,
@@ -787,163 +901,338 @@ st.markdown("""
         max-width: none !important;
         width: auto !important;
         margin: 0 !important;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
+        padding: 2rem 2.5rem !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
     }
-    
-    /* Headers */
+
+    /* Typography — serif display, warm ink body */
     h1 {
-        background: linear-gradient(135deg, #0f766e 0%, #0891b2 50%, #0284c7 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 700;
-        letter-spacing: -0.02em;
+        font-family: 'Fraunces', 'Georgia', serif !important;
+        color: var(--ink) !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em !important;
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
     }
-    
-    h2, h3 {
-        color: #0f766e;
-        font-weight: 600;
+    h2 {
+        font-family: 'Fraunces', 'Georgia', serif !important;
+        color: var(--forest) !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.015em !important;
     }
-    
-    /* Cards/Containers */
-    .stMetric {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 1.2rem;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(20, 184, 166, 0.2);
+    h3, h4 {
+        font-family: 'Inter', sans-serif !important;
+        color: var(--ink) !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.005em !important;
     }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 12px;
-        font-weight: 600;
-        color: #0f766e;
+    p, li, label, span, div { color: inherit; }
+    .stCaption, [data-testid="stCaptionContainer"], small { color: var(--ink-muted) !important; }
+
+    /* Metric cards */
+    [data-testid="stMetric"], .stMetric {
+        background: var(--surface);
+        padding: 1.1rem 1.2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
     }
-    
-    /* Button styling */
+    [data-testid="stMetricLabel"] {
+        color: var(--ink-muted) !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.06em !important;
+        text-transform: uppercase !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: var(--ink) !important;
+        font-family: 'Fraunces', 'Georgia', serif !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stMetricDelta"] { color: var(--ink-muted) !important; }
+
+    /* Expanders in main content */
+    [data-testid="stExpander"] summary {
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        font-weight: 500;
+        color: var(--ink) !important;
+    }
+
+    /* Bordered containers */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background: var(--surface);
+        border: 1px solid var(--border) !important;
+        border-radius: var(--radius-lg) !important;
+    }
+
+    /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0.6rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
+        background: var(--forest);
+        color: #f4eedd;
+        border: 1px solid var(--forest);
+        border-radius: var(--radius-md);
+        padding: 0.55rem 1.3rem;
+        font-weight: 500;
+        letter-spacing: 0.005em;
+        transition: background 0.15s ease, border-color 0.15s ease;
     }
-    
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(13, 148, 136, 0.4);
+        background: var(--forest-dark);
+        border-color: var(--forest-dark);
+        transform: none;
+        color: #f4eedd;
     }
-    
     .stButton > button[kind="secondary"] {
-        background: white;
-        color: #0d9488;
-        border: 2px solid #0d9488;
+        background: var(--surface);
+        color: var(--forest);
+        border: 1px solid var(--border-strong);
     }
-    
-    /* Download button */
+    .stButton > button[kind="secondary"]:hover {
+        background: var(--forest-soft);
+        color: var(--forest-dark);
+        border-color: var(--forest);
+    }
+
     .stDownloadButton > button {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-weight: 600;
+        background: var(--surface);
+        color: var(--forest);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        font-weight: 500;
     }
-    
     .stDownloadButton > button:hover {
-        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        background: var(--forest-soft);
+        color: var(--forest-dark);
+        border-color: var(--forest);
     }
-    
-    /* Select boxes and inputs */
+
+    /* Inputs */
     .stSelectbox > div > div,
     .stMultiSelect > div > div,
-    .stTextInput > div > div > input {
-        border-radius: 10px;
-        border: 2px solid #e2e8f0;
-        background: rgba(255, 255, 255, 0.9);
-        transition: all 0.2s ease;
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input,
+    .stDateInput > div > div > input,
+    .stTextArea textarea {
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--ink) !important;
+        transition: border-color 0.15s ease;
     }
-    
     .stSelectbox > div > div:focus-within,
     .stMultiSelect > div > div:focus-within,
-    .stTextInput > div > div > input:focus {
-        border-color: #14b8a6;
-        box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus,
+    .stDateInput > div > div > input:focus,
+    .stTextArea textarea:focus {
+        border-color: var(--forest) !important;
+        outline: none;
     }
-    
-    /* Tab styling */
+
+    /* Main tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        background: rgba(241, 245, 249, 0.9);
-        border-radius: 12px;
-        padding: 4px;
+        gap: 2rem;
+        background: transparent;
+        border-bottom: 1px solid var(--border);
+        padding: 0;
+        border-radius: 0;
     }
-    
     .stTabs [data-baseweb="tab"] {
-        border-radius: 8px;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0.75rem 0 !important;
         font-weight: 500;
-        color: #64748b;
-        padding: 0.5rem 1rem;
+        color: var(--ink-muted);
+        position: relative;
     }
-    
     .stTabs [aria-selected="true"] {
-        background: white;
-        color: #0d9488;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        background: transparent !important;
+        color: var(--forest) !important;
+        font-weight: 600;
     }
-    
-    /* Success/Error/Info boxes */
-    .stSuccess {
-        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-        border-left: 4px solid #059669;
-        border-radius: 10px;
+    .stTabs [aria-selected="true"]::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: -1px;
+        height: 2px;
+        background: var(--forest);
     }
-    
-    .stError {
-        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-        border-left: 4px solid #ef4444;
-        border-radius: 10px;
-    }
-    
-    .stInfo {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        border-left: 4px solid #3b82f6;
-        border-radius: 10px;
-    }
-    
-    .stWarning {
-        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        border-left: 4px solid #f59e0b;
-        border-radius: 10px;
-    }
-    
-    /* Divider styling */
+
+    /* Alerts — warm-paper bg + coloured left border */
+    .stSuccess { background: var(--paper-alt); border: 1px solid var(--border); border-left: 3px solid var(--moss);       border-radius: var(--radius-md); color: var(--ink); }
+    .stError   { background: var(--paper-alt); border: 1px solid var(--border); border-left: 3px solid var(--oxide);      border-radius: var(--radius-md); color: var(--ink); }
+    .stInfo    { background: var(--paper-alt); border: 1px solid var(--border); border-left: 3px solid var(--forest);     border-radius: var(--radius-md); color: var(--ink); }
+    .stWarning { background: var(--paper-alt); border: 1px solid var(--border); border-left: 3px solid var(--ochre);      border-radius: var(--radius-md); color: var(--ink); }
+
     hr {
         border: none;
         height: 1px;
-        background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+        background: var(--border);
         margin: 1.5rem 0;
     }
+
+    header[data-testid="stHeader"] {
+        background: transparent;
+        border-bottom: 1px solid var(--border);
+    }
+
+    [data-testid="stTable"], .stDataFrame {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+    }
+
+    /* Plotly charts sit on the paper — no background colour bleed */
+    .stPlotlyChart { background: transparent; }
+
+    /* Page title accent — subtle serif system */
+    .page-eyebrow {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--terracotta);
+        margin-bottom: 0.35rem;
+    }
+
+    /* ── Animated tagline ticker ──────────────────────────────── */
+    .amr-ticker {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        background: linear-gradient(90deg, var(--paper-alt) 0%, var(--surface-alt) 50%, var(--paper-alt) 100%);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        margin: 0.2rem 0 1.3rem 0;
+    }
+    .amr-ticker::before, .amr-ticker::after {
+        content: "";
+        position: absolute; top: 0; bottom: 0; width: 90px; z-index: 2;
+        pointer-events: none;
+    }
+    .amr-ticker::before { left: 0;  background: linear-gradient(90deg, var(--paper-alt) 0%, rgba(235,226,205,0) 100%); }
+    .amr-ticker::after  { right: 0; background: linear-gradient(270deg, var(--paper-alt) 0%, rgba(235,226,205,0) 100%); }
+    .amr-ticker__track {
+        display: inline-flex;
+        white-space: nowrap;
+        animation: amrTickerScroll 48s linear infinite;
+        will-change: transform;
+    }
+    .amr-ticker:hover .amr-ticker__track { animation-play-state: paused; }
+    .amr-ticker__item {
+        display: inline-flex; align-items: center;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem; font-weight: 500;
+        color: var(--ink-muted); letter-spacing: 0.04em;
+        padding: 0 2.4rem;
+    }
+    .amr-ticker__item strong {
+        font-family: 'Fraunces', 'Georgia', serif;
+        font-weight: 600; color: var(--forest-dark);
+        margin-right: 0.45rem;
+    }
+    .amr-ticker__dot {
+        display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+        background: var(--gold); margin: 0 1.2rem; opacity: 0.85;
+    }
+    @keyframes amrTickerScroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+    }
+
+    /* ── Container blending — flat, no white pop on paper ────── */
+    [data-testid="stVerticalBlockBorderWrapper"],
+    div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: var(--surface-alt) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: var(--radius-md) !important;
+    }
+    [data-testid="stExpander"] {
+        background: var(--surface-alt) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: var(--radius-md) !important;
+    }
+    [data-testid="stMetric"] {
+        background: transparent !important;
+    }
+
+    /* Streamlit default markdown rule → warm, subtle */
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
     </style>
 """, unsafe_allow_html=True)
 
+# ── Auto-select most recent accessible dataset on (re)login ────────
+# Ensures uploaded data remains visible after logout/login — the DB keeps
+# the rows, but `active_dataset_id` in session_state is None on a fresh
+# login, which previously left every dashboard page saying "no data".
+try:
+    _visible = db.get_all_datasets() or []
+    _admin_email_cfg, _ = _get_admin_config()
+    _admin_email_norm = (_admin_email_cfg or "").strip().lower()
+    if not st.session_state.is_admin and _admin_email_norm:
+        _visible = [d for d in _visible
+                    if (d.get("uploaded_by") or "").strip().lower() != _admin_email_norm]
+    if st.session_state.get("lab_name"):
+        _user_norm = (st.session_state.get("user_email") or "").strip().lower()
+        _visible = [d for d in _visible
+                    if (d.get("uploaded_by") or "").strip().lower() == _user_norm]
+    _visible_ids = {d["dataset_id"] for d in _visible}
+    _current_id = st.session_state.get("active_dataset_id")
+    if _visible and (not _current_id or _current_id not in _visible_ids):
+        st.session_state.active_dataset_id = _visible[0]["dataset_id"]
+except Exception:
+    logger.exception("auto-select of active dataset failed")
+
 # App title and description (only shown when authenticated)
 st.markdown("# ICBB-AMRSS")
-st.markdown("##### ICBB AMR Surveillance System — Multi-source Surveillance (Environment, Food, Human, Animal, Aquaculture) | Ghana")
-st.markdown("---")
+
+# Animated tagline ticker — duplicated content for seamless infinite scroll
+_ticker_item = (
+    "<span class='amr-ticker__item'>"
+    "<strong>ICBB AMR Surveillance System</strong>"
+    "Multi-source Surveillance"
+    "<span class='amr-ticker__dot'></span>"
+    "Environment"
+    "<span class='amr-ticker__dot'></span>"
+    "Food"
+    "<span class='amr-ticker__dot'></span>"
+    "Human"
+    "<span class='amr-ticker__dot'></span>"
+    "Animal"
+    "<span class='amr-ticker__dot'></span>"
+    "Aquaculture"
+    "<span class='amr-ticker__dot'></span>"
+    "Ghana"
+    "</span>"
+)
+st.markdown(
+    f"<div class='amr-ticker'><div class='amr-ticker__track'>"
+    f"{_ticker_item * 4}"
+    f"</div></div>",
+    unsafe_allow_html=True,
+)
 
 # Sidebar navigation with user info and admin panel
 with st.sidebar:
     # Logo/Title
     st.markdown("""
         <div class="sidebar-brand">
-            <div class="brand-icon">🔬</div>
+            <div class="brand-icon">
+                <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" aria-label="ICBB logo">
+                    <path d="M28 4 L50 17 L50 39 L28 52 L6 39 L6 17 Z"
+                          fill="none" stroke="#e6d39c" stroke-width="1.6" stroke-linejoin="round"/>
+                    <circle cx="28" cy="12.5" r="1.6" fill="#e6d39c"/>
+                    <text x="28" y="33" text-anchor="middle"
+                          font-family="Fraunces, Georgia, serif" font-size="12" font-weight="600"
+                          letter-spacing="0.5" fill="#f4eedd">ICBB</text>
+                </svg>
+            </div>
             <div class="brand-name">ICBB-AMRSS</div>
-            <div class="brand-sub">AMR Surveillance System</div>
+            <div class="brand-sub">Surveillance System</div>
         </div>
     """, unsafe_allow_html=True)
     
