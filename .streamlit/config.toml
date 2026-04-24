@@ -7,23 +7,30 @@ showErrorDetails = true
 toolbarMode = "viewer"
 
 [server]
-# Prevent server from closing idle connections
 maxUploadSize = 200
 maxMessageSize = 200
 runOnSave = false
-# Critical: keep connections alive
+# Local development: both CORS + XSRF must be false OR both true.
+# Setting enableCORS=false while XSRF stays on makes Streamlit force it
+# back to true and then block localhost's WebSocket because
+# http://localhost:8501 is not in the default allowedOrigins list —
+# the app shell loads but the page stays blank. Both off is the
+# supported combo for local dev. Re-enable both on production deploy.
 enableCORS = false
+enableXsrfProtection = false
 enableWebsocketCompression = true
 headless = true
 
 [runner]
 magicEnabled = true
-# Faster reruns reduce perceived lag
 fastReruns = true
 
 [theme]
-primaryColor = "#1f77b4"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
+# Warm editorial palette, mirrors the CSS tokens in app.py so the
+# initial paint matches the custom shell instead of flashing white.
+base = "light"
+primaryColor = "#1d4d43"
+backgroundColor = "#f3ead6"
+secondaryBackgroundColor = "#fdfaf2"
+textColor = "#1a170e"
 font = "sans serif"
