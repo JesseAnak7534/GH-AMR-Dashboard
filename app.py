@@ -13,6 +13,37 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
 import plotly.express as px
+import plotly.io as pio
+import plotly.graph_objects as go
+
+# ── Global Plotly theme ───────────────────────────────────────────────
+# Every chart (Home page already transparent; this catches the other pages
+# that previously rendered on Plotly's default white background) inherits a
+# transparent paper/plot surface so the chart blends with the warm paper
+# shell. Also sets the typography + colourway to match the editorial palette.
+pio.templates["amrss"] = go.layout.Template(layout=dict(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+              color="#1a170e", size=12),
+    colorway=["#194238", "#a27117", "#964517", "#2f5430", "#164161",
+              "#741a10", "#b18a3a", "#5a8c6d"],
+    xaxis=dict(gridcolor="#e2d7bb", linecolor="#b4a788",
+               zerolinecolor="#e2d7bb", tickcolor="#b4a788",
+               tickfont=dict(color="#58523e"), title=dict(font=dict(color="#1a170e"))),
+    yaxis=dict(gridcolor="#e2d7bb", linecolor="#b4a788",
+               zerolinecolor="#e2d7bb", tickcolor="#b4a788",
+               tickfont=dict(color="#58523e"), title=dict(font=dict(color="#1a170e"))),
+    hoverlabel=dict(bgcolor="#fbf7ec", bordercolor="#b4a788",
+                    font=dict(family="Inter, sans-serif", color="#1a170e", size=12)),
+    legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="rgba(0,0,0,0)",
+                font=dict(color="#1a170e", size=11)),
+    colorscale=dict(sequential=[[0, "#f3ead6"], [0.5, "#a27117"], [1, "#194238"]],
+                    diverging=[[0, "#741a10"], [0.5, "#f3ead6"], [1, "#194238"]]),
+    title=dict(font=dict(family="Fraunces, Georgia, serif",
+                         color="#1a170e", size=16)),
+))
+pio.templates.default = "amrss"
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -706,18 +737,21 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
     :root {
-        --paper:         #ebe2cd;
-        --paper-alt:     #ddd1b4;
-        --surface:       #f5ecd7;
-        --surface-alt:   #f9f2e0;
-        --border:        #c9bc98;
-        --border-strong: #a89777;
-        --ink:           #12100a;
-        --ink-muted:     #55503e;
-        --ink-soft:      #7a735f;
-        --forest:        #194238;
-        --forest-dark:   #0c2620;
-        --forest-deep:   #061712;
+        /* Brighter, cleaner paper so body text pops; containers use the same
+           warm family so charts blend instead of popping as white slabs. */
+        --paper:         #f3ead6;
+        --paper-alt:     #e8dec6;
+        --surface:       #faf4e5;
+        --surface-alt:   #fbf7ec;
+        --surface-soft:  #fdfaf2;
+        --border:        #d4c9ae;
+        --border-strong: #b4a788;
+        --ink:           #1a170e;
+        --ink-muted:     #58523e;
+        --ink-soft:      #857e68;
+        --forest:        #1d4d43;
+        --forest-dark:   #123830;
+        --forest-deep:   #0d2a23;
         --forest-soft:   #d8e2dc;
         --gold:          #b18a3a;
         --gold-soft:     #e6d39c;
@@ -738,10 +772,16 @@ st.markdown("""
         -webkit-font-smoothing: antialiased;
     }
 
-    /* ── Sidebar — deep forest, restrained ─────────────────────── */
+    /* ── Sidebar — deep forest with hex-dot texture ────────────── */
     [data-testid="stSidebar"] {
-        background: var(--forest-deep) !important;
-        border-right: 1px solid rgba(244, 238, 221, 0.06);
+        background-color: var(--forest-deep) !important;
+        background-image:
+            radial-gradient(circle at 20% 14%, rgba(230, 211, 156, 0.10) 0, transparent 45%),
+            radial-gradient(circle at 82% 78%, rgba(177, 138, 58, 0.08) 0, transparent 50%),
+            url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><g fill='none' stroke='%23e6d39c' stroke-width='0.8' stroke-opacity='0.08'><polygon points='32,8 52,20 52,44 32,56 12,44 12,20'/><circle cx='32' cy='32' r='1.6' fill='%23e6d39c' fill-opacity='0.12' stroke='none'/></g></svg>") !important;
+        background-repeat: no-repeat, no-repeat, repeat !important;
+        background-size: auto, auto, 64px 64px !important;
+        border-right: 1px solid rgba(230, 211, 156, 0.10);
     }
     [data-testid="stSidebar"] > div:first-child {
         background: transparent;
@@ -750,7 +790,7 @@ st.markdown("""
     [data-testid="stSidebar"] .stMarkdown,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label { color: #e8e0cc !important; }
+    [data-testid="stSidebar"] label { color: #ede4cb !important; }
     [data-testid="stSidebar"] .stRadio > label { display: none; }
 
     [data-testid="stSidebar"] .stButton > button {
@@ -803,32 +843,33 @@ st.markdown("""
         padding: 0 !important;
     }
 
-    /* Nav items — left accent, flat */
+    /* Nav items — left accent, flat, higher-contrast text */
     [data-testid="stSidebar"] .nav-item-btn { margin: 0 !important; padding: 0 !important; }
     [data-testid="stSidebar"] .nav-item-btn button {
         background: transparent !important;
-        color: #cfc7b0 !important;
+        color: #ede4cb !important;
         border: none !important;
         border-left: 3px solid transparent !important;
         text-align: left !important;
         padding: 0.55rem 0.75rem 0.55rem 1rem !important;
         border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
-        font-size: 0.88em !important;
-        font-weight: 400 !important;
+        font-size: 0.9em !important;
+        font-weight: 500 !important;
         width: 100% !important;
         margin: 1px 0 !important;
         line-height: 1.4 !important;
+        letter-spacing: 0.005em !important;
         transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
     [data-testid="stSidebar"] .nav-item-btn button:hover {
-        background: rgba(244, 238, 221, 0.05) !important;
-        color: #ffffff !important;
+        background: rgba(230, 211, 156, 0.10) !important;
+        color: #fff8e1 !important;
     }
     [data-testid="stSidebar"] .nav-item-btn.nav-active button {
-        background: rgba(201, 168, 90, 0.1) !important;
-        color: #f1d990 !important;
+        background: rgba(230, 211, 156, 0.16) !important;
+        color: #f6db9c !important;
         font-weight: 600 !important;
-        border-left-color: #c9a85a !important;
+        border-left-color: #e6d39c !important;
     }
 
     /* Last-updated badge */
@@ -933,7 +974,7 @@ st.markdown("""
 
     /* Metric cards */
     [data-testid="stMetric"], .stMetric {
-        background: var(--surface);
+        background: var(--surface-soft);
         padding: 1.1rem 1.2rem;
         border-radius: var(--radius-lg);
         border: 1px solid var(--border);
@@ -1144,20 +1185,37 @@ st.markdown("""
         to   { transform: translateX(-50%); }
     }
 
-    /* ── Container blending — flat, no white pop on paper ────── */
+    /* ── Container blending — subtle cream lift on paper ──────── */
     [data-testid="stVerticalBlockBorderWrapper"],
     div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: var(--surface-alt) !important;
+        background: var(--surface-soft) !important;
         border: 1px solid var(--border) !important;
         border-radius: var(--radius-md) !important;
     }
     [data-testid="stExpander"] {
-        background: var(--surface-alt) !important;
+        background: var(--surface-soft) !important;
         border: 1px solid var(--border) !important;
         border-radius: var(--radius-md) !important;
     }
     [data-testid="stMetric"] {
+        background: var(--surface-soft) !important;
+    }
+
+    /* Plotly charts blend with their parent container — no white slab */
+    .stPlotlyChart,
+    [data-testid="stPlotlyChart"],
+    [data-testid="stPlotlyChart"] > div,
+    [data-testid="stPlotlyChart"] .js-plotly-plot,
+    [data-testid="stPlotlyChart"] .plot-container,
+    [data-testid="stPlotlyChart"] .main-svg {
         background: transparent !important;
+    }
+
+    /* Data tables + dataframes — warm surface instead of raw white */
+    [data-testid="stDataFrame"],
+    [data-testid="stDataFrame"] .glideDataEditor,
+    [data-testid="stTable"] {
+        background: var(--surface-soft) !important;
     }
 
     /* Streamlit default markdown rule → warm, subtle */

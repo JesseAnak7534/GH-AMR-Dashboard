@@ -1,63 +1,133 @@
 """
 Database module for AMR Surveillance Dashboard.
-Handles SQLite schema creation and CRUD operations.
+Backed by PostgreSQL (psycopg2). Reads DATABASE_URL from environment or
+Streamlit secrets; falls back to a local dev URL if neither is set.
+
+The public function surface is kept stable so `app.py` does not need to
+change — `get_connection()` still returns an object that supports
+`.execute(sql).fetchone()[0]` and dict-style row access.
 """
-import sqlite3
 import os
+import logging
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
+
 import pandas as pd
+import psycopg2
+import psycopg2.extras
 
 
-DB_DIR = "db"
-DB_PATH = os.path.join(DB_DIR, "amr_data.db")
+logger = logging.getLogger(__name__)
 
 
-def ensure_db_dir():
-    """Create db directory if it doesn't exist."""
-    os.makedirs(DB_DIR, exist_ok=True)
+# ---------------------------------------------------------------------------
+# Connection handling
+# ---------------------------------------------------------------------------
+
+_LOCAL_DEV_URL = "postgresql://amr_app:amr_app_local_2026@localhost:5432/amr_surveillance"
 
 
-def get_connection():
-    """Get SQLite connection."""
-    ensure_db_dir()
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def _database_url() -> str:
+    """Resolve the Postgres connection URL from env / Streamlit secrets."""
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return url
+    try:
+        import streamlit as st  # optional; only present when running the app
+        if hasattr(st, "secrets") and "DATABASE_URL" in st.secrets:
+            return st.secrets["DATABASE_URL"]
+    except Exception:
+        pass
+    return _LOCAL_DEV_URL
 
+
+class _ConnectionWrapper:
+    """Thin wrapper around a psycopg2 connection that mimics the tiny subset
+    of sqlite3.Connection behaviour callers rely on — specifically
+    ``conn.execute(sql).fetchone()[0]``.
+    """
+
+    def __init__(self, raw):
+        self._raw = raw
+
+    def cursor(self, *args, **kwargs):
+        kwargs.setdefault("cursor_factory", psycopg2.extras.DictCursor)
+        return self._raw.cursor(*args, **kwargs)
+
+    def execute(self, sql: str, params=None):
+        cur = self.cursor()
+        cur.execute(sql, params or ())
+        return cur
+
+    def commit(self):
+        return self._raw.commit()
+
+    def rollback(self):
+        return self._raw.rollback()
+
+    def close(self):
+        return self._raw.close()
+
+    # Expose the underlying connection for pandas.read_sql_query etc.
+    @property
+    def raw(self):
+        return self._raw
+
+
+def get_connection() -> _ConnectionWrapper:
+    """Open a fresh Postgres connection wrapped for app-friendly usage."""
+    raw = psycopg2.connect(_database_url())
+    return _ConnectionWrapper(raw)
+
+
+def _fetch_df(sql: str, params=None) -> pd.DataFrame:
+    """Run a SELECT and return a DataFrame. Keeps psycopg2 off pandas's
+    connection-detection path, which insists on SQLAlchemy engines."""
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, params or ())
+        rows = cur.fetchall()
+        cols = [d[0] for d in cur.description] if cur.description else []
+        cur.close()
+        return pd.DataFrame([dict(r) for r in rows], columns=cols)
+    finally:
+        conn.close()
+
+
+def _safe_add_column(cur, table: str, column: str, ddl: str):
+    """Idempotent column add. Postgres 9.6+ supports IF NOT EXISTS."""
+    try:
+        cur.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {ddl}")
+    except Exception:
+        logger.exception("ADD COLUMN %s.%s failed", table, column)
+
+
+# ---------------------------------------------------------------------------
+# Schema bootstrap
+# ---------------------------------------------------------------------------
 
 def init_database():
-    """Initialize database schema."""
+    """Initialize database schema (idempotent)."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
 
-    # Create users table
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id BIGSERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             created_at TEXT NOT NULL,
             last_login TEXT,
-            is_active BOOLEAN DEFAULT 1,
-            is_admin BOOLEAN DEFAULT 0
+            is_active SMALLINT DEFAULT 1,
+            is_admin SMALLINT DEFAULT 0
         )
     """)
+    _safe_add_column(cur, "users", "is_verified", "SMALLINT DEFAULT 0")
+    _safe_add_column(cur, "users", "verification_code", "TEXT")
+    _safe_add_column(cur, "users", "verification_expires", "TEXT")
 
-    # Add email verification columns if they don't exist (migration)
-    user_migrations = [
-        ("is_verified", "BOOLEAN DEFAULT 0"),
-        ("verification_code", "TEXT"),
-        ("verification_expires", "TEXT")
-    ]
-    for col_name, col_type in user_migrations:
-        try:
-            cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
-        except sqlite3.OperationalError:
-            pass
-
-    # Create datasets table
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS datasets (
             dataset_id TEXT PRIMARY KEY,
             dataset_name TEXT NOT NULL,
@@ -67,20 +137,10 @@ def init_database():
             rows_tests INTEGER
         )
     """)
+    _safe_add_column(cur, "datasets", "country", "TEXT")
+    _safe_add_column(cur, "datasets", "is_country_main", "SMALLINT DEFAULT 0")
 
-    # Add country and is_country_main columns if they don't exist
-    migration_cols = [
-        ("country", "TEXT"),
-        ("is_country_main", "BOOLEAN DEFAULT 0")
-    ]
-    for col_name, col_type in migration_cols:
-        try:
-            cursor.execute(f"ALTER TABLE datasets ADD COLUMN {col_name} {col_type}")
-        except sqlite3.OperationalError:
-            pass
-
-    # Create samples table
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS samples (
             dataset_id TEXT,
             sample_id TEXT,
@@ -93,21 +153,14 @@ def init_database():
             source_type TEXT,
             food_matrix TEXT,
             environment_matrix TEXT,
-            latitude REAL,
-            longitude REAL,
-            PRIMARY KEY (dataset_id, sample_id),
-            FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
+            latitude DOUBLE PRECISION,
+            longitude DOUBLE PRECISION,
+            PRIMARY KEY (dataset_id, sample_id)
         )
     """)
-    
-    # Add lab_name column if it doesn't exist (migration)
-    try:
-        cursor.execute("ALTER TABLE samples ADD COLUMN lab_name TEXT")
-    except sqlite3.OperationalError:
-        pass
+    _safe_add_column(cur, "samples", "lab_name", "TEXT")
 
-    # Create ast_results table
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS ast_results (
             dataset_id TEXT,
             sample_id TEXT,
@@ -118,64 +171,46 @@ def init_database():
             method TEXT,
             guideline TEXT,
             test_date TEXT,
-            mic_value REAL,
-            zone_diameter REAL,
-            auto_interpreted BOOLEAN DEFAULT FALSE,
+            mic_value DOUBLE PRECISION,
+            zone_diameter DOUBLE PRECISION,
+            auto_interpreted SMALLINT DEFAULT 0,
             interpreted_result TEXT,
             interpretation_guideline TEXT,
             interpretation_confidence TEXT,
             suspected_mechanism TEXT,
             interpretation_notes TEXT,
-            PRIMARY KEY (dataset_id, isolate_id, antibiotic),
-            FOREIGN KEY (dataset_id, sample_id) REFERENCES samples(dataset_id, sample_id)
+            PRIMARY KEY (dataset_id, isolate_id, antibiotic)
         )
     """)
-
-    # Add zone_diameter column if it doesn't exist (for database migration)
-    try:
-        cursor.execute("ALTER TABLE ast_results ADD COLUMN zone_diameter REAL")
-    except sqlite3.OperationalError:
-        # Column already exists
-        pass
-
-    # Add interpretation columns if they don't exist (for database migration)
-    interpretation_columns = [
-        ("auto_interpreted", "BOOLEAN DEFAULT FALSE"),
+    for col, ddl in [
+        ("zone_diameter", "DOUBLE PRECISION"),
+        ("auto_interpreted", "SMALLINT DEFAULT 0"),
         ("interpreted_result", "TEXT"),
         ("interpretation_guideline", "TEXT"),
         ("interpretation_confidence", "TEXT"),
         ("suspected_mechanism", "TEXT"),
-        ("interpretation_notes", "TEXT")
-    ]
+        ("interpretation_notes", "TEXT"),
+    ]:
+        _safe_add_column(cur, "ast_results", col, ddl)
 
-    for col_name, col_type in interpretation_columns:
-        try:
-            cursor.execute(f"ALTER TABLE ast_results ADD COLUMN {col_name} {col_type}")
-        except sqlite3.OperationalError:
-            # Column already exists
-            pass
-
-    # Create predictions table (future-proofing)
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS predictions (
             dataset_id TEXT,
             location_level TEXT,
             location_name TEXT,
             organism TEXT,
             antibiotic TEXT,
-            predicted_risk REAL,
-            confidence REAL,
+            predicted_risk DOUBLE PRECISION,
+            confidence DOUBLE PRECISION,
             model_version TEXT,
             run_date TEXT,
-            PRIMARY KEY (dataset_id, location_level, location_name, organism, antibiotic),
-            FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
+            PRIMARY KEY (dataset_id, location_level, location_name, organism, antibiotic)
         )
     """)
 
-    # Create alerts table for tracking generated alerts
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS alerts (
-            alert_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            alert_id BIGSERIAL PRIMARY KEY,
             alert_type TEXT NOT NULL,
             severity TEXT NOT NULL,
             title TEXT NOT NULL,
@@ -184,23 +219,21 @@ def init_database():
             antibiotic TEXT,
             lab_name TEXT,
             region TEXT,
-            resistance_rate REAL,
-            threshold REAL,
+            resistance_rate DOUBLE PRECISION,
+            threshold DOUBLE PRECISION,
             affected_count INTEGER,
             detected_at TEXT NOT NULL,
             is_acknowledged INTEGER DEFAULT 0,
             acknowledged_by TEXT,
             acknowledged_at TEXT,
             notes TEXT,
-            dataset_id TEXT,
-            FOREIGN KEY (dataset_id) REFERENCES datasets(dataset_id)
+            dataset_id TEXT
         )
     """)
 
-    # Create alert_subscriptions table for user preferences
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS alert_subscriptions (
-            subscription_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subscription_id BIGSERIAL PRIMARY KEY,
             user_id INTEGER,
             alert_type TEXT,
             severity_threshold TEXT DEFAULT 'MEDIUM',
@@ -208,15 +241,13 @@ def init_database():
             sms_enabled INTEGER DEFAULT 0,
             lab_filter TEXT,
             organism_filter TEXT,
-            created_at TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(user_id)
+            created_at TEXT NOT NULL
         )
     """)
 
-    # Create scheduled_reports table for report scheduling
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS scheduled_reports (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id BIGSERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             report_type TEXT NOT NULL,
             frequency TEXT NOT NULL,
@@ -234,23 +265,20 @@ def init_database():
         )
     """)
 
-    # Create report_history table for tracking report execution
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS report_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id BIGSERIAL PRIMARY KEY,
             schedule_id INTEGER,
             report_type TEXT,
             run_time TEXT NOT NULL,
             status TEXT NOT NULL,
             recipients TEXT,
             error_message TEXT,
-            file_path TEXT,
-            FOREIGN KEY (schedule_id) REFERENCES scheduled_reports(id)
+            file_path TEXT
         )
     """)
 
-    # ── PPS (Point Prevalence Survey) tables ──
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS pps_surveys (
             survey_id TEXT PRIMARY KEY,
             facility_name TEXT NOT NULL,
@@ -265,9 +293,9 @@ def init_database():
         )
     """)
 
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS pps_prescriptions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id BIGSERIAL PRIMARY KEY,
             survey_id TEXT NOT NULL,
             ward TEXT,
             patient_age_group TEXT,
@@ -276,15 +304,13 @@ def init_database():
             indication TEXT,
             indication_documented INTEGER DEFAULT 0,
             guideline_compliant INTEGER DEFAULT 0,
-            duration_days REAL,
-            FOREIGN KEY (survey_id) REFERENCES pps_surveys(survey_id)
+            duration_days DOUBLE PRECISION
         )
     """)
 
-    # ── AMU (Antimicrobial Use) tables ──
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS amu_records (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id BIGSERIAL PRIMARY KEY,
             facility_name TEXT NOT NULL,
             report_period TEXT NOT NULL,
             region TEXT,
@@ -294,18 +320,17 @@ def init_database():
             atc_code TEXT,
             formulation TEXT,
             unit_of_measure TEXT,
-            quantity_dispensed REAL,
-            ddd_per_1000 REAL,
+            quantity_dispensed DOUBLE PRECISION,
+            ddd_per_1000 DOUBLE PRECISION,
             patient_days INTEGER,
             uploaded_by TEXT,
             uploaded_at TEXT NOT NULL
         )
     """)
 
-    # ── AMC (Antimicrobial Consumption) tables ──
-    cursor.execute("""
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS amc_records (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id BIGSERIAL PRIMARY KEY,
             report_period TEXT NOT NULL,
             region TEXT,
             sector TEXT NOT NULL DEFAULT 'ANIMAL',
@@ -314,9 +339,9 @@ def init_database():
             antibiotic_class TEXT NOT NULL,
             antibiotic_name TEXT,
             atc_vet_code TEXT,
-            quantity_kg REAL,
-            biomass_kg REAL,
-            mg_per_kg_biomass REAL,
+            quantity_kg DOUBLE PRECISION,
+            biomass_kg DOUBLE PRECISION,
+            mg_per_kg_biomass DOUBLE PRECISION,
             route TEXT,
             purpose TEXT,
             uploaded_by TEXT,
@@ -328,93 +353,79 @@ def init_database():
     conn.close()
 
 
-def save_dataset(dataset_id: str, dataset_name: str, samples_df: pd.DataFrame, 
+# ---------------------------------------------------------------------------
+# Dataset + AST CRUD
+# ---------------------------------------------------------------------------
+
+def save_dataset(dataset_id: str, dataset_name: str, samples_df: pd.DataFrame,
                  ast_df: pd.DataFrame, uploaded_by: str = "System"):
-    """Save dataset and related data to database."""
     conn = get_connection()
-    cursor = conn.cursor()
-
+    cur = conn.cursor()
     try:
-        # Save dataset metadata
-        cursor.execute("""
+        cur.execute("""
             INSERT INTO datasets (dataset_id, dataset_name, uploaded_by, uploaded_at, rows_samples, rows_tests)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (dataset_id, dataset_name, uploaded_by, datetime.now().isoformat(), len(samples_df), len(ast_df)))
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (dataset_id, dataset_name, uploaded_by, datetime.now().isoformat(),
+              len(samples_df), len(ast_df)))
 
-        # Save samples
         for _, row in samples_df.iterrows():
-            cursor.execute("""
-                INSERT INTO samples 
-                (dataset_id, sample_id, lab_name, collection_date, region, district, site_type, 
+            cur.execute("""
+                INSERT INTO samples
+                (dataset_id, sample_id, lab_name, collection_date, region, district, site_type,
                  source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dataset_id,
-                row.get('sample_id'),
-                row.get('lab_name'),
-                row.get('collection_date'),
-                row.get('region'),
-                row.get('district'),
-                row.get('site_type'),
-                row.get('source_category'),
-                row.get('source_type'),
-                row.get('food_matrix'),
-                row.get('environment_matrix'),
-                row.get('latitude'),
-                row.get('longitude')
+                row.get('sample_id'), row.get('lab_name'), row.get('collection_date'),
+                row.get('region'), row.get('district'), row.get('site_type'),
+                row.get('source_category'), row.get('source_type'),
+                row.get('food_matrix'), row.get('environment_matrix'),
+                row.get('latitude'), row.get('longitude'),
             ))
 
-        # Save AST results
         for _, row in ast_df.iterrows():
-            cursor.execute("""
+            cur.execute("""
                 INSERT INTO ast_results
                 (dataset_id, sample_id, isolate_id, organism, antibiotic, result, method, guideline, test_date, mic_value)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 dataset_id,
-                row.get('sample_id'),
-                row.get('isolate_id'),
-                row.get('organism'),
-                row.get('antibiotic'),
-                row.get('result'),
-                row.get('method'),
-                row.get('guideline'),
-                row.get('test_date'),
-                row.get('mic_value')
+                row.get('sample_id'), row.get('isolate_id'), row.get('organism'),
+                row.get('antibiotic'), row.get('result'), row.get('method'),
+                row.get('guideline'), row.get('test_date'), row.get('mic_value'),
             ))
 
         conn.commit()
         return True, "Data saved successfully"
     except Exception as e:
         conn.rollback()
+        logger.exception("save_dataset failed")
         return False, f"Database error: {str(e)}"
     finally:
         conn.close()
 
 
 def get_all_datasets() -> List[Dict]:
-    """Get all datasets."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM datasets ORDER BY uploaded_at DESC")
-    rows = cursor.fetchall()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM datasets ORDER BY uploaded_at DESC")
+    rows = cur.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return [dict(r) for r in rows]
 
 
 def set_dataset_main(dataset_id: str, is_main: bool = True, country: Optional[str] = None) -> Tuple[bool, str]:
-    """Mark a dataset as the main country dataset and optionally set country."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
         if is_main and country:
-            cursor.execute(
-                "UPDATE datasets SET is_country_main = 1, country = ? WHERE dataset_id = ?",
+            cur.execute(
+                "UPDATE datasets SET is_country_main = 1, country = %s WHERE dataset_id = %s",
                 (country, dataset_id)
             )
         else:
-            cursor.execute(
-                "UPDATE datasets SET is_country_main = ?, country = COALESCE(country, ?) WHERE dataset_id = ?",
+            cur.execute(
+                "UPDATE datasets SET is_country_main = %s, country = COALESCE(country, %s) WHERE dataset_id = %s",
                 (1 if is_main else 0, country, dataset_id)
             )
         conn.commit()
@@ -427,41 +438,38 @@ def set_dataset_main(dataset_id: str, is_main: bool = True, country: Optional[st
 
 
 def get_main_datasets(country: Optional[str] = None) -> List[Dict]:
-    """Retrieve all datasets marked as main, optionally filtered by country."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     if country:
-        cursor.execute("SELECT * FROM datasets WHERE is_country_main = 1 AND country = ? ORDER BY uploaded_at DESC", (country,))
+        cur.execute(
+            "SELECT * FROM datasets WHERE is_country_main = 1 AND country = %s ORDER BY uploaded_at DESC",
+            (country,)
+        )
     else:
-        cursor.execute("SELECT * FROM datasets WHERE is_country_main = 1 ORDER BY uploaded_at DESC")
-    rows = cursor.fetchall()
+        cur.execute("SELECT * FROM datasets WHERE is_country_main = 1 ORDER BY uploaded_at DESC")
+    rows = cur.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return [dict(r) for r in rows]
 
 
 def get_datasets_by_uploader(email: str) -> List[Dict]:
-    """Retrieve datasets uploaded by a specific email."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM datasets WHERE uploaded_by = ? ORDER BY uploaded_at DESC", (email,))
-    rows = cursor.fetchall()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM datasets WHERE uploaded_by = %s ORDER BY uploaded_at DESC", (email,))
+    rows = cur.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return [dict(r) for r in rows]
 
 
 def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tuple[bool, str]:
-    """Physically merge source dataset rows into the main dataset.
-    Safeguards: prefix sample_id and isolate_id with source dataset id to avoid key conflicts.
-    """
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
         samples_df = get_dataset_samples(source_dataset_id)
         ast_df = get_dataset_ast(source_dataset_id)
         if samples_df.empty and ast_df.empty:
             return False, "Source dataset is empty"
 
-        # Build mapping for sample_id prefixes
         id_map = {}
         empty_sample_counter = 0
         for _, row in samples_df.iterrows():
@@ -472,29 +480,31 @@ def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tup
                 empty_sample_counter += 1
                 new_sid = f"{source_dataset_id}-sample-{empty_sample_counter}"
             id_map[old_sid] = new_sid
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO samples
+            cur.execute("""
+                INSERT INTO samples
                 (dataset_id, sample_id, lab_name, collection_date, region, district, site_type,
                  source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    main_dataset_id,
-                    new_sid,
-                    row.get('lab_name'),
-                    row.get('collection_date'),
-                    row.get('region'),
-                    row.get('district'),
-                    row.get('site_type'),
-                    row.get('source_category'),
-                    row.get('source_type'),
-                    row.get('food_matrix'),
-                    row.get('environment_matrix'),
-                    row.get('latitude'),
-                    row.get('longitude')
-                )
-            )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (dataset_id, sample_id) DO UPDATE SET
+                    lab_name = EXCLUDED.lab_name,
+                    collection_date = EXCLUDED.collection_date,
+                    region = EXCLUDED.region,
+                    district = EXCLUDED.district,
+                    site_type = EXCLUDED.site_type,
+                    source_category = EXCLUDED.source_category,
+                    source_type = EXCLUDED.source_type,
+                    food_matrix = EXCLUDED.food_matrix,
+                    environment_matrix = EXCLUDED.environment_matrix,
+                    latitude = EXCLUDED.latitude,
+                    longitude = EXCLUDED.longitude
+            """, (
+                main_dataset_id, new_sid,
+                row.get('lab_name'), row.get('collection_date'),
+                row.get('region'), row.get('district'), row.get('site_type'),
+                row.get('source_category'), row.get('source_type'),
+                row.get('food_matrix'), row.get('environment_matrix'),
+                row.get('latitude'), row.get('longitude'),
+            ))
 
         added_samples = len(id_map)
 
@@ -508,114 +518,91 @@ def merge_dataset_into_main(source_dataset_id: str, main_dataset_id: str) -> Tup
             else:
                 empty_isolate_counter += 1
                 new_isolate = f"{source_dataset_id}-isolate-{empty_isolate_counter}"
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO ast_results
+            cur.execute("""
+                INSERT INTO ast_results
                 (dataset_id, sample_id, isolate_id, organism, antibiotic, result, method, guideline, test_date, mic_value,
                  zone_diameter, auto_interpreted, interpreted_result, interpretation_guideline, interpretation_confidence,
                  suspected_mechanism, interpretation_notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    main_dataset_id,
-                    new_sid,
-                    new_isolate,
-                    row.get('organism'),
-                    row.get('antibiotic'),
-                    row.get('result'),
-                    row.get('method'),
-                    row.get('guideline'),
-                    row.get('test_date'),
-                    row.get('mic_value'),
-                    row.get('zone_diameter'),
-                    row.get('auto_interpreted'),
-                    row.get('interpreted_result'),
-                    row.get('interpretation_guideline'),
-                    row.get('interpretation_confidence'),
-                    row.get('suspected_mechanism'),
-                    row.get('interpretation_notes')
-                )
-            )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (dataset_id, isolate_id, antibiotic) DO UPDATE SET
+                    sample_id = EXCLUDED.sample_id,
+                    organism = EXCLUDED.organism,
+                    result = EXCLUDED.result,
+                    method = EXCLUDED.method,
+                    guideline = EXCLUDED.guideline,
+                    test_date = EXCLUDED.test_date,
+                    mic_value = EXCLUDED.mic_value,
+                    zone_diameter = EXCLUDED.zone_diameter,
+                    auto_interpreted = EXCLUDED.auto_interpreted,
+                    interpreted_result = EXCLUDED.interpreted_result,
+                    interpretation_guideline = EXCLUDED.interpretation_guideline,
+                    interpretation_confidence = EXCLUDED.interpretation_confidence,
+                    suspected_mechanism = EXCLUDED.suspected_mechanism,
+                    interpretation_notes = EXCLUDED.interpretation_notes
+            """, (
+                main_dataset_id, new_sid, new_isolate,
+                row.get('organism'), row.get('antibiotic'), row.get('result'),
+                row.get('method'), row.get('guideline'), row.get('test_date'),
+                row.get('mic_value'), row.get('zone_diameter'),
+                row.get('auto_interpreted'), row.get('interpreted_result'),
+                row.get('interpretation_guideline'), row.get('interpretation_confidence'),
+                row.get('suspected_mechanism'), row.get('interpretation_notes'),
+            ))
 
         added_tests = len(ast_df)
 
-        cursor.execute("UPDATE datasets SET rows_samples = COALESCE(rows_samples,0) + ?, rows_tests = COALESCE(rows_tests,0) + ? WHERE dataset_id = ?",
-                       (added_samples, added_tests, main_dataset_id))
+        cur.execute(
+            "UPDATE datasets SET rows_samples = COALESCE(rows_samples, 0) + %s, "
+            "rows_tests = COALESCE(rows_tests, 0) + %s WHERE dataset_id = %s",
+            (added_samples, added_tests, main_dataset_id)
+        )
 
         conn.commit()
         return True, f"Merged {added_samples} samples and {added_tests} tests into main dataset"
     except Exception as e:
         conn.rollback()
+        logger.exception("merge_dataset_into_main failed")
         return False, f"Error during merge: {str(e)}"
     finally:
         conn.close()
 
 
 def get_dataset_samples(dataset_id: str) -> pd.DataFrame:
-    """Get samples for a dataset."""
-    return pd.read_sql_query(
-        "SELECT * FROM samples WHERE dataset_id = ?",
-        get_connection(),
-        params=(dataset_id,)
-    )
+    return _fetch_df("SELECT * FROM samples WHERE dataset_id = %s", (dataset_id,))
 
 
 def get_dataset_ast(dataset_id: str) -> pd.DataFrame:
-    """Get AST results for a dataset."""
-    return pd.read_sql_query(
-        "SELECT * FROM ast_results WHERE dataset_id = ?",
-        get_connection(),
-        params=(dataset_id,)
-    )
+    return _fetch_df("SELECT * FROM ast_results WHERE dataset_id = %s", (dataset_id,))
 
 
 def get_all_ast_results() -> pd.DataFrame:
-    """Get all AST results from all datasets."""
-    return pd.read_sql_query(
-        "SELECT * FROM ast_results",
-        get_connection()
-    )
+    return _fetch_df("SELECT * FROM ast_results")
 
 
 def get_all_samples() -> pd.DataFrame:
-    """Get all samples from all datasets."""
-    return pd.read_sql_query(
-        "SELECT * FROM samples",
-        get_connection()
-    )
+    return _fetch_df("SELECT * FROM samples")
 
 
 def get_resistance_stats(dataset_id: Optional[str] = None) -> pd.DataFrame:
-    """Get resistance statistics."""
     query = """
-        SELECT 
-            organism,
-            antibiotic,
-            result,
-            COUNT(*) as count
+        SELECT organism, antibiotic, result, COUNT(*) AS count
         FROM ast_results
     """
-    params = []
+    params: tuple = ()
     if dataset_id:
-        query += " WHERE dataset_id = ?"
-        params.append(dataset_id)
+        query += " WHERE dataset_id = %s"
+        params = (dataset_id,)
     query += " GROUP BY organism, antibiotic, result"
-
-    return pd.read_sql_query(
-        query,
-        get_connection(),
-        params=params if params else None
-    )
+    return _fetch_df(query, params)
 
 
 def delete_dataset(dataset_id: str) -> Tuple[bool, str]:
-    """Delete a dataset and all associated data."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("DELETE FROM ast_results WHERE dataset_id = ?", (dataset_id,))
-        cursor.execute("DELETE FROM samples WHERE dataset_id = ?", (dataset_id,))
-        cursor.execute("DELETE FROM datasets WHERE dataset_id = ?", (dataset_id,))
+        cur.execute("DELETE FROM ast_results WHERE dataset_id = %s", (dataset_id,))
+        cur.execute("DELETE FROM samples WHERE dataset_id = %s", (dataset_id,))
+        cur.execute("DELETE FROM datasets WHERE dataset_id = %s", (dataset_id,))
         conn.commit()
         return True, "Dataset deleted successfully"
     except Exception as e:
@@ -625,145 +612,137 @@ def delete_dataset(dataset_id: str) -> Tuple[bool, str]:
         conn.close()
 
 
-# ============================================================================
-# USER AUTHENTICATION FUNCTIONS
-# ============================================================================
+# ---------------------------------------------------------------------------
+# Users
+# ---------------------------------------------------------------------------
 
 def create_user(email: str, password_hash: str, is_admin: bool = False) -> Tuple[bool, str]:
-    """Create a new user account."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("""
+        cur.execute("""
             INSERT INTO users (email, password_hash, created_at, is_active, is_admin, is_verified)
-            VALUES (?, ?, ?, 1, ?, 1)
+            VALUES (%s, %s, %s, 1, %s, 1)
         """, (email, password_hash, datetime.now().isoformat(), 1 if is_admin else 0))
         conn.commit()
         return True, "User created successfully"
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
+        conn.rollback()
         return False, "Email already registered"
     except Exception as e:
+        conn.rollback()
         return False, f"Error creating user: {str(e)}"
     finally:
         conn.close()
 
 
 def get_user_by_email(email: str) -> Optional[Dict]:
-    """Get user by email."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-    row = cursor.fetchone()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    row = cur.fetchone()
     conn.close()
     return dict(row) if row else None
 
 
 def get_all_users() -> List[Dict]:
-    """Get all users for admin panel."""
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT user_id, email, created_at, last_login, is_active, is_admin 
-        FROM users 
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT user_id, email, created_at, last_login, is_active, is_admin
+        FROM users
         ORDER BY created_at DESC
     """)
-    rows = cursor.fetchall()
+    rows = cur.fetchall()
     conn.close()
-    return [dict(row) for row in rows]
+    return [dict(r) for r in rows]
 
 
 def update_last_login(email: str) -> bool:
-    """Update user's last login timestamp."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET last_login = ? WHERE email = ?",
-            (datetime.now().isoformat(), email)
-        )
+        cur.execute("UPDATE users SET last_login = %s WHERE email = %s",
+                    (datetime.now().isoformat(), email))
         conn.commit()
         return True
-    except Exception as e:
+    except Exception:
+        conn.rollback()
         return False
     finally:
         conn.close()
 
 
 def update_user_status(user_id: int, is_active: bool) -> Tuple[bool, str]:
-    """Activate or deactivate a user account."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET is_active = ? WHERE user_id = ?",
-            (1 if is_active else 0, user_id)
-        )
+        cur.execute("UPDATE users SET is_active = %s WHERE user_id = %s",
+                    (1 if is_active else 0, user_id))
         conn.commit()
         status = "activated" if is_active else "deactivated"
         return True, f"User {status} successfully"
     except Exception as e:
+        conn.rollback()
         return False, f"Error updating user: {str(e)}"
     finally:
         conn.close()
 
 
 def update_user_password(email: str, new_password_hash: str) -> Tuple[bool, str]:
-    """Update user's password hash."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET password_hash = ? WHERE email = ?",
-            (new_password_hash, email)
-        )
+        cur.execute("UPDATE users SET password_hash = %s WHERE email = %s",
+                    (new_password_hash, email))
         conn.commit()
         return True, "Password updated successfully"
     except Exception as e:
+        conn.rollback()
         return False, f"Error updating password: {str(e)}"
     finally:
         conn.close()
 
 
 def set_verification_code(email: str, code: str, expires_at: str) -> Tuple[bool, str]:
-    """Set a verification code and expiry for a user."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET verification_code = ?, verification_expires = ? WHERE email = ?",
+        cur.execute(
+            "UPDATE users SET verification_code = %s, verification_expires = %s WHERE email = %s",
             (code, expires_at, email)
         )
         conn.commit()
         return True, "Verification code set"
     except Exception as e:
+        conn.rollback()
         return False, f"Error setting verification code: {str(e)}"
     finally:
         conn.close()
 
 
 def verify_user_email(email: str, code: str) -> Tuple[bool, str]:
-    """Verify user email if code matches and not expired."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("SELECT verification_code, verification_expires FROM users WHERE email = ?", (email,))
-        row = cursor.fetchone()
+        cur.execute("SELECT verification_code, verification_expires FROM users WHERE email = %s",
+                    (email,))
+        row = cur.fetchone()
         if not row:
             return False, "User not found"
-        saved_code = row[0]
-        expires = row[1]
+        saved_code = row["verification_code"]
+        expires = row["verification_expires"]
         if not saved_code:
             return False, "No verification code set"
         if str(saved_code) != str(code):
             return False, "Invalid verification code"
-        # Expiry check
         try:
             if expires and datetime.fromisoformat(expires) < datetime.now():
                 return False, "Verification code expired"
         except Exception:
             pass
-        cursor.execute(
-            "UPDATE users SET is_verified = 1, verification_code = NULL, verification_expires = NULL WHERE email = ?",
+        cur.execute(
+            "UPDATE users SET is_verified = 1, verification_code = NULL, verification_expires = NULL WHERE email = %s",
             (email,)
         )
         conn.commit()
@@ -776,68 +755,60 @@ def verify_user_email(email: str, code: str) -> Tuple[bool, str]:
 
 
 def set_user_verified(email: str, is_verified: bool = True) -> Tuple[bool, str]:
-    """Force set a user's verified flag (used for admin bootstrap)."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET is_verified = ? WHERE email = ?",
-            (1 if is_verified else 0, email)
-        )
+        cur.execute("UPDATE users SET is_verified = %s WHERE email = %s",
+                    (1 if is_verified else 0, email))
         conn.commit()
         return True, "User verification flag updated"
     except Exception as e:
+        conn.rollback()
         return False, f"Error updating verification flag: {str(e)}"
     finally:
         conn.close()
 
 
 def delete_user(user_id: int) -> Tuple[bool, str]:
-    """Delete a user account."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        cur.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
         conn.commit()
         return True, "User deleted successfully"
     except Exception as e:
+        conn.rollback()
         return False, f"Error deleting user: {str(e)}"
     finally:
         conn.close()
 
 
 def set_user_admin(email: str, is_admin: bool) -> Tuple[bool, str]:
-    """Update user's admin flag by email."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute(
-            "UPDATE users SET is_admin = ? WHERE email = ?",
-            (1 if is_admin else 0, email)
-        )
+        cur.execute("UPDATE users SET is_admin = %s WHERE email = %s",
+                    (1 if is_admin else 0, email))
         conn.commit()
         status = "granted" if is_admin else "revoked"
         return True, f"Admin privileges {status}"
     except Exception as e:
+        conn.rollback()
         return False, f"Error updating admin flag: {str(e)}"
     finally:
         conn.close()
 
 
 def delete_non_admin_users(admin_email: Optional[str] = None) -> Tuple[int, str]:
-    """Delete all users except the admin(s).
-    If admin_email is provided, keep only that email and delete all others.
-    Otherwise, delete users where is_admin = 0 and keep admins.
-    Returns (deleted_count, message).
-    """
+    """Delete all users except the admin(s)."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
         if admin_email:
-            cursor.execute("DELETE FROM users WHERE email <> ?", (admin_email,))
+            cur.execute("DELETE FROM users WHERE email <> %s", (admin_email,))
         else:
-            cursor.execute("DELETE FROM users WHERE IFNULL(is_admin, 0) = 0")
-        deleted = cursor.rowcount or 0
+            cur.execute("DELETE FROM users WHERE COALESCE(is_admin, 0) = 0")
+        deleted = cur.rowcount or 0
         conn.commit()
         return deleted, f"Deleted {deleted} non-admin user(s)"
     except Exception as e:
@@ -847,33 +818,32 @@ def delete_non_admin_users(admin_email: Optional[str] = None) -> Tuple[int, str]
         conn.close()
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 # PPS CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 
 def save_pps_survey(survey_id, facility_name, survey_date, region, district,
                     total_patients, patients_on_antibiotics,
                     prescriptions_df, uploaded_by="System"):
-    """Save a PPS survey and its prescription rows."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     try:
-        cursor.execute("""
+        cur.execute("""
             INSERT INTO pps_surveys
             (survey_id, facility_name, survey_date, region, district,
              total_patients, patients_on_antibiotics, uploaded_by, uploaded_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (survey_id, facility_name, survey_date, region, district,
               total_patients, patients_on_antibiotics, uploaded_by,
               datetime.now().isoformat()))
 
         for _, row in prescriptions_df.iterrows():
-            cursor.execute("""
+            cur.execute("""
                 INSERT INTO pps_prescriptions
                 (survey_id, ward, patient_age_group, antibiotic_name,
                  route, indication, indication_documented,
                  guideline_compliant, duration_days)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (survey_id,
                   row.get('ward'), row.get('patient_age_group'),
                   row.get('antibiotic_name'), row.get('route'),
@@ -892,41 +862,32 @@ def save_pps_survey(survey_id, facility_name, survey_date, region, district,
 
 
 def get_pps_surveys():
-    conn = get_connection()
-    df = pd.read_sql_query("SELECT * FROM pps_surveys ORDER BY survey_date DESC", conn)
-    conn.close()
-    return df
+    return _fetch_df("SELECT * FROM pps_surveys ORDER BY survey_date DESC")
 
 
 def get_pps_prescriptions(survey_id=None):
-    conn = get_connection()
     if survey_id:
-        df = pd.read_sql_query(
-            "SELECT * FROM pps_prescriptions WHERE survey_id = ?", conn, params=(survey_id,))
-    else:
-        df = pd.read_sql_query("SELECT * FROM pps_prescriptions", conn)
-    conn.close()
-    return df
+        return _fetch_df("SELECT * FROM pps_prescriptions WHERE survey_id = %s", (survey_id,))
+    return _fetch_df("SELECT * FROM pps_prescriptions")
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 # AMU CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 
 def save_amu_records(records_df, uploaded_by="System"):
-    """Bulk insert AMU records from a DataFrame."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     now = datetime.now().isoformat()
     try:
         for _, row in records_df.iterrows():
-            cursor.execute("""
+            cur.execute("""
                 INSERT INTO amu_records
                 (facility_name, report_period, region, district, sector,
                  antibiotic_name, atc_code, formulation, unit_of_measure,
                  quantity_dispensed, ddd_per_1000, patient_days,
                  uploaded_by, uploaded_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 row.get('facility_name'), row.get('report_period'),
                 row.get('region'), row.get('district'),
@@ -945,30 +906,26 @@ def save_amu_records(records_df, uploaded_by="System"):
 
 
 def get_amu_records():
-    conn = get_connection()
-    df = pd.read_sql_query("SELECT * FROM amu_records ORDER BY report_period DESC", conn)
-    conn.close()
-    return df
+    return _fetch_df("SELECT * FROM amu_records ORDER BY report_period DESC")
 
 
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 # AMC CRUD
-# ════════════════════════════════════════════════════════════════════════════
+# ---------------------------------------------------------------------------
 
 def save_amc_records(records_df, uploaded_by="System"):
-    """Bulk insert AMC records from a DataFrame."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cur = conn.cursor()
     now = datetime.now().isoformat()
     try:
         for _, row in records_df.iterrows():
-            cursor.execute("""
+            cur.execute("""
                 INSERT INTO amc_records
                 (report_period, region, sector, species, production_type,
                  antibiotic_class, antibiotic_name, atc_vet_code,
                  quantity_kg, biomass_kg, mg_per_kg_biomass,
                  route, purpose, uploaded_by, uploaded_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 row.get('report_period'), row.get('region'),
                 row.get('sector', 'ANIMAL'), row.get('species'),
@@ -989,7 +946,4 @@ def save_amc_records(records_df, uploaded_by="System"):
 
 
 def get_amc_records():
-    conn = get_connection()
-    df = pd.read_sql_query("SELECT * FROM amc_records ORDER BY report_period DESC", conn)
-    conn.close()
-    return df
+    return _fetch_df("SELECT * FROM amc_records ORDER BY report_period DESC")

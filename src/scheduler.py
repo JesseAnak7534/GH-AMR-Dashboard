@@ -11,7 +11,6 @@ from enum import Enum
 import json
 import threading
 import time
-import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -20,8 +19,15 @@ from email import encoders
 import os
 from dotenv import load_dotenv
 
+from . import db as _db
+
 # Load environment variables
 load_dotenv()
+
+
+def _connect():
+    """Return a Postgres connection via the shared backend."""
+    return _db.get_connection()
 
 
 class ReportFrequency(Enum):
@@ -66,66 +72,27 @@ class ReportScheduler:
     """Manages scheduled reports and their execution."""
     
     def __init__(self, db_path: str = "db/amr_data.db"):
+        # db_path retained for API compatibility; Postgres connection comes
+        # from the shared src.db backend, not this string.
         self.db_path = db_path
         self._scheduler_thread: Optional[threading.Thread] = None
         self._running = False
-        self._init_db()
-    
-    def _init_db(self):
-        """Initialize scheduled reports table in database."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS scheduled_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                report_type TEXT NOT NULL,
-                frequency TEXT NOT NULL,
-                recipients TEXT NOT NULL,
-                filters TEXT,
-                day_of_week INTEGER DEFAULT 0,
-                day_of_month INTEGER DEFAULT 1,
-                hour INTEGER DEFAULT 8,
-                minute INTEGER DEFAULT 0,
-                is_active INTEGER DEFAULT 1,
-                last_run TEXT,
-                next_run TEXT,
-                created_at TEXT NOT NULL,
-                created_by TEXT
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS report_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                schedule_id INTEGER,
-                report_type TEXT,
-                run_time TEXT NOT NULL,
-                status TEXT NOT NULL,
-                recipients TEXT,
-                error_message TEXT,
-                file_path TEXT,
-                FOREIGN KEY (schedule_id) REFERENCES scheduled_reports(id)
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
+        _db.init_database()
     
     def create_schedule(self, report: ScheduledReport) -> int:
         """Create a new scheduled report."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
         # Calculate next run time
         next_run = self._calculate_next_run(report)
         
         cursor.execute('''
-            INSERT INTO scheduled_reports 
-            (name, report_type, frequency, recipients, filters, day_of_week, 
+            INSERT INTO scheduled_reports
+            (name, report_type, frequency, recipients, filters, day_of_week,
              day_of_month, hour, minute, is_active, next_run, created_at, created_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
         ''', (
             report.name,
             report.report_type.value,
@@ -141,8 +108,8 @@ class ReportScheduler:
             report.created_at.isoformat(),
             report.created_by
         ))
-        
-        schedule_id = cursor.lastrowid
+
+        schedule_id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
         
@@ -150,16 +117,16 @@ class ReportScheduler:
     
     def update_schedule(self, report: ScheduledReport) -> bool:
         """Update an existing scheduled report."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
         next_run = self._calculate_next_run(report)
         
         cursor.execute('''
-            UPDATE scheduled_reports 
-            SET name=?, report_type=?, frequency=?, recipients=?, filters=?,
-                day_of_week=?, day_of_month=?, hour=?, minute=?, is_active=?, next_run=?
-            WHERE id=?
+            UPDATE scheduled_reports
+            SET name=%s, report_type=%s, frequency=%s, recipients=%s, filters=%s,
+                day_of_week=%s, day_of_month=%s, hour=%s, minute=%s, is_active=%s, next_run=%s
+            WHERE id=%s
         ''', (
             report.name,
             report.report_type.value,
@@ -183,10 +150,10 @@ class ReportScheduler:
     
     def delete_schedule(self, schedule_id: int) -> bool:
         """Delete a scheduled report."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM scheduled_reports WHERE id=?', (schedule_id,))
+        cursor.execute('DELETE FROM scheduled_reports WHERE id=%s', (schedule_id,))
         
         conn.commit()
         success = cursor.rowcount > 0
@@ -196,10 +163,10 @@ class ReportScheduler:
     
     def get_schedule(self, schedule_id: int) -> Optional[ScheduledReport]:
         """Get a scheduled report by ID."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
-        cursor.execute('SELECT * FROM scheduled_reports WHERE id=?', (schedule_id,))
+        cursor.execute('SELECT * FROM scheduled_reports WHERE id=%s', (schedule_id,))
         row = cursor.fetchone()
         conn.close()
         
@@ -209,7 +176,7 @@ class ReportScheduler:
     
     def get_all_schedules(self, active_only: bool = False) -> List[ScheduledReport]:
         """Get all scheduled reports."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
         if active_only:
@@ -315,7 +282,7 @@ class ReportScheduler:
     
     def mark_schedule_run(self, schedule_id: int, success: bool, error_message: str = None):
         """Mark a schedule as having been run and update next run time."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
         # Get current schedule
@@ -330,15 +297,15 @@ class ReportScheduler:
         
         # Update schedule
         cursor.execute('''
-            UPDATE scheduled_reports 
-            SET last_run=?, next_run=?
-            WHERE id=?
+            UPDATE scheduled_reports
+            SET last_run=%s, next_run=%s
+            WHERE id=%s
         ''', (now.isoformat(), next_run.isoformat() if next_run else None, schedule_id))
         
         # Log to history
         cursor.execute('''
             INSERT INTO report_history (schedule_id, report_type, run_time, status, recipients, error_message)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         ''', (
             schedule_id,
             schedule.report_type.value,
@@ -353,21 +320,21 @@ class ReportScheduler:
     
     def get_report_history(self, schedule_id: Optional[int] = None, limit: int = 50) -> List[Dict]:
         """Get report execution history."""
-        conn = sqlite3.connect(self.db_path)
+        conn = _connect()
         cursor = conn.cursor()
         
         if schedule_id:
             cursor.execute('''
                 SELECT h.*, s.name FROM report_history h
                 LEFT JOIN scheduled_reports s ON h.schedule_id = s.id
-                WHERE h.schedule_id=?
-                ORDER BY h.run_time DESC LIMIT ?
+                WHERE h.schedule_id=%s
+                ORDER BY h.run_time DESC LIMIT %s
             ''', (schedule_id, limit))
         else:
             cursor.execute('''
                 SELECT h.*, s.name FROM report_history h
                 LEFT JOIN scheduled_reports s ON h.schedule_id = s.id
-                ORDER BY h.run_time DESC LIMIT ?
+                ORDER BY h.run_time DESC LIMIT %s
             ''', (limit,))
         
         rows = cursor.fetchall()
@@ -398,15 +365,8 @@ class ReportGenerator:
     
     def generate_summary_report(self, filters: Dict = None) -> Dict:
         """Generate a summary report."""
-        conn = sqlite3.connect(self.db_path)
-        
-        # Base query
-        samples_query = "SELECT * FROM samples"
-        ast_query = "SELECT * FROM ast_results"
-        
-        samples_df = pd.read_sql_query(samples_query, conn)
-        ast_df = pd.read_sql_query(ast_query, conn)
-        conn.close()
+        samples_df = _db.get_all_samples()
+        ast_df = _db.get_all_ast_results()
         
         # Apply filters if provided
         if filters:
@@ -454,11 +414,8 @@ class ReportGenerator:
     
     def generate_resistance_report(self, filters: Dict = None) -> Dict:
         """Generate detailed resistance rates report."""
-        conn = sqlite3.connect(self.db_path)
-        
-        samples_df = pd.read_sql_query("SELECT * FROM samples", conn)
-        ast_df = pd.read_sql_query("SELECT * FROM ast_results", conn)
-        conn.close()
+        samples_df = _db.get_all_samples()
+        ast_df = _db.get_all_ast_results()
         
         merged = ast_df.merge(samples_df, on='sample_id', how='inner')
         

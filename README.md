@@ -68,6 +68,33 @@ streamlit run app.py
 
 The app will open at `http://localhost:8501`
 
+### Database
+
+The app uses **PostgreSQL** (previously SQLite — migrated April 2026). Set
+`DATABASE_URL` in `.env` (local) or Streamlit secrets (cloud):
+
+```env
+DATABASE_URL=postgresql://amr_app:amr_app_local_2026@localhost:5432/amr_surveillance
+```
+
+For a one-shot local bootstrap:
+
+```sql
+CREATE USER amr_app WITH PASSWORD '<app-password>';
+CREATE DATABASE amr_surveillance OWNER amr_app;
+GRANT ALL PRIVILEGES ON DATABASE amr_surveillance TO amr_app;
+\c amr_surveillance
+GRANT ALL ON SCHEMA public TO amr_app;
+ALTER SCHEMA public OWNER TO amr_app;
+```
+
+Schema is created automatically on first app start via `db.init_database()`.
+To port an existing SQLite database (`db/amr_data.db`) to Postgres, run:
+
+```bash
+python scripts/migrate_sqlite_to_postgres.py
+```
+
 ### Admin Account & Environment Variables
 
 Admin credentials are read from environment variables (or Streamlit secrets) — there is no hardcoded fallback. Configure them before launch by creating a `.env` file in the project root:
@@ -84,6 +111,7 @@ SESSION_TIMEOUT_MINUTES=30
 Streamlit secrets (`.streamlit/secrets.toml`) are also honoured:
 
 ```toml
+DATABASE_URL = "postgresql://user:password@host:5432/amr_surveillance"
 ADMIN_EMAIL = "your.admin@example.com"
 ADMIN_PASSWORD = "StrongPassword123!"
 SESSION_TIMEOUT_MINUTES = 30
