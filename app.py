@@ -1139,6 +1139,97 @@ st.markdown("""
         margin-bottom: 0.35rem;
     }
 
+    /* ── Sticky page header (title + ticker) ──────────────────── */
+    /* Pin the page title and the animated tagline strip to the top of the
+       main content area so they stay visible while scrolling. The ticker
+       animation inside continues to run normally.
+
+       Streamlit wraps every st.markdown in nested <div> layers, so
+       `position: sticky` only works if it is applied to the OUTER
+       `stElementContainer` (a direct child of the scrolling main column).
+       We use :has() to target that container and lift the wrapper up. */
+    div[data-testid="stElementContainer"]:has(> div .amr-sticky-header),
+    div[data-testid="stElementContainer"]:has(.amr-sticky-header) {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        /* Fully opaque so scrolled content cannot bleed through. */
+        background: var(--paper) !important;
+        padding: 0.4rem 0 0.5rem 0 !important;
+        margin-bottom: 0 !important;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 8px 16px -10px rgba(0,0,0,0.25);
+    }
+    .amr-sticky-header {
+        background: var(--paper);
+    }
+    /* Streamlit's own top header (data-testid="stHeader") is positioned
+       absolutely at top:0 with z-index ~999990 (above our sticky title)
+       and carries a 1px bottom border that visually crosses through the
+       "ICBB-AMRSS" text when content scrolls beneath it. The toolbar
+       inside it is transparent already, so we just strip the border and
+       any background/shadow so the line disappears entirely. */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
+    }
+    header[data-testid="stHeader"]::before,
+    header[data-testid="stHeader"]::after {
+        display: none !important;
+        border: 0 !important;
+        background: transparent !important;
+    }
+    .amr-sticky-header h1 {
+        margin: 0 0 0.35rem 0 !important;
+    }
+    .amr-sticky-header .amr-ticker {
+        margin: 0 !important;
+    }
+    /* Streamlit auto-injects a heading anchor link icon and (sometimes) a
+       thin underline on the heading element itself — strip both inside the
+       sticky strip so nothing visually bisects the title text. */
+    .amr-sticky-header h1 a,
+    .amr-sticky-header h1 [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+    .amr-sticky-header h1::after,
+    .amr-sticky-header h1::before {
+        display: none !important;
+    }
+
+    /* ── Sticky per-page heading ──────────────────────────────────
+       The page's heading container is found at runtime by a tiny
+       parent-document script (rendered just below). The script applies
+       the `amr-stick-heading` / `amr-stick-caption` classes so we can
+       style them here. This is more reliable than CSS sibling selectors
+       because Streamlit injects empty wrapper elements that vary per
+       page. */
+    [data-testid="stElementContainer"].amr-stick-heading {
+        position: sticky !important;
+        top: 140px !important;
+        z-index: 998 !important;
+        background: var(--paper) !important;
+        padding-top: 0.4rem !important;
+        padding-bottom: 0.35rem !important;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 6px 14px -10px rgba(0,0,0,0.18);
+    }
+    [data-testid="stElementContainer"].amr-stick-caption {
+        position: sticky !important;
+        top: 215px !important;
+        z-index: 997 !important;
+        background: var(--paper) !important;
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.45rem !important;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 6px 14px -10px rgba(0,0,0,0.18);
+    }
+    /* Hide the auto-anchor link icon on any sticky heading too. */
+    [data-testid="stElementContainer"].amr-stick-heading [data-testid="stHeaderActionElements"] {
+        display: none !important;
+    }
+
     /* ── Animated tagline ticker ──────────────────────────────── */
     .amr-ticker {
         position: relative;
@@ -1227,8 +1318,16 @@ st.markdown("""
 # Ensures uploaded data remains visible after logout/login — the DB keeps
 # the rows, but `active_dataset_id` in session_state is None on a fresh
 # login, which previously left every dashboard page saying "no data".
+#
+# Cached so we don't re-query the dataset list on every page navigation —
+# that single SELECT was opening a new Postgres connection per rerun and
+# was the main reason page navigation "got stuck".
+@st.cache_data(ttl=30, show_spinner=False)
+def _cached_all_datasets():
+    return db.get_all_datasets() or []
+
 try:
-    _visible = db.get_all_datasets() or []
+    _visible = _cached_all_datasets()
     _admin_email_cfg, _ = _get_admin_config()
     _admin_email_norm = (_admin_email_cfg or "").strip().lower()
     if not st.session_state.is_admin and _admin_email_norm:
@@ -1245,10 +1344,9 @@ try:
 except Exception:
     logger.exception("auto-select of active dataset failed")
 
-# App title and description (only shown when authenticated)
-st.markdown("# ICBB-AMRSS")
-
-# Animated tagline ticker — duplicated content for seamless infinite scroll
+# App title and animated tagline ticker — wrapped in a sticky header so they
+# stay pinned to the top of the main view when the user scrolls. The ticker
+# animation continues to run as normal inside the sticky strip.
 _ticker_item = (
     "<span class='amr-ticker__item'>"
     "<strong>ICBB AMR Surveillance System</strong>"
@@ -1268,10 +1366,101 @@ _ticker_item = (
     "</span>"
 )
 st.markdown(
-    f"<div class='amr-ticker'><div class='amr-ticker__track'>"
+    "<div class='amr-sticky-header'>"
+    "<h1>ICBB-AMRSS</h1>"
+    "<div class='amr-ticker'><div class='amr-ticker__track'>"
     f"{_ticker_item * 4}"
-    f"</div></div>",
+    "</div></div>"
+    "</div>",
     unsafe_allow_html=True,
+)
+
+# ── Sticky page-heading helper ──────────────────────────────────────
+# Streamlit puts a few invisible wrapper containers between the title
+# strip and the page's actual heading, which makes pure-CSS sibling
+# selectors unreliable. This tiny script (loaded inside an iframe but
+# reaching parent.document) finds the FIRST visible heading that comes
+# after the title strip on every rerun and tags its container so the
+# CSS rules above can pin it. Same for the optional caption/subtitle
+# that sits directly under the heading.
+import streamlit.components.v1 as _components
+_components.html(
+    """
+<script>
+(function() {
+  const apply = () => {
+    try {
+      const doc = window.parent.document;
+      const titleEl = doc.querySelector('.amr-sticky-header');
+      if (!titleEl) return;
+      const titleEC = titleEl.closest('[data-testid="stElementContainer"]');
+      if (!titleEC) return;
+
+      // Clear previous tags so we don't accumulate stickies after reruns.
+      doc.querySelectorAll('.amr-stick-heading, .amr-stick-caption')
+         .forEach(n => n.classList.remove('amr-stick-heading', 'amr-stick-caption'));
+
+      // Walk forward siblings; tag the first heading-bearing container,
+      // then tag the immediately following caption/paragraph container
+      // (if any). Stop as soon as we hit anything heavier so we don't
+      // pin charts/tables.
+      let n = titleEC.nextElementSibling;
+      let headingDone = false;
+      let steps = 0;
+      while (n && steps < 12) {
+        steps++;
+        const isEC = n.matches && n.matches('[data-testid="stElementContainer"]');
+        if (!isEC) { n = n.nextElementSibling; continue; }
+
+        // Skip our own zero-height components.html iframe wrapper and any
+        // other invisible/empty containers (Streamlit injects a few of
+        // these between the title strip and the page's real heading).
+        const rect = n.getBoundingClientRect();
+        const heading = n.querySelector('h1, h2, h3, [data-testid="stHeading"]');
+        const caption = n.querySelector('[data-testid="stCaptionContainer"]');
+        const para    = n.querySelector('.stMarkdown > div > p, .stMarkdown p');
+        const heavy   = n.querySelector(
+          '[data-testid="stHorizontalBlock"], [data-testid="stMetric"],'
+          + ' [data-testid="stDataFrame"], [data-testid="stPlotlyChart"],'
+          + ' [data-testid="stTable"], [data-testid="stForm"], canvas, svg.main-svg'
+        );
+        const isInvisible = rect.height < 4 || (!heading && !caption && !para && !heavy);
+
+        if (!headingDone) {
+          if (heading) {
+            n.classList.add('amr-stick-heading');
+            headingDone = true;
+          } else if (heavy) {
+            // Heading missing on this page; nothing to pin.
+            break;
+          } else if (isInvisible) {
+            // Skip empty wrapper / our own iframe and keep looking.
+            n = n.nextElementSibling; continue;
+          }
+        } else {
+          if (caption || (para && !heavy)) {
+            n.classList.add('amr-stick-caption');
+          }
+          // Stop after one extra container regardless.
+          break;
+        }
+        n = n.nextElementSibling;
+      }
+    } catch (e) { /* swallow — never break the page */ }
+  };
+
+  // Run now and also re-run when Streamlit re-renders the main column.
+  apply();
+  try {
+    const doc = window.parent.document;
+    const root = doc.querySelector('section[data-testid="stMain"]') || doc.body;
+    const obs = new MutationObserver(() => { apply(); });
+    obs.observe(root, { childList: true, subtree: true });
+  } catch (e) { /* ignore */ }
+})();
+</script>
+""",
+    height=0,
 )
 
 # Sidebar navigation with user info and admin panel
@@ -1297,13 +1486,25 @@ with st.sidebar:
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
 
     # ── Last Updated indicator ────────────────────────────────────
-    try:
+    # Cached so we don't open a fresh DB connection on every nav click.
+    @st.cache_data(ttl=60, show_spinner=False)
+    def _sidebar_last_uploaded_at():
         _conn = db.get_connection()
-        _last_row = _conn.execute(
-            "SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1"
-        ).fetchone()
-        if _last_row and _last_row[0]:
-            _last_ts = datetime.fromisoformat(_last_row[0])
+        try:
+            row = _conn.execute(
+                "SELECT uploaded_at FROM datasets ORDER BY uploaded_at DESC LIMIT 1"
+            ).fetchone()
+            return row[0] if row and row[0] else None
+        finally:
+            try:
+                _conn.close()
+            except Exception:
+                pass
+
+    try:
+        _last_at = _sidebar_last_uploaded_at()
+        if _last_at:
+            _last_ts = datetime.fromisoformat(_last_at)
             _delta = datetime.now() - _last_ts
             if _delta.days > 0:
                 _ago = f"{_delta.days}d ago"

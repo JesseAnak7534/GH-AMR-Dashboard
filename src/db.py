@@ -220,9 +220,45 @@ class _ConnectionWrapper:
 
 
 def get_connection() -> _ConnectionWrapper:
-    """Open a fresh connection in the active backend."""
+    """Open a fresh connection in the active backend.
+
+    Postgres connections use a finite ``connect_timeout`` and TCP keepalives so
+    a transient network blip or an idle hosted database (Supabase, Neon, etc.)
+    fails fast with an exception instead of hanging the whole UI.
+    """
     if _BACKEND == "postgres":
-        return _ConnectionWrapper(psycopg2.connect(_PG_DSN), "postgres")
+        try:
+            timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "8"))
+        except ValueError:
+            timeout = 8
+        raw = psycopg2.connect(
+            _PG_DSN,
+            connect_timeout=timeout,
+            # Detect dead connections within ~30s instead of waiting forever.
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=3,
+        )
+        # Safety nets: cap any single statement and abort transactions that
+        # are left "idle in transaction" (which previously locked the
+        # `datasets` table and froze every page load until killed manually).
+        try:
+            stmt_ms = int(os.getenv("DB_STATEMENT_TIMEOUT_MS", "30000"))
+            idle_tx_ms = int(os.getenv("DB_IDLE_TX_TIMEOUT_MS", "60000"))
+            with raw.cursor() as _cfg:
+                _cfg.execute(
+                    f"SET statement_timeout = {stmt_ms}; "
+                    f"SET idle_in_transaction_session_timeout = {idle_tx_ms};"
+                )
+            raw.commit()
+        except Exception:
+            logger.exception("failed to set session timeouts; continuing")
+            try:
+                raw.rollback()
+            except Exception:
+                pass
+        return _ConnectionWrapper(raw, "postgres")
     # SQLite
     os.makedirs(_SQLITE_DIR, exist_ok=True)
     conn = sqlite3.connect(_SQLITE_PATH)

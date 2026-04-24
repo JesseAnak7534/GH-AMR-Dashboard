@@ -57,3 +57,16 @@ tmp/
 temp/
 ~$*
 *.tmp
+
+# Personal / non-app files (CV, motivation letters, helper scripts)
+.claude/
+*CV*.docx
+Motivation_Letter_*.docx
+generate_motivation_letter.py
+generate_egli_motivation_letter.py
+generate_seeger_motivation_letter.py
+read_cv.py
+read_cv2.py
+update_cv_about.py
+CV for me/
+"CV for me"/
