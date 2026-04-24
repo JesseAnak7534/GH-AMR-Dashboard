@@ -8,6 +8,9 @@ ENV/
 db/amr_data.db
 db/*.sqlite
 db/*.sqlite3
+# Lab credentials (plaintext passwords -- never commit)
+db/lab_credentials.json
+Lab_Login_Credentials.docx
 
 # Excel files and templates (keep templates, ignore uploads)
 *.xlsx
