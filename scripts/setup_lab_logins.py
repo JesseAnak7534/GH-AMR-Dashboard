@@ -43,40 +43,23 @@ import bcrypt
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src import db  # noqa: E402
-from src.lab_management import APPROVED_LABS  # noqa: E402
+from src.lab_management import (  # noqa: E402
+    APPROVED_LABS,
+    LAB_EMAIL_DOMAIN as _LAB_EMAIL_DOMAIN,
+    LAB_LOGIN_CODES,
+)
 
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
-EMAIL_DOMAIN = "icbb-amr.gh"
+# Single source of truth lives in src.lab_management so the dashboard's
+# sign-in flow and this provisioner can never drift apart.
+EMAIL_DOMAIN = _LAB_EMAIL_DOMAIN
+LAB_CODES: dict[str, str] = dict(LAB_LOGIN_CODES)
 CREDENTIALS_FILE = Path("db") / "lab_credentials.json"
 WORD_OUTPUT = Path("Lab_Login_Credentials.docx")
-
-# Curated short codes -- chosen to be short, unique and easy to type.
-# Keys must match `APPROVED_LABS` exactly.
-LAB_CODES: dict[str, str] = {
-    "Eastern Regional Hospital": "erh",
-    "St. Martin De Porres Hospital Eikwe": "smpe",
-    "Sekondi Public Health Reference Laboratory": "sphrl",
-    "Ho Teaching Hospital": "hth",
-    "Tamale Teaching Hospital": "tth",
-    "Komfo Anokye Teaching Hospital": "kath",
-    "Korle-Bu Teaching Hospital": "kbth",
-    "Lekma Hospital": "lekma",
-    "Sunyani Teaching Hospital": "snth",
-    "Cape Coast Teaching Hospital": "ccth",
-    "National Food Safety Laboratory": "nfsl",
-    "CSIR – Water Research Institute (Microbiology Laboratory)": "csir",
-    "Accra Veterinary Laboratory": "avl",
-    "Kumasi Veterinary Laboratory": "kvl",
-    "Quadushah Medical Diagnostic Limited": "qmd",
-    "Central Veterinary Laboratory": "cvl",
-    "Pong Tamale School": "pts",
-    "Metropolis Health Care Limited": "mhc",
-    "Alma Medical Laboratory Ltd": "alma",
-}
 
 
 # ---------------------------------------------------------------------------

@@ -13,8 +13,36 @@ from dotenv import load_dotenv
 
 # KoboToolbox API Configuration
 KOBO_API_BASE = "https://kf.kobotoolbox.org/api/v2"
-LAB_EMAIL_DOMAIN = "sentinel-amr.lab"
+# Short, easy-to-type domain used for sentinel-lab logins.  Each lab has a
+# fixed email of the form  <code>@icbb-amr.gh  (see LAB_LOGIN_CODES below).
+LAB_EMAIL_DOMAIN = "icbb-amr.gh"
 KOBO_CONFIG_PATH = os.path.join("db", "kobo_config.json")
+
+# Short login codes for each approved lab.  These map directly to the
+# usernames provisioned by ``scripts/setup_lab_logins.py`` and are the
+# values the dashboard checks at sign-in time, so changing a code here
+# without re-running the provisioner will lock that lab out.
+LAB_LOGIN_CODES: dict = {
+    "Eastern Regional Hospital": "erh",
+    "St. Martin De Porres Hospital Eikwe": "smpe",
+    "Sekondi Public Health Reference Laboratory": "sphrl",
+    "Ho Teaching Hospital": "hth",
+    "Tamale Teaching Hospital": "tth",
+    "Komfo Anokye Teaching Hospital": "kath",
+    "Korle-Bu Teaching Hospital": "kbth",
+    "Lekma Hospital": "lekma",
+    "Sunyani Teaching Hospital": "snth",
+    "Cape Coast Teaching Hospital": "ccth",
+    "National Food Safety Laboratory": "nfsl",
+    "CSIR – Water Research Institute (Microbiology Laboratory)": "csir",
+    "Accra Veterinary Laboratory": "avl",
+    "Kumasi Veterinary Laboratory": "kvl",
+    "Quadushah Medical Diagnostic Limited": "qmd",
+    "Central Veterinary Laboratory": "cvl",
+    "Pong Tamale School": "pts",
+    "Metropolis Health Care Limited": "mhc",
+    "Alma Medical Laboratory Ltd": "alma",
+}
 
 load_dotenv()
 KOBO_API_TOKEN = os.getenv("KOBO_API_TOKEN")
@@ -263,33 +291,14 @@ def is_lab_user(user_email: str, lab_mapping: Dict[str, str]) -> Tuple[bool, Opt
     return False, None
 
 def get_lab_credentials() -> Dict[str, str]:
+    """Return ``{lab_name: short_username}`` for every approved lab.
+
+    The short username is combined with :data:`LAB_EMAIL_DOMAIN` to form the
+    login email (e.g. ``kbth@icbb-amr.gh``).  Edit :data:`LAB_LOGIN_CODES`
+    to change a code; passwords are managed by
+    ``scripts/setup_lab_logins.py``.
     """
-    Get lab credentials from configuration.
-    Format: {lab_name: username}
-    
-    These are pre-configured lab usernames. Passwords are managed separately.
-    """
-    return {
-        "Eastern Regional Hospital": "eastern_regional_hospital",
-        "St. Martin De Porres Hospital Eikwe": "st_martin_de_porres_hospital",
-        "Sekondi Public Health Reference Laboratory": "sekondi_public_health_lab",
-        "Ho Teaching Hospital": "ho_teaching_hospital",
-        "Tamale Teaching Hospital": "tamale_teaching_hospital",
-        "Komfo Anokye Teaching Hospital": "komfo_anokye_teaching_hospital",
-        "Korle-Bu Teaching Hospital": "korle_bu_teaching_hospital",
-        "Lekma Hospital": "lekma_hospital",
-        "Sunyani Teaching Hospital": "sunyani_teaching_hospital",
-        "Cape Coast Teaching Hospital": "cape_coast_teaching_hospital",
-        "National Food Safety Laboratory": "national_food_safety_laboratory",
-        "CSIR – Water Research Institute (Microbiology Laboratory)": "csir_water_research_institute",
-        "Accra Veterinary Laboratory": "accra_veterinary_laboratory",
-        "Kumasi Veterinary Laboratory": "kumasi_veterinary_laboratory",
-        "Quadushah Medical Diagnostic Limited": "quadushah_medical_diagnostic",
-        "Central Veterinary Laboratory": "central_veterinary_laboratory",
-        "Pong Tamale School": "pong_tamale_school",
-        "Metropolis Health Care Limited": "metropolis_health_care",
-        "Alma Medical Laboratory Ltd": "alma_medical_laboratory"
-    }
+    return dict(LAB_LOGIN_CODES)
 
 def get_lab_names() -> List[str]:
     """Get list of all approved lab names for dropdown selection."""
