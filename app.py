@@ -717,10 +717,30 @@ if not st.session_state.authenticated:
             login_email = st.text_input("Email address", placeholder="name@institution.gh", key="login_email")
             login_password = st.text_input("Password", type="password", placeholder="••••••••", key="login_password")
 
+            # Optional one-shot diagnostic: append ?debug=1 to the URL to see
+            # whether the lab/admin bootstrap actually populated the cloud DB.
+            try:
+                if st.query_params.get("debug") == "1":
+                    try:
+                        all_users = db.get_all_users()
+                        st.info(
+                            f"DB diagnostic — backend in use, total user rows: {len(all_users)}. "
+                            f"Sample emails: {[u['email'] for u in all_users[:5]]}"
+                        )
+                    except Exception as diag_err:
+                        st.warning(f"DB diagnostic failed: {diag_err}")
+            except Exception:
+                pass
+
             if st.button("Sign in", use_container_width=True, type="primary"):
                 if not login_email or not login_password:
                     st.error("Please fill in all fields")
                 else:
+                    # Normalize email: lowercase + strip whitespace (the lab
+                    # manifest is keyed lowercase, so a user typing "KBTH@..."
+                    # or with a stray space would otherwise hit "user not found")
+                    login_email = login_email.strip().lower()
+                    login_password = login_password.strip()
                     user = db.get_user_by_email(login_email)
                     if user and user['is_active']:
                         try:
