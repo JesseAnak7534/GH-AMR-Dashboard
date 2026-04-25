@@ -77,8 +77,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize database
-db.init_database()
+# Initialize database (cached: runs once per process, not on every rerun --
+# critical for hosted Postgres where ~50 DDL round-trips would otherwise
+# happen on every interaction and lock the UI for many seconds)
+@st.cache_resource(show_spinner="Connecting to surveillance database…")
+def _init_db_once():
+    try:
+        db.init_database()
+        return True
+    except Exception:
+        logger.exception("db.init_database() failed")
+        return False
+
+_init_db_once()
 
 # ── Keep-alive: prevent idle WebSocket disconnection ────────────────────
 st.markdown(
@@ -255,7 +266,13 @@ def _empty_state(msg: str, icon: str = "📊"):
 
 
 ADMIN_EMAIL, ADMIN_PASSWORD = _get_admin_config()
-if ADMIN_EMAIL and ADMIN_PASSWORD:
+
+
+@st.cache_resource(show_spinner=False)
+def _bootstrap_admin_once():
+    """Provision the admin account exactly once per process."""
+    if not (ADMIN_EMAIL and ADMIN_PASSWORD):
+        return False
     try:
         admin_user = db.get_user_by_email(ADMIN_EMAIL)
         password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -271,8 +288,12 @@ if ADMIN_EMAIL and ADMIN_PASSWORD:
             db.set_user_verified(ADMIN_EMAIL, True)
         except Exception:
             logger.exception("admin verified flag write failed")
+        return True
     except Exception:
         logger.exception("admin account bootstrap failed")
+        return False
+
+_bootstrap_admin_once()
 
 
 def _bootstrap_lab_accounts() -> None:
@@ -314,10 +335,16 @@ def _bootstrap_lab_accounts() -> None:
             logger.exception("lab account bootstrap failed for %s", email)
 
 
-try:
-    _bootstrap_lab_accounts()
-except Exception:
-    logger.exception("lab account bootstrap top-level failure")
+@st.cache_resource(show_spinner=False)
+def _bootstrap_lab_accounts_once():
+    try:
+        _bootstrap_lab_accounts()
+        return True
+    except Exception:
+        logger.exception("lab account bootstrap top-level failure")
+        return False
+
+_bootstrap_lab_accounts_once()
 
 def _get_flag(name: str) -> bool:
     val = None
