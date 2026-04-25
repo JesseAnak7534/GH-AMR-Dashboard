@@ -775,7 +775,6 @@ if not st.session_state.authenticated:
                                 st.session_state.lab_name = lab_name if not is_admin_flag else None
 
                                 db.update_last_login(login_email)
-                                st.success("Signed in. Loading your workspace…")
                                 st.rerun()
                             else:
                                 st.error("Invalid email or password")
