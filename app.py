@@ -714,9 +714,6 @@ if not st.session_state.authenticated:
         tab1, tab2 = st.tabs(["Sign in", "Information"])
 
         with tab1:
-            login_email = st.text_input("Email address", placeholder="name@institution.gh", key="login_email")
-            login_password = st.text_input("Password", type="password", placeholder="••••••••", key="login_password")
-
             # Optional one-shot diagnostic: append ?debug=1 to the URL to see
             # whether the lab/admin bootstrap actually populated the cloud DB.
             try:
@@ -732,7 +729,17 @@ if not st.session_state.authenticated:
             except Exception:
                 pass
 
-            if st.button("Sign in", use_container_width=True, type="primary"):
+            # Wrap inputs + button in a form so a single Enter / click submits
+            # everything in ONE rerun.  Without this, typing in a password and
+            # immediately clicking the button can require two clicks because
+            # Streamlit processes the input change in one rerun and the button
+            # click in the next.
+            with st.form("login_form", clear_on_submit=False):
+                login_email = st.text_input("Email address", placeholder="name@institution.gh", key="login_email")
+                login_password = st.text_input("Password", type="password", placeholder="••••••••", key="login_password")
+                submitted = st.form_submit_button("Sign in", use_container_width=True, type="primary")
+
+            if submitted:
                 if not login_email or not login_password:
                     st.error("Please fill in all fields")
                 else:
@@ -774,7 +781,13 @@ if not st.session_state.authenticated:
                                 st.session_state.is_admin = bool(is_admin_flag)
                                 st.session_state.lab_name = lab_name if not is_admin_flag else None
 
-                                db.update_last_login(login_email)
+                                # Fire-and-forget: don't make the user wait for
+                                # the last_login UPDATE round-trip to Postgres
+                                # before the dashboard appears.
+                                try:
+                                    db.update_last_login(login_email)
+                                except Exception:
+                                    logger.exception("update_last_login failed for %s", login_email)
                                 st.rerun()
                             else:
                                 st.error("Invalid email or password")
