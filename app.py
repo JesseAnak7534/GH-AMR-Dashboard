@@ -4351,7 +4351,11 @@ elif page == "Antibiogram":
                     except:
                         return 'background-color: #f0f0f0'
                 
-                styled_df = matrix.style.applymap(color_cells)
+                # pandas >= 2.1 removed Styler.applymap in favour of
+                # Styler.map; fall back to the old name for older envs.
+                _styler = matrix.style
+                _apply = getattr(_styler, "map", None) or _styler.applymap
+                styled_df = _apply(color_cells)
                 st.dataframe(styled_df, use_container_width=True, height=400)
                 
                 # Legend
