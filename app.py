@@ -91,6 +91,56 @@ def _init_db_once():
 
 _init_db_once()
 
+
+# ── Cloud-data seed: load the committed snapshot if the DB is empty ─────
+# We can't reach Supabase from the maintainer's network to run a normal
+# data migration, so we ship a small gzip-compressed snapshot of the
+# production tables in the repo and replay it the first time the cloud
+# app sees an empty `samples` table.  Idempotent: does nothing if
+# samples already exist.
+@st.cache_resource(show_spinner="Seeding initial surveillance data…")
+def _seed_cloud_data_once():
+    snapshot_path = Path("db") / "cloud_snapshot.json.gz"
+    if not snapshot_path.exists():
+        return False
+    try:
+        conn = db.get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM samples")
+        existing = cur.fetchone()[0]
+        if existing:
+            conn.close()
+            return False  # DB already has data; do nothing
+        import gzip as _gz
+        with _gz.open(snapshot_path, "rt", encoding="utf-8") as f:
+            snapshot = json.load(f)
+        for table, payload in snapshot.get("tables", {}).items():
+            cols = payload.get("columns") or []
+            rows = payload.get("rows") or []
+            if not rows:
+                continue
+            placeholders = ", ".join(["%s"] * len(cols))
+            collist = ", ".join(cols)
+            sql = (
+                f"INSERT INTO {table} ({collist}) VALUES ({placeholders}) "
+                f"ON CONFLICT DO NOTHING"
+            )
+            data = [tuple(r.get(c) for c in cols) for r in rows]
+            try:
+                cur.executemany(sql, data)
+                conn.commit()
+                logger.info("seeded %s with %d rows", table, len(rows))
+            except Exception:
+                conn.rollback()
+                logger.exception("seed insert failed for table %s", table)
+        conn.close()
+        return True
+    except Exception:
+        logger.exception("cloud-data seed failed")
+        return False
+
+_seed_cloud_data_once()
+
 # ── Keep-alive: prevent idle WebSocket disconnection ────────────────────
 st.markdown(
     """
