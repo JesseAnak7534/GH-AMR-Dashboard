@@ -844,6 +844,11 @@ if not st.session_state.authenticated:
                                 # extra ~300ms round-trip is hidden by the
                                 # dashboard's data load.
                                 st.session_state["_pending_last_login"] = login_email
+                                # Flag a one-shot loading overlay for the
+                                # *next* run so the user never sees the
+                                # login form during the dashboard's first
+                                # render after st.rerun().
+                                st.session_state["_show_login_overlay"] = True
                                 # Wipe the login DOM *before* triggering the
                                 # rerun, then show a tiny full-screen loading
                                 # overlay so the user never sees the login
@@ -908,6 +913,36 @@ if not st.session_state.authenticated:
 # ============================================================================
 # MAIN APP STYLING (After Authentication)
 # ============================================================================
+
+# Render a full-screen overlay on the very first run after login so the
+# slow dashboard build doesn't leave the old login DOM visible (the
+# "login flashback").  We emit it BEFORE any heavy markdown so Streamlit
+# delivers it as one of the earliest deltas; the dashboard renders
+# underneath, then a tiny JS timer fades it out once the workspace is
+# painted.  One-shot: the flag is consumed immediately.
+if st.session_state.pop("_show_login_overlay", False):
+    st.markdown(
+        """
+        <div id="_post_login_overlay" style="position:fixed;inset:0;
+                    background:#ebe2cd;display:flex;align-items:center;
+                    justify-content:center;z-index:99999;
+                    font-family:'Fraunces',Georgia,serif;color:#194238;
+                    font-size:1.1rem;letter-spacing:0.02em;
+                    transition:opacity 250ms ease;">
+            Loading your workspace…
+        </div>
+        <script>
+          // Fade out once the dashboard has finished painting.
+          setTimeout(function(){
+            var el = window.parent.document.getElementById('_post_login_overlay')
+                  || document.getElementById('_post_login_overlay');
+            if (el) { el.style.opacity = '0';
+                      setTimeout(function(){ el.remove(); }, 300); }
+          }, 1500);
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
 
 # Flush any deferred bookkeeping writes that we skipped during the login
 # click handler so the dashboard could appear instantly.  Failures here are
@@ -1969,7 +2004,7 @@ elif page == "Upload & Data Quality":
     
     # Show existing datasets
     st.subheader("Existing Datasets")
-    datasets = db.get_all_datasets()
+    datasets = _cached_all_datasets()
     # Hide admin-owned datasets from non-admin users
     config_admin_email, _ = _get_admin_config()
     admin_email = (config_admin_email or "").strip().lower()
@@ -2012,7 +2047,7 @@ elif page == "Data Management":
     st.markdown("Manage, review, and maintain your AMR surveillance datasets")
 
     # Get all datasets
-    datasets = db.get_all_datasets()
+    datasets = _cached_all_datasets()
     # Hide admin-owned datasets from non-admin users
     config_admin_email, _ = _get_admin_config()
     admin_email = (config_admin_email or "").strip().lower()
@@ -2043,7 +2078,7 @@ elif page == "Admin - Datasets":
     config_admin_email, _ = _get_admin_config()
     admin_email = (config_admin_email or "").strip().lower()
 
-    all_datasets = db.get_all_datasets()
+    all_datasets = _cached_all_datasets()
 
     main_datasets = db.get_main_datasets(country="Ghana")
     main_label_by_id = {d['dataset_id']: f"{d['dataset_name']} ({d['dataset_id']})" for d in main_datasets}
@@ -4813,7 +4848,7 @@ elif page == "Report Export":
             )
 
             # Dataset selection (optional - for metadata)
-            datasets = db.get_all_datasets()
+            datasets = _cached_all_datasets()
             # Hide admin-owned datasets from non-admin users
             config_admin_email, _ = _get_admin_config()
             admin_email = (config_admin_email or "").strip().lower()
