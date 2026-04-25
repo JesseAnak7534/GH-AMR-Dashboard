@@ -666,8 +666,14 @@ if not st.session_state.authenticated:
         </style>
     """, unsafe_allow_html=True)
 
-    # Two-column split — left brand panel, right form panel
-    left, right = st.columns([5, 6], gap="medium")
+    # Single placeholder wraps the whole login screen.  After a successful
+    # submit we call login_placeholder.empty() *before* st.rerun() so the
+    # browser DOM is wiped instantly -- otherwise Streamlit would briefly
+    # re-render the login form during the rerun (the "login flashback").
+    login_placeholder = st.empty()
+    with login_placeholder.container():
+        # Two-column split — left brand panel, right form panel
+        left, right = st.columns([5, 6], gap="medium")
 
     with left:
         st.markdown("""
@@ -788,6 +794,22 @@ if not st.session_state.authenticated:
                                 # extra ~300ms round-trip is hidden by the
                                 # dashboard's data load.
                                 st.session_state["_pending_last_login"] = login_email
+                                # Wipe the login DOM *before* triggering the
+                                # rerun, then show a tiny full-screen loading
+                                # overlay so the user never sees the login
+                                # form flash again during the script restart.
+                                login_placeholder.empty()
+                                st.markdown(
+                                    """
+                                    <div style="position:fixed;inset:0;background:#ebe2cd;
+                                                display:flex;align-items:center;justify-content:center;
+                                                z-index:99999;font-family:'Fraunces',Georgia,serif;
+                                                color:#194238;font-size:1.1rem;letter-spacing:0.02em;">
+                                        Loading your workspace…
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True,
+                                )
                                 st.rerun()
                             else:
                                 st.error("Invalid email or password")
