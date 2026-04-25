@@ -9,6 +9,7 @@ import uuid
 import bcrypt
 import json
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
@@ -272,6 +273,51 @@ if ADMIN_EMAIL and ADMIN_PASSWORD:
             logger.exception("admin verified flag write failed")
     except Exception:
         logger.exception("admin account bootstrap failed")
+
+
+def _bootstrap_lab_accounts() -> None:
+    """Provision sentinel-lab logins from the committed hash manifest.
+
+    The deployed Streamlit Cloud app uses its own database (separate from the
+    administrator's local Postgres), so each new deployment has to recreate
+    the 19 sentinel-lab accounts before any lab can sign in.  We persist the
+    bcrypt hashes (never plaintext) to ``db/lab_accounts.json`` and replay
+    them here on startup -- this is idempotent: existing accounts get the
+    same hash overwritten, so the credentials shared with the labs keep
+    working across redeploys.
+    """
+    manifest = Path("db") / "lab_accounts.json"
+    if not manifest.exists():
+        return
+    try:
+        accounts = json.loads(manifest.read_text(encoding="utf-8"))
+    except Exception:
+        logger.exception("could not read %s", manifest)
+        return
+    for email, info in accounts.items():
+        pw_hash = info.get("password_hash")
+        if not pw_hash:
+            continue
+        try:
+            existing = db.get_user_by_email(email)
+            if existing is None:
+                db.create_user(email, pw_hash, is_admin=False)
+            else:
+                db.update_user_password(email, pw_hash)
+                if not existing.get("is_active"):
+                    db.update_user_status(existing["user_id"], True)
+            try:
+                db.set_user_verified(email, True)
+            except Exception:
+                logger.exception("lab verified flag write failed for %s", email)
+        except Exception:
+            logger.exception("lab account bootstrap failed for %s", email)
+
+
+try:
+    _bootstrap_lab_accounts()
+except Exception:
+    logger.exception("lab account bootstrap top-level failure")
 
 def _get_flag(name: str) -> bool:
     val = None
