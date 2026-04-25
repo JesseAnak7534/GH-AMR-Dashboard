@@ -377,8 +377,6 @@ except Exception:
 
 # If not authenticated, show login page
 if not st.session_state.authenticated:
-    # Render login page with professional styling
-    
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
@@ -756,14 +754,16 @@ if not st.session_state.authenticated:
                                 target_admin_email = (config_admin_email or "").strip().lower()
 
                                 is_admin_flag = user.get('is_admin')
-                                if target_admin_email and login_email.strip().lower() == target_admin_email:
+                                if target_admin_email and login_email == target_admin_email:
+                                    # Trust the cached bootstrap; do NOT issue
+                                    # set_user_admin/update_user_status/
+                                    # set_user_verified writes here.  Each one
+                                    # is a Postgres round-trip (~200-400ms via
+                                    # Supabase pooler) and they made the user
+                                    # wait 1-2s after clicking Sign in.  The
+                                    # admin bootstrap on startup already keeps
+                                    # those flags in sync.
                                     is_admin_flag = 1
-                                    try:
-                                        db.set_user_admin(login_email, True)
-                                        db.update_user_status(user['user_id'], True)
-                                        db.set_user_verified(login_email, True)
-                                    except Exception:
-                                        logger.exception("admin role enforcement at login failed for %s", login_email)
 
                                 lab_mapping = _get_lab_email_mapping()
                                 is_lab, lab_name = is_lab_user(login_email, lab_mapping)
@@ -781,13 +781,13 @@ if not st.session_state.authenticated:
                                 st.session_state.is_admin = bool(is_admin_flag)
                                 st.session_state.lab_name = lab_name if not is_admin_flag else None
 
-                                # Fire-and-forget: don't make the user wait for
-                                # the last_login UPDATE round-trip to Postgres
-                                # before the dashboard appears.
-                                try:
-                                    db.update_last_login(login_email)
-                                except Exception:
-                                    logger.exception("update_last_login failed for %s", login_email)
+                                # Defer last_login write to the next rerun via
+                                # session_state so the UI can render the
+                                # dashboard immediately.  We do the actual
+                                # UPDATE on the *post-login* page where the
+                                # extra ~300ms round-trip is hidden by the
+                                # dashboard's data load.
+                                st.session_state["_pending_last_login"] = login_email
                                 st.rerun()
                             else:
                                 st.error("Invalid email or password")
@@ -836,6 +836,16 @@ if not st.session_state.authenticated:
 # ============================================================================
 # MAIN APP STYLING (After Authentication)
 # ============================================================================
+
+# Flush any deferred bookkeeping writes that we skipped during the login
+# click handler so the dashboard could appear instantly.  Failures here are
+# never user-visible.
+_pending_login_email = st.session_state.pop("_pending_last_login", None)
+if _pending_login_email:
+    try:
+        db.update_last_login(_pending_login_email)
+    except Exception:
+        logger.exception("deferred update_last_login failed for %s", _pending_login_email)
 
 # Editorial, warm, human-designed theme for the authenticated app shell
 st.markdown("""
