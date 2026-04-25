@@ -59,6 +59,10 @@ from src.lab_management import (  # noqa: E402
 EMAIL_DOMAIN = _LAB_EMAIL_DOMAIN
 LAB_CODES: dict[str, str] = dict(LAB_LOGIN_CODES)
 CREDENTIALS_FILE = Path("db") / "lab_credentials.json"
+# Public, hash-only manifest committed to the repo so the deployed Streamlit
+# Cloud app can bootstrap the same lab accounts into its own database on
+# startup.  Plaintext passwords are NEVER written here.
+PUBLIC_HASH_FILE = Path("db") / "lab_accounts.json"
 WORD_OUTPUT = Path("Lab_Login_Credentials.docx")
 
 
@@ -92,18 +96,22 @@ def _save(creds: dict) -> None:
     )
 
 
-def _ensure_user(email: str, password: str) -> str:
+def _ensure_user(email: str, password: str, password_hash: str | None = None) -> tuple[str, str]:
     """Create the user, or reset their password if they already exist.
 
-    Returns a short status string for the caller to log.
+    Returns ``(status, password_hash)`` so callers can persist the hash for
+    later bootstrap on the deployed Streamlit Cloud database.
     """
-    pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    if password_hash is None:
+        password_hash = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
     existing = db.get_user_by_email(email)
     if existing is None:
-        ok, msg = db.create_user(email, pw_hash, is_admin=False)
-        return "created" if ok else f"create-failed: {msg}"
-    ok, msg = db.update_user_password(email, pw_hash)
-    return "password-reset" if ok else f"reset-failed: {msg}"
+        ok, msg = db.create_user(email, password_hash, is_admin=False)
+        return ("created" if ok else f"create-failed: {msg}", password_hash)
+    ok, msg = db.update_user_password(email, password_hash)
+    return ("password-reset" if ok else f"reset-failed: {msg}", password_hash)
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +202,7 @@ def _write_docx(rows: list[dict]) -> None:
 def main() -> int:
     creds = _load_existing()
     rows: list[dict] = []
+    public: dict[str, dict] = {}
     print(f"Provisioning {len(APPROVED_LABS)} lab accounts...\n")
 
     for lab_name in APPROVED_LABS:
@@ -203,25 +212,38 @@ def main() -> int:
             continue
         email = f"{code}@{EMAIL_DOMAIN}"
 
-        entry = creds.get(email)
-        if entry and entry.get("password"):
-            password = entry["password"]
-        else:
+        entry = creds.get(email) or {}
+        password = entry.get("password")
+        password_hash = entry.get("password_hash")
+        if not password:
             password = _make_password(code)
-            creds[email] = {
-                "lab": lab_name,
-                "code": code,
-                "password": password,
-            }
+            password_hash = None  # force fresh hash below
+        if not password_hash:
+            password_hash = bcrypt.hashpw(
+                password.encode("utf-8"), bcrypt.gensalt()
+            ).decode("utf-8")
 
-        status = _ensure_user(email, password)
+        creds[email] = {
+            "lab": lab_name,
+            "code": code,
+            "password": password,
+            "password_hash": password_hash,
+        }
+
+        status, _ = _ensure_user(email, password, password_hash)
         print(f"  {lab_name[:48]:48} {email:32} [{status}]")
         rows.append({"lab": lab_name, "email": email, "password": password})
+        public[email] = {"lab": lab_name, "code": code, "password_hash": password_hash}
 
     _save(creds)
+    PUBLIC_HASH_FILE.parent.mkdir(parents=True, exist_ok=True)
+    PUBLIC_HASH_FILE.write_text(
+        json.dumps(public, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     _write_docx(rows)
-    print(f"\nWrote credentials JSON -> {CREDENTIALS_FILE}")
-    print(f"Wrote Word document    -> {WORD_OUTPUT}")
+    print(f"\nWrote credentials JSON     -> {CREDENTIALS_FILE}  (gitignored)")
+    print(f"Wrote public hash manifest -> {PUBLIC_HASH_FILE}  (committed)")
+    print(f"Wrote Word document        -> {WORD_OUTPUT}")
     return 0
 
 

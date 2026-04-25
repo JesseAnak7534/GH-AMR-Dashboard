@@ -11,6 +11,9 @@ db/*.sqlite3
 # Lab credentials (plaintext passwords -- never commit)
 db/lab_credentials.json
 Lab_Login_Credentials.docx
+# NOTE: db/lab_accounts.json is intentionally NOT ignored -- it contains
+# only bcrypt hashes (no plaintext) and the deployed Streamlit Cloud app
+# needs it to bootstrap the lab logins on startup.
 
 # Excel files and templates (keep templates, ignore uploads)
 *.xlsx

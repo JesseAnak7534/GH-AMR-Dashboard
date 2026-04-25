@@ -1,0 +1,97 @@
+{
+  "erh@icbb-amr.gh": {
+    "lab": "Eastern Regional Hospital",
+    "code": "erh",
+    "password_hash": "$2b$12$UEdpM9iX591ZkOEXZwlK1uJxHNO.8qRUn4PHbsxgpNCtIHzQlk21u"
+  },
+  "smpe@icbb-amr.gh": {
+    "lab": "St. Martin De Porres Hospital Eikwe",
+    "code": "smpe",
+    "password_hash": "$2b$12$oyRpDjoNX/0W6hFqufriZ.THmila8xCxcCgeQRspSwfG2l2hSBR.q"
+  },
+  "sphrl@icbb-amr.gh": {
+    "lab": "Sekondi Public Health Reference Laboratory",
+    "code": "sphrl",
+    "password_hash": "$2b$12$xYrySmw30Ilco7UDKQvywOlmy1w/6LnFCvHOkEy4ZDyPGCuC9ZQcS"
+  },
+  "hth@icbb-amr.gh": {
+    "lab": "Ho Teaching Hospital",
+    "code": "hth",
+    "password_hash": "$2b$12$47BrtGPLeE7HqqNovHDWueqnoeSvb9l/E87GMFIbYBHjvzl0OIZyq"
+  },
+  "tth@icbb-amr.gh": {
+    "lab": "Tamale Teaching Hospital",
+    "code": "tth",
+    "password_hash": "$2b$12$fqWf/iG2nxQI2rpymJhfVe2QN.UuLjyL4ZtzDlgSiWQF/tz0GNJbe"
+  },
+  "kath@icbb-amr.gh": {
+    "lab": "Komfo Anokye Teaching Hospital",
+    "code": "kath",
+    "password_hash": "$2b$12$h6dMswwu03R/LOUGfYvAWOvd7MltVqbFPInBmnB23DmSKSOXgJqbC"
+  },
+  "kbth@icbb-amr.gh": {
+    "lab": "Korle-Bu Teaching Hospital",
+    "code": "kbth",
+    "password_hash": "$2b$12$KRLQnpbW5pwTnptTRs5ABudkIWBZANRZpILER/Fkk5x0wk1BRqBRq"
+  },
+  "lekma@icbb-amr.gh": {
+    "lab": "Lekma Hospital",
+    "code": "lekma",
+    "password_hash": "$2b$12$zCnVKFRP9dRlVz3xGtpzpuwZJU6c1KXSzbmMKvPgQeUOszJVY5mba"
+  },
+  "snth@icbb-amr.gh": {
+    "lab": "Sunyani Teaching Hospital",
+    "code": "snth",
+    "password_hash": "$2b$12$8/vD7XWWJkwxK7oRBjzSq./kntOS7x8lN9gdCFVzUe5bYpWEUviGS"
+  },
+  "ccth@icbb-amr.gh": {
+    "lab": "Cape Coast Teaching Hospital",
+    "code": "ccth",
+    "password_hash": "$2b$12$8l7bPBnk2ZeZ7UAZ8MI0ZOoAtpIrnvkNhWc7YeUr.0QygPz7QU19G"
+  },
+  "nfsl@icbb-amr.gh": {
+    "lab": "National Food Safety Laboratory",
+    "code": "nfsl",
+    "password_hash": "$2b$12$p2jIuvBUXbwflwfA1ANFEuyQv277YBFwlxyIuJLGCVj8fv0zCmGyS"
+  },
+  "csir@icbb-amr.gh": {
+    "lab": "CSIR – Water Research Institute (Microbiology Laboratory)",
+    "code": "csir",
+    "password_hash": "$2b$12$bxJxY2HLUv7ArZATonmEW.d6fEfKdqz2o3cjVKa2tMi8nQVgBQ5a."
+  },
+  "avl@icbb-amr.gh": {
+    "lab": "Accra Veterinary Laboratory",
+    "code": "avl",
+    "password_hash": "$2b$12$a.hjmmiGeAN1EbLPLhExcuOeT9GVzXKHuf8/ZwUb7RwH8J5CeGbm."
+  },
+  "kvl@icbb-amr.gh": {
+    "lab": "Kumasi Veterinary Laboratory",
+    "code": "kvl",
+    "password_hash": "$2b$12$Wr6TAqYJmE7M1fCnbcW9PusieCn8vuKhPNQ2DKHuDknQTrc777pAm"
+  },
+  "qmd@icbb-amr.gh": {
+    "lab": "Quadushah Medical Diagnostic Limited",
+    "code": "qmd",
+    "password_hash": "$2b$12$CrBt8Kps1q7CNkcaVxaJgeM36v0KRCYE3vxig4EZsr18J12a4UyNy"
+  },
+  "cvl@icbb-amr.gh": {
+    "lab": "Central Veterinary Laboratory",
+    "code": "cvl",
+    "password_hash": "$2b$12$ThISOUbuk2f.icyFBZCDSu9isEeoGmS5kF0W/6MjZBRVoluFVZ8FK"
+  },
+  "pts@icbb-amr.gh": {
+    "lab": "Pong Tamale School",
+    "code": "pts",
+    "password_hash": "$2b$12$DaOH3okcbo4jRXejqQUrSuxmJOYBHEat/HNMfeFsp4wQoTOVqjE/S"
+  },
+  "mhc@icbb-amr.gh": {
+    "lab": "Metropolis Health Care Limited",
+    "code": "mhc",
+    "password_hash": "$2b$12$k8YrUw9Eweer4UGb47lnIO0ONFKzV5HTPFrk4t8oBUD.19EnWyzr2"
+  },
+  "alma@icbb-amr.gh": {
+    "lab": "Alma Medical Laboratory Ltd",
+    "code": "alma",
+    "password_hash": "$2b$12$mKlLgo05I9V5cEbz70XaDeH0X2j3EPTVkYBw/XasjG7mkdVnAg9CO"
+  }
+}
