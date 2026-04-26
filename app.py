@@ -2254,6 +2254,62 @@ elif page == "Admin - Datasets":
                                 st.success(f"KoboToolbox data imported as dataset {dataset_id}")
                                 if dropped_samples or dropped_tests:
                                     st.info(f"Skipped duplicates: {dropped_samples} samples, {dropped_tests} tests")
+
+                                # Option C — per-lab visibility:
+                                # In addition to the consolidated national
+                                # dataset above (visible to the admin), we
+                                # also create one per-lab dataset slice so
+                                # that when the lab itself logs in, the
+                                # existing visibility filter on Data
+                                # Management (which keys on `uploaded_by`
+                                # == lab email) shows them only their own
+                                # rows.  The per-lab slices are de-duped
+                                # by the same logic as the national insert.
+                                try:
+                                    lab_email_map = _get_lab_email_mapping() or {}
+                                    if 'lab_name' in samples_df.columns and lab_email_map:
+                                        per_lab_created = 0
+                                        for lab_name, lab_email in lab_email_map.items():
+                                            lab_samples = samples_df[
+                                                samples_df['lab_name'].astype(str) == str(lab_name)
+                                            ]
+                                            if lab_samples.empty:
+                                                continue
+                                            lab_ast = ast_df[
+                                                ast_df['sample_id'].astype(str).isin(
+                                                    lab_samples['sample_id'].astype(str)
+                                                )
+                                            ]
+                                            if lab_ast.empty:
+                                                continue
+                                            lab_dataset_id = str(uuid.uuid4())[:8]
+                                            lab_dataset_name = (
+                                                f"{lab_name} — Kobo "
+                                                f"{datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                                            )
+                                            ok_lab, _ = db.save_dataset(
+                                                lab_dataset_id,
+                                                lab_dataset_name,
+                                                lab_samples,
+                                                lab_ast,
+                                                uploaded_by=lab_email,
+                                            )
+                                            if ok_lab:
+                                                per_lab_created += 1
+                                        if per_lab_created:
+                                            st.success(
+                                                f"Created {per_lab_created} per-lab dataset "
+                                                f"slice(s) — each lab now sees only its own rows."
+                                            )
+                                        # Bust the dataset list cache so the
+                                        # new slices appear immediately on
+                                        # the Data Management page.
+                                        try:
+                                            _cached_all_datasets.clear()
+                                        except Exception:
+                                            pass
+                                except Exception:
+                                    logger.exception("per-lab slice creation failed")
                             else:
                                 st.error(save_msg)
 
@@ -2569,6 +2625,11 @@ elif page == "Trends":
             st.plotly_chart(
                 plots.plot_resistance_trends(filtered_ast, time_agg),
                 use_container_width=True
+            )
+            st.caption(
+                "Shaded bands show 95 % Wilson confidence intervals — wide bands mean the "
+                "underlying number of isolates is small, so interpret short-term swings with "
+                "caution. Hover any marker to see the exact CI and isolate count."
             )
             
             st.markdown("---")
