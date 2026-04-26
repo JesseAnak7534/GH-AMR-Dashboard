@@ -322,25 +322,85 @@ def plot_resistance_trends(ast_df: pd.DataFrame, time_aggregation: str = 'Monthl
     fig = go.Figure()
     
     colors = {'R': '#d62728', 'I': '#ff7f0e', 'S': '#2ca02c'}
+    fill_colors = {
+        'R': 'rgba(214, 39, 40, 0.18)',
+        'I': 'rgba(255, 127, 14, 0.18)',
+        'S': 'rgba(44, 160, 44, 0.18)',
+    }
     result_labels = {'R': 'Resistant', 'I': 'Intermediate', 'S': 'Susceptible'}
-    
+
+    # Wilson 95 % confidence-interval bands.  For each period we compute
+    #   p_hat = count_of_result / total_isolates_in_period
+    # and the Wilson interval at z=1.96.  Wilson is preferred over the
+    # plain normal-approximation because it stays inside [0, 1] and behaves
+    # correctly for small n -- exactly the regime AMR surveillance lives in.
+    import math
+    z = 1.96
+
+    def _wilson(k, n):
+        if n <= 0:
+            return 0.0, 0.0
+        p = k / n
+        denom = 1 + z * z / n
+        centre = (p + z * z / (2 * n)) / denom
+        half = (z * math.sqrt((p * (1 - p) + z * z / (4 * n)) / n)) / denom
+        lo = max(0.0, (centre - half)) * 100
+        hi = min(1.0, (centre + half)) * 100
+        return lo, hi
+
     for result in ['R', 'I', 'S']:
         if result in percentages.columns:
+            counts = pivot_data[result].astype(float).tolist()
+            denoms = totals.astype(float).tolist()
+            ci_lo, ci_hi = [], []
+            for k, n in zip(counts, denoms):
+                lo, hi = _wilson(k, n)
+                ci_lo.append(lo)
+                ci_hi.append(hi)
+
+            # Upper band trace (invisible line, drawn first)
             fig.add_trace(go.Scatter(
-                x=periods, 
+                x=periods, y=ci_hi,
+                mode='lines',
+                line=dict(width=0),
+                showlegend=False,
+                hoverinfo='skip',
+                name=f'{result_labels.get(result, result)} 95% CI upper',
+            ))
+            # Lower band trace fills down to the upper trace above
+            fig.add_trace(go.Scatter(
+                x=periods, y=ci_lo,
+                mode='lines',
+                line=dict(width=0),
+                fill='tonexty',
+                fillcolor=fill_colors.get(result, 'rgba(128,128,128,0.15)'),
+                showlegend=False,
+                hoverinfo='skip',
+                name=f'{result_labels.get(result, result)} 95% CI lower',
+            ))
+            # Main line trace
+            fig.add_trace(go.Scatter(
+                x=periods,
                 y=percentages[result],
                 name=result_labels.get(result, result),
                 mode='lines+markers',
                 line=dict(color=colors.get(result, '#808080'), width=3),
                 marker=dict(size=8),
-                hovertemplate='%{x}<br>%{y:.1f}%<extra></extra>'
+                customdata=list(zip(ci_lo, ci_hi, denoms)),
+                hovertemplate=(
+                    '%{x}<br>'
+                    '%{y:.1f}%  '
+                    '(95% CI %{customdata[0]:.1f}–%{customdata[1]:.1f}%)<br>'
+                    'n = %{customdata[2]:.0f}'
+                    '<extra></extra>'
+                ),
             ))
-    
+
     fig.update_layout(
-        title=f'Resistance Trends ({time_aggregation})',
+        title=f'Resistance Trends ({time_aggregation}) — shaded bands = 95% Wilson confidence interval',
         xaxis_title='Time Period',
         yaxis_title='Percentage (%)',
-        height=500,
+        height=520,
         hovermode='x unified',
         showlegend=True
     )
