@@ -355,7 +355,23 @@ def kobo_submissions_to_frames(submissions_df: pd.DataFrame) -> Tuple[pd.DataFra
 
     # Normalize column names
     df.columns = [str(c).strip() for c in df.columns]
-    
+
+    # KoboToolbox returns grouped questions prefixed with the group name
+    # (e.g. ``ast_section/sample_id``).  Flatten those down to the leaf
+    # name so the rest of this function (which expects ``sample_id`` etc.)
+    # works.  Where the same leaf appears in multiple groups the first
+    # non-null value wins on a per-row basis.
+    GROUP_PREFIXES = ("ast_section/", "pps_section/", "amu_section/", "amc_section/")
+    for col in list(df.columns):
+        for prefix in GROUP_PREFIXES:
+            if col.startswith(prefix):
+                leaf = col[len(prefix):]
+                if leaf in df.columns:
+                    df[leaf] = df[leaf].combine_first(df[col])
+                else:
+                    df[leaf] = df[col]
+                break
+
     # Apply choice mappings to convert codes to labels
     for col, mapping in choice_mappings.items():
         if col in df.columns:
