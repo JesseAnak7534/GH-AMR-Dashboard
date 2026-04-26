@@ -988,6 +988,37 @@ st.markdown("""
         --radius-lg: 14px;
     }
 
+    /* Global font scale.  Streamlit's default root is 16px; bumping it
+       to 17px scales every rem-based size in this stylesheet uniformly
+       so text reads better without re-flowing layouts.  em-based sizes
+       inside the sidebar inherit naturally. */
+    html, body, .stApp { font-size: 17px; }
+    .main .block-container,
+    .main .stMainBlockContainer,
+    [data-testid="stAppViewBlockContainer"] { font-size: 1rem; }
+    p, li, label, span, div { font-size: inherit; }
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] li { font-size: 1.02rem; line-height: 1.6; }
+    .stCaption, [data-testid="stCaptionContainer"], small {
+        font-size: 0.92rem !important;
+        color: var(--ink-muted) !important;
+    }
+    /* Inputs / selects: keep them readable but not larger than the
+       container so dropdown chips don't wrap. */
+    .stSelectbox, .stMultiSelect, .stTextInput, .stNumberInput,
+    .stDateInput, .stTextArea, .stRadio, .stCheckbox { font-size: 0.98rem; }
+    .stSelectbox label, .stMultiSelect label, .stTextInput label,
+    .stNumberInput label, .stDateInput label, .stTextArea label,
+    .stRadio label, .stCheckbox label, .stSlider label, .stFileUploader label {
+        font-size: 0.95rem !important;
+        color: var(--ink) !important;
+        font-weight: 500 !important;
+    }
+    /* Tables / dataframes */
+    [data-testid="stDataFrame"] { font-size: 0.95rem; }
+    /* Tabs */
+    .stTabs [data-baseweb="tab"] { font-size: 1rem !important; }
+
     .stApp {
         background: var(--paper) !important;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1204,8 +1235,8 @@ st.markdown("""
     }
     [data-testid="stMetricLabel"] {
         color: var(--ink-muted) !important;
-        font-size: 0.78rem !important;
-        font-weight: 500 !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
         letter-spacing: 0.06em !important;
         text-transform: uppercase !important;
     }
@@ -1213,8 +1244,9 @@ st.markdown("""
         color: var(--ink) !important;
         font-family: 'Fraunces', 'Georgia', serif !important;
         font-weight: 600 !important;
+        font-size: 2rem !important;
     }
-    [data-testid="stMetricDelta"] { color: var(--ink-muted) !important; }
+    [data-testid="stMetricDelta"] { color: var(--ink-muted) !important; font-size: 0.9rem !important; }
 
     /* Expanders in main content */
     [data-testid="stExpander"] summary {
