@@ -397,7 +397,7 @@ def plot_resistance_trends(ast_df: pd.DataFrame, time_aggregation: str = 'Monthl
             ))
 
     fig.update_layout(
-        title=f'Resistance Trends ({time_aggregation}) — shaded bands = 95% Wilson confidence interval',
+        title=f'Resistance Trends ({time_aggregation})',
         xaxis_title='Time Period',
         yaxis_title='Percentage (%)',
         height=520,

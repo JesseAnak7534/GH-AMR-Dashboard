@@ -133,12 +133,12 @@ def render_pps_page():
             fig4 = go.Figure(go.Indicator(
                 mode="gauge+number+delta",
                 value=compliance,
-                number={'suffix': '%', 'font': {'size': 36, 'color': '#ffffff'}},
-                title={'text': "Guideline Compliance", 'font': {'size': 14, 'color': '#94a3b8'}},
+                number={'suffix': '%', 'font': {'size': 36, 'color': '#0f172a'}},
+                title={'text': "Guideline Compliance", 'font': {'size': 14, 'color': '#475569'}},
                 gauge={
-                    'axis': {'range': [0, 100], 'tickcolor': '#94a3b8', 'tickfont': {'color': '#94a3b8'}},
+                    'axis': {'range': [0, 100], 'tickcolor': '#475569', 'tickfont': {'color': '#475569'}},
                     'bar': {'color': '#10b981'},
-                    'bgcolor': '#1e293b',
+                    'bgcolor': '#f1f5f9',
                     'steps': [
                         {'range': [0, 50], 'color': 'rgba(239,68,68,0.25)'},
                         {'range': [50, 80], 'color': 'rgba(234,179,8,0.25)'},
@@ -147,7 +147,7 @@ def render_pps_page():
                     'threshold': {'line': {'color': '#f59e0b', 'width': 2}, 'thickness': 0.8, 'value': 80},
                 },
             ))
-            fig4.update_layout(paper_bgcolor="#131a26", font=dict(color="#e2e8f0"), height=280, margin=dict(t=60, b=20))
+            fig4.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=280, margin=dict(t=60, b=20))
             st.markdown('<div class="gauge-container">', unsafe_allow_html=True)
             st.plotly_chart(fig4, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -158,12 +158,12 @@ def render_pps_page():
             fig5 = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=doc_rate,
-                number={'suffix': '%', 'font': {'size': 36, 'color': '#ffffff'}},
-                title={'text': "Indication Documentation", 'font': {'size': 14, 'color': '#94a3b8'}},
+                number={'suffix': '%', 'font': {'size': 36, 'color': '#0f172a'}},
+                title={'text': "Indication Documentation", 'font': {'size': 14, 'color': '#475569'}},
                 gauge={
-                    'axis': {'range': [0, 100], 'tickcolor': '#94a3b8', 'tickfont': {'color': '#94a3b8'}},
+                    'axis': {'range': [0, 100], 'tickcolor': '#475569', 'tickfont': {'color': '#475569'}},
                     'bar': {'color': '#3b82f6'},
-                    'bgcolor': '#1e293b',
+                    'bgcolor': '#f1f5f9',
                     'steps': [
                         {'range': [0, 50], 'color': 'rgba(239,68,68,0.25)'},
                         {'range': [50, 80], 'color': 'rgba(234,179,8,0.25)'},
@@ -172,7 +172,7 @@ def render_pps_page():
                     'threshold': {'line': {'color': '#f59e0b', 'width': 2}, 'thickness': 0.8, 'value': 80},
                 },
             ))
-            fig5.update_layout(paper_bgcolor="#131a26", font=dict(color="#e2e8f0"), height=280, margin=dict(t=60, b=20))
+            fig5.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=280, margin=dict(t=60, b=20))
             st.markdown('<div class="gauge-container">', unsafe_allow_html=True)
             st.plotly_chart(fig5, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)

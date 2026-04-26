@@ -959,18 +959,19 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
     :root {
-        /* Brighter, cleaner paper so body text pops; containers use the same
-           warm family so charts blend instead of popping as white slabs. */
-        --paper:         #f3ead6;
-        --paper-alt:     #e8dec6;
-        --surface:       #faf4e5;
-        --surface-alt:   #fbf7ec;
-        --surface-soft:  #fdfaf2;
-        --border:        #d4c9ae;
-        --border-strong: #b4a788;
-        --ink:           #1a170e;
-        --ink-muted:     #58523e;
-        --ink-soft:      #857e68;
+        /* Clean white surfaces for the main app body so charts and tables
+           sit on neutral backgrounds.  The sidebar keeps its own dark
+           forest palette via --forest-deep below. */
+        --paper:         #ffffff;
+        --paper-alt:     #f5f5f5;
+        --surface:       #ffffff;
+        --surface-alt:   #fafafa;
+        --surface-soft:  #ffffff;
+        --border:        #e2e8f0;
+        --border-strong: #cbd5e1;
+        --ink:           #0f172a;
+        --ink-muted:     #334155;
+        --ink-soft:      #475569;
         --forest:        #1d4d43;
         --forest-dark:   #123830;
         --forest-deep:   #0d2a23;
@@ -2625,11 +2626,6 @@ elif page == "Trends":
             st.plotly_chart(
                 plots.plot_resistance_trends(filtered_ast, time_agg),
                 use_container_width=True
-            )
-            st.caption(
-                "Shaded bands show 95 % Wilson confidence intervals — wide bands mean the "
-                "underlying number of isolates is small, so interpret short-term swings with "
-                "caution. Hover any marker to see the exact CI and isolate count."
             )
             
             st.markdown("---")
