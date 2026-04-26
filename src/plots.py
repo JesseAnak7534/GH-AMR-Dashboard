@@ -6,7 +6,20 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from typing import Optional, List, Tuple, Dict
+
+# Larger, darker default font for every Plotly figure built in this module
+# so axis ticks, legends, and titles read clearly on the white app surface.
+_amr_template = pio.templates["plotly"].to_plotly_json()
+_amr_template["layout"]["font"] = {
+    "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+    "size": 14,
+    "color": "#1e293b",
+}
+_amr_template["layout"]["title"] = {"font": {"size": 18, "color": "#0f172a"}}
+pio.templates["amr_white"] = _amr_template
+pio.templates.default = "amr_white"
 
 
 def _safe_text(series):

@@ -45,7 +45,7 @@ CARD_CSS = """
 
 CHART_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="#1e293b"), margin=dict(l=40, r=20, t=30, b=40),
+    font=dict(color="#1e293b", size=13), margin=dict(l=40, r=20, t=30, b=40),
     title=dict(text=""),
 )
 

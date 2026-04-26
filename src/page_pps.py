@@ -37,8 +37,8 @@ def _kpi(value, label, color="blue"):
 
 CHART_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="#1e293b"), margin=dict(l=40, r=20, t=50, b=40),
-    title_font_size=16,
+    font=dict(color="#1e293b", size=13), margin=dict(l=40, r=20, t=50, b=40),
+    title_font_size=17,
 )
 
 
