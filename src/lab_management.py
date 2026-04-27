@@ -6,7 +6,7 @@ Handles lab user authentication, access control, and data syncing with KoboToolb
 import requests
 import json
 import pandas as pd
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict, Optional, Any
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -243,33 +243,53 @@ class KoboToolboxManager:
             return False, f"Form creation error: {str(e)}", None
     
     def fetch_submitted_data(self, form_id: str) -> Tuple[bool, str, Optional[pd.DataFrame]]:
-        """Fetch submitted AST data from KoboToolbox form."""
+        """Fetch submitted AST data from KoboToolbox form.
+
+        KoboToolbox paginates ``/data/`` (default 100 per page) and returns a
+        ``next`` URL for each subsequent page.  Walk every page so the caller
+        sees the complete submission set, not just the first 100 rows.
+        """
         try:
             if not self.session:
                 success, msg = self.authenticate()
                 if not success:
                     return False, msg, None
-            
+
             # The form_id is actually the asset UID from KoboToolbox
             # Use the correct endpoint: /api/v2/assets/{asset_uid}/data/
-            url = f"{KOBO_API_BASE}/assets/{form_id}/data/"
-            response = self.session.get(url, params={"format": "json"}, timeout=10)
-            
-            if response.status_code == 200:
+            url: Optional[str] = f"{KOBO_API_BASE}/assets/{form_id}/data/"
+            params: Optional[Dict[str, Any]] = {"format": "json", "limit": 30000}
+
+            all_results: list = []
+            pages = 0
+            while url:
+                response = self.session.get(url, params=params, timeout=60)
+                if response.status_code != 200:
+                    return False, f"Failed to fetch data: {response.status_code} - {response.text[:200]}", None
+
                 data = response.json()
-                
-                # Extract results from paginated response
-                results = data.get('results', []) if isinstance(data, dict) else data
-                
-                # Convert to DataFrame
-                if results:
-                    df = pd.DataFrame(results)
-                    return True, f"Retrieved {len(df)} submissions", df
+                if isinstance(data, dict):
+                    page_rows = data.get('results', [])
+                    next_url = data.get('next')
                 else:
-                    return True, "No submissions found", pd.DataFrame()
-            else:
-                return False, f"Failed to fetch data: {response.status_code} - {response.text[:200]}", None
-        
+                    page_rows = data or []
+                    next_url = None
+
+                all_results.extend(page_rows)
+                pages += 1
+                # ``next`` already carries the offset/limit query string
+                url = next_url
+                params = None
+
+                # Hard ceiling so a runaway pagination loop can't hang the UI
+                if pages >= 200:
+                    break
+
+            if all_results:
+                df = pd.DataFrame(all_results)
+                return True, f"Retrieved {len(df)} submissions", df
+            return True, "No submissions found", pd.DataFrame()
+
         except Exception as e:
             return False, f"Data fetch error: {str(e)}", None
 
