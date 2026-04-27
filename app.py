@@ -177,9 +177,12 @@ def _get_session_timeout_minutes():
     return timeout_minutes if timeout_minutes > 0 else None
 
 
-# Session timeout is disabled by default.
-# To enable it, set SESSION_TIMEOUT_MINUTES in env or Streamlit secrets.
+# Session timeout defaults to 2 hours (120 minutes) so live demos and
+# exhibitions don't drop the user mid-session. Override by setting
+# SESSION_TIMEOUT_MINUTES in env or Streamlit secrets (set to 0 to disable).
 SESSION_TIMEOUT_MINUTES = _get_session_timeout_minutes()
+if SESSION_TIMEOUT_MINUTES is None:
+    SESSION_TIMEOUT_MINUTES = 120
 
 # Authentication check
 if "authenticated" not in st.session_state:
