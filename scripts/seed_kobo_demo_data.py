@@ -1,4 +1,5 @@
-"""Post 100 plausible AMR demo submissions to the deployed KoboToolbox form.
+"""Post a per-lab batch of plausible AMR demo submissions to the deployed
+KoboToolbox form.
 
 Run:
     setx KOBO_API_TOKEN "<your token>"   # then open a new shell
@@ -9,13 +10,14 @@ Or pass the token inline:
 
 What it does
 ------------
-* Generates 100 realistic AST submissions spread across all 19 approved
-  sentinel labs and across the 5 One-Health sectors (HUMAN / ANIMAL /
-  FOOD / ENVIRONMENT / AQUACULTURE).
+* For each of the 19 approved sentinel labs, generates a random number
+  of realistic AST submissions in the range [PER_LAB_MIN, PER_LAB_MAX]
+  (defaults: 100 to 120) covering the 5 One-Health sectors (HUMAN /
+  ANIMAL / FOOD / ENVIRONMENT / AQUACULTURE).
 * Submits each one to the form's OpenRosa endpoint as XML so they appear
   in KoboToolbox exactly as if a lab had filled the web/mobile form.
 * The next time the admin clicks "Sync KoboToolbox Submissions" inside
-  the dashboard, all 100 rows will flow into the national database AND
+  the dashboard, all rows will flow into the national database AND
   (because of the per-lab slicer) into each lab's own visible dataset.
 
 Safe to re-run; each submission carries a fresh isolate_id / sample_id
@@ -41,7 +43,11 @@ from src.lab_management import APPROVED_LABS  # noqa: E402
 KOBO_BASE_KPI = "https://kf.kobotoolbox.org"
 KOBO_BASE_KC  = "https://kc.kobotoolbox.org"
 FORM_ID       = "aNZKSJhqwZukz5aoX8abvC"   # already deployed
-N_SUBMISSIONS = 100
+# Per-lab volume target.  Each lab will receive a random count drawn
+# uniformly from this inclusive range, giving ~100–120 submissions per
+# lab and roughly 19 × 110 ≈ 2,000 rows total.
+PER_LAB_MIN = 100
+PER_LAB_MAX = 120
 
 # ---------------------------------------------------------------------------
 # Demo content pools
@@ -89,8 +95,7 @@ def _rand_geo() -> str:
     return f"{lat} {lon} 0 0"
 
 
-def _build_submission_xml(idx: int) -> str:
-    lab_name, lab_code = random.choice(list(APPROVED_LABS.items()))
+def _build_submission_xml(idx: int, lab_name: str, lab_code: str) -> str:
     region, district = random.choice(REGIONS_DISTRICTS)
     sector_code = random.choices(
         ["human", "animal", "food", "env", "aqua"],
@@ -196,24 +201,36 @@ def main():
 
     ok = 0
     fail = 0
-    for i in range(1, N_SUBMISSIONS + 1):
-        xml = _build_submission_xml(i)
+    # Build a per-lab submission plan first so we can report progress.
+    plan: list[tuple[str, str]] = []  # (lab_name, lab_code)
+    for lab_name, lab_code in APPROVED_LABS.items():
+        n = random.randint(PER_LAB_MIN, PER_LAB_MAX)
+        plan.extend([(lab_name, lab_code)] * n)
+    random.shuffle(plan)
+    total = len(plan)
+    print(
+        f"Posting {total} submissions across {len(APPROVED_LABS)} labs "
+        f"({PER_LAB_MIN}–{PER_LAB_MAX} per lab)..."
+    )
+
+    for i, (lab_name, lab_code) in enumerate(plan, start=1):
+        xml = _build_submission_xml(i, lab_name, lab_code)
         success, msg = post_one(sess, xml, endpoints)
         if success:
             ok += 1
         else:
             fail += 1
             if fail <= 3:
-                print(f"[{i:03d}] FAIL  {msg}")
-        if i % 10 == 0:
-            print(f"  ...{i}/{N_SUBMISSIONS}  ok={ok}  fail={fail}")
+                print(f"[{i:04d}] FAIL  {msg}")
+        if i % 50 == 0:
+            print(f"  ...{i}/{total}  ok={ok}  fail={fail}")
 
-    print(f"\nDone. {ok}/{N_SUBMISSIONS} submitted, {fail} failed.")
+    print(f"\nDone. {ok}/{total} submitted, {fail} failed.")
     if ok:
         print(
             "\nNext step: open the dashboard, log in as the admin, go to "
             "'Upload & Data Quality' -> 'KoboToolbox Sync', click "
-            "'Sync KoboToolbox Submissions'.  All 100 rows will flow into "
+            "'Sync KoboToolbox Submissions'.  All rows will flow into "
             "the national database AND a per-lab dataset slice will be "
             "created for every lab that received submissions."
         )
