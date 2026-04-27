@@ -145,12 +145,21 @@ _seed_cloud_data_once()
 st.markdown(
     """
     <script>
-    // Ping the Streamlit server every 2 minutes to keep the WebSocket alive
+    // Ping the Streamlit server every 30 s to keep the WebSocket alive
+    // and ping again as soon as the tab regains focus, since browsers
+    // throttle setInterval when the tab is hidden which would otherwise
+    // let the connection drop during a demo.
     (function keepAlive() {
-        setInterval(function() {
-            fetch(window.location.href, {method: 'HEAD', cache: 'no-store'})
-                .catch(function(){});
-        }, 120000);
+        function ping() {
+            try {
+                fetch(window.location.href, {method: 'HEAD', cache: 'no-store'})
+                    .catch(function(){});
+            } catch (e) { /* swallow */ }
+        }
+        setInterval(ping, 30000);
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') { ping(); }
+        });
     })();
     </script>
     """,
