@@ -51,7 +51,7 @@ if not logger.handlers:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 # Import modules
-from src import db, validate, plots, report, analytics
+from src import db, validate, plots, report, analytics, ai_assistant
 from src import email_utils
 from src.page_dashboard import render_dashboard_page
 from src.lab_management import (
@@ -1823,6 +1823,7 @@ with st.sidebar:
             ("🧬", "Antibiogram"),
             ("📁", "WHONET Export"),
             ("📄", "Report Export"),
+            ("🤖", "AI Assistant"),
         ]),
     ]
     if st.session_state.is_admin:
@@ -5050,6 +5051,62 @@ elif page == "AMU Dashboard":
 # ============================================================================
 elif page == "AMC Dashboard":
     render_amc_page()
+
+# ============================================================================
+# PAGE 18: AI ASSISTANT
+# ============================================================================
+elif page == "AI Assistant":
+    st.header("🤖 AI Assistant")
+
+    assistant = ai_assistant.EnhancedAIAssistant()
+    if assistant.anthropic_available:
+        st.caption(
+            f"Connected to Claude ({assistant.model}). Answers use your selected "
+            "dataset as context where available."
+        )
+    else:
+        st.caption(
+            "Offline mode — no ANTHROPIC_API_KEY configured. Using the built-in "
+            "rule-based reasoner. Add a key in secrets to enable Claude."
+        )
+
+    # Use the active dataset as context when one is selected; otherwise answer
+    # general AMR questions without data context.
+    if st.session_state.get("active_dataset_id"):
+        all_samples, all_ast = _load_active_dataset()
+        _render_dataset_banner(st.session_state.active_dataset_id)
+    else:
+        all_samples, all_ast = pd.DataFrame(), pd.DataFrame()
+        st.info(
+            "No dataset selected. You can still ask general AMR questions; select a "
+            "dataset in 'Data Management' for data-aware answers."
+        )
+
+    if "ai_chat_history" not in st.session_state:
+        st.session_state.ai_chat_history = []
+
+    # Replay the conversation so far
+    for _role, _content in st.session_state.ai_chat_history:
+        with st.chat_message(_role):
+            st.markdown(_content)
+
+    _prompt = st.chat_input("Ask about resistance patterns, stewardship, mechanisms…")
+    if _prompt:
+        st.session_state.ai_chat_history.append(("user", _prompt))
+        with st.chat_message("user"):
+            st.markdown(_prompt)
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking…"):
+                try:
+                    _answer = assistant.get_response(_prompt, all_ast, all_samples)
+                except Exception as _e:
+                    _answer = f"Sorry, something went wrong: {_e}"
+            st.markdown(_answer)
+        st.session_state.ai_chat_history.append(("assistant", _answer))
+
+    if st.session_state.ai_chat_history and st.button("Clear conversation"):
+        st.session_state.ai_chat_history = []
+        st.rerun()
 
 # ============================================================================
 # PAGE 10: ADMIN - USER MANAGEMENT
