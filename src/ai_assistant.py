@@ -60,55 +60,148 @@ class EnhancedAIAssistant:
             "Vibrio cholerae": "Cholera - Important for Ghana",
         }
 
-    def get_response(self, user_query: str, all_ast: pd.DataFrame, all_samples: pd.DataFrame) -> str:
-        """Get AI-generated response."""
+    def get_response(self, user_query: str, all_ast: pd.DataFrame, all_samples: pd.DataFrame, history=None) -> str:
+        """Get an AI-generated response.
+
+        history: optional list of {"role": "user"|"assistant", "content": str}
+        prior turns, enabling a real multi-turn conversation.
+        """
 
         # Try Claude if a key is configured
         if self.anthropic_available:
             try:
-                return self._get_anthropic_response(user_query, all_ast, all_samples)
+                return self._get_anthropic_response(user_query, all_ast, all_samples, history)
             except Exception:
                 # Any API/network/parsing error -> graceful local fallback.
                 pass
 
-        # Fall back to advanced local reasoning
+        # Fall back to advanced local reasoning (single-turn)
         return self._get_local_response(user_query, all_ast, all_samples)
 
-    def _get_anthropic_response(self, user_query: str, all_ast: pd.DataFrame, all_samples: pd.DataFrame) -> str:
-        """Get response from the Claude API."""
+    def _build_data_context(self, all_ast: pd.DataFrame, all_samples: pd.DataFrame) -> str:
+        """Build a rich text summary of the dataset for the model to reason over."""
 
-        # Prepare data context
-        if all_ast.empty or all_samples.empty:
-            context = "No data available"
-        else:
-            stats = analytics.calculate_resistance_statistics(all_ast)
-            context = f"""Your surveillance dataset:
-- Tests: {len(all_ast):,}
-- Resistance rate: {stats.get('resistance_rate', 0):.1f}%
-- Organisms: {all_ast['organism'].nunique()}
-- Antibiotics: {all_ast['antibiotic'].nunique()}"""
+        if all_ast is None or all_ast.empty:
+            return ("No dataset is currently loaded. Answer from general AMR "
+                    "expertise and invite the user to select a dataset in the "
+                    "Data Management page for data-specific analysis.")
 
-        system_prompt = f"""You are an expert AMR epidemiologist and public health specialist.
+        ast = all_ast
+        samples = all_samples if all_samples is not None else pd.DataFrame()
+        lines = []
+
+        def pct_r(df):
+            return (df['result'] == 'R').mean() * 100 if len(df) and 'result' in df.columns else 0.0
+
+        # Overview
+        lines.append(
+            f"OVERVIEW: {len(samples):,} samples, "
+            f"{ast['isolate_id'].nunique() if 'isolate_id' in ast.columns else 0:,} isolates, "
+            f"{len(ast):,} AST results, "
+            f"{ast['organism'].nunique() if 'organism' in ast.columns else 0} organism types, "
+            f"{ast['antibiotic'].nunique() if 'antibiotic' in ast.columns else 0} antibiotics."
+        )
+
+        # Date range
+        for cand, df in (('collection_date', samples), ('test_date', ast)):
+            if cand in getattr(df, 'columns', []):
+                dts = pd.to_datetime(df[cand], errors='coerce').dropna()
+                if len(dts):
+                    lines.append(f"DATE RANGE: {dts.min():%Y-%m-%d} to {dts.max():%Y-%m-%d}.")
+                    break
+
+        # Overall S/I/R
+        if 'result' in ast.columns:
+            vc = ast['result'].value_counts()
+            tot = len(ast)
+            lines.append(
+                f"OVERALL SUSCEPTIBILITY: R {vc.get('R', 0) / tot * 100:.1f}%, "
+                f"I {vc.get('I', 0) / tot * 100:.1f}%, "
+                f"S {vc.get('S', 0) / tot * 100:.1f}% (n={tot:,})."
+            )
+
+        # Top organisms with %R
+        if 'organism' in ast.columns:
+            lines.append("TOP ORGANISMS (tests, %R):")
+            for org, cnt in ast['organism'].value_counts().head(8).items():
+                lines.append(f"  - {org}: {cnt} tests, {pct_r(ast[ast['organism'] == org]):.0f}% R")
+
+        # Antibiotics ranked by resistance
+        if 'antibiotic' in ast.columns:
+            rows = []
+            for abx, cnt in ast['antibiotic'].value_counts().items():
+                if cnt >= 3:
+                    rows.append((abx, cnt, pct_r(ast[ast['antibiotic'] == abx])))
+            if rows:
+                worst = sorted(rows, key=lambda r: r[2], reverse=True)[:8]
+                best = sorted(rows, key=lambda r: r[2])[:5]
+                lines.append("HIGHEST-RESISTANCE ANTIBIOTICS (avoid empirically):")
+                lines += [f"  - {abx}: {r:.0f}% R (n={cnt})" for abx, cnt, r in worst]
+                lines.append("LOWEST-RESISTANCE ANTIBIOTICS (likely still effective):")
+                lines += [f"  - {abx}: {r:.0f}% R (n={cnt})" for abx, cnt, r in best]
+
+        # Resistance by source category and region (need a sample_id join)
+        if not samples.empty and 'sample_id' in samples.columns and 'sample_id' in ast.columns:
+            for col, label in (('source_category', 'SOURCE CATEGORY'), ('region', 'REGION')):
+                if col in samples.columns:
+                    merged = ast.merge(
+                        samples[['sample_id', col]].drop_duplicates('sample_id'),
+                        on='sample_id', how='left',
+                    )
+                    groups = merged[col].value_counts().head(6)
+                    if len(groups):
+                        lines.append(f"RESISTANCE BY {label}:")
+                        for val, cnt in groups.items():
+                            lines.append(f"  - {val}: {pct_r(merged[merged[col] == val]):.0f}% R (n={cnt})")
+
+        # Multi-drug resistance (isolate resistant to >=3 antibiotics)
+        if 'isolate_id' in ast.columns and 'result' in ast.columns:
+            r_counts = ast[ast['result'] == 'R'].groupby('isolate_id').size()
+            total_iso = ast['isolate_id'].nunique()
+            if total_iso:
+                mdr = int((r_counts >= 3).sum())
+                lines.append(
+                    f"MULTI-DRUG RESISTANCE: {mdr} of {total_iso} isolates resistant "
+                    f"to >=3 antibiotics ({mdr / total_iso * 100:.0f}%)."
+                )
+
+        return "\n".join(lines)
+
+    def _get_anthropic_response(self, user_query: str, all_ast: pd.DataFrame, all_samples: pd.DataFrame, history=None) -> str:
+        """Get response from the Claude API, grounded in the dataset summary."""
+
+        context = self._build_data_context(all_ast, all_samples)
+
+        system_prompt = f"""You are an expert antimicrobial resistance (AMR) epidemiologist and public-health adviser embedded in a Ghana One Health surveillance dashboard covering environmental, food, and clinical samples.
+
+You are given a summary of the user's CURRENTLY SELECTED dataset. Use it to give specific, data-grounded answers — cite the actual organisms, %R figures, antibiotics and regions from the summary rather than speaking generically. Do not invent numbers that are not in the summary; if something isn't covered, say so and explain how the user could find it elsewhere in the dashboard.
+
+=== DATASET SUMMARY ===
 {context}
+=== END SUMMARY ===
 
-You can:
-1. Analyze the user's surveillance data
-2. Reason beyond the data using expert knowledge
-3. Provide evidence-based recommendations
-4. Explain resistance mechanisms
-5. Connect findings to global AMR trends
+How to respond:
+- Lead with a direct, useful answer. Keep it concise and scannable: short paragraphs, bullet points, and **bold** the key numbers.
+- Ground every clinical or stewardship recommendation in the data above, and flag when a sample size is too small to be reliable.
+- Bring in Ghana / WHO GLASS / One Health context where it adds value.
+- Be interactive: after answering a broad question, offer 1-2 specific follow-up questions the user could ask next.
+- You are a decision-support aid, not a substitute for clinical judgement or confirmatory laboratory testing."""
 
-Be practical, actionable, and connect to Ghana/Africa context when relevant."""
+        messages = []
+        for turn in (history or []):
+            role = turn.get("role")
+            content = turn.get("content")
+            if role in ("user", "assistant") and content:
+                messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": user_query})
 
-        # Adaptive thinking lets Claude decide how much to reason per question —
-        # good for clinical/epidemiological queries. Drop the `thinking` arg for
-        # lower latency if responses feel slow.
+        # Adaptive thinking lets Claude decide how much to reason per question.
         response = self.client.messages.create(
             model=self.model,
             max_tokens=4096,
             thinking={"type": "adaptive"},
             system=system_prompt,
-            messages=[{"role": "user", "content": user_query}],
+            messages=messages,
         )
 
         # Response content is a list of blocks; keep the text, skip thinking blocks.
