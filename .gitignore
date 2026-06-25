@@ -4,6 +4,9 @@ env/
 ENV/
 .env
 
+# Streamlit secrets (API keys, DB URLs -- never commit)
+.streamlit/secrets.toml
+
 # Database files
 db/amr_data.db
 db/*.sqlite
