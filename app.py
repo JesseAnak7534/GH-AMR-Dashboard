@@ -5113,9 +5113,9 @@ elif page == "AI Assistant":
         st.markdown("**Try one of these, or type your own below:**")
         _examples = [
             "What are the biggest resistance concerns in this dataset?",
-            "Which antibiotics are still effective here?",
-            "Compare resistance between food and environmental samples.",
-            "What stewardship actions do you recommend, and why?",
+            "Show the antibiogram for the most common organism.",
+            "Is there any ESBL, MRSA, or carbapenem resistance?",
+            "How has resistance trended over time?",
         ]
         _ec = st.columns(2)
         for _i, _ex in enumerate(_examples):

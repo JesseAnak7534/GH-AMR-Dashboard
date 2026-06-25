@@ -7,6 +7,7 @@ falls back to a rich local rule-based reasoner when it is not.
 """
 
 import os
+import json
 import pandas as pd
 from src import analytics
 
@@ -167,25 +168,253 @@ class EnhancedAIAssistant:
 
         return "\n".join(lines)
 
+    # Fields that can be filtered / grouped (sample attributes are merged onto AST rows).
+    _FILTER_FIELDS = [
+        "organism", "antibiotic", "region", "district",
+        "source_category", "source_type", "site_type", "lab_name",
+    ]
+
+    def _tool_definitions(self):
+        """Curated, typed tools the model can call to query the live dataset."""
+        return [
+            {
+                "name": "list_dataset_values",
+                "description": "List the distinct values present in the dataset for a field "
+                               "(e.g. every organism name, antibiotic, or region). Call this "
+                               "first to get the exact spelling/casing before filtering.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "field": {"type": "string", "enum": self._FILTER_FIELDS},
+                    },
+                    "required": ["field"],
+                },
+            },
+            {
+                "name": "query_resistance",
+                "description": "Compute susceptibility (n and %R/%I/%S) over the dataset with optional "
+                               "filters and an optional group-by. Use for 'ciprofloxacin resistance in "
+                               "E. coli', 'resistance by region', 'food vs environment for ceftriaxone'. "
+                               "Filters are optional and combine with AND. group_by also covers "
+                               "comparisons (by organism, antibiotic, lab_name, region, etc.).",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "organism": {"type": "string"},
+                        "antibiotic": {"type": "string"},
+                        "region": {"type": "string"},
+                        "district": {"type": "string"},
+                        "source_category": {"type": "string", "description": "e.g. FOOD or ENVIRONMENT"},
+                        "source_type": {"type": "string"},
+                        "lab_name": {"type": "string"},
+                        "date_from": {"type": "string", "description": "YYYY-MM-DD lower bound on test_date"},
+                        "date_to": {"type": "string", "description": "YYYY-MM-DD upper bound on test_date"},
+                        "group_by": {"type": "string", "enum": self._FILTER_FIELDS,
+                                     "description": "Optional: break results down by this field."},
+                    },
+                },
+            },
+            {
+                "name": "get_antibiogram",
+                "description": "Cumulative antibiogram: for an organism, the %susceptible and tested "
+                               "count (n) per antibiotic. Use for 'antibiogram for Klebsiella' or "
+                               "'which drugs work against E. coli'.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "organism": {"type": "string",
+                                     "description": "Organism name. Omit for an overview across organisms."},
+                    },
+                },
+            },
+            {
+                "name": "detect_resistance_phenotypes",
+                "description": "Run special phenotype detection across the dataset: ESBL, CRE "
+                               "(carbapenemase), MRSA, AmpC, or MDR (resistant to >=3 antibiotics). "
+                               "Returns counts and example isolates.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "phenotype": {"type": "string", "enum": ["ESBL", "CRE", "MRSA", "AmpC", "MDR"]},
+                    },
+                    "required": ["phenotype"],
+                },
+            },
+            {
+                "name": "get_resistance_trend",
+                "description": "Resistance (%R) over time, aggregated by month/quarter/year, optionally "
+                               "filtered to an organism and/or antibiotic. Returns the series plus a "
+                               "trend direction.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "organism": {"type": "string"},
+                        "antibiotic": {"type": "string"},
+                        "aggregation": {"type": "string", "enum": ["monthly", "quarterly", "yearly"]},
+                    },
+                },
+            },
+        ]
+
+    def _merge_frames(self, all_ast, all_samples):
+        """AST rows with sample attributes merged on, plus a normalised _date column."""
+        if all_ast is None or all_ast.empty:
+            return pd.DataFrame()
+        ast = all_ast
+        samples = all_samples if all_samples is not None else pd.DataFrame()
+        sample_cols = [c for c in ["sample_id", "region", "district", "source_category",
+                                   "source_type", "site_type", "lab_name", "collection_date"]
+                       if c in getattr(samples, "columns", [])]
+        if not samples.empty and "sample_id" in ast.columns and "sample_id" in sample_cols:
+            merged = ast.merge(samples[sample_cols].drop_duplicates("sample_id"),
+                               on="sample_id", how="left")
+        else:
+            merged = ast.copy()
+        for cand in ("test_date", "collection_date"):
+            if cand in merged.columns:
+                merged["_date"] = pd.to_datetime(merged[cand], errors="coerce")
+                break
+        return merged
+
+    @staticmethod
+    def _sir(df):
+        n = len(df)
+        if n == 0 or "result" not in df.columns:
+            return {"n": 0}
+        r = int((df["result"] == "R").sum())
+        i = int((df["result"] == "I").sum())
+        s = int((df["result"] == "S").sum())
+        return {"n": n, "R": r, "I": i, "S": s,
+                "pct_R": round(r / n * 100, 1), "pct_I": round(i / n * 100, 1),
+                "pct_S": round(s / n * 100, 1)}
+
+    def _apply_filters(self, df, ti):
+        out = df
+        for f in self._FILTER_FIELDS:
+            v = ti.get(f)
+            if v and f in out.columns:
+                out = out[out[f].astype(str).str.lower() == str(v).strip().lower()]
+        for bound, op in (("date_from", "ge"), ("date_to", "le")):
+            raw = ti.get(bound)
+            if raw and "_date" in out.columns:
+                dt = pd.to_datetime(raw, errors="coerce")
+                if pd.notna(dt):
+                    out = out[out["_date"] >= dt] if op == "ge" else out[out["_date"] <= dt]
+        return out
+
+    def _run_tool(self, name, ti, merged):
+        """Execute one tool call against the dataset and return a string result."""
+        try:
+            if merged is None or merged.empty:
+                return "No data is loaded for the selected dataset."
+
+            if name == "list_dataset_values":
+                field = ti.get("field")
+                if field not in merged.columns:
+                    return f"Field '{field}' is not available in this dataset."
+                vals = sorted(merged[field].dropna().astype(str).unique().tolist())
+                return json.dumps({"field": field, "count": len(vals), "values": vals[:200]})
+
+            if name == "query_resistance":
+                df = self._apply_filters(merged, ti)
+                result = {"filters": {k: v for k, v in ti.items() if v and k != "group_by"},
+                          "overall": self._sir(df)}
+                gb = ti.get("group_by")
+                if gb and gb in df.columns and len(df):
+                    groups = []
+                    for val, sub in df.groupby(df[gb].astype(str)):
+                        st = self._sir(sub)
+                        st["value"] = val
+                        groups.append(st)
+                    result["group_by"] = gb
+                    result["groups"] = sorted(groups, key=lambda g: g["n"], reverse=True)[:25]
+                return json.dumps(result, default=str)
+
+            if name == "get_antibiogram":
+                org = ti.get("organism")
+                df = merged
+                if org and "organism" in df.columns:
+                    df = df[df["organism"].astype(str).str.lower() == str(org).strip().lower()]
+                if df.empty or "antibiotic" not in df.columns:
+                    return json.dumps({"organism": org, "note": "No matching records."})
+                rows = []
+                for abx, sub in df.groupby("antibiotic"):
+                    st = self._sir(sub)
+                    rows.append({"antibiotic": abx, "n": st["n"],
+                                 "pct_S": st.get("pct_S"), "pct_R": st.get("pct_R")})
+                rows = sorted(rows, key=lambda r: r["n"], reverse=True)[:40]
+                return json.dumps({"organism": org or "all", "antibiogram": rows,
+                                   "note": "Interpret %S cautiously where n<30 (CLSI M39 minimum)."},
+                                  default=str)
+
+            if name == "detect_resistance_phenotypes":
+                ph = ti.get("phenotype")
+                fnmap = {
+                    "ESBL": analytics.detect_esbl_patterns,
+                    "CRE": analytics.detect_carbapenemase_patterns,
+                    "MRSA": analytics.detect_mrsa_patterns,
+                    "AmpC": analytics.detect_ampc_patterns,
+                }
+                if ph == "MDR":
+                    df = analytics.get_multiple_resistance_patterns(merged, min_resistances=3)
+                elif ph in fnmap:
+                    df = fnmap[ph](merged)
+                else:
+                    return f"Unknown phenotype: {ph}"
+                if df is None or len(df) == 0:
+                    return json.dumps({"phenotype": ph, "count": 0, "examples": []})
+                return json.dumps({"phenotype": ph, "count": int(len(df)),
+                                   "examples": df.head(10).to_dict("records")}, default=str)
+
+            if name == "get_resistance_trend":
+                df = merged
+                if ti.get("organism") and "organism" in df.columns:
+                    df = df[df["organism"].astype(str).str.lower() == str(ti["organism"]).strip().lower()]
+                if ti.get("antibiotic") and "antibiotic" in df.columns:
+                    df = df[df["antibiotic"].astype(str).str.lower() == str(ti["antibiotic"]).strip().lower()]
+                if df.empty or "_date" not in df.columns:
+                    return json.dumps({"note": "No dated records for this filter."})
+                d = df.dropna(subset=["_date"])
+                if d.empty:
+                    return json.dumps({"note": "No valid test dates for this filter."})
+                freq = {"monthly": "M", "quarterly": "Q", "yearly": "Y"}.get(ti.get("aggregation"), "M")
+                d = d.assign(period=d["_date"].dt.to_period(freq).astype(str))
+                series = []
+                for per, sub in d.groupby("period"):
+                    st = self._sir(sub)
+                    series.append({"period": per, "pct_R": st.get("pct_R"), "n": st["n"]})
+                series = sorted(series, key=lambda x: x["period"])
+                return json.dumps({"aggregation": ti.get("aggregation", "monthly"), "series": series,
+                                   "direction": analytics.calculate_trend_direction(df)}, default=str)
+
+            return f"Unknown tool: {name}"
+        except Exception as e:
+            return f"Tool error while running {name}: {e}"
+
     def _get_anthropic_response(self, user_query: str, all_ast: pd.DataFrame, all_samples: pd.DataFrame, history=None) -> str:
-        """Get response from the Claude API, grounded in the dataset summary."""
+        """Get response from Claude, grounded in the dataset summary and live data tools."""
 
         context = self._build_data_context(all_ast, all_samples)
+        merged = self._merge_frames(all_ast, all_samples)
+        has_data = not merged.empty
+        tools = self._tool_definitions() if has_data else []
 
         system_prompt = f"""You are an expert antimicrobial resistance (AMR) epidemiologist and public-health adviser embedded in a Ghana One Health surveillance dashboard covering environmental, food, and clinical samples.
 
-You are given a summary of the user's CURRENTLY SELECTED dataset. Use it to give specific, data-grounded answers — cite the actual organisms, %R figures, antibiotics and regions from the summary rather than speaking generically. Do not invent numbers that are not in the summary; if something isn't covered, say so and explain how the user could find it elsewhere in the dashboard.
+You are given a summary of the user's CURRENTLY SELECTED dataset. Cite the actual organisms, %R figures, antibiotics and regions rather than speaking generically.
 
 === DATASET SUMMARY ===
 {context}
 === END SUMMARY ===
 
+You also have TOOLS to query the live dataset directly: susceptibility by any filter (query_resistance), antibiograms (get_antibiogram), resistance phenotypes — ESBL/CRE/MRSA/AmpC/MDR (detect_resistance_phenotypes), and time trends (get_resistance_trend), plus list_dataset_values to discover exact value spellings.
+
 How to respond:
-- Lead with a direct, useful answer. Keep it concise and scannable: short paragraphs, bullet points, and **bold** the key numbers.
-- Ground every clinical or stewardship recommendation in the data above, and flag when a sample size is too small to be reliable.
-- Bring in Ghana / WHO GLASS / One Health context where it adds value.
-- Be interactive: after answering a broad question, offer 1-2 specific follow-up questions the user could ask next.
-- You are a decision-support aid, not a substitute for clinical judgement or confirmatory laboratory testing."""
+- If the summary already answers the question, answer directly. If it does NOT, CALL A TOOL to compute the answer — do not guess and do not say "the data doesn't cover that" without checking with a tool first.
+- Use list_dataset_values when unsure of the exact organism/antibiotic/region spelling before filtering.
+- Base every quantitative claim on the summary or a tool result; never invent numbers. Flag when a sample size is too small (n<30) to be reliable.
+- Lead with a direct, scannable answer (short paragraphs, bullets, **bold** key numbers). Bring in Ghana / WHO GLASS / One Health context where useful, and offer 1-2 specific follow-up questions.
+- You are a decision-support aid, not a substitute for clinical judgement or confirmatory testing."""
 
         messages = []
         for turn in (history or []):
@@ -195,16 +424,48 @@ How to respond:
                 messages.append({"role": role, "content": content})
         messages.append({"role": "user", "content": user_query})
 
-        # Adaptive thinking lets Claude decide how much to reason per question.
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=4096,
-            thinking={"type": "adaptive"},
-            system=system_prompt,
-            messages=messages,
-        )
+        # Agentic loop: let Claude call tools until it has what it needs to answer.
+        response = None
+        for _ in range(8):
+            kwargs = dict(
+                model=self.model,
+                max_tokens=4096,
+                thinking={"type": "adaptive"},
+                system=system_prompt,
+                messages=messages,
+            )
+            if tools:
+                kwargs["tools"] = tools
+            response = self.client.messages.create(**kwargs)
 
-        # Response content is a list of blocks; keep the text, skip thinking blocks.
+            if response.stop_reason == "tool_use":
+                # Preserve the full assistant turn (thinking + tool_use blocks) verbatim.
+                messages.append({"role": "assistant", "content": response.content})
+                tool_results = []
+                for block in response.content:
+                    if getattr(block, "type", None) == "tool_use":
+                        out = self._run_tool(block.name, block.input or {}, merged)
+                        tool_results.append({
+                            "type": "tool_result",
+                            "tool_use_id": block.id,
+                            "content": out,
+                        })
+                messages.append({"role": "user", "content": tool_results})
+                continue
+
+            if response.stop_reason == "pause_turn":
+                messages.append({"role": "assistant", "content": response.content})
+                continue
+
+            break  # end_turn or terminal stop reason
+
+        # If we exhausted the loop still wanting tools, force a final no-tools answer.
+        if response is not None and response.stop_reason == "tool_use":
+            response = self.client.messages.create(
+                model=self.model, max_tokens=4096, thinking={"type": "adaptive"},
+                system=system_prompt, messages=messages,
+            )
+
         text = "\n".join(
             block.text for block in response.content
             if getattr(block, "type", None) == "text"
