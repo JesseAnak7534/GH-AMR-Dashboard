@@ -5056,57 +5056,111 @@ elif page == "AMC Dashboard":
 # PAGE 18: AI ASSISTANT
 # ============================================================================
 elif page == "AI Assistant":
-    st.header("🤖 AI Assistant")
-
     assistant = ai_assistant.EnhancedAIAssistant()
-    if assistant.anthropic_available:
-        st.caption(
-            f"Connected to Claude ({assistant.model}). Answers use your selected "
-            "dataset as context where available."
-        )
-    else:
-        st.caption(
-            "Offline mode — no ANTHROPIC_API_KEY configured. Using the built-in "
-            "rule-based reasoner. Add a key in secrets to enable Claude."
+
+    # ── Header row: title + connection status badge ──
+    _hc1, _hc2 = st.columns([3, 1])
+    with _hc1:
+        st.markdown("### 🤖 AI Surveillance Assistant")
+    with _hc2:
+        if assistant.anthropic_available:
+            _badge = ("<span style='background:#e6f4ea;color:#137333;padding:3px 10px;"
+                      "border-radius:12px;font-size:0.8rem;font-weight:600'>● Claude online</span>")
+        else:
+            _badge = ("<span style='background:#fce8e6;color:#a50e0e;padding:3px 10px;"
+                      "border-radius:12px;font-size:0.8rem;font-weight:600'>● Offline mode</span>")
+        st.markdown(f"<div style='text-align:right;padding-top:8px'>{_badge}</div>",
+                    unsafe_allow_html=True)
+
+    st.caption(
+        "Ask about resistance patterns, stewardship priorities, pathogen profiles, "
+        "or general AMR guidance — answers are grounded in your selected dataset."
+    )
+
+    if not assistant.anthropic_available:
+        st.warning(
+            "**Claude isn't connected**, so answers fall back to a basic offline "
+            "reasoner. Add `ANTHROPIC_API_KEY` to your `.env` (local) or "
+            "`.streamlit/secrets.toml` (cloud) and reload to enable full AI answers."
         )
 
-    # Use the active dataset as context when one is selected; otherwise answer
-    # general AMR questions without data context.
+    # ── Dataset context ──
     if st.session_state.get("active_dataset_id"):
         all_samples, all_ast = _load_active_dataset()
-        _render_dataset_banner(st.session_state.active_dataset_id)
+        st.caption(
+            f"📊 Context: **{len(all_samples):,}** samples · **{len(all_ast):,}** "
+            "AST results from the selected dataset."
+        )
     else:
         all_samples, all_ast = pd.DataFrame(), pd.DataFrame()
-        st.info(
-            "No dataset selected. You can still ask general AMR questions; select a "
-            "dataset in 'Data Management' for data-aware answers."
+        st.caption(
+            "📊 No dataset selected — general questions only. Pick one in "
+            "**Data Management** for data-specific analysis."
         )
+
+    st.markdown("---")
 
     if "ai_chat_history" not in st.session_state:
         st.session_state.ai_chat_history = []
 
-    # Replay the conversation so far
+    _AVATARS = {"user": "🧑‍⚕️", "assistant": "🤖"}
+
+    # Pull any example question queued from a button click on the previous run
+    _queued = st.session_state.pop("ai_queued_prompt", None)
+
+    # ── Example prompts (only before a conversation starts) ──
+    if not st.session_state.ai_chat_history and not _queued:
+        st.markdown("**Try one of these, or type your own below:**")
+        _examples = [
+            "What are the biggest resistance concerns in this dataset?",
+            "Which antibiotics are still effective here?",
+            "Compare resistance between food and environmental samples.",
+            "What stewardship actions do you recommend, and why?",
+        ]
+        _ec = st.columns(2)
+        for _i, _ex in enumerate(_examples):
+            if _ec[_i % 2].button(_ex, key=f"ai_ex_{_i}", use_container_width=True):
+                st.session_state.ai_queued_prompt = _ex
+                st.rerun()
+
+    # ── Replay the conversation ──
     for _role, _content in st.session_state.ai_chat_history:
-        with st.chat_message(_role):
+        with st.chat_message(_role, avatar=_AVATARS.get(_role)):
             st.markdown(_content)
 
-    _prompt = st.chat_input("Ask about resistance patterns, stewardship, mechanisms…")
+    # ── Input (typed box or a queued example) ──
+    _typed = st.chat_input("Ask about resistance, a pathogen, stewardship…")
+    _prompt = _typed or _queued
+
     if _prompt:
-        st.session_state.ai_chat_history.append(("user", _prompt))
-        with st.chat_message("user"):
+        _api_history = [
+            {"role": _r, "content": _c} for _r, _c in st.session_state.ai_chat_history
+        ]
+        with st.chat_message("user", avatar=_AVATARS["user"]):
             st.markdown(_prompt)
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking…"):
+        with st.chat_message("assistant", avatar=_AVATARS["assistant"]):
+            with st.spinner("Analysing your data…"):
                 try:
-                    _answer = assistant.get_response(_prompt, all_ast, all_samples)
+                    _answer = assistant.get_response(
+                        _prompt, all_ast, all_samples, history=_api_history
+                    )
                 except Exception as _e:
-                    _answer = f"Sorry, something went wrong: {_e}"
+                    _answer = f"Sorry — I ran into an error: `{_e}`"
             st.markdown(_answer)
+        st.session_state.ai_chat_history.append(("user", _prompt))
         st.session_state.ai_chat_history.append(("assistant", _answer))
 
-    if st.session_state.ai_chat_history and st.button("Clear conversation"):
-        st.session_state.ai_chat_history = []
-        st.rerun()
+    # ── Footer: clear control + disclaimer ──
+    if st.session_state.ai_chat_history:
+        _fc1, _fc2 = st.columns([4, 1])
+        with _fc2:
+            if st.button("🗑️ Clear", use_container_width=True):
+                st.session_state.ai_chat_history = []
+                st.rerun()
+    st.caption(
+        "⚕️ AI guidance is decision-support only — verify with confirmatory testing "
+        "and local clinical judgement."
+    )
 
 # ============================================================================
 # PAGE 10: ADMIN - USER MANAGEMENT
