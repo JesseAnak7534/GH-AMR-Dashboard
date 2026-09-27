@@ -339,6 +339,22 @@ def _sql_list(values: Iterable[str]) -> str:
     return ", ".join("'" + str(v).replace("'", "''") + "'" for v in values)
 
 
+def _add_constraint(cur, table: str, name: str, definition: str) -> None:
+    """Add a named constraint when the database does not already have it.
+
+    PostgreSQL has no ADD CONSTRAINT IF NOT EXISTS, and a plain ADD would fail
+    on the second startup. Checking pg_constraint keeps schema creation
+    idempotent, which is what lets init_database() run on every boot.
+    """
+    cur.execute(
+        "SELECT 1 FROM pg_constraint WHERE conname = %s "
+        "AND conrelid = %s::regclass",
+        (name, table),
+    )
+    if cur.fetchone() is None:
+        cur.execute(f"ALTER TABLE {table} ADD CONSTRAINT {name} {definition}")
+
+
 def init_traceability_schema(cur) -> None:
     """Create the traceability tables. Safe to call on every startup.
 
@@ -451,6 +467,17 @@ def init_traceability_schema(cur) -> None:
             ward_type_at_collection TEXT
                 CHECK (ward_type_at_collection IS NULL
                        OR ward_type_at_collection IN ({_sql_list(WARD_TYPES)})),
+            -- Age is held here as well as on the subject, and this is the copy
+            -- that reporting uses. A patient readmitted two years later is the
+            -- same subject at a different age, so an age stored only against
+            -- the subject puts every later specimen in the wrong band.
+            age_years_at_collection DOUBLE PRECISION
+                CHECK (age_years_at_collection IS NULL
+                       OR (age_years_at_collection >= 0
+                           AND age_years_at_collection <= 130)),
+            age_band_at_collection TEXT
+                CHECK (age_band_at_collection IS NULL
+                       OR age_band_at_collection IN ({_sql_list(AGE_BANDS)})),
             receipt_datetime TIMESTAMPTZ,
             condition_on_receipt TEXT
                 CHECK (condition_on_receipt IS NULL
@@ -678,6 +705,31 @@ def init_traceability_schema(cur) -> None:
         )
     """)
 
+    # -- in-place upgrades --------------------------------------------------
+    # CREATE TABLE IF NOT EXISTS does nothing to a table that already exists,
+    # so columns added after a database was first built need stating
+    # separately. Each statement is idempotent, so this stays safe to run on
+    # every startup.
+    for stmt in (
+        "ALTER TABLE specimens ADD COLUMN IF NOT EXISTS "
+        "age_years_at_collection DOUBLE PRECISION",
+        "ALTER TABLE specimens ADD COLUMN IF NOT EXISTS "
+        "age_band_at_collection TEXT",
+    ):
+        cur.execute(stmt)
+
+    # ADD COLUMN carries no CHECK with it, and PostgreSQL has no
+    # ADD CONSTRAINT IF NOT EXISTS, so each one is added only when absent.
+    # Without this an upgraded database would accept an age of 900 while a
+    # freshly created one rejected it.
+    _add_constraint(cur, "specimens", "specimens_age_at_collection_range",
+                    "CHECK (age_years_at_collection IS NULL "
+                    "OR (age_years_at_collection >= 0 "
+                    "AND age_years_at_collection <= 130))")
+    _add_constraint(cur, "specimens", "specimens_age_band_at_collection_valid",
+                    f"CHECK (age_band_at_collection IS NULL "
+                    f"OR age_band_at_collection IN ({_sql_list(AGE_BANDS)}))")
+
     # -- indexes -----------------------------------------------------------
     # The joins this model exists to make fast: walking the chain in either
     # direction, slicing by ward type or specimen type, and pulling an
@@ -698,6 +750,10 @@ def init_traceability_schema(cur) -> None:
         "ON specimens (dataset_id, encounter_id)",
         "CREATE INDEX IF NOT EXISTS idx_specimens_type "
         "ON specimens (dataset_id, specimen_type)",
+        "CREATE INDEX IF NOT EXISTS idx_specimens_ward_type "
+        "ON specimens (dataset_id, ward_type_at_collection)",
+        "CREATE INDEX IF NOT EXISTS idx_specimens_age_band "
+        "ON specimens (dataset_id, age_band_at_collection)",
         "CREATE INDEX IF NOT EXISTS idx_specimens_collected "
         "ON specimens (dataset_id, collection_datetime)",
         "CREATE INDEX IF NOT EXISTS idx_isolates_specimen "

@@ -1,15 +1,16 @@
 """
-Validation and template generation for unified One Health data uploads.
-Single Excel workbook with 6 sheets: samples, ast_results, pps_survey, prescriptions, amu_data, amc_data.
-Users fill only the sheets they need.
+Validation of the One Health sheets of a unified upload.
+
+One workbook carries every submission type. The AMR sheets -- samples,
+isolates, ast_results and genomics -- are defined by ``src.upload_schema`` and
+checked by ``src.validate``. This module covers the remaining four sheets:
+pps_survey, prescriptions, amu_data and amc_data. Users fill only the sheets
+they need.
 """
 import pandas as pd
-import numpy as np
-from datetime import datetime
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Dict
 from io import BytesIO
 from openpyxl import load_workbook
-from openpyxl.worksheet.datavalidation import DataValidation
 from src.lab_management import APPROVED_LABS
 
 
@@ -27,6 +28,11 @@ REQUIRED_PPS_RX_COLS = {
     'indication', 'indication_documented', 'guideline_compliant', 'duration_days'
 }
 
+#: Columns that tie a prescription row to its survey. Optional when the workbook
+#: contains exactly one survey, required beyond that -- see
+#: ``attribute_prescriptions``.
+PPS_RX_LINK_COLS = ('facility_name', 'survey_date')
+
 REQUIRED_AMU_COLS = {
     'facility_name', 'report_period', 'region', 'antibiotic_name',
     'quantity_dispensed'
@@ -36,6 +42,108 @@ REQUIRED_AMC_COLS = {
     'report_period', 'sector', 'antibiotic_class', 'quantity_kg'
 }
 
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# PPS PRESCRIPTION ATTRIBUTION
+# ════════════════════════════════════════════════════════════════════════════
+
+def _normalise_key(value) -> str:
+    text = "" if value is None else str(value).strip()
+    return text[:10] if text[:4].isdigit() and "-" in text[:10] else text.lower()
+
+
+def attribute_prescriptions(survey_df: pd.DataFrame,
+                            rx_df: pd.DataFrame) -> Tuple[Dict[int, pd.DataFrame], List[str]]:
+    """Assign each prescription row to the survey it belongs to.
+
+    Returns a mapping of survey row position to its prescriptions, plus any
+    errors.
+
+    The upload page previously divided the prescriptions sheet into equal blocks
+    by row position and handed one block to each survey in turn. With two
+    surveys and seven prescriptions that gave three rows to each and discarded
+    the seventh, and it attributed every prescription to whichever facility
+    happened to occupy the same position in the other sheet. The facility, ward
+    mix and compliance figures of a multi-facility PPS were therefore wrong in a
+    way nothing in the output revealed.
+
+    Attribution is now by key. One survey takes every prescription, which is
+    unambiguous. More than one survey requires the prescriptions sheet to name
+    its facility, and a row that matches no survey is reported rather than
+    assigned to a neighbour.
+    """
+    errors: List[str] = []
+    if survey_df is None or survey_df.empty:
+        return {}, ["[PPS] No survey rows to attribute prescriptions to."]
+    if rx_df is None or rx_df.empty:
+        return {i: rx_df.iloc[0:0] for i in range(len(survey_df))}, errors
+
+    if len(survey_df) == 1:
+        return {0: rx_df.copy()}, errors
+
+    if 'facility_name' not in rx_df.columns:
+        return {}, [
+            "[PPS] The workbook holds "
+            f"{len(survey_df)} surveys, so each prescription must say which "
+            "facility it belongs to. Add a 'facility_name' column to the "
+            "prescriptions sheet (and 'survey_date' if one facility was "
+            "surveyed more than once). Prescriptions are not split by row "
+            "order, because that would attribute them to the wrong facility."
+        ]
+
+    use_date = ('survey_date' in rx_df.columns
+                and 'survey_date' in survey_df.columns)
+
+    def key_of(facility, date=None):
+        parts = [_normalise_key(facility)]
+        if use_date:
+            parts.append(_normalise_key(date))
+        return tuple(parts)
+
+    survey_keys: Dict[tuple, List[int]] = {}
+    for position, (_, srow) in enumerate(survey_df.iterrows()):
+        key = key_of(srow.get('facility_name'), srow.get('survey_date'))
+        survey_keys.setdefault(key, []).append(position)
+
+    ambiguous = {k: v for k, v in survey_keys.items() if len(v) > 1}
+    if ambiguous:
+        label = "; ".join(" / ".join(str(part) for part in k) for k in ambiguous)
+        hint = ("" if use_date else
+                " Add a 'survey_date' column to the prescriptions sheet to tell "
+                "them apart.")
+        errors.append(
+            f"[PPS] More than one survey shares the same identity ({label}), so "
+            f"prescriptions cannot be attributed unambiguously.{hint}")
+        return {}, errors
+
+    rx_keys = [key_of(r.get('facility_name'), r.get('survey_date'))
+               for _, r in rx_df.iterrows()]
+    assigned: Dict[int, List[int]] = {i: [] for i in range(len(survey_df))}
+    unmatched: Dict[tuple, int] = {}
+    for row_index, key in zip(rx_df.index, rx_keys):
+        positions = survey_keys.get(key)
+        if positions:
+            assigned[positions[0]].append(row_index)
+        else:
+            unmatched[key] = unmatched.get(key, 0) + 1
+
+    for key, count in sorted(unmatched.items(), key=lambda kv: -kv[1])[:5]:
+        errors.append(
+            f"[PPS] {count} prescription row(s) name "
+            f"'{' / '.join(str(part) for part in key)}', which matches no "
+            "survey on the pps_survey sheet.")
+
+    empty = [position for position, rows in assigned.items() if not rows]
+    for position in empty[:5]:
+        facility = survey_df.iloc[position].get('facility_name')
+        errors.append(
+            f"[PPS] The survey for '{facility}' has no prescriptions attributed "
+            "to it. Check the spelling of facility_name on the prescriptions "
+            "sheet.")
+
+    return ({position: rx_df.loc[rows] for position, rows in assigned.items()},
+            errors)
 
 # ════════════════════════════════════════════════════════════════════════════
 # UNIFIED VALIDATOR  –  detects which sheets are present, validates each
@@ -151,43 +259,18 @@ def validate_unified_upload(file_obj) -> Tuple[bool, List[str], Dict]:
 # ════════════════════════════════════════════════════════════════════════════
 
 def create_unified_template() -> bytes:
+    """Generate ONE Excel workbook covering every submission type.
+
+    The AMR sheets -- samples, isolates, ast_results and genomics -- are built by
+    ``src.upload_template`` from the single column contract in
+    ``src.upload_schema``, which is also what the validator enforces. This
+    function used to define its own ``samples`` and ``ast_results`` columns, so
+    the workbook people downloaded and the format the validator accepted could
+    and did diverge. The One Health sheets below are appended to that workbook.
     """
-    Generate ONE Excel template with all sheets:
-      samples, ast_results, pps_survey, prescriptions, amu_data, amc_data.
-    Each sheet has example rows and colour-coded headers.
-    """
+    from src.upload_template import build_template
+
     lab_names = sorted(APPROVED_LABS.keys())
-
-    # ── Samples ─────────────────────────────────────────────────────────
-    samples = pd.DataFrame({
-        'sample_id': ['SAMPLE_001', 'SAMPLE_002', 'SAMPLE_003'],
-        'lab_name': [lab_names[0] if lab_names else 'Lab 1',
-                     lab_names[1] if len(lab_names) > 1 else 'Lab 2',
-                     lab_names[2] if len(lab_names) > 2 else 'Lab 3'],
-        'collection_date': ['2024-01-15', '2024-01-20', '2024-01-25'],
-        'region': ['Ashanti', 'Greater Accra', 'Eastern'],
-        'district': ['Kumasi', 'Accra', 'Koforidua'],
-        'site_type': ['Water Treatment Plant', 'Retail Market', 'Hospital Lab'],
-        'source_category': ['ENVIRONMENT', 'FOOD', 'HUMAN'],
-        'source_type': ['treated_water', 'raw_chicken', 'clinical_specimen'],
-        'food_matrix': ['', 'chicken', ''],
-        'environment_matrix': ['treated_water', '', ''],
-        'latitude': [6.6326, 5.6037, 6.1256],
-        'longitude': [-1.6243, -0.1870, -0.3597],
-    })
-
-    ast = pd.DataFrame({
-        'sample_id': ['SAMPLE_001', 'SAMPLE_001', 'SAMPLE_002'],
-        'isolate_id': ['ISO_001', 'ISO_002', 'ISO_003'],
-        'organism': ['E. coli', 'E. coli', 'Salmonella'],
-        'antibiotic': ['Ampicillin', 'Ciprofloxacin', 'Ampicillin'],
-        'result': ['R', 'S', 'I'],
-        'method': ['DD', 'DD', 'MIC'],
-        'guideline': ['CLSI', 'EUCAST', 'CLSI'],
-        'test_date': ['2024-01-20', '2024-01-20', '2024-01-22'],
-        'mic_value': [np.nan, np.nan, 0.5],
-        'zone_diameter': [15.0, 28.0, np.nan],
-    })
 
     # ── PPS ─────────────────────────────────────────────────────────────
     pps_survey = pd.DataFrame({
@@ -200,11 +283,17 @@ def create_unified_template() -> bytes:
     })
 
     prescriptions = pd.DataFrame({
+        # These two tie each prescription to its survey. They may be left blank
+        # when the workbook holds a single survey; with more than one they are
+        # required, because prescriptions are never split by row order.
+        'facility_name': ['Korle-Bu Teaching Hospital'] * 3,
+        'survey_date': ['2026-03-15'] * 3,
         'ward': ['Medical', 'Surgical', 'Paediatric'],
         'patient_age_group': ['Adult (25-44)', 'Geriatric (65+)', 'Child (5-14)'],
         'antibiotic_name': ['Amoxicillin', 'Ceftriaxone', 'Metronidazole'],
         'route': ['Oral', 'IV', 'Oral'],
-        'indication': ['Community-acquired pneumonia', 'Surgical prophylaxis', 'Intra-abdominal infection'],
+        'indication': ['Community-acquired pneumonia', 'Surgical prophylaxis',
+                       'Intra-abdominal infection'],
         'indication_documented': [1, 1, 0],
         'guideline_compliant': [1, 0, 1],
         'duration_days': [7, 1, 5],
@@ -212,7 +301,8 @@ def create_unified_template() -> bytes:
 
     # ── AMU ─────────────────────────────────────────────────────────────
     amu = pd.DataFrame({
-        'facility_name': ['Korle-Bu Teaching Hospital', 'Korle-Bu Teaching Hospital', 'Tamale Teaching Hospital'],
+        'facility_name': ['Korle-Bu Teaching Hospital', 'Korle-Bu Teaching Hospital',
+                          'Tamale Teaching Hospital'],
         'report_period': ['2026-Q1', '2026-Q1', '2026-Q1'],
         'region': ['Greater Accra', 'Greater Accra', 'Northern'],
         'district': ['Accra Metropolis', 'Accra Metropolis', 'Tamale Metropolis'],
@@ -243,88 +333,15 @@ def create_unified_template() -> bytes:
         'purpose': ['Therapeutic', 'Therapeutic', 'Prophylactic'],
     })
 
-    # ── Write to Excel with coloured headers ────────────────────────────
-    buf = BytesIO()
-    with pd.ExcelWriter(buf, engine='openpyxl') as w:
-        samples.to_excel(w, sheet_name='samples', index=False)
-        ast.to_excel(w, sheet_name='ast_results', index=False)
-        pps_survey.to_excel(w, sheet_name='pps_survey', index=False)
-        prescriptions.to_excel(w, sheet_name='prescriptions', index=False)
-        amu.to_excel(w, sheet_name='amu_data', index=False)
-        amc.to_excel(w, sheet_name='amc_data', index=False)
-
-    # Style headers + add lab dropdown validation
-    from openpyxl.styles import PatternFill, Font, Alignment
-
-    HEADER_STYLES = {
-        'samples':       PatternFill('solid', fgColor='1F4E79'),
-        'ast_results':   PatternFill('solid', fgColor='2E75B6'),
-        'pps_survey':    PatternFill('solid', fgColor='548235'),
-        'prescriptions': PatternFill('solid', fgColor='70AD47'),
-        'amu_data':      PatternFill('solid', fgColor='BF8F00'),
-        'amc_data':      PatternFill('solid', fgColor='C55A11'),
-    }
-    white_font = Font(color='FFFFFF', bold=True)
-
-    buf.seek(0)
-    wb = load_workbook(buf)
-
-    for sheet_name, fill in HEADER_STYLES.items():
-        ws = wb[sheet_name]
-        for cell in ws[1]:
-            cell.fill = fill
-            cell.font = white_font
-            cell.alignment = Alignment(horizontal='center')
-
-    # Lab name dropdown on samples sheet
-    if 'lab_lists' not in wb.sheetnames:
-        list_ws = wb.create_sheet('lab_lists')
-    else:
-        list_ws = wb['lab_lists']
-    list_ws['A1'] = 'lab_name_list'
-    for idx, lab in enumerate(lab_names, start=2):
-        list_ws[f"A{idx}"] = lab
-    list_range = f"lab_lists!$A$2:$A${len(lab_names) + 1}"
-    dv = DataValidation(type="list", formula1=list_range, allow_blank=False)
-    wb['samples'].add_data_validation(dv)
-    dv.add("B2:B1000")
-    list_ws.sheet_state = 'hidden'
-
-    # Instructions sheet
-    instr = wb.create_sheet('_INSTRUCTIONS', 0)
-    instructions = [
-        "AMR ONE HEALTH SURVEILLANCE – UNIFIED DATA TEMPLATE",
-        "",
-        "Fill ONLY the sheets relevant to your data submission:",
-        "",
-        "  SHEET                 PURPOSE",
-        "  ─────────────────     ──────────────────────────────────────",
-        "  samples               Sample metadata (ID, location, source)",
-        "  ast_results           Antimicrobial susceptibility test results",
-        "  pps_survey            Point Prevalence Survey facility summary",
-        "  prescriptions         Individual prescription records (PPS)",
-        "  amu_data              Antimicrobial Use data (human, DDD)",
-        "  amc_data              Antimicrobial Consumption (animal/aqua, kg)",
-        "",
-        "RULES:",
-        "  • samples + ast_results are the core AMR sheets (always needed for resistance data)",
-        "  • pps_survey + prescriptions must both be filled for PPS",
-        "  • amu_data and amc_data are independent",
-        "  • Leave unused sheets empty (do not delete them)",
-        "  • Yellow/orange columns = required fields; others are optional",
-        "",
-        "Delete the example rows before entering your real data.",
-    ]
-    for i, line in enumerate(instructions, 1):
-        instr.cell(row=i, column=1, value=line)
-    instr.column_dimensions['A'].width = 80
-    title_fill = PatternFill('solid', fgColor='0D1117')
-    instr.cell(row=1, column=1).fill = title_fill
-    instr.cell(row=1, column=1).font = Font(color='FFFFFF', bold=True, size=14)
-
-    out = BytesIO()
-    wb.save(out)
-    return out.getvalue()
+    return build_template(
+        lab_names=lab_names,
+        extra_sheets=(
+            ('pps_survey', pps_survey, '548235'),
+            ('prescriptions', prescriptions, '70AD47'),
+            ('amu_data', amu, 'BF8F00'),
+            ('amc_data', amc, 'C55A11'),
+        ),
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════

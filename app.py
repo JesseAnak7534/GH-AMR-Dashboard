@@ -255,6 +255,28 @@ def _apply_lab_filter(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> Tuple[p
     return filtered_samples, filtered_ast
 
 
+def _ingest_frames(dataset_id: str, dataset_name: str,
+                   samples_df: pd.DataFrame, ast_df: pd.DataFrame,
+                   uploaded_by: str = "System") -> Tuple[bool, str]:
+    """Validate in-memory frames and write them through the traceability chain.
+
+    Every write path goes through here rather than calling ``db.save_dataset``,
+    which only ever populated the two legacy wide tables. Rows written that way
+    had no subject, no encounter, no specimen and no isolate, so nothing
+    imported by that route could be traced back to a ward or a patient.
+    """
+    from src import ingest as _ingest
+
+    outcome = validate.validate_frames(samples_df, ast_df)
+    if not outcome.ok:
+        first = "; ".join(outcome.errors[:3])
+        return False, f"Validation failed: {first}"
+
+    result = _ingest.ingest_validated_upload(dataset_id, dataset_name, outcome,
+                                             uploaded_by=uploaded_by)
+    return result.ok, result.message
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared UI / data helpers
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1902,22 +1924,31 @@ elif page == "Upload & Data Quality":
     col1, col2 = st.columns([2, 1])
     
     with col2:
-        st.subheader("📋 Template Download")
-        os.makedirs("templates", exist_ok=True)
+        st.subheader("Template Download")
+        # The template is built in memory from the same column contract the
+        # validator enforces. The previous builder wrote a file into a
+        # ``templates/`` directory first, which meant it depended on the working
+        # directory and failed outright on a read-only filesystem.
         try:
             from src.validate_onehealth import create_unified_template
+            from src.upload_schema import TEMPLATE_FILENAME
             unified_bytes = create_unified_template()
             st.download_button(
-                label="⬇ Download Unified Template",
+                label="Download Upload Template",
                 data=unified_bytes,
-                file_name="AMR_OneHealth_Unified_Template.xlsx",
+                file_name=TEMPLATE_FILENAME,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                help="Single workbook with all sheets: samples, ast_results, pps_survey, prescriptions, amu_data, amc_data",
+                help=("One workbook: samples, isolates, ast_results, genomics, "
+                      "pps_survey, prescriptions, amu_data and amc_data, with a "
+                      "Data dictionary sheet describing every column."),
                 use_container_width=True,
             )
         except Exception as e:
-            st.error(f"Error creating unified template: {e}")
-        st.caption("One Excel file · 6 sheets · fill only what you need")
+            st.error(f"Error creating template: {e}")
+        st.caption(
+            "One Excel file. Fill only the sheets you need. Controlled fields "
+            "have dropdowns; the Data dictionary sheet explains each column."
+        )
     
     with col1:
         st.subheader("Upload Data")
@@ -1929,45 +1960,81 @@ elif page == "Upload & Data Quality":
         if uploaded_file:
             if st.button("Validate & Upload", type="primary"):
                 with st.spinner("Validating all sheets..."):
-                    # ── Core AMR (samples + ast_results) ────────────────
-                    is_valid, errors, samples_df, ast_df = validate.validate_upload(uploaded_file)
-                    
+                    # ── Core AMR: specimens, isolates, AST, genomics ────
+                    from src import ingest as _ingest
+                    outcome = validate.validate_workbook(uploaded_file)
+                    samples_df, ast_df = outcome.samples, outcome.ast
+
                     amr_saved = False
-                    if is_valid:
+                    if outcome.ok:
                         if st.session_state.lab_name:
-                            lab_values = samples_df['lab_name'].astype(str).str.strip().unique().tolist()
+                            lab_values = samples_df['lab_name'].dropna().astype(str).str.strip().unique().tolist()
                             if len(lab_values) != 1 or lab_values[0].strip().lower() != st.session_state.lab_name.strip().lower():
                                 st.error("Uploaded data must contain only your laboratory in the lab_name column.")
                                 st.stop()
 
                         auto_interpreted_count = ast_df['auto_interpreted'].sum() if 'auto_interpreted' in ast_df.columns else 0
                         if auto_interpreted_count > 0:
-                            st.info(f"🔬 Automated interpretation: {int(auto_interpreted_count)} AST results (CLSI/EUCAST)")
+                            st.info(
+                                f"Automated interpretation: {int(auto_interpreted_count)} "
+                                "susceptibility result(s) were derived from a measurement "
+                                "against the platform's abridged breakpoint table. Each is "
+                                "stored with that table's version and marked "
+                                "rule-interpreted."
+                            )
 
                         dataset_id = str(uuid.uuid4())[:8]
-                        success, msg = db.save_dataset(
+                        # Writes the traceability chain -- subject, encounter,
+                        # specimen, isolate, phenotype, genomic result and the
+                        # custody log -- alongside the legacy wide tables, in a
+                        # single transaction.
+                        result = _ingest.ingest_validated_upload(
                             dataset_id,
                             uploaded_file.name.replace('.xlsx', ''),
-                            samples_df,
-                            ast_df,
-                            uploaded_by=(st.session_state.user_email or "Anonymous")
+                            outcome,
+                            uploaded_by=(st.session_state.user_email or "Anonymous"),
                         )
-                        if success:
-                            st.success(f"✅ AMR data saved (ID: {dataset_id}) — {len(samples_df)} samples, {len(ast_df)} tests")
+                        if result.ok:
+                            st.success(f"AMR data saved (ID: {dataset_id}) — {result.message}")
+                            counts = result.counts
+                            c1, c2, c3, c4 = st.columns(4)
+                            c1.metric("Patients / subjects", counts.get('subjects', 0))
+                            c2.metric("Specimens", counts.get('specimens', 0))
+                            c3.metric("Isolates", counts.get('isolates', 0))
+                            c4.metric("Susceptibility results", counts.get('phenotypes', 0))
+                            if counts.get('genomic_results'):
+                                st.caption(
+                                    f"{counts['genomic_results']} genomic result(s) linked to "
+                                    "their isolates, and "
+                                    f"{counts.get('custody_events', 0)} custody event(s) recorded."
+                                )
+                            for note in result.notes:
+                                st.info(note)
                             amr_saved = True
                         else:
-                            st.error(f"Database error: {msg}")
-                    elif errors:
-                        # Only show AMR errors if sheets existed
+                            st.error(result.message)
+
+                        if outcome.warnings:
+                            with st.expander(f"{len(outcome.warnings)} data-quality warning(s)"):
+                                for i, warning in enumerate(outcome.warnings, 1):
+                                    st.markdown(f"{i}. {warning}")
+                    else:
                         uploaded_file.seek(0)
                         from openpyxl import load_workbook as _lwb
                         _wb = _lwb(uploaded_file, read_only=True)
                         _has_amr = 'samples' in _wb.sheetnames or 'ast_results' in _wb.sheetnames
                         _wb.close()
                         if _has_amr:
-                            st.warning("⚠ AMR sheets (samples/ast_results) had errors:")
-                            for i, error in enumerate(errors, 1):
-                                st.markdown(f"  {i}. {error}")
+                            st.error(
+                                f"The AMR sheets were not saved: {len(outcome.errors)} "
+                                "problem(s) must be corrected first. Nothing was written."
+                            )
+                            for i, error in enumerate(outcome.errors, 1):
+                                st.markdown(f"{i}. {error}")
+                            if outcome.warnings:
+                                with st.expander(f"{len(outcome.warnings)} further warning(s)"):
+                                    for i, warning in enumerate(outcome.warnings, 1):
+                                        st.markdown(f"{i}. {warning}")
 
                     # ── One Health sheets (PPS / AMU / AMC) ─────────────
                     uploaded_file.seek(0)
@@ -1988,16 +2055,27 @@ elif page == "Upload & Data Quality":
                         # Handle both DataFrame and legacy dict
                         survey_df = survey_raw if isinstance(survey_raw, pd.DataFrame) else pd.DataFrame([survey_raw])
                         rx_df = oh_result['pps_prescriptions']
-                        n_surveys = len(survey_df)
                         n_rx = len(rx_df)
-                        rx_per = max(1, n_rx // n_surveys) if n_surveys else 0
-                        rx_idx = 0
+
+                        # Prescriptions are attributed to their survey by
+                        # facility (and survey date when a facility was surveyed
+                        # more than once), never by row position. Splitting the
+                        # sheet into equal blocks, as this page used to, gave
+                        # every prescription the facility that happened to sit at
+                        # the same row index in the survey sheet and discarded
+                        # the remainder of the division.
+                        from src.validate_onehealth import attribute_prescriptions
+                        attribution, attr_errors = attribute_prescriptions(survey_df, rx_df)
+                        for err in attr_errors:
+                            st.error(err)
+
                         pps_ok_count = 0
-                        for _, srow in survey_df.iterrows():
+                        pps_rx_count = 0
+                        for position, (_, srow) in enumerate(survey_df.iterrows()):
+                            chunk = attribution.get(position)
+                            if chunk is None:
+                                continue
                             sid = f"PPS-{_uuid.uuid4().hex[:8]}"
-                            end_idx = min(rx_idx + rx_per, n_rx)
-                            chunk = rx_df.iloc[rx_idx:end_idx] if rx_idx < n_rx else pd.DataFrame()
-                            rx_idx = end_idx
                             ok, msg = db.save_pps_survey(
                                 sid,
                                 str(srow['facility_name']),
@@ -2011,9 +2089,22 @@ elif page == "Upload & Data Quality":
                             )
                             if ok:
                                 pps_ok_count += 1
+                                pps_rx_count += len(chunk)
+                            else:
+                                st.error(f"PPS save error for {srow['facility_name']}: {msg}")
+
                         if pps_ok_count:
-                            st.success(f"✅ PPS saved — {pps_ok_count} surveys, {n_rx} prescriptions")
-                        else:
+                            st.success(
+                                f"PPS saved — {pps_ok_count} survey(s), "
+                                f"{pps_rx_count} of {n_rx} prescription(s) attributed"
+                            )
+                            if pps_rx_count < n_rx:
+                                st.warning(
+                                    f"{n_rx - pps_rx_count} prescription(s) were not stored "
+                                    "because they could not be attributed to a survey. See "
+                                    "the messages above."
+                                )
+                        elif not attr_errors:
                             st.error("PPS save error: no surveys could be saved")
 
                     # AMU
@@ -2231,15 +2322,21 @@ elif page == "Admin - Datasets":
                         st.info("No submissions available for import.")
                     else:
                         samples_df, ast_df = kobo_submissions_to_frames(submissions_df)
-                        sample_valid, sample_errors = validate.validate_samples(samples_df)
-                        ast_valid, ast_errors = validate.validate_ast_results(ast_df, set(samples_df['sample_id'].dropna().astype(str)))
-                        errors = sample_errors + ast_errors
+                        # The same validator the workbook upload uses. A second,
+                        # laxer path is how the mobile import came to write rows
+                        # that the traceability tables never saw.
+                        kobo_outcome = validate.validate_frames(samples_df, ast_df)
+                        samples_df, ast_df = kobo_outcome.samples, kobo_outcome.ast
 
-                        if errors:
-                            st.error("KoboToolbox data validation failed.")
-                            for err in errors[:10]:
+                        if not kobo_outcome.ok:
+                            st.error("KoboToolbox data validation failed. Nothing was imported.")
+                            for err in kobo_outcome.errors[:15]:
                                 st.write(f"- {err}")
                         else:
+                            if kobo_outcome.warnings:
+                                with st.expander(f"{len(kobo_outcome.warnings)} data-quality warning(s)"):
+                                    for warn in kobo_outcome.warnings:
+                                        st.write(f"- {warn}")
                             # Deduplicate by existing sample_id and (isolate_id + antibiotic) combination
                             existing_samples_df = db.get_all_samples()
                             existing_ast_df = db.get_all_ast_results()
@@ -2280,12 +2377,12 @@ elif page == "Admin - Datasets":
 
                             dataset_id = str(uuid.uuid4())[:8]
                             dataset_name = f"Kobo Sync {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-                            success, save_msg = db.save_dataset(
+                            success, save_msg = _ingest_frames(
                                 dataset_id,
                                 dataset_name,
                                 samples_df,
                                 ast_df,
-                                uploaded_by=(st.session_state.user_email or "System")
+                                uploaded_by=(st.session_state.user_email or "System"),
                             )
                             if success:
                                 st.success(f"KoboToolbox data imported as dataset {dataset_id}")
@@ -2324,7 +2421,7 @@ elif page == "Admin - Datasets":
                                                 f"{lab_name} — Kobo "
                                                 f"{datetime.now().strftime('%Y-%m-%d %H:%M')}"
                                             )
-                                            ok_lab, _ = db.save_dataset(
+                                            ok_lab, _ = _ingest_frames(
                                                 lab_dataset_id,
                                                 lab_dataset_name,
                                                 lab_samples,

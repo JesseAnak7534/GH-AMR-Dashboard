@@ -495,3 +495,31 @@ def batch_interpret_results(ast_df: pd.DataFrame, guideline: str = "CLSI") -> pd
     """Convenience function for batch interpretation."""
     interpreter = get_interpreter(guideline)
     return interpreter.batch_interpret(ast_df)
+
+# ============================================================================
+# PROVENANCE OF THE PLATFORM BREAKPOINT TABLES
+# ============================================================================
+#
+# The tables above are an abridged transcription of the published standards,
+# covering the organism-drug pairs this platform sees most often. They are not
+# the standards themselves, and a result derived from them must say so: a
+# laboratory auditing an S/I/R needs to know whether the call came from the full
+# CLSI M100 table or from this subset.
+#
+# `platform_breakpoint_label` is what gets written into the `breakpoint_version`
+# column for any result the platform derives, so the distinction survives in the
+# stored record rather than living only in this comment.
+
+PLATFORM_BREAKPOINT_LABELS: Dict[str, str] = {
+    "CLSI_2025": "CLSI 2025 (ICBB-AMRSS abridged table)",
+    "EUCAST_2025": "EUCAST 2025 (ICBB-AMRSS abridged table)",
+}
+
+
+def platform_breakpoint_label(guideline_version: Optional[str]) -> str:
+    """Return the version label to store against a platform-derived result."""
+    if not guideline_version:
+        return "ICBB-AMRSS abridged table (edition unspecified)"
+    key = str(guideline_version).strip()
+    return PLATFORM_BREAKPOINT_LABELS.get(
+        key, f"{key} (ICBB-AMRSS abridged table)")

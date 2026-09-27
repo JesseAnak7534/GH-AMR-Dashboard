@@ -137,7 +137,11 @@ class _CursorProxy:
     """Thin wrapper over psycopg2's DictCursor."""
     def __init__(self, raw): self._raw = raw
     def execute(self, sql, params=None):
-        self._raw.execute(sql, params or ())
+        # psycopg2 skips placeholder interpolation only when vars is None. An
+        # empty tuple still triggers it, so SQL holding a literal % -- a LIKE
+        # pattern, a to_char format -- would fail with "tuple index out of
+        # range" purely because it was called without parameters.
+        self._raw.execute(sql, params if params else None)
         return self
     def executemany(self, sql, seq_of_params):
         self._raw.executemany(sql, seq_of_params)
@@ -145,6 +149,14 @@ class _CursorProxy:
     def fetchone(self): return self._raw.fetchone()
     def fetchall(self): return self._raw.fetchall()
     def fetchmany(self, size=None): return self._raw.fetchmany(size) if size else self._raw.fetchmany()
+    @property
+    def raw(self):
+        """The underlying psycopg2 cursor.
+
+        Needed by callers that use psycopg2 extras directly -- ``execute_values``
+        for batched inserts, in particular, which the proxy does not wrap.
+        """
+        return self._raw
     @property
     def description(self): return self._raw.description
     @property
@@ -509,53 +521,15 @@ def init_database():
 # Dataset + AST CRUD
 # ---------------------------------------------------------------------------
 
-def save_dataset(dataset_id: str, dataset_name: str, samples_df: pd.DataFrame,
-                 ast_df: pd.DataFrame, uploaded_by: str = "System"):
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            INSERT INTO datasets (dataset_id, dataset_name, uploaded_by, uploaded_at, rows_samples, rows_tests)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (dataset_id, dataset_name, uploaded_by, datetime.now().isoformat(),
-              len(samples_df), len(ast_df)))
-
-        for _, row in samples_df.iterrows():
-            cur.execute("""
-                INSERT INTO samples
-                (dataset_id, sample_id, lab_name, collection_date, region, district, site_type,
-                 source_category, source_type, food_matrix, environment_matrix, latitude, longitude)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                dataset_id,
-                row.get('sample_id'), row.get('lab_name'), row.get('collection_date'),
-                row.get('region'), row.get('district'), row.get('site_type'),
-                row.get('source_category'), row.get('source_type'),
-                row.get('food_matrix'), row.get('environment_matrix'),
-                row.get('latitude'), row.get('longitude'),
-            ))
-
-        for _, row in ast_df.iterrows():
-            cur.execute("""
-                INSERT INTO ast_results
-                (dataset_id, sample_id, isolate_id, organism, antibiotic, result, method, guideline, test_date, mic_value)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                dataset_id,
-                row.get('sample_id'), row.get('isolate_id'), row.get('organism'),
-                row.get('antibiotic'), row.get('result'), row.get('method'),
-                row.get('guideline'), row.get('test_date'), row.get('mic_value'),
-            ))
-
-        conn.commit()
-        return True, "Data saved successfully"
-    except Exception as e:
-        conn.rollback()
-        logger.exception("save_dataset failed")
-        return False, f"Database error: {str(e)}"
-    finally:
-        conn.close()
-
+# save_dataset was removed here. It inserted a ``samples`` row and an
+# ``ast_results`` row and nothing else, so anything written through it had no
+# subject, encounter, specimen or isolate behind it and could not be traced to a
+# ward or a patient. It also silently dropped zone_diameter and every
+# interpretation column that validation had just produced.
+#
+# ``src.ingest.ingest_validated_upload`` replaces it: one transaction that
+# writes the whole chain plus the legacy wide tables. Every write path in the
+# application goes through it.
 
 def get_all_datasets() -> List[Dict]:
     conn = get_connection()
