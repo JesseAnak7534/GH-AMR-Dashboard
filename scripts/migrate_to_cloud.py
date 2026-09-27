@@ -108,8 +108,42 @@ def redact(url: str) -> str:
     return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", url or "")
 
 
+def is_transaction_pooler(url: str) -> bool:
+    """Detect a transaction-mode connection pooler.
+
+    Supabase (port 6543) and PgBouncer in transaction mode hand each statement
+    a different backend, so a named server-side cursor cannot survive between
+    fetches. Callers fall back to client-side buffering, which is fine at this
+    database's size.
+    """
+    try:
+        from urllib.parse import urlsplit, parse_qsl
+        parts = urlsplit(url)
+        if parts.port == 6543:
+            return True
+        host = (parts.hostname or "").lower()
+        if "pooler" in host and parts.port not in (5432, None):
+            return True
+        return dict(parse_qsl(parts.query)).get("pgbouncer") == "true"
+    except Exception:
+        return False
+
+
+def normalise(url: str) -> str:
+    """Add sslmode/application_name the same way the application does."""
+    from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+    parts = urlsplit(url)
+    params = dict(parse_qsl(parts.query, keep_blank_values=True))
+    host = (parts.hostname or "").lower()
+    if host not in {"localhost", "127.0.0.1", "::1", "0.0.0.0", ""}:
+        params.setdefault("sslmode", "require")
+    params["application_name"] = "amrss-migrate"
+    return urlunsplit((parts.scheme, parts.netloc, parts.path,
+                       urlencode(params), parts.fragment))
+
+
 def connect(url: str, *, readonly: bool = False):
-    conn = psycopg2.connect(url, connect_timeout=15, application_name="amrss-migrate")
+    conn = psycopg2.connect(normalise(url), connect_timeout=15)
     if readonly:
         conn.set_session(readonly=True)
     return conn
@@ -147,7 +181,8 @@ def migration_order(source_tables: List[str]) -> List[str]:
     return ordered + extra
 
 
-def copy_table(src, dst, table: str, *, truncate: bool, dry_run: bool) -> Tuple[int, str]:
+def copy_table(src, dst, table: str, *, truncate: bool, dry_run: bool,
+               server_cursor: bool = True) -> Tuple[int, str]:
     """Copy one table. Returns (rows copied, note)."""
     src_cols = columns_of(src, table)
     dst_cols = columns_of(dst, table)
@@ -182,8 +217,15 @@ def copy_table(src, dst, table: str, *, truncate: bool, dry_run: bool) -> Tuple[
 
     copied = 0
     try:
-        with src.cursor(name="mig_%s" % table) as scur:   # server-side cursor
+        # A named cursor streams the source without loading it all into memory,
+        # but it needs a stable backend. Behind a transaction-mode pooler each
+        # statement may land on a different connection, so buffer client-side
+        # instead. At this database's size that costs a few MB.
+        scur = (src.cursor(name="mig_%s" % table) if server_cursor
+                else src.cursor())
+        if server_cursor:
             scur.itersize = BATCH
+        with scur:
             scur.execute('SELECT %s FROM "%s"' % (collist, table))
             with dst.cursor() as dcur:
                 while True:
@@ -297,6 +339,17 @@ def main() -> int:
     try:
         tables = migration_order(list_tables(src))
 
+        # Streaming the source needs a stable backend; a transaction pooler
+        # cannot give one.
+        use_server_cursor = not is_transaction_pooler(args.source)
+        if not use_server_cursor:
+            print("\nnote: source looks like a transaction pooler; buffering "
+                  "client-side instead of streaming")
+        if is_transaction_pooler(args.target):
+            print("note: target is a transaction pooler. Migration will work, "
+                  "but prefer the direct or session-mode connection string for "
+                  "the schema build.")
+
         if args.verify_only:
             return 0 if verify(src, dst, tables) else 1
 
@@ -311,7 +364,8 @@ def main() -> int:
         for t in tables:
             try:
                 n, note = copy_table(src, dst, t,
-                                     truncate=args.truncate, dry_run=args.dry_run)
+                                     truncate=args.truncate, dry_run=args.dry_run,
+                                     server_cursor=use_server_cursor)
                 if not args.dry_run:
                     dst.commit()
                 grand += n

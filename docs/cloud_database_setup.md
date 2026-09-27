@@ -45,6 +45,26 @@ Pick a region close to Ghana. `eu-central-1` (Frankfurt) or `eu-west-2`
    take the pooled one for the deployed app — Streamlit opens and closes
    connections per page load.
 
+### If you are using Supabase
+
+Find the strings under **Project Settings -> Database -> Connection string**.
+Supabase offers three, and they are not interchangeable:
+
+| Mode | Port | Use it for |
+|---|---|---|
+| **Direct** | 5432 | Migration and schema work. IPv6-only on some networks. |
+| **Session pooler** | 5432 | Migration and schema work, IPv4-friendly. Safe default. |
+| **Transaction pooler** | 6543 | The deployed app only. |
+
+The transaction pooler gives each statement a different backend, so server-side
+cursors and prepared statements do not survive between fetches. The migration
+script detects port 6543 and switches to client-side buffering automatically,
+so it will not break — but **run the migration through the direct or session
+string** and save the transaction pooler for `DATABASE_URL` on Streamlit Cloud.
+
+The database is always named `postgres` on Supabase; you do not create
+`amr_surveillance` separately. Everything lands in the `public` schema.
+
 ---
 
 ## 3. Migrate
