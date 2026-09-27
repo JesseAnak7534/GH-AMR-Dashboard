@@ -19,7 +19,7 @@ LAB_EMAIL_DOMAIN = "icbb-amr.gh"
 KOBO_CONFIG_PATH = os.path.join("db", "kobo_config.json")
 
 # Short login codes for each approved lab.  These map directly to the
-# usernames provisioned by ``scripts/setup_lab_logins.py`` and are the
+# usernames that per-laboratory login accounts used to carry, and are the
 # values the dashboard checks at sign-in time, so changing a code here
 # without re-running the provisioner will lock that lab out.
 LAB_LOGIN_CODES: dict = {
@@ -314,9 +314,13 @@ def get_lab_credentials() -> Dict[str, str]:
     """Return ``{lab_name: short_username}`` for every approved lab.
 
     The short username is combined with :data:`LAB_EMAIL_DOMAIN` to form the
-    login email (e.g. ``kbth@icbb-amr.gh``).  Edit :data:`LAB_LOGIN_CODES`
-    to change a code; passwords are managed by
-    ``scripts/setup_lab_logins.py``.
+    login email (e.g. ``kbth@icbb-amr.gh``).
+
+    Per-laboratory login accounts were retired: laboratory identity is a data
+    attribute (``samples.lab_name``), not a credential. This mapping is kept
+    because the login path still recognises a laboratory address if such an
+    account is ever created deliberately, and because the codes are the same
+    ones WHONET exports carry.
     """
     return dict(LAB_LOGIN_CODES)
 

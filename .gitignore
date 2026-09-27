@@ -19,9 +19,10 @@ db/lab_credentials.json
 db/supabase_pre_upgrade_*.json.gz
 db/*_backup_*.json.gz
 Lab_Login_Credentials.docx
-# NOTE: db/lab_accounts.json is intentionally NOT ignored -- it contains
-# only bcrypt hashes (no plaintext) and the deployed Streamlit Cloud app
-# needs it to bootstrap the lab logins on startup.
+# db/lab_accounts.json was deleted, not ignored. It paired each lab's code
+# with its bcrypt hash, and the repository is public, so it handed an attacker
+# both halves of the guess. Per-laboratory logins were retired with it.
+db/lab_accounts.json
 
 # Excel files and templates (keep templates, ignore uploads)
 *.xlsx

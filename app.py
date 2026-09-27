@@ -227,6 +227,88 @@ else:
     if st.session_state.authenticated:
         st.session_state.last_activity_time = datetime.now()
 
+# ============================================================================
+# ACCESS MODEL
+# ============================================================================
+#
+# The dashboard is readable without signing in, but only in aggregate. Signing
+# in as an administrator unlocks record-level detail and every write path.
+#
+# The reason is the data. The platform holds human specimens carrying ward type,
+# age band and specimen type, attributable to named hospitals. Patient
+# pseudonymisation protects the patient; it does nothing for the facility, and a
+# named hospital's ICU resistance profile is not ours to publish. Rates and
+# charts carry the epidemiological signal without exposing any individual
+# record, so that is what an anonymous visitor sees.
+#
+# Laboratory identity is unaffected. It lives in the data -- samples.lab_name,
+# specimens.lab_name, subjects.facility_code -- so attribution and per-lab
+# comparison work for every visitor. What used to gate those was a per-lab login
+# account, and those accounts are gone.
+
+#: A frame holding any of these columns describes individual records rather than
+#: an aggregate. Testing the data beats remembering to gate each call site: a
+#: table added later is covered without anyone having to think about it.
+_RECORD_ID_COLUMNS = frozenset({
+    "sample_id", "specimen_id", "isolate_id", "subject_id", "encounter_id",
+    "genomic_id", "patient_pseudonym", "accession_number", "local_patient_id",
+    "email", "password_hash",
+})
+
+
+def is_admin() -> bool:
+    return bool(st.session_state.get("is_admin"))
+
+
+def can_view_records() -> bool:
+    """Whether record-level detail may be shown to the current visitor."""
+    return is_admin()
+
+
+def _is_record_level(data) -> bool:
+    """Whether a frame describes individual records."""
+    columns = getattr(data, "columns", None)
+    if columns is None:
+        return False
+    try:
+        return bool(_RECORD_ID_COLUMNS & {str(c).strip().lower() for c in columns})
+    except Exception:
+        return False
+
+
+def _record_lock_notice(rows=None) -> None:
+    count = f"{rows:,} record(s)" if isinstance(rows, int) else "the underlying records"
+    st.info(
+        f"Aggregate view. {count} sit behind this figure. Record-level detail "
+        "and data export need an administrator sign-in, because these rows "
+        "describe individual specimens from named facilities. Use **Sign in** "
+        "in the sidebar."
+    )
+
+
+# Central gate. Streamlit's table renderers are wrapped once, here, so that
+# every record-level table in the application is covered, including any added
+# later by someone who has not read this comment.
+_ST_DATAFRAME = st.dataframe
+_ST_TABLE = st.table
+_ST_DATA_EDITOR = st.data_editor
+
+
+def _gated_renderer(renderer):
+    def wrapped(data=None, *args, **kwargs):
+        if not can_view_records() and _is_record_level(data):
+            shape = getattr(data, "shape", None)
+            _record_lock_notice(shape[0] if shape else None)
+            return None
+        return renderer(data, *args, **kwargs)
+    return wrapped
+
+
+st.dataframe = _gated_renderer(_ST_DATAFRAME)
+st.table = _gated_renderer(_ST_TABLE)
+st.data_editor = _gated_renderer(_ST_DATA_EDITOR)
+
+
 def _get_admin_config():
     admin_email = None
     admin_password = None
@@ -247,40 +329,10 @@ def _get_lab_email_mapping() -> Dict[str, str]:
     return get_lab_email_map()
 
 
-def _apply_lab_filter(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    lab_name = st.session_state.get("lab_name")
-    if st.session_state.get("is_admin") or not lab_name:
-        return samples_df, ast_df
-    if samples_df.empty:
-        return samples_df, ast_df
-    lab_mask = samples_df['lab_name'].astype(str).str.strip().str.lower() == lab_name.strip().lower()
-    filtered_samples = samples_df[lab_mask]
-    if ast_df.empty:
-        return filtered_samples, ast_df
-    filtered_ast = ast_df[ast_df['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str))]
-    return filtered_samples, filtered_ast
-
-
-def _ingest_frames(dataset_id: str, dataset_name: str,
-                   samples_df: pd.DataFrame, ast_df: pd.DataFrame,
-                   uploaded_by: str = "System") -> Tuple[bool, str]:
-    """Validate in-memory frames and write them through the traceability chain.
-
-    Every write path goes through here rather than calling ``db.save_dataset``,
-    which only ever populated the two legacy wide tables. Rows written that way
-    had no subject, no encounter, no specimen and no isolate, so nothing
-    imported by that route could be traced back to a ward or a patient.
-    """
-    from src import ingest as _ingest
-
-    outcome = validate.validate_frames(samples_df, ast_df)
-    if not outcome.ok:
-        first = "; ".join(outcome.errors[:3])
-        return False, f"Validation failed: {first}"
-
-    result = _ingest.ingest_validated_upload(dataset_id, dataset_name, outcome,
-                                             uploaded_by=uploaded_by)
-    return result.ok, result.message
+# _apply_lab_filter was removed here. It narrowed the dashboard to the logged-in
+# laboratory's own rows. Nothing called it, and with laboratory identity on the
+# data rather than in the session, narrowing by laboratory is an ordinary filter
+# available to every visitor.
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -339,8 +391,15 @@ def _render_dataset_banner(dataset_id):
 
 
 def _csv_download(df: pd.DataFrame, filename: str, key: str, label: str = "⬇ Download CSV"):
-    """Render a CSV download button below a chart or table."""
+    """Render a CSV download button below a chart or table.
+
+    A record-level export is the same disclosure as a record-level table, so it
+    is held to the same rule.
+    """
     if df is None or df.empty:
+        return
+    if not can_view_records() and _is_record_level(df):
+        st.caption("Record-level export requires an administrator sign-in.")
         return
     try:
         csv = df.to_csv(index=False).encode("utf-8")
@@ -386,55 +445,18 @@ def _bootstrap_admin_once():
 _bootstrap_admin_once()
 
 
-def _bootstrap_lab_accounts() -> None:
-    """Provision sentinel-lab logins from the committed hash manifest.
+# The per-lab account bootstrap was removed here. It read bcrypt hashes from
+# db/lab_accounts.json and created one login per laboratory on startup.
+#
+# Two reasons it is gone. The hashes had to be committed for a deployed app to
+# read them, which put credential material in a public repository. And the
+# accounts existed to give each laboratory a filtered view, which the data now
+# provides directly through samples.lab_name and specimens.lab_name -- 36 of the
+# 40 accounts were never signed into once.
+#
+# Laboratory identity is a data attribute, not a login. The administrator
+# account is the only one, from ADMIN_EMAIL / ADMIN_PASSWORD.
 
-    The deployed Streamlit Cloud app uses its own database (separate from the
-    administrator's local Postgres), so each new deployment has to recreate
-    the 19 sentinel-lab accounts before any lab can sign in.  We persist the
-    bcrypt hashes (never plaintext) to ``db/lab_accounts.json`` and replay
-    them here on startup -- this is idempotent: existing accounts get the
-    same hash overwritten, so the credentials shared with the labs keep
-    working across redeploys.
-    """
-    manifest = Path("db") / "lab_accounts.json"
-    if not manifest.exists():
-        return
-    try:
-        accounts = json.loads(manifest.read_text(encoding="utf-8"))
-    except Exception:
-        logger.exception("could not read %s", manifest)
-        return
-    for email, info in accounts.items():
-        pw_hash = info.get("password_hash")
-        if not pw_hash:
-            continue
-        try:
-            existing = db.get_user_by_email(email)
-            if existing is None:
-                db.create_user(email, pw_hash, is_admin=False)
-            else:
-                db.update_user_password(email, pw_hash)
-                if not existing.get("is_active"):
-                    db.update_user_status(existing["user_id"], True)
-            try:
-                db.set_user_verified(email, True)
-            except Exception:
-                logger.exception("lab verified flag write failed for %s", email)
-        except Exception:
-            logger.exception("lab account bootstrap failed for %s", email)
-
-
-@st.cache_resource(show_spinner=False)
-def _bootstrap_lab_accounts_once():
-    try:
-        _bootstrap_lab_accounts()
-        return True
-    except Exception:
-        logger.exception("lab account bootstrap top-level failure")
-        return False
-
-_bootstrap_lab_accounts_once()
 
 def _get_flag(name: str) -> bool:
     val = None
@@ -465,8 +487,10 @@ try:
 except Exception:
     logger.exception("startup maintenance PURGE_NON_ADMIN_ON_DEPLOY failed")
 
-# If not authenticated, show login page
-if not st.session_state.authenticated:
+# The login page is shown only when a visitor asks for it. It used to stand in
+# front of the whole application; the dashboard is now readable in aggregate
+# without it, and signing in unlocks record-level detail and every write path.
+if st.session_state.get("show_login") and not st.session_state.authenticated:
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
@@ -1613,16 +1637,15 @@ def _cached_all_datasets():
     return db.get_all_datasets() or []
 
 try:
+    # Every dataset is visible to every visitor. Two filters used to stand here:
+    # one hiding admin-owned datasets from non-admins, one narrowing to the
+    # logged-in laboratory's own uploads. Both existed to serve per-lab login
+    # accounts. With those gone, every dataset is admin-owned, so the first
+    # filter emptied this list for an anonymous visitor -- which left no dataset
+    # auto-selected and every dataset-scoped page stopping with "please select a
+    # dataset". What an anonymous visitor may *see* of a dataset is decided by
+    # the access model, not by hiding the dataset itself.
     _visible = _cached_all_datasets()
-    _admin_email_cfg, _ = _get_admin_config()
-    _admin_email_norm = (_admin_email_cfg or "").strip().lower()
-    if not st.session_state.is_admin and _admin_email_norm:
-        _visible = [d for d in _visible
-                    if (d.get("uploaded_by") or "").strip().lower() != _admin_email_norm]
-    if st.session_state.get("lab_name"):
-        _user_norm = (st.session_state.get("user_email") or "").strip().lower()
-        _visible = [d for d in _visible
-                    if (d.get("uploaded_by") or "").strip().lower() == _user_norm]
     _visible_ids = {d["dataset_id"] for d in _visible}
     _current_id = st.session_state.get("active_dataset_id")
     if _visible and (not _current_id or _current_id not in _visible_ids):
@@ -1878,16 +1901,24 @@ with st.sidebar:
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Sign out at bottom ─────────────────────────────────────────
+    # ── Sign in / out at bottom ────────────────────────────────────
     st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-    if st.button("Sign out", use_container_width=True):
-        st.session_state.authenticated = False
-        st.session_state.user_email = None
-        st.session_state.is_admin = False
-        st.session_state.last_activity_time = None
-        st.session_state.lab_name = None
-        st.success("Logged out successfully")
-        st.rerun()
+    if st.session_state.authenticated:
+        st.caption(f"Signed in as {st.session_state.user_email}")
+        if st.button("Sign out", use_container_width=True):
+            st.session_state.authenticated = False
+            st.session_state.user_email = None
+            st.session_state.is_admin = False
+            st.session_state.last_activity_time = None
+            st.session_state.lab_name = None
+            st.session_state.show_login = False
+            st.success("Signed out")
+            st.rerun()
+    else:
+        st.caption("Aggregate view — sign in for record-level detail.")
+        if st.button("Sign in", use_container_width=True):
+            st.session_state.show_login = True
+            st.rerun()
 
     page = st.session_state.active_page
 
@@ -1973,12 +2004,6 @@ elif page == "Upload & Data Quality":
 
                     amr_saved = False
                     if outcome.ok:
-                        if st.session_state.lab_name:
-                            lab_values = samples_df['lab_name'].dropna().astype(str).str.strip().unique().tolist()
-                            if len(lab_values) != 1 or lab_values[0].strip().lower() != st.session_state.lab_name.strip().lower():
-                                st.error("Uploaded data must contain only your laboratory in the lab_name column.")
-                                st.stop()
-
                         auto_interpreted_count = ast_df['auto_interpreted'].sum() if 'auto_interpreted' in ast_df.columns else 0
                         if auto_interpreted_count > 0:
                             st.info(
@@ -2139,16 +2164,12 @@ elif page == "Upload & Data Quality":
     # Show existing datasets
     st.subheader("Existing Datasets")
     datasets = _cached_all_datasets()
-    # Hide admin-owned datasets from non-admin users
-    config_admin_email, _ = _get_admin_config()
-    admin_email = (config_admin_email or "").strip().lower()
-    if not st.session_state.is_admin and admin_email:
-        datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
-    if st.session_state.lab_name:
-        datasets = [
-            ds for ds in datasets
-            if (ds.get('uploaded_by') or '').strip().lower() == (st.session_state.user_email or '').strip().lower()
-        ]
+    # The filter that hid admin-owned datasets from non-admin users was removed
+    # here. It existed so a logged-in laboratory would not see the national
+    # dataset. With laboratory accounts gone, every dataset is admin-owned, so
+    # the filter left an anonymous visitor with nothing at all -- which defeats
+    # the aggregate public view. Record-level protection is handled centrally by
+    # the access model instead.
     
     if datasets:
         for ds in datasets:
@@ -2182,16 +2203,12 @@ elif page == "Data Management":
 
     # Get all datasets
     datasets = _cached_all_datasets()
-    # Hide admin-owned datasets from non-admin users
-    config_admin_email, _ = _get_admin_config()
-    admin_email = (config_admin_email or "").strip().lower()
-    if not st.session_state.is_admin and admin_email:
-        datasets = [ds for ds in datasets if (ds.get('uploaded_by') or '').strip().lower() != admin_email]
-    if st.session_state.lab_name:
-        datasets = [
-            ds for ds in datasets
-            if (ds.get('uploaded_by') or '').strip().lower() == (st.session_state.user_email or '').strip().lower()
-        ]
+    # The filter that hid admin-owned datasets from non-admin users was removed
+    # here. It existed so a logged-in laboratory would not see the national
+    # dataset. With laboratory accounts gone, every dataset is admin-owned, so
+    # the filter left an anonymous visitor with nothing at all -- which defeats
+    # the aggregate public view. Record-level protection is handled centrally by
+    # the access model instead.
 
     if not datasets:
         st.info("No datasets available. Please upload data first on the 'Upload & Data Quality' page.")
@@ -2395,61 +2412,20 @@ elif page == "Admin - Datasets":
                                 if dropped_samples or dropped_tests:
                                     st.info(f"Skipped duplicates: {dropped_samples} samples, {dropped_tests} tests")
 
-                                # Option C — per-lab visibility:
-                                # In addition to the consolidated national
-                                # dataset above (visible to the admin), we
-                                # also create one per-lab dataset slice so
-                                # that when the lab itself logs in, the
-                                # existing visibility filter on Data
-                                # Management (which keys on `uploaded_by`
-                                # == lab email) shows them only their own
-                                # rows.  The per-lab slices are de-duped
-                                # by the same logic as the national insert.
+                                # The per-lab dataset slices were removed
+                                # here. They copied every row of the national
+                                # dataset into one dataset per laboratory, so
+                                # that a logged-in laboratory would see only its
+                                # own rows. With laboratory identity carried on
+                                # the data itself, that view is a filter -- and
+                                # the copies were pure duplication: 2,201 rows
+                                # became 4,402, and every specimen, subject and
+                                # isolate was counted twice. The 19 datasets
+                                # this had already created were deleted.
                                 try:
-                                    lab_email_map = _get_lab_email_mapping() or {}
-                                    if 'lab_name' in samples_df.columns and lab_email_map:
-                                        per_lab_created = 0
-                                        for lab_name, lab_email in lab_email_map.items():
-                                            lab_samples = samples_df[
-                                                samples_df['lab_name'].astype(str) == str(lab_name)
-                                            ]
-                                            if lab_samples.empty:
-                                                continue
-                                            lab_ast = ast_df[
-                                                ast_df['sample_id'].astype(str).isin(
-                                                    lab_samples['sample_id'].astype(str)
-                                                )
-                                            ]
-                                            if lab_ast.empty:
-                                                continue
-                                            lab_dataset_id = str(uuid.uuid4())[:8]
-                                            lab_dataset_name = (
-                                                f"{lab_name} — Kobo "
-                                                f"{datetime.now().strftime('%Y-%m-%d %H:%M')}"
-                                            )
-                                            ok_lab, _ = _ingest_frames(
-                                                lab_dataset_id,
-                                                lab_dataset_name,
-                                                lab_samples,
-                                                lab_ast,
-                                                uploaded_by=lab_email,
-                                            )
-                                            if ok_lab:
-                                                per_lab_created += 1
-                                        if per_lab_created:
-                                            st.success(
-                                                f"Created {per_lab_created} per-lab dataset "
-                                                f"slice(s) — each lab now sees only its own rows."
-                                            )
-                                        # Bust the dataset list cache so the
-                                        # new slices appear immediately on
-                                        # the Data Management page.
-                                        try:
-                                            _cached_all_datasets.clear()
-                                        except Exception:
-                                            pass
+                                    _cached_all_datasets.clear()
                                 except Exception:
-                                    logger.exception("per-lab slice creation failed")
+                                    pass
                             else:
                                 st.error(save_msg)
 
@@ -5067,11 +5043,9 @@ elif page == "Report Export":
 
             # Dataset selection (optional - for metadata)
             datasets = _cached_all_datasets()
-            # Hide admin-owned datasets from non-admin users
-            config_admin_email, _ = _get_admin_config()
-            admin_email = (config_admin_email or "").strip().lower()
-            if not st.session_state.is_admin and admin_email:
-                datasets = [d for d in datasets if (d.get('uploaded_by') or '').strip().lower() != admin_email]
+            # The admin-owned dataset filter was removed here; see the note on
+            # the access model. Every dataset is admin-owned now, so it only
+            # blanked the report's dataset list for anonymous visitors.
             dataset_names = [f"{d['dataset_name']} ({d['dataset_id']})" for d in datasets]
 
             selected_dataset_name = "Filtered Dataset"

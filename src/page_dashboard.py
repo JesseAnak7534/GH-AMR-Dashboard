@@ -134,10 +134,24 @@ def render_dashboard_page():
     lab_name = st.session_state.get("lab_name")
     user_email = st.session_state.get("user_email", "")
 
-    name = "Administrator" if is_admin else (lab_name or user_email.split("@")[0])
-    scope = "National surveillance overview" if is_admin else f"Surveillance summary for {lab_name or 'your lab'}"
+    # The dashboard is readable without signing in, so there may be no user at
+    # all. This greeting previously split user_email unconditionally and raised
+    # an AttributeError for every anonymous visitor.
+    if is_admin:
+        greeting = "Welcome back, Administrator"
+        scope = "National surveillance overview"
+    elif lab_name:
+        greeting = f"Welcome back, {lab_name}"
+        scope = f"Surveillance summary for {lab_name}"
+    elif user_email:
+        greeting = f"Welcome back, {str(user_email).split('@')[0]}"
+        scope = "Surveillance summary"
+    else:
+        greeting = "AMR One Health Surveillance"
+        scope = ("National surveillance overview. Aggregate figures only -- "
+                 "record-level detail requires an administrator sign-in.")
 
-    st.markdown(f"## Welcome back, {name}")
+    st.markdown(f"## {greeting}")
     st.caption(scope)
 
     data = _compute("" if is_admin else (lab_name or ""))

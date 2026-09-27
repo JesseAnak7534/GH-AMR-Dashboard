@@ -30,8 +30,9 @@ SNAPSHOT_PATH = ROOT / "db" / "cloud_snapshot.json.gz"
 # (samples, ast_results, pps_prescriptions, predictions).
 # `users` is deliberately absent. This snapshot is committed to a public
 # repository, and the table holds email addresses and bcrypt password hashes.
-# Lab logins are bootstrapped separately; see db/lab_accounts.json and
-# scripts/setup_lab_logins.py.
+# There is no lab-login bootstrap any more: per-laboratory accounts were
+# retired, and the administrator account comes from ADMIN_EMAIL /
+# ADMIN_PASSWORD.
 TABLES = [
     "datasets",
     "samples",
