@@ -28,8 +28,11 @@ SNAPSHOT_PATH = ROOT / "db" / "cloud_snapshot.json.gz"
 
 # Order matters: parents (datasets, users, pps_surveys) before children
 # (samples, ast_results, pps_prescriptions, predictions).
+# `users` is deliberately absent. This snapshot is committed to a public
+# repository, and the table holds email addresses and bcrypt password hashes.
+# Lab logins are bootstrapped separately; see db/lab_accounts.json and
+# scripts/setup_lab_logins.py.
 TABLES = [
-    "users",
     "datasets",
     "samples",
     "ast_results",

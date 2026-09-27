@@ -70,14 +70,28 @@ WORD_OUTPUT = Path("Lab_Login_Credentials.docx")
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _make_password(code: str) -> str:
-    """Return a memorable but reasonably strong password.
+# Deliberately excludes O, 0, I, l and 1, which are misread when a password is
+# transcribed from a printed credential sheet.
+_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
 
-    Pattern: ``<CODE>-Amr@<4 digits>`` -- always >= 11 chars and contains
-    upper-case, lower-case, digit and a symbol.
+
+def _make_password(code: str) -> str:
+    """Return a password that is typable but not guessable.
+
+    The previous pattern was ``<CODE>-Amr@<4 digits>``. The code is public, the
+    middle is a constant, and four digits is 10,000 possibilities -- so anyone
+    holding the bcrypt hash could recover the password by trying every
+    candidate, which is about an hour per account on one core and trivially
+    parallelised. Because the hashes were committed to a public repository
+    alongside the codes, that was not a theoretical weakness.
+
+    This draws 14 characters from a 56-character alphabet, about 81 bits, which
+    is beyond brute force whatever the attacker holds. The code is kept as a
+    prefix only so a lab can tell at a glance which account a password belongs
+    to; none of the entropy depends on it.
     """
-    digits = "".join(secrets.choice("0123456789") for _ in range(4))
-    return f"{code.upper()}-Amr@{digits}"
+    body = "".join(secrets.choice(_PASSWORD_ALPHABET) for _ in range(14))
+    return f"{code.upper()}-{body}"
 
 
 def _load_existing() -> dict:

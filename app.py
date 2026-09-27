@@ -115,6 +115,12 @@ def _seed_cloud_data_once():
         with _gz.open(snapshot_path, "rt", encoding="utf-8") as f:
             snapshot = json.load(f)
         for table, payload in snapshot.get("tables", {}).items():
+            # Never restore credentials from a snapshot, even if an older file
+            # still contains them. The snapshot is committed, so anything it
+            # carries is public; logins come from the bootstrap path instead.
+            if table in ("users", "lab_credentials"):
+                logger.warning("refusing to seed the %s table from a snapshot", table)
+                continue
             cols = payload.get("columns") or []
             rows = payload.get("rows") or []
             if not rows:
