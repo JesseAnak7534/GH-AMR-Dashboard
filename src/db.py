@@ -63,6 +63,41 @@ def _read_database_url() -> Optional[str]:
     return None
 
 
+_LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1", "0.0.0.0", ""}
+
+
+def _is_local_host(url: str) -> bool:
+    try:
+        from urllib.parse import urlsplit
+        return (urlsplit(url).hostname or "").lower() in _LOCAL_HOSTS
+    except Exception:
+        return False
+
+
+def _normalise_dsn(url: str) -> str:
+    """Add the connection parameters a managed Postgres needs.
+
+    Hosted providers (Neon, Supabase, Railway, RDS…) require TLS and will
+    refuse or silently downgrade a plaintext connection. A local development
+    server usually has no certificate, so TLS is only forced off-box.
+
+    ``application_name`` makes this app identifiable in pg_stat_activity,
+    which matters when several services share one database.
+    """
+    from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+
+    parts = urlsplit(url)
+    params = dict(parse_qsl(parts.query, keep_blank_values=True))
+
+    if not _is_local_host(url):
+        params.setdefault("sslmode", "require")
+    params.setdefault("application_name", "icbb-amrss")
+
+    return urlunsplit(
+        (parts.scheme, parts.netloc, parts.path, urlencode(params), parts.fragment)
+    )
+
+
 def _resolve_dsn() -> None:
     """Validate the DSN at import time. A missing or malformed URL is fatal."""
     global _PG_DSN
@@ -78,8 +113,12 @@ def _resolve_dsn() -> None:
         raise RuntimeError(
             f"DATABASE_URL must be a PostgreSQL DSN, got {_redact(url)!r}."
         )
-    _PG_DSN = url
-    logger.info("database: PostgreSQL at %s", _redact(url))
+    _PG_DSN = _normalise_dsn(url)
+    logger.info(
+        "database: PostgreSQL at %s (%s)",
+        _redact(_PG_DSN),
+        "local" if _is_local_host(url) else "managed/remote, TLS required",
+    )
 
 
 _resolve_dsn()
