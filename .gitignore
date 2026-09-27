@@ -79,3 +79,12 @@ read_cv2.py
 update_cv_about.py
 CV for me/
 "CV for me"/
+
+# Thesis reference papers (large PDFs — not part of the app)
+Thesis_Papers/
+
+# PhD proposal drafts and sources (personal)
+Proposal/
+
+# Stray Windows shortcuts
+*.lnk

@@ -1109,7 +1109,7 @@ def generate_filtered_html_report(
     emerging_patterns = analytics.identify_emerging_resistance(ast_df, samples_df)
     data_quality = analytics.assess_data_quality(samples_df, ast_df)
     high_risk_organisms = analytics.get_high_risk_organisms(ast_df)
-    antibiotic_recommendations = analytics.generate_antibiotic_recommendations(ast_df)
+    susceptibility_summary = analytics.summarise_susceptibility(ast_df)
     resistance_burden = analytics.calculate_resistance_burden(samples_df, ast_df)
     resistance_forecast = analytics.forecast_resistance_trend(ast_df)
 
@@ -2124,25 +2124,66 @@ def generate_filtered_html_report(
         </div>
 """
 
-    # Antibiotic Recommendations
-    if antibiotic_recommendations:
-        html_report += """
+    # Susceptibility summary.
+    #
+    # This block previously printed "Antibiotic Treatment Recommendations" cards
+    # reading rec.get('status') and rec.get('reason'). Neither key was ever
+    # produced by the upstream function, so every antibiotic in every exported
+    # report was labelled "Alternative / Based on resistance patterns" whatever
+    # the data said. Replaced with a descriptive, organism-specific table that
+    # carries its own denominators, confidence intervals and disclaimer, so the
+    # caveat travels with the document once it leaves the application.
+    if susceptibility_summary:
+        reportable = [r for r in susceptibility_summary if r.get('meets_reporting_threshold')]
+        shown = (reportable or susceptibility_summary)
+        shown = sorted(shown, key=lambda r: (str(r['organism']), -r['tested']))[:25]
+        n_below = len(susceptibility_summary) - len(reportable)
+
+        html_report += f"""
         <div class="chart-container">
-            <h3>Antibiotic Treatment Recommendations</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-"""
-
-        for rec in antibiotic_recommendations[:6]:  # Show top 6 recommendations
-            status_color = {'Preferred': '#27ae60', 'Alternative': '#f39c12', 'Not Recommended': '#e74c3c'}.get(rec.get('status', 'Alternative'), '#95a5a6')
-            html_report += f"""
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid {status_color};">
-                    <div style="font-weight: bold; color: #2d3748; margin-bottom: 5px;">{rec.get('antibiotic', 'N/A')}</div>
-                    <div style="color: {status_color}; font-weight: 500; margin-bottom: 5px;">{rec.get('status', 'Alternative')}</div>
-                    <div style="color: #4a5568; font-size: 0.9em;">{rec.get('reason', 'Based on resistance patterns')}</div>
-                </div>"""
-
-        html_report += """
+            <h3>Susceptibility summary (exploratory surveillance data)</h3>
+            <div style="background:#fff4e5; border-left:5px solid #b45309; padding:14px 16px;
+                        border-radius:6px; margin-bottom:16px; color:#3f3f46; font-size:0.92em;">
+                <strong>Not prescribing guidance.</strong> These are descriptive counts from the
+                surveillance dataset, pooled across facilities, specimen types and time. They take no
+                account of infection site, patient factors, local formulary, drug availability or
+                breakpoint version, and they are not a cumulative antibiogram. Treatment decisions
+                require a CLSI M39 antibiogram for the specific facility and period, validated by the
+                reference laboratory and clinical governance.
             </div>
+            <table style="width:100%; border-collapse:collapse; font-size:0.9em;">
+                <thead>
+                    <tr style="background:#f1f5f9; text-align:left;">
+                        <th style="padding:8px; border-bottom:2px solid #cbd5e1;">Organism</th>
+                        <th style="padding:8px; border-bottom:2px solid #cbd5e1;">Antibiotic</th>
+                        <th style="padding:8px; border-bottom:2px solid #cbd5e1;">Tested</th>
+                        <th style="padding:8px; border-bottom:2px solid #cbd5e1;">% susceptible</th>
+                        <th style="padding:8px; border-bottom:2px solid #cbd5e1;">95% CI</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+        for r in shown:
+            prov = "" if r.get('meets_reporting_threshold') else \
+                ' <span style="color:#b45309; font-size:0.85em;">(provisional)</span>'
+            html_report += f"""
+                    <tr>
+                        <td style="padding:7px; border-bottom:1px solid #e2e8f0;"><em>{r['organism']}</em>{prov}</td>
+                        <td style="padding:7px; border-bottom:1px solid #e2e8f0;">{r['antibiotic']}</td>
+                        <td style="padding:7px; border-bottom:1px solid #e2e8f0;">{r['tested']}</td>
+                        <td style="padding:7px; border-bottom:1px solid #e2e8f0;">{r['susceptibility_rate']:.1f}%</td>
+                        <td style="padding:7px; border-bottom:1px solid #e2e8f0;">{r['ci_low']:.1f} - {r['ci_high']:.1f}</td>
+                    </tr>"""
+
+        html_report += f"""
+                </tbody>
+            </table>
+            <p style="color:#64748b; font-size:0.85em; margin-top:10px;">
+                Organism-antibiotic pairs below the {analytics.SURVEILLANCE_MIN_ISOLATES}-isolate
+                reporting threshold are marked provisional. {n_below} of
+                {len(susceptibility_summary)} pairs in this dataset fall below it. Intervals are
+                95% Wilson score intervals on the percent susceptible.
+            </p>
         </div>
 """
 

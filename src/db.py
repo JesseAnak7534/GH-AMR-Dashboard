@@ -1,64 +1,58 @@
 """
-Database module for AMR Surveillance Dashboard.
+Database module for the ICBB-AMRSS surveillance platform.
 
-Dual-backend: prefers PostgreSQL (psycopg2) when a reachable DATABASE_URL
-is configured, falls back to SQLite at ``db/amr_data.db`` otherwise. This
-makes the app work on Streamlit Cloud out-of-the-box (SQLite) while still
-using the better Postgres backend locally / when a managed DB (Supabase,
-Neon, RDS…) is wired up via DATABASE_URL or Streamlit secrets.
+PostgreSQL only. A configured, reachable ``DATABASE_URL`` is required and the
+module refuses to import without one.
 
-The public function surface is stable — `get_connection()` returns a
-wrapper that supports ``.execute(sql).fetchone()[0]`` and dict-style row
-access in both modes. SQL is written in Postgres dialect (``%s``
-placeholders, ``ON CONFLICT … DO UPDATE``, ``RETURNING id``) and
-translated on the fly when the active backend is SQLite.
+The platform previously fell back to a local SQLite file when Postgres was
+unreachable. That was removed: a silent fallback meant the application could
+come up pointing at a stale local snapshot while appearing healthy, and every
+statement had to be written to the lowest common denominator of two dialects,
+which ruled out foreign keys, CHECK constraints, JSONB and real timestamps.
+Failing loudly on a bad connection is safer than serving stale surveillance
+data, and a single dialect lets the schema enforce its own integrity.
+
+SQL is plain Postgres: ``%s`` placeholders, ``ON CONFLICT … DO UPDATE``,
+``RETURNING``.
 """
 import os
 import re
-import sqlite3
 import logging
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
 
 import pandas as pd
+import psycopg2
+import psycopg2.extras
 
-# Populate env vars from .env before we read DATABASE_URL. Safe no-op if
-# dotenv isn't installed or .env doesn't exist. Must happen before any
-# module-level call to _resolve_backend().
+# Populate env vars from .env before DATABASE_URL is read. Safe no-op when
+# dotenv is absent or there is no .env file.
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except Exception:
     pass
 
-try:
-    import psycopg2
-    import psycopg2.extras
-    _PSYCOPG2_AVAILABLE = True
-except Exception:  # pragma: no cover
-    psycopg2 = None  # type: ignore
-    _PSYCOPG2_AVAILABLE = False
-
 
 logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Backend resolution
+# Connection settings
 # ---------------------------------------------------------------------------
 
-_SQLITE_DIR  = "db"
-_SQLITE_PATH = os.path.join(_SQLITE_DIR, "amr_data.db")
+_PG_DSN: str = ""
 
-_BACKEND: str = ""       # "postgres" | "sqlite" — set by _resolve_backend
-_PG_DSN: Optional[str] = None
+
+def _redact(url: str) -> str:
+    return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", url)
 
 
 def _read_database_url() -> Optional[str]:
-    """Pick DATABASE_URL from env or Streamlit secrets, or None."""
+    """Pick DATABASE_URL from the environment or Streamlit secrets."""
     url = os.environ.get("DATABASE_URL")
-    if url:
-        return url.strip() or None
+    if url and url.strip():
+        return url.strip()
     try:
         import streamlit as st
         if hasattr(st, "secrets") and "DATABASE_URL" in st.secrets:
@@ -69,88 +63,39 @@ def _read_database_url() -> Optional[str]:
     return None
 
 
-def _resolve_backend() -> None:
-    """Decide at import time whether Postgres is reachable; else SQLite."""
-    global _BACKEND, _PG_DSN
+def _resolve_dsn() -> None:
+    """Validate the DSN at import time. A missing or malformed URL is fatal."""
+    global _PG_DSN
 
     url = _read_database_url()
-    if url and _PSYCOPG2_AVAILABLE and url.startswith(("postgresql://", "postgres://")):
-        try:
-            test = psycopg2.connect(url, connect_timeout=3)
-            test.close()
-            _BACKEND = "postgres"
-            _PG_DSN = url
-            logger.info("db backend: PostgreSQL")
-            return
-        except Exception as e:
-            logger.warning("db backend: Postgres at %s not reachable (%s); "
-                           "falling back to SQLite", _redact(url), e.__class__.__name__)
-
-    # Fallback
-    os.makedirs(_SQLITE_DIR, exist_ok=True)
-    _BACKEND = "sqlite"
-    logger.info("db backend: SQLite (%s)", _SQLITE_PATH)
+    if not url:
+        raise RuntimeError(
+            "DATABASE_URL is not configured. The platform requires PostgreSQL; "
+            "set DATABASE_URL in the environment, in .env, or in Streamlit "
+            "secrets before starting the application."
+        )
+    if not url.startswith(("postgresql://", "postgres://")):
+        raise RuntimeError(
+            f"DATABASE_URL must be a PostgreSQL DSN, got {_redact(url)!r}."
+        )
+    _PG_DSN = url
+    logger.info("database: PostgreSQL at %s", _redact(url))
 
 
-def _redact(url: str) -> str:
-    return re.sub(r"://([^:]+):([^@]+)@", r"://\1:***@", url)
-
-
-_resolve_backend()
+_resolve_dsn()
 
 
 def is_postgres() -> bool:
-    return _BACKEND == "postgres"
-
-
-def is_sqlite() -> bool:
-    return _BACKEND == "sqlite"
-
-
-# ---------------------------------------------------------------------------
-# Dialect translation — Postgres SQL is the source of truth; we rewrite it
-# for SQLite on the fly so all downstream code can stay vendor-neutral.
-# ---------------------------------------------------------------------------
-
-_PG_TO_SQLITE_DDL = [
-    (re.compile(r"\bBIGSERIAL\b", re.I), "INTEGER"),
-    (re.compile(r"\bSERIAL\b",    re.I), "INTEGER"),
-    (re.compile(r"\bDOUBLE PRECISION\b", re.I), "REAL"),
-    (re.compile(r"\bSMALLINT\b",  re.I), "INTEGER"),
-]
-
-
-def _translate_sql(sql: str) -> str:
-    """Rewrite Postgres-dialect SQL for SQLite when the active backend is
-    SQLite. No-op on Postgres."""
-    if _BACKEND != "sqlite":
-        return sql
-
-    # %s placeholder → ? (skip %s inside string literals — we don't build
-    # SQL that needs that). Safe for our internal call sites.
-    sql = sql.replace("%s", "?")
-
-    # Type keywords that SQLite doesn't know → map to compatible types.
-    for pat, repl in _PG_TO_SQLITE_DDL:
-        sql = pat.sub(repl, sql)
-
-    # INTEGER PRIMARY KEY → INTEGER PRIMARY KEY AUTOINCREMENT (for tables
-    # that originally used BIGSERIAL; needed so lastrowid + RETURNING work).
-    sql = re.sub(
-        r"\bINTEGER PRIMARY KEY(?!\s+AUTOINCREMENT)\b",
-        "INTEGER PRIMARY KEY AUTOINCREMENT",
-        sql, flags=re.I,
-    )
-
-    return sql
+    """Retained for call sites that branch on backend. Always True."""
+    return True
 
 
 # ---------------------------------------------------------------------------
 # Connection wrappers
 # ---------------------------------------------------------------------------
 
-class _PGCursorProxy:
-    """Wraps psycopg2 DictCursor; identical behaviour."""
+class _CursorProxy:
+    """Thin wrapper over psycopg2's DictCursor."""
     def __init__(self, raw): self._raw = raw
     def execute(self, sql, params=None):
         self._raw.execute(sql, params or ())
@@ -165,46 +110,20 @@ class _PGCursorProxy:
     def description(self): return self._raw.description
     @property
     def rowcount(self):    return self._raw.rowcount
-    @property
-    def lastrowid(self):   return getattr(self._raw, "lastrowid", None)
     def close(self): self._raw.close()
-
-
-class _SqliteCursorProxy:
-    """Wraps sqlite3.Cursor with SQL dialect translation so Postgres-style
-    queries work against SQLite unchanged."""
-    def __init__(self, raw): self._raw = raw
-    def execute(self, sql, params=None):
-        self._raw.execute(_translate_sql(sql), params or ())
-        return self
-    def executemany(self, sql, seq_of_params):
-        self._raw.executemany(_translate_sql(sql), seq_of_params)
-        return self
-    def fetchone(self): return self._raw.fetchone()
-    def fetchall(self): return self._raw.fetchall()
-    def fetchmany(self, size=None): return self._raw.fetchmany(size) if size else self._raw.fetchmany()
-    @property
-    def description(self): return self._raw.description
-    @property
-    def rowcount(self):    return self._raw.rowcount
-    @property
-    def lastrowid(self):   return self._raw.lastrowid
-    def close(self): self._raw.close()
+    def __enter__(self): return self
+    def __exit__(self, *exc): self.close()
 
 
 class _ConnectionWrapper:
-    """Uniform connection surface across both backends."""
+    """Connection surface used across the application."""
 
-    def __init__(self, raw, backend: str):
+    def __init__(self, raw):
         self._raw = raw
-        self._backend = backend
 
     def cursor(self, *args, **kwargs):
-        if self._backend == "postgres":
-            kwargs.setdefault("cursor_factory", psycopg2.extras.DictCursor)
-            return _PGCursorProxy(self._raw.cursor(*args, **kwargs))
-        # sqlite
-        return _SqliteCursorProxy(self._raw.cursor())
+        kwargs.setdefault("cursor_factory", psycopg2.extras.DictCursor)
+        return _CursorProxy(self._raw.cursor(*args, **kwargs))
 
     def execute(self, sql: str, params=None):
         cur = self.cursor()
@@ -215,60 +134,62 @@ class _ConnectionWrapper:
     def rollback(self): return self._raw.rollback()
     def close(self):    return self._raw.close()
 
+    def __enter__(self): return self
+    def __exit__(self, exc_type, *exc):
+        try:
+            if exc_type is None:
+                self._raw.commit()
+            else:
+                self._raw.rollback()
+        finally:
+            self._raw.close()
+
     @property
     def raw(self): return self._raw
 
 
 def get_connection() -> _ConnectionWrapper:
-    """Open a fresh connection in the active backend.
+    """Open a fresh Postgres connection.
 
-    Postgres connections use a finite ``connect_timeout`` and TCP keepalives so
-    a transient network blip or an idle hosted database (Supabase, Neon, etc.)
-    fails fast with an exception instead of hanging the whole UI.
+    A finite ``connect_timeout`` plus TCP keepalives mean a network blip or an
+    idle hosted database fails fast instead of hanging the UI. Statement and
+    idle-transaction timeouts stop a stuck query from locking a table and
+    freezing every page load.
     """
-    if _BACKEND == "postgres":
+    try:
+        timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "8"))
+    except ValueError:
+        timeout = 8
+
+    raw = psycopg2.connect(
+        _PG_DSN,
+        connect_timeout=timeout,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=3,
+    )
+    try:
+        stmt_ms = int(os.getenv("DB_STATEMENT_TIMEOUT_MS", "30000"))
+        idle_tx_ms = int(os.getenv("DB_IDLE_TX_TIMEOUT_MS", "60000"))
+        with raw.cursor() as _cfg:
+            _cfg.execute(
+                f"SET statement_timeout = {stmt_ms}; "
+                f"SET idle_in_transaction_session_timeout = {idle_tx_ms};"
+            )
+        raw.commit()
+    except Exception:
+        logger.exception("failed to set session timeouts; continuing")
         try:
-            timeout = int(os.getenv("DB_CONNECT_TIMEOUT", "8"))
-        except ValueError:
-            timeout = 8
-        raw = psycopg2.connect(
-            _PG_DSN,
-            connect_timeout=timeout,
-            # Detect dead connections within ~30s instead of waiting forever.
-            keepalives=1,
-            keepalives_idle=30,
-            keepalives_interval=10,
-            keepalives_count=3,
-        )
-        # Safety nets: cap any single statement and abort transactions that
-        # are left "idle in transaction" (which previously locked the
-        # `datasets` table and froze every page load until killed manually).
-        try:
-            stmt_ms = int(os.getenv("DB_STATEMENT_TIMEOUT_MS", "30000"))
-            idle_tx_ms = int(os.getenv("DB_IDLE_TX_TIMEOUT_MS", "60000"))
-            with raw.cursor() as _cfg:
-                _cfg.execute(
-                    f"SET statement_timeout = {stmt_ms}; "
-                    f"SET idle_in_transaction_session_timeout = {idle_tx_ms};"
-                )
-            raw.commit()
+            raw.rollback()
         except Exception:
-            logger.exception("failed to set session timeouts; continuing")
-            try:
-                raw.rollback()
-            except Exception:
-                pass
-        return _ConnectionWrapper(raw, "postgres")
-    # SQLite
-    os.makedirs(_SQLITE_DIR, exist_ok=True)
-    conn = sqlite3.connect(_SQLITE_PATH)
-    conn.row_factory = sqlite3.Row
-    return _ConnectionWrapper(conn, "sqlite")
+            pass
+    return _ConnectionWrapper(raw)
 
 
 def _fetch_df(sql: str, params=None) -> pd.DataFrame:
     """Run a SELECT and return a DataFrame. Stays off pandas's connection-
-    detection path (which insists on SQLAlchemy engines for non-sqlite)."""
+    detection path, which insists on SQLAlchemy engines for non-sqlite."""
     conn = get_connection()
     try:
         cur = conn.cursor()
@@ -276,27 +197,17 @@ def _fetch_df(sql: str, params=None) -> pd.DataFrame:
         rows = cur.fetchall()
         cols = [d[0] for d in cur.description] if cur.description else []
         cur.close()
-        # Both DictRow (psycopg2) and sqlite3.Row support dict() conversion.
         return pd.DataFrame([dict(r) for r in rows], columns=cols)
     finally:
         conn.close()
 
 
 def _safe_add_column(cur, table: str, column: str, ddl: str):
-    """Idempotent column add. Postgres: IF NOT EXISTS.  SQLite: try/except
-    on duplicate-column error (no IF NOT EXISTS for ALTER TABLE in SQLite)."""
-    if _BACKEND == "postgres":
-        try:
-            cur.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {ddl}")
-        except Exception:
-            logger.exception("ADD COLUMN %s.%s failed", table, column)
-        return
-    # SQLite
+    """Idempotent column add."""
     try:
-        cur.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
-    except sqlite3.OperationalError as e:
-        if "duplicate column" not in str(e).lower():
-            logger.warning("ADD COLUMN %s.%s: %s", table, column, e)
+        cur.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {ddl}")
+    except Exception:
+        logger.exception("ADD COLUMN %s.%s failed", table, column)
 
 
 # ---------------------------------------------------------------------------
@@ -544,6 +455,12 @@ def init_database():
             uploaded_at TEXT NOT NULL
         )
     """)
+
+    # ---- traceability model ------------------------------------------------
+    # subject -> encounter -> specimen -> isolate -> phenotype / genomic result,
+    # plus the append-only custody log. Defined in src/traceability.py.
+    from src.traceability import init_traceability_schema
+    init_traceability_schema(cur)
 
     conn.commit()
     conn.close()
@@ -796,6 +713,17 @@ def delete_dataset(dataset_id: str) -> Tuple[bool, str]:
     conn = get_connection()
     cur = conn.cursor()
     try:
+        # The traceability chain cascades from `subjects` through foreign keys,
+        # so deleting subjects removes encounters, specimens, isolates,
+        # phenotypes and genomic results with it.
+        #
+        # custody_events and sequencing_runs are deleted explicitly: the audit
+        # log deliberately carries no foreign key (it must outlive the rows it
+        # describes), and a sequencing run is shared across isolates rather
+        # than owned by one.
+        cur.execute("DELETE FROM custody_events WHERE dataset_id = %s", (dataset_id,))
+        cur.execute("DELETE FROM subjects WHERE dataset_id = %s", (dataset_id,))
+        cur.execute("DELETE FROM sequencing_runs WHERE dataset_id = %s", (dataset_id,))
         cur.execute("DELETE FROM ast_results WHERE dataset_id = %s", (dataset_id,))
         cur.execute("DELETE FROM samples WHERE dataset_id = %s", (dataset_id,))
         cur.execute("DELETE FROM datasets WHERE dataset_id = %s", (dataset_id,))
@@ -822,8 +750,7 @@ def create_user(email: str, password_hash: str, is_admin: bool = False) -> Tuple
         """, (email, password_hash, datetime.now().isoformat(), 1 if is_admin else 0))
         conn.commit()
         return True, "User created successfully"
-    except (sqlite3.IntegrityError,
-            *( (psycopg2.IntegrityError,) if _PSYCOPG2_AVAILABLE else () )):
+    except psycopg2.IntegrityError:
         conn.rollback()
         return False, "Email already registered"
     except Exception as e:

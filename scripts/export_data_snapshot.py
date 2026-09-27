@@ -1,6 +1,6 @@
 """
 Export the data tables from the currently-active database (local Postgres
-or SQLite) to a single gzip-compressed JSON snapshot at
+to a single gzip-compressed JSON snapshot at
 ``db/cloud_snapshot.json.gz``.  The snapshot is small enough to commit
 to the repository (~2 MB for 1k samples + 5k AST results), and the
 Streamlit Cloud app loads it on first startup when the cloud Postgres
@@ -48,7 +48,7 @@ def _json_default(obj):
 
 
 def main():
-    print(f"Backend in use: {db._BACKEND}")
+    print("Backend in use: PostgreSQL")
     conn = db.get_connection()
     cur = conn.cursor()
 

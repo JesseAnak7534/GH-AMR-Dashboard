@@ -12,7 +12,8 @@ from src import db
 from src.analytics import (
     detect_resistance_mechanisms,
     calculate_organism_risk_score,
-    generate_antibiotic_recommendations,
+    summarise_susceptibility,
+    SURVEILLANCE_MIN_ISOLATES,
     calculate_trend_direction,
 )
 
@@ -141,7 +142,7 @@ def render_pathogen_profile_page():
     # ── TABS ────────────────────────────────────────────────────────────
     tab_abx, tab_trend, tab_mech, tab_geo, tab_rec = st.tabs([
         "Antimicrobial Profile", "Resistance Trends", "Mechanisms",
-        "Geographic Spread", "Recommendations",
+        "Geographic Spread", "Susceptibility Summary",
     ])
 
     # ── Tab 1: Antimicrobial Profile ────────────────────────────────────
@@ -314,33 +315,53 @@ def render_pathogen_profile_page():
 
     # ── Tab 5: Recommendations ──────────────────────────────────────────
     with tab_rec:
-        st.subheader(f"Treatment Recommendations — {selected_org}")
+        st.subheader(f"Susceptibility summary — {selected_org}")
+
+        # This tab used to rank antibiotics as PREFERRED / GOOD / CAUTION / AVOID.
+        # It was removed: those labels read as prescribing guidance while ignoring
+        # infection site, patient factors, specimen source, formulary, breakpoint
+        # version and sampling bias, and the underlying figures pooled every
+        # organism together. What follows is descriptive only.
+        st.warning(
+            "**Not prescribing guidance.** These are descriptive counts for "
+            f"*{selected_org}* in the surveillance dataset, pooled across facilities, "
+            "specimen types and time. Choosing therapy needs a CLSI M39 cumulative "
+            "antibiogram for the specific facility and period, validated by the "
+            "reference laboratory and clinical governance."
+        )
+
         try:
-            recs = generate_antibiotic_recommendations(org_ast)
-            if not recs:
-                st.info("Not enough data to generate recommendations.")
+            rows = [r for r in summarise_susceptibility(org_ast)
+                    if r["organism"] == selected_org]
+            if not rows:
+                st.info("No susceptibility results for this organism.")
             else:
-                # Group by priority
-                priority_map = {1: "PREFERRED", 2: "GOOD", 3: "CAUTION", 4: "AVOID"}
-                for pri_num, (priority_label, colour) in enumerate([("PREFERRED", "#22c55e"), ("GOOD", "#84cc16"), ("CAUTION", "#f59e0b"), ("AVOID", "#ef4444")], 1):
-                    group = [r for r in recs if r.get("priority") == pri_num]
-                    if group:
-                        st.markdown(f"**{priority_label}** ({len(group)} antibiotics)")
-                        for r in group:
-                            pct_s = r.get("susceptibility_rate", 0)
-                            abx = r.get("antibiotic", "?")
-                            n = r.get("tests", 0)
-                            bar_width = max(5, pct_s)
-                            st.markdown(
-                                f'<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">'
-                                f'<span style="min-width:160px;font-size:0.9rem;color:#334155;">{abx}</span>'
-                                f'<div style="flex:1;background:#e2e8f0;border-radius:6px;height:18px;overflow:hidden;">'
-                                f'<div style="width:{bar_width}%;background:{colour};height:100%;border-radius:6px;"></div>'
-                                f'</div>'
-                                f'<span style="min-width:65px;font-size:0.82rem;color:#64748b;">{pct_s:.0f}% S (n={n})</span>'
-                                f'</div>',
-                                unsafe_allow_html=True,
-                            )
-                        st.markdown("")
+                rows = sorted(rows, key=lambda r: -r["susceptibility_rate"])
+                n_ok = sum(1 for r in rows if r["meets_reporting_threshold"])
+                st.caption(
+                    f"{len(rows)} antibiotics tested against {selected_org}. "
+                    f"{n_ok} reach the {SURVEILLANCE_MIN_ISOLATES}-isolate reporting "
+                    f"threshold; the rest are provisional and are marked below."
+                )
+
+                for r in rows:
+                    pct_s = r["susceptibility_rate"]
+                    lo, hi = r["ci_low"], r["ci_high"]
+                    abx, n = r["antibiotic"], r["tested"]
+                    provisional = not r["meets_reporting_threshold"]
+                    # One neutral colour. Ranking drugs by colour was the problem.
+                    colour = "#94a3b8" if provisional else "#0e7490"
+                    flag = ' <span style="color:#b45309;font-size:0.75rem;">provisional</span>' if provisional else ""
+                    st.markdown(
+                        f'<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;">'
+                        f'<span style="min-width:170px;font-size:0.9rem;color:#334155;">{abx}{flag}</span>'
+                        f'<div style="flex:1;background:#e2e8f0;border-radius:6px;height:18px;overflow:hidden;">'
+                        f'<div style="width:{max(2, pct_s)}%;background:{colour};height:100%;border-radius:6px;"></div>'
+                        f'</div>'
+                        f'<span style="min-width:190px;font-size:0.8rem;color:#64748b;">'
+                        f'{pct_s:.0f}% S (95% CI {lo:.0f}-{hi:.0f}, n={n})</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
         except Exception as e:
-            st.warning(f"Recommendation error: {e}")
+            st.warning(f"Could not build the susceptibility summary: {e}")

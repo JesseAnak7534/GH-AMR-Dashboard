@@ -780,20 +780,11 @@ if not st.session_state.authenticated:
         tab1, tab2 = st.tabs(["Sign in", "Information"])
 
         with tab1:
-            # Optional one-shot diagnostic: append ?debug=1 to the URL to see
-            # whether the lab/admin bootstrap actually populated the cloud DB.
-            try:
-                if st.query_params.get("debug") == "1":
-                    try:
-                        all_users = db.get_all_users()
-                        st.info(
-                            f"DB diagnostic — backend in use, total user rows: {len(all_users)}. "
-                            f"Sample emails: {[u['email'] for u in all_users[:5]]}"
-                        )
-                    except Exception as diag_err:
-                        st.warning(f"DB diagnostic failed: {diag_err}")
-            except Exception:
-                pass
+            # NOTE: an unauthenticated ?debug=1 diagnostic used to live here and
+            # printed the user count plus real account emails to anyone who
+            # loaded the sign-in page. It was removed (critical review, 2026-09).
+            # Any future diagnostic must sit behind an authenticated admin check
+            # and must never echo account identifiers to the browser.
 
             # Wrap inputs + button in a form so a single Enter / click submits
             # everything in ONE rerun.  Without this, typing in a password and
@@ -3009,33 +3000,55 @@ elif page == "Advanced Analytics":
         
         # TAB 4: ANTIBIOTIC INSIGHTS
         with tab4:
-            st.subheader("Antibiotic Recommendations")
-            
-            recommendations = analytics.generate_antibiotic_recommendations(all_ast)
-            
-            if recommendations:
-                # Priority breakdown
-                col1, col2, col3, col4 = st.columns(4)
-                
-                preferred = len([r for r in recommendations if r['priority'] == 1])
-                good = len([r for r in recommendations if r['priority'] == 2])
-                caution = len([r for r in recommendations if r['priority'] == 3])
-                avoid = len([r for r in recommendations if r['priority'] == 4])
-                
+            st.subheader("Susceptibility summary (exploratory)")
+
+            st.warning(
+                "**Not prescribing guidance.** These are descriptive counts from the "
+                "surveillance dataset, pooled across facilities, specimen types and time. "
+                "They take no account of infection site, patient factors, local formulary "
+                "or breakpoint version, and they are not a cumulative antibiogram. "
+                "Treatment decisions need a CLSI M39 antibiogram for the specific facility "
+                "and period, validated by the reference laboratory and clinical governance."
+            )
+
+            summary = analytics.summarise_susceptibility(all_ast)
+
+            if summary:
+                sum_df = pd.DataFrame(summary)
+
+                reportable = sum_df[sum_df['meets_reporting_threshold']]
+                provisional = sum_df[~sum_df['meets_reporting_threshold']]
+
+                col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.success(f"**Preferred**: {preferred}")
+                    st.metric("Organism-drug pairs", len(sum_df))
                 with col2:
-                    st.info(f"**Good**: {good}")
+                    st.metric(
+                        f"At or above {analytics.SURVEILLANCE_MIN_ISOLATES} isolates",
+                        len(reportable),
+                    )
                 with col3:
-                    st.warning(f"**Caution**: {caution}")
-                with col4:
-                    st.error(f"**Avoid**: {avoid}")
-                
+                    st.metric("Below threshold", len(provisional))
+
                 st.markdown("---")
-                
-                # Detailed recommendations
-                rec_df = pd.DataFrame(recommendations).sort_values('priority')
-                st.dataframe(rec_df, use_container_width=True)
+
+                show = sum_df.rename(columns={
+                    'tested': 'Tested',
+                    'susceptible': 'Susceptible',
+                    'susceptibility_rate': '% S',
+                    'ci_low': '95% CI low',
+                    'ci_high': '95% CI high',
+                    'observation': 'Observation',
+                    'meets_reporting_threshold': f'>= {analytics.SURVEILLANCE_MIN_ISOLATES}',
+                })
+                st.dataframe(show, use_container_width=True)
+                st.caption(
+                    f"Pairs below {analytics.SURVEILLANCE_MIN_ISOLATES} isolates are shown "
+                    "but should be read as provisional. The interval is a 95% Wilson "
+                    "score interval on the percent susceptible."
+                )
+            else:
+                st.info("No susceptibility data available for this selection.")
         
         # TAB 5: DATA QUALITY
         with tab5:
@@ -5295,7 +5308,8 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 30px;">
     <p>ICBB-AMRSS | ICBB AMR Surveillance System | Ghana</p>
-    <p>Data stored locally in SQLite. No internet required.</p>
-    <p><em>For academic and policy use. Always consult AMR experts for decision-making.</em></p>
+    <p><em>Surveillance data for public health and research use. Not a clinical
+    decision-support system; treatment decisions require a validated facility
+    antibiogram and clinical judgement.</em></p>
 </div>
 """, unsafe_allow_html=True)

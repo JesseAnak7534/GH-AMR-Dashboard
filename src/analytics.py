@@ -718,47 +718,91 @@ def get_high_risk_organisms(ast_df: pd.DataFrame, threshold: int = 50) -> List[D
 
 
 # ============================================================================
-# ANTIBIOTIC ROTATION RECOMMENDATIONS
+# EXPLORATORY SUSCEPTIBILITY SUMMARY
+#
+# This section previously emitted PREFERRED / GOOD / CAUTION / AVOID labels
+# from susceptibility pooled across every organism in the dataset, with a
+# five-test minimum. Two things were wrong with that. It read as prescribing
+# guidance while accounting for none of infection site, patient factors,
+# specimen source, formulary, drug availability, breakpoint version or
+# sampling bias. And it pooled organisms, so a single "ceftriaxone" figure
+# mixed E. coli, Klebsiella, Staphylococcus and Pseudomonas into one number
+# that describes no organism at all.
+#
+# It is now an exploratory surveillance summary: organism-specific, reported
+# with its denominator and a confidence interval, and carrying no advice.
+# Anything clinical must come from a governed cumulative antibiogram (CLSI
+# M39) validated by the reference laboratory and clinical governance.
 # ============================================================================
 
-def generate_antibiotic_recommendations(ast_df: pd.DataFrame) -> List[Dict]:
-    """Generate antibiotic usage recommendations based on resistance patterns."""
+# CLSI M39 conventional threshold for reporting a cumulative antibiogram.
+SURVEILLANCE_MIN_ISOLATES = 30
+
+
+def _wilson_ci(successes: int, total: int, z: float = 1.96) -> Tuple[float, float]:
+    """Wilson score interval, in percent. Stable at small n and near 0 or 100%."""
+    if total <= 0:
+        return (0.0, 0.0)
+    p = successes / total
+    denom = 1 + z ** 2 / total
+    centre = (p + z ** 2 / (2 * total)) / denom
+    half = z * np.sqrt(p * (1 - p) / total + z ** 2 / (4 * total ** 2)) / denom
+    return (max(0.0, (centre - half) * 100), min(100.0, (centre + half) * 100))
+
+
+def summarise_susceptibility(ast_df: pd.DataFrame,
+                             min_isolates: int = SURVEILLANCE_MIN_ISOLATES) -> List[Dict]:
+    """Exploratory, organism-specific susceptibility summary.
+
+    This is a description of what the surveillance dataset contains. It is not
+    prescribing guidance and must not be used to choose therapy for a patient.
+
+    Each row is one organism-antibiotic pair with the number tested, the
+    percent susceptible and a 95% Wilson interval. Pairs below `min_isolates`
+    are returned but flagged, so the caller can show them as provisional
+    instead of silently dropping them.
+    """
     if ast_df.empty:
         return []
-    
-    recommendations = []
-    
-    # Get antibiotics ranked by susceptibility
-    antibiotic_stats = ast_df.groupby('antibiotic').agg({
-        'result': ['count', lambda x: (x == 'S').sum()]
-    }).reset_index()
-    antibiotic_stats.columns = ['antibiotic', 'tests', 'susceptible']
-    antibiotic_stats['susceptibility_rate'] = antibiotic_stats['susceptible'] / antibiotic_stats['tests'] * 100
-    antibiotic_stats = antibiotic_stats.sort_values('susceptibility_rate', ascending=False)
-    
-    for _, row in antibiotic_stats.iterrows():
-        if row['tests'] >= 5:  # Only consider with sufficient data
-            antibiotic = row['antibiotic']
-            susc_rate = row['susceptibility_rate']
-            
-            if susc_rate > 80:
-                recommendation = 'PREFERRED - Excellent susceptibility'
-            elif susc_rate > 60:
-                recommendation = 'GOOD - Acceptable for use'
-            elif susc_rate > 40:
-                recommendation = 'CAUTION - Declining efficacy'
-            else:
-                recommendation = 'AVOID - Poor efficacy'
-            
-            recommendations.append({
-                'antibiotic': antibiotic,
-                'susceptibility_rate': round(susc_rate, 2),
-                'tests': int(row['tests']),
-                'recommendation': recommendation,
-                'priority': 1 if susc_rate > 80 else 2 if susc_rate > 60 else 3 if susc_rate > 40 else 4
-            })
-    
-    return recommendations
+
+    required = {'organism', 'antibiotic', 'result'}
+    if not required.issubset(ast_df.columns):
+        return []
+
+    rows: List[Dict] = []
+    for (organism, antibiotic), group in ast_df.groupby(['organism', 'antibiotic']):
+        tested = len(group)
+        if tested == 0:
+            continue
+        susceptible = int((group['result'] == 'S').sum())
+        rate = susceptible / tested * 100
+        lo, hi = _wilson_ci(susceptible, tested)
+
+        # Descriptive bands only. No verb, no recommendation, no ranking of
+        # drugs against each other.
+        if rate >= 80:
+            band = 'High susceptibility observed'
+        elif rate >= 60:
+            band = 'Moderate susceptibility observed'
+        elif rate >= 40:
+            band = 'Low susceptibility observed'
+        else:
+            band = 'Very low susceptibility observed'
+
+        rows.append({
+            'organism': organism,
+            'antibiotic': antibiotic,
+            'tested': tested,
+            'susceptible': susceptible,
+            'susceptibility_rate': round(rate, 1),
+            'ci_low': round(lo, 1),
+            'ci_high': round(hi, 1),
+            'observation': band,
+            'meets_reporting_threshold': tested >= min_isolates,
+        })
+
+    # Order by organism, then by the pairs we are most confident about.
+    return sorted(rows, key=lambda r: (str(r['organism']), -r['tested']))
 
 
 # ============================================================================
