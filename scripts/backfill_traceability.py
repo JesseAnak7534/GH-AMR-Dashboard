@@ -84,7 +84,6 @@ from src import db  # noqa: E402
 from src.traceability import (  # noqa: E402
     SECTORS,
     make_patient_pseudonym,
-    record_custody_event,
 )
 
 #: Facility code scoping every synthetic legacy patient pseudonym. A distinct,
@@ -330,20 +329,38 @@ def backfill_dataset(conn, dataset_id: str, *, dry_run: bool,
     # One custody event per entity, stating that this record was reconstructed
     # rather than reported. Without it there is nothing in the data to
     # distinguish a backfilled specimen from an uploaded one.
-    for sample_id, subject_id in sorted(sample_to_subject.items()):
-        record_custody_event(
-            cur, dataset_id, "specimen", sample_id, "transferred",
-            actor=PROVENANCE, source_system="backfill",
-            reason="reconstructed from the legacy samples table; no ward, "
-                   "specimen type or patient identifier was recorded")
-    for isolate_id, (sample_id, organism) in sorted(organism_for_isolate.items()):
-        if sample_id not in sample_to_subject:
-            continue
-        record_custody_event(
-            cur, dataset_id, "isolate", isolate_id, "transferred",
-            actor=PROVENANCE, source_system="backfill",
-            reason=f"{organism}, derived by grouping legacy susceptibility rows "
-                   "on specimen and organism")
+    #
+    # These are batched rather than sent through record_custody_event one row at
+    # a time. That helper is the right API for a handful of events written
+    # alongside the change they describe, but here there are two per specimen
+    # across the whole database -- about 21,000 rows -- and one round trip each
+    # to a database in another region takes minutes rather than seconds. The
+    # vocabularies are constants in this loop, so they are checked once below
+    # instead of per row.
+    from src.traceability import CUSTODY_EVENT_TYPES, ENTITY_TYPES
+    assert "transferred" in CUSTODY_EVENT_TYPES
+    assert {"specimen", "isolate"} <= set(ENTITY_TYPES)
+
+    custody_rows: List[tuple] = [
+        (dataset_id, "specimen", sample_id, "transferred", PROVENANCE,
+         "backfill",
+         "reconstructed from the legacy samples table; no ward, specimen type "
+         "or patient identifier was recorded")
+        for sample_id in sorted(sample_to_subject)
+    ] + [
+        (dataset_id, "isolate", isolate_id, "transferred", PROVENANCE,
+         "backfill",
+         f"{organism}, derived by grouping legacy susceptibility rows on "
+         "specimen and organism")
+        for isolate_id, (sample_id, organism) in sorted(organism_for_isolate.items())
+        if sample_id in sample_to_subject
+    ]
+    psycopg2.extras.execute_values(
+        raw,
+        "INSERT INTO custody_events (dataset_id, entity_type, entity_id, "
+        "event_type, actor, source_system, reason) VALUES %s",
+        custody_rows, page_size=BATCH)
+    summary["custody_events"] = len(custody_rows)
 
     if rewrite_legacy_ids:
         updates = [
@@ -357,6 +374,11 @@ def backfill_dataset(conn, dataset_id: str, *, dry_run: bool,
         # The primary key is (dataset_id, isolate_id, antibiotic), and several
         # old rows collapse onto one new isolate_id, so the rewrite is done into
         # a temporary column and swapped. Updating in place would collide.
+        # ON COMMIT DROP is not enough here: the whole run is one transaction
+        # across every dataset, so the table from the previous dataset is still
+        # live when the next one starts. Dropping it explicitly per dataset is
+        # what makes the loop repeatable.
+        raw.execute("DROP TABLE IF EXISTS _isolate_remap")
         raw.execute("""
             CREATE TEMP TABLE _isolate_remap (
                 dataset_id TEXT, old_isolate_id TEXT, antibiotic TEXT,
@@ -437,8 +459,8 @@ def main() -> int:
 
         print("\ntotals")
         for key in ("subjects", "human_subjects", "specimens", "isolates",
-                    "phenotypes", "legacy_ast_rows", "ast_rows_not_carried",
-                    "legacy_ids_rewritten"):
+                    "phenotypes", "custody_events", "legacy_ast_rows",
+                    "ast_rows_not_carried", "legacy_ids_rewritten"):
             if key in totals:
                 print(f"  {key:24s} {totals[key]}")
         if not args.dry_run and totals:

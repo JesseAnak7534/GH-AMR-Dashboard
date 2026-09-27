@@ -308,6 +308,14 @@ def main() -> int:
                     help="empty a non-empty target table before copying into it")
     ap.add_argument("--skip-schema", action="store_true",
                     help="assume the target schema already exists")
+    ap.add_argument("--tables", default="",
+                    help="comma-separated list of tables to copy. Everything "
+                         "else is left alone. Use this when the target is a "
+                         "live database and only some tables are being "
+                         "topped up -- copying a table like scheduled_reports "
+                         "into production starts it sending email.")
+    ap.add_argument("--exclude", default="",
+                    help="comma-separated list of tables to skip")
     args = ap.parse_args()
 
     if not args.source:
@@ -338,6 +346,22 @@ def main() -> int:
 
     try:
         tables = migration_order(list_tables(src))
+
+        only = {t.strip() for t in args.tables.split(",") if t.strip()}
+        if only:
+            unknown = only - set(tables)
+            if unknown:
+                print("\nNot present on the source: %s"
+                      % ", ".join(sorted(unknown)),
+                      file=sys.stderr)
+                return 2
+            tables = [t for t in tables if t in only]
+            print("\nlimited to: %s" % ", ".join(tables))
+
+        excluded = {t.strip() for t in args.exclude.split(",") if t.strip()}
+        if excluded:
+            tables = [t for t in tables if t not in excluded]
+            print("excluding : %s" % ", ".join(sorted(excluded)))
 
         # Streaming the source needs a stable backend; a transaction pooler
         # cannot give one.
