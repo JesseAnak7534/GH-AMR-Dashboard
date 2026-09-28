@@ -199,6 +199,78 @@ class _ConnectionWrapper:
     def raw(self): return self._raw
 
 
+_TLS_FAILURE_MARKERS = (
+    "ssl syscall error",
+    "ssl error",
+    "server closed the connection unexpectedly",
+    "could not create ssl context",
+)
+
+
+def _explain_connection_failure(exc: Exception) -> Exception:
+    """Turn a TLS connection failure into an explanation, not a puzzle.
+
+    When a hosted database refuses TLS, psycopg2 reports "server closed the
+    connection unexpectedly", which reads like an outage. It is not: the server
+    is often reachable, and the obvious next move -- deleting sslmode from the
+    connection string -- makes it work by sending the password and every patient
+    record across the public internet in clear text.
+
+    So when TLS fails, this probes whether an unencrypted connection *would*
+    have succeeded, and if it would, says so explicitly. The platform still
+    refuses to connect. The point is that the person reading the error learns
+    what the quick fix would actually cost.
+    """
+    message = str(exc).lower()
+    if not any(marker in message for marker in _TLS_FAILURE_MARKERS):
+        return exc
+    if _is_local_host(_PG_DSN):
+        return exc
+
+    plaintext_works = False
+    try:
+        from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+        parts = urlsplit(_PG_DSN)
+        params = {k: v for k, v in parse_qsl(parts.query, keep_blank_values=True)
+                  if k != "sslmode"}
+        params["sslmode"] = "disable"
+        probe = urlunsplit((parts.scheme, parts.netloc, parts.path,
+                            urlencode(params), parts.fragment))
+        test = psycopg2.connect(probe, connect_timeout=8)
+        plaintext_works = not getattr(test.info, "ssl_in_use", False)
+        test.close()
+    except Exception:
+        plaintext_works = False
+
+    if not plaintext_works:
+        return exc
+
+    logger.error("database refused TLS; refusing to connect unencrypted")
+    blank = ""
+    return RuntimeError(nl_join([
+        "The database refused an encrypted connection.",
+        blank,
+        "It is reachable, but only without TLS. The platform will not connect "
+        "that way, because the password and every patient-derived record would "
+        "cross the public internet in clear text.",
+        blank,
+        "Do not remove sslmode from DATABASE_URL to make this go away. Instead:",
+        "  - check whether a firewall or antivirus product has begun inspecting "
+        "traffic on the database port; that breaks the PostgreSQL TLS handshake "
+        "specifically, while leaving ordinary HTTPS working,",
+        "  - try the same connection from another network, which distinguishes a "
+        "local cause from a provider one,",
+        "  - check the provider's status page.",
+        blank,
+        f"Underlying error: {exc}",
+    ]))
+
+
+def nl_join(parts) -> str:
+    """Join lines without embedding an escape in a source string."""
+    return chr(10).join(str(p) for p in parts)
+
+
 def get_connection() -> _ConnectionWrapper:
     """Open a fresh Postgres connection.
 
@@ -212,14 +284,17 @@ def get_connection() -> _ConnectionWrapper:
     except ValueError:
         timeout = 8
 
-    raw = psycopg2.connect(
-        _PG_DSN,
-        connect_timeout=timeout,
-        keepalives=1,
-        keepalives_idle=30,
-        keepalives_interval=10,
-        keepalives_count=3,
-    )
+    try:
+        raw = psycopg2.connect(
+            _PG_DSN,
+            connect_timeout=timeout,
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=3,
+        )
+    except psycopg2.OperationalError as exc:
+        raise _explain_connection_failure(exc) from exc
     try:
         stmt_ms = int(os.getenv("DB_STATEMENT_TIMEOUT_MS", "30000"))
         idle_tx_ms = int(os.getenv("DB_IDLE_TX_TIMEOUT_MS", "60000"))
