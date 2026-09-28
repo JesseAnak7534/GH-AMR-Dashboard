@@ -513,6 +513,12 @@ def init_database():
     from src.traceability import init_traceability_schema
     init_traceability_schema(cur)
 
+    # ---- signals and the response lifecycle --------------------------------
+    # Detected signal, its provenance, and the append-only log of who reviewed,
+    # assigned, actioned and closed it. Defined in src/signals.py.
+    from src.signals import init_signal_schema
+    init_signal_schema(cur)
+
     conn.commit()
     conn.close()
 

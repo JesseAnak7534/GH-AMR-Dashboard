@@ -1863,7 +1863,7 @@ with st.sidebar:
             ("🧪", "AMC Dashboard"),
         ]),
         ("📋", "Reports & Tools", [
-            ("🔔", "Alerts Dashboard"),
+            ("🔔", "Signals & Response"),
             ("🧬", "Antibiogram"),
             ("📁", "WHONET Export"),
             ("📄", "Report Export"),
@@ -4342,143 +4342,16 @@ elif page == "Comparative Analysis":
                     st.warning("One or both groups have no data. Please adjust your filters.")
 
 # ============================================================================
-# PAGE 9: ALERTS DASHBOARD
+# PAGE 9: SIGNALS & RESPONSE
 # ============================================================================
-elif page == "Alerts Dashboard":
-    st.header("Alerts Dashboard")
-    
-    # Require dataset selection
-    if not st.session_state.active_dataset_id:
-        st.warning("Please select a dataset in the 'Data Management' page first.")
-        st.stop()
-    
-    # Import alerts module
-    from src.alerts import (
-        generate_all_alerts, alerts_to_dataframe, get_alert_summary,
-        AlertSeverity, AlertType
-    )
-    
-    all_samples, all_ast = _load_active_dataset()
-    _render_dataset_banner(st.session_state.active_dataset_id)
-
-    if all_ast.empty:
-        _empty_state("No AST data available for alert generation.")
-    else:
-        # Alert Configuration
-        with st.expander("Alert Configuration", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                critical_threshold = st.slider("Critical Threshold (%)", 50, 95, 80, 5)
-            with col2:
-                high_threshold = st.slider("High Threshold (%)", 30, 80, 60, 5)
-            with col3:
-                medium_threshold = st.slider("Medium Threshold (%)", 20, 60, 40, 5)
-        
-        # Build thresholds dict
-        custom_thresholds = {
-            'critical': critical_threshold,
-            'high': high_threshold,
-            'medium': medium_threshold
-        }
-        
-        # Generate alerts
-        with st.spinner("Analyzing data for alerts..."):
-            alerts = generate_all_alerts(
-                all_ast, 
-                all_samples,
-                thresholds=custom_thresholds
-            )
-        
-        # Alert Summary Cards
-        summary = get_alert_summary(alerts)
-        
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 32px; font-weight: bold;">{summary['critical']}</div>
-                <div>Critical Alerts</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 32px; font-weight: bold;">{summary['high']}</div>
-                <div>High Priority</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #eab308, #ca8a04); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 32px; font-weight: bold;">{summary['medium']}</div>
-                <div>Medium Priority</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col4:
-            st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 20px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 32px; font-weight: bold;">{summary['low']}</div>
-                <div>Low Priority</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        if alerts:
-            # Filter alerts by type
-            st.subheader("Alert Details")
-            
-            alert_type_filter = st.multiselect(
-                "Filter by Alert Type",
-                options=[t.value.replace('_', ' ').title() for t in AlertType],
-                default=[t.value.replace('_', ' ').title() for t in AlertType]
-            )
-            
-            severity_filter = st.multiselect(
-                "Filter by Severity",
-                options=[s.value.upper() for s in AlertSeverity],
-                default=[s.value.upper() for s in AlertSeverity]
-            )
-            
-            # Convert to dataframe for display
-            alerts_df = alerts_to_dataframe(alerts)
-            
-            # Apply filters using correct column names
-            filtered_alerts = alerts_df[
-                (alerts_df['Type'].isin(alert_type_filter)) &
-                (alerts_df['Severity'].isin(severity_filter))
-            ]
-            
-            if not filtered_alerts.empty:
-                # Display alerts
-                for _, alert in filtered_alerts.iterrows():
-                    severity_color = {
-                        'CRITICAL': '#ef4444',
-                        'HIGH': '#f97316',
-                        'MEDIUM': '#eab308',
-                        'LOW': '#22c55e'
-                    }.get(alert['Severity'], '#64748b')
-                    
-                    with st.expander(f"{alert['Title']}", expanded=alert['Severity'] == 'CRITICAL'):
-                        st.markdown(f"""
-                        <div style="border-left: 4px solid {severity_color}; padding-left: 15px;">
-                            <p><strong>Severity:</strong> <span style="color: {severity_color}; font-weight: bold;">{alert['Severity']}</span></p>
-                            <p><strong>Type:</strong> {alert['Type']}</p>
-                            <p><strong>Description:</strong> {alert['Description']}</p>
-                            <p><strong>Detected:</strong> {alert['Created']}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if alert['Organism'] != '-':
-                            st.write(f"**Organism:** {alert['Organism']}")
-                        if alert['Antibiotic'] != '-':
-                            st.write(f"**Antibiotic:** {alert['Antibiotic']}")
-                        if alert['Current Value'] != '-':
-                            st.write(f"**Current Value:** {alert['Current Value']}")
-            else:
-                st.info("No alerts match the selected filters.")
-        else:
-            st.success("No alerts detected based on current thresholds. Your data looks good!")
+elif page == "Signals & Response":
+    # Replaces the old Alerts Dashboard. That page raised an alert whenever a
+    # fixed resistance percentage was crossed, counting susceptibility tests
+    # rather than isolates, with no deduplication, no baseline and no record of
+    # why a signal fired -- which is how it came to show 111 high-priority
+    # alerts that nobody could act on. See src/signals.py.
+    from src.page_signals import render_signals_page
+    render_signals_page()
 
 # ============================================================================
 # PAGE 10: ANTIBIOGRAM
