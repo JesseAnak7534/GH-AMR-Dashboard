@@ -309,6 +309,33 @@ st.table = _gated_renderer(_ST_TABLE)
 st.data_editor = _gated_renderer(_ST_DATA_EDITOR)
 
 
+def _ingest_frames(dataset_id: str, dataset_name: str,
+                   samples_df: pd.DataFrame, ast_df: pd.DataFrame,
+                   isolates_df: Optional[pd.DataFrame] = None,
+                   uploaded_by: str = "System") -> Tuple[bool, str]:
+    """Validate in-memory frames and write them through the traceability chain.
+
+    Every write path goes through here rather than straight to the database, so
+    a KoboToolbox sync and a spreadsheet upload are held to the same validation
+    and produce the same linked records.
+
+    ``isolates_df`` is optional. The redesigned Kobo form records isolates as
+    entities and supplies them; a source that does not is left to the validator,
+    which derives one isolate per specimen and organism.
+    """
+    from src import ingest as _ingest
+
+    outcome = validate.validate_frames(samples_df, ast_df,
+                                       isolates_df=isolates_df)
+    if not outcome.ok:
+        first = "; ".join(outcome.errors[:3])
+        return False, f"Validation failed: {first}"
+
+    result = _ingest.ingest_validated_upload(dataset_id, dataset_name, outcome,
+                                             uploaded_by=uploaded_by)
+    return result.ok, result.message
+
+
 def _get_admin_config():
     admin_email = None
     admin_password = None
@@ -2354,12 +2381,18 @@ elif page == "Admin - Datasets":
                     elif submissions_df is None or submissions_df.empty:
                         st.info("No submissions available for import.")
                     else:
-                        samples_df, ast_df = kobo_submissions_to_frames(submissions_df)
+                        # Three frames now: the redesigned form records isolates
+                        # as entities, so the sync can populate them instead of
+                        # leaving the validator to derive them from AST rows.
+                        samples_df, isolates_df, ast_df = kobo_submissions_to_frames(
+                            submissions_df)
                         # The same validator the workbook upload uses. A second,
                         # laxer path is how the mobile import came to write rows
                         # that the traceability tables never saw.
-                        kobo_outcome = validate.validate_frames(samples_df, ast_df)
+                        kobo_outcome = validate.validate_frames(
+                            samples_df, ast_df, isolates_df=isolates_df)
                         samples_df, ast_df = kobo_outcome.samples, kobo_outcome.ast
+                        isolates_df = kobo_outcome.isolates
 
                         if not kobo_outcome.ok:
                             st.error("KoboToolbox data validation failed. Nothing was imported.")
@@ -2415,6 +2448,7 @@ elif page == "Admin - Datasets":
                                 dataset_name,
                                 samples_df,
                                 ast_df,
+                                isolates_df=isolates_df,
                                 uploaded_by=(st.session_state.user_email or "System"),
                             )
                             if success:
