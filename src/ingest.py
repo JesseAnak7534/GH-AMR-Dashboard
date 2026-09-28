@@ -771,6 +771,29 @@ def ingest_validated_upload(dataset_id: str, dataset_name: str,
             sample_to_subject, subject_basis, phenotype_counts)
 
         conn.commit()
+
+        # Refresh planner statistics for the tables just written.
+        #
+        # After a bulk insert PostgreSQL has no statistics for the new rows, so
+        # it can pick a plan suited to an empty table. On a 2,500-specimen
+        # upload the first query joining the chain hit the 30-second statement
+        # timeout; the same query took well under a second once analysed. Doing
+        # it here means the first page load after an upload is fast rather than
+        # a failure the user has to retry.
+        #
+        # Outside the transaction, and failure is not fatal: stale statistics
+        # make queries slow, not wrong.
+        try:
+            conn = db.get_connection()
+            cur = conn.cursor()
+            cur.raw.connection.set_isolation_level(0)  # autocommit for ANALYZE
+            for table in ("subjects", "encounters", "specimens", "isolates",
+                          "phenotypes", "genomic_results", "custody_events",
+                          "samples", "ast_results"):
+                cur.execute(f"ANALYZE {table}")
+        except Exception:                             # noqa: BLE001
+            logger.warning("could not refresh planner statistics after ingest",
+                           exc_info=True)
     except Exception as exc:                          # noqa: BLE001
         conn.rollback()
         logger.exception("ingest_validated_upload failed")
