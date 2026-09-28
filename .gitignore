@@ -6,6 +6,10 @@ ENV/
 
 # Streamlit secrets (API keys, DB URLs -- never commit)
 .streamlit/secrets.toml
+# The generated paste-ready secrets block. Holds live credentials and is
+# meant to be deleted once pasted into Streamlit Cloud.
+streamlit_secrets_TO_PASTE.toml
+*_TO_PASTE.toml
 
 # Database files
 db/amr_data.db
