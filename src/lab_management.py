@@ -45,7 +45,18 @@ LAB_LOGIN_CODES: dict = {
 }
 
 load_dotenv()
-KOBO_API_TOKEN = os.getenv("KOBO_API_TOKEN")
+def _kobo_token() -> Optional[str]:
+    """The KoboToolbox API token, read when it is needed.
+
+    This was a module constant assigned from os.getenv at import time, which
+    meant the token was found only if something else had already loaded .env --
+    in practice src.db, by import order -- and was never found on Streamlit
+    Cloud, where secrets are not environment variables. That produced the
+    "KoboToolbox API token is not configured" error against a .env that
+    contained it.
+    """
+    from src.settings import get_setting
+    return get_setting("KOBO_API_TOKEN")
 
 # List of approved sentinel site laboratories
 APPROVED_LABS = {
@@ -75,14 +86,18 @@ class KoboToolboxManager:
     
     def __init__(self, api_token: Optional[str] = None):
         """Initialize KoboToolbox manager with API token."""
-        self.api_token = api_token or KOBO_API_TOKEN
+        self.api_token = api_token or _kobo_token()
         self.session = None
         
     def authenticate(self) -> Tuple[bool, str]:
         """Authenticate with KoboToolbox API using Token Auth."""
         try:
             if not self.api_token:
-                return False, "KoboToolbox API token is not configured. Set KOBO_API_TOKEN."
+                return False, (
+                    "KoboToolbox API token is not configured. Add KOBO_API_TOKEN "
+                    "to .env for local use, or to Settings > Secrets on "
+                    "Streamlit Cloud. The token is on your KoboToolbox account "
+                    "page under Account Settings > Security.")
             
             # Test authentication using Token auth on the assets endpoint
             test_url = f"{KOBO_API_BASE}/assets/"
