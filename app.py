@@ -3235,10 +3235,42 @@ elif page == "Risk Assessment":
         # TAB 1: ORGANISM RISK SCORES
         with tab1:
             st.subheader("Organism Risk Scores")
-            
-            # Risk threshold slider
-            risk_threshold = st.slider("Show organisms with resistance rate ≥", 0, 100, 50, step=1)
-            
+            st.warning(
+                "**A composite indicator, not a validated risk measure.** The "
+                "score adds points for resistance level, breadth across agents "
+                "and testing volume. Those weights were chosen for this "
+                "dashboard and have not been derived from outcome data or "
+                "approved by any clinical governance group, so the ranking is a "
+                "way of ordering a list for review -- not a statement that one "
+                "organism is more dangerous than another. The contributing "
+                "factors are listed under each organism, and the scoring rule "
+                "is below."
+            )
+            with st.expander("How the score is calculated"):
+                _rule_rows = [
+                    "| Component | Condition | Points |",
+                    "|---|---|---|",
+                    "| Resistance level | over 70% | 40 |",
+                    "| | over 50% | 30 |",
+                    "| | over 30% | 20 |",
+                    "| Breadth | resistant to many agents | up to 30 |",
+                    "| Evidence volume | more tests recorded | up to 30 |",
+                ]
+                st.markdown(chr(10).join(_rule_rows))
+                st.caption(
+                    "Maximum 100. Because volume contributes, an organism that "
+                    "is tested often scores higher than an equally resistant one "
+                    "tested rarely. That is deliberate -- it ranks what there is "
+                    "evidence about -- but it means the score is not comparable "
+                    "between laboratories with different testing practices."
+                )
+
+            risk_threshold = st.slider(
+                "Show organisms with resistance rate at or above", 0, 100, 50,
+                step=1, key="risk_threshold",
+                help="A display filter for this list, not a clinical or "
+                     "public-health threshold.")
+
             high_risk = analytics.get_high_risk_organisms(all_ast, risk_threshold)
             
             if high_risk:
@@ -3257,13 +3289,22 @@ elif page == "Risk Assessment":
                         for factor in risk_item['risk_factors']:
                             st.write(f"• {factor}")
                         
-                        # Recommendation
+                        # The clinical direction that used to sit here --
+                        # "consider alternative treatment options" -- was
+                        # advice derived from an unvalidated composite score,
+                        # the same defect as the prescribing labels removed
+                        # earlier. What remains describes the observation.
                         if risk_item['risk_level'] == 'CRITICAL':
-                            st.error("**Urgent intervention required** - Consider alternative treatment options")
+                            st.error(
+                                "Highest band on this indicator. Worth reviewing "
+                                "against the cumulative antibiogram and "
+                                "confirming with the reference laboratory.")
                         elif risk_item['risk_level'] == 'HIGH':
-                            st.warning("**Enhanced surveillance** - Monitor trends closely")
+                            st.warning(
+                                "Upper band on this indicator. Worth watching in "
+                                "the trend view.")
                         else:
-                            st.info("**Monitor** - Continue standard surveillance")
+                            st.info("Within the lower bands of this indicator.")
             else:
                 st.success(f"No organisms above risk threshold ({risk_threshold})")
 
@@ -4389,7 +4430,8 @@ elif page == "WHONET Export":
     # Import WHONET module
     from src.whonet import (
         convert_to_whonet_format, export_to_whonet_txt, export_to_whonet_excel,
-        generate_glass_report, validate_whonet_data, generate_glass_html_report
+        generate_glass_report, validate_whonet_data, generate_glass_html_report,
+        unmapped_values, EXPORT_SCHEMA_VERSION
     )
     
     all_samples, all_ast = _load_active_dataset()
@@ -4409,6 +4451,36 @@ elif page == "WHONET Export":
         
         lab_info = {'code': lab_code, 'name': lab_name}
         
+        st.caption(
+            f"Export schema version {EXPORT_SCHEMA_VERSION}. An export file "
+            "existing is not the same as WHONET accepting it: check a round "
+            "trip against a reference file before describing this as GLASS "
+            "submission-ready."
+        )
+
+        # Unmapped values are surfaced before anything is offered for download,
+        # so shipping an incomplete file is a decision rather than a surprise
+        # for whoever tries to import it.
+        unmapped = unmapped_values(all_samples, all_ast)
+        if unmapped["organisms"] or unmapped["antibiotics"]:
+            st.error(
+                "**Some values have no governed WHONET code.** The platform no "
+                "longer invents one: a made-up code produces a file that "
+                "imports somewhere and is wrong, rather than failing and being "
+                "noticed. Map these at source, or accept that rows carrying "
+                "them are not importable."
+            )
+            if unmapped["organisms"]:
+                st.write("**Organisms without a code:** "
+                         + ", ".join(unmapped["organisms"][:25])
+                         + (f" (and {len(unmapped['organisms']) - 25} more)"
+                            if len(unmapped["organisms"]) > 25 else ""))
+            if unmapped["antibiotics"]:
+                st.write("**Antibiotics without a code:** "
+                         + ", ".join(unmapped["antibiotics"][:25])
+                         + (f" (and {len(unmapped['antibiotics']) - 25} more)"
+                            if len(unmapped["antibiotics"]) > 25 else ""))
+
         # Convert to WHONET format
         with st.spinner("Converting data to WHONET format..."):
             whonet_df = convert_to_whonet_format(all_samples, all_ast, lab_info)

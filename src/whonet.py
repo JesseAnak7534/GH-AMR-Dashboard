@@ -144,6 +144,38 @@ WHONET_ANTIBIOTIC_CODES = {
 }
 
 
+#: Version of the exported layout. The review asked for the export schema to be
+#: versioned, so a file can be matched to the column set and code sets that
+#: produced it rather than assumed to be current.
+EXPORT_SCHEMA_VERSION = "1.1"
+
+#: Written wherever a value has no governed code. Chosen so it cannot be
+#: mistaken for a real WHONET code and so an export carrying it is obviously
+#: incomplete rather than quietly wrong.
+UNMAPPED_CODE = "UNMAPPED"
+
+
+def unmapped_values(samples_df, ast_df) -> Dict[str, List[str]]:
+    """Organisms and antibiotics with no governed WHONET code.
+
+    Returned before an export is offered, so the choice to ship an incomplete
+    file is a deliberate one rather than an accident discovered by whoever tries
+    to import it.
+    """
+    organisms, antibiotics = set(), set()
+    if ast_df is not None and not ast_df.empty:
+        if "organism" in ast_df.columns:
+            for value in ast_df["organism"].dropna().unique():
+                code, _ = normalize_organism(value)
+                if code == UNMAPPED_CODE:
+                    organisms.add(str(value))
+        if "antibiotic" in ast_df.columns:
+            for value in ast_df["antibiotic"].dropna().unique():
+                if normalize_antibiotic(value) == UNMAPPED_CODE:
+                    antibiotics.add(str(value))
+    return {"organisms": sorted(organisms), "antibiotics": sorted(antibiotics)}
+
+
 def normalize_specimen_type(specimen: str) -> str:
     """Normalize specimen type to WHONET code."""
     if pd.isna(specimen):
@@ -168,14 +200,14 @@ def normalize_organism(organism: str) -> Tuple[str, str]:
             proper_name = key.title().replace("'S", "'s")
             return (code, proper_name)
     
-    # Generate code from first 3 letters if not found
-    parts = organism.split()
-    if len(parts) >= 2:
-        code = parts[0][:1].lower() + parts[1][:2].lower()
-    else:
-        code = organism[:3].lower()
-    
-    return (code, organism)
+    # Unmapped. The code is NOT invented.
+    #
+    # This used to build one from the first letters of the genus and species,
+    # which produced a plausible-looking code that WHONET does not recognise and
+    # that can collide with a real one -- an export would import somewhere and be
+    # wrong rather than fail and be noticed. The review asked for unmapped values
+    # to be reported as errors rather than given invented codes.
+    return (UNMAPPED_CODE, organism)
 
 
 def normalize_antibiotic(antibiotic: str) -> str:
@@ -188,8 +220,8 @@ def normalize_antibiotic(antibiotic: str) -> str:
         if key in antibiotic_lower or antibiotic_lower in key:
             return code
     
-    # Return first 3 letters uppercase if not found
-    return antibiotic[:3].upper()
+    # Unmapped. See normalize_organism: no code is invented here either.
+    return UNMAPPED_CODE
 
 
 def convert_to_whonet_format(samples_df: pd.DataFrame, 
@@ -509,11 +541,26 @@ def validate_whonet_data(whonet_df: pd.DataFrame) -> Dict:
             validation['errors'].append(f"Required field {field} is empty")
             validation['is_valid'] = False
     
-    # Check for valid organism codes
+    # Unmapped codes are errors, not warnings. A file that carries them is not
+    # WHONET-importable, and describing it as merely non-standard invited it to
+    # be sent anyway.
     if 'ORG_CODE' in whonet_df.columns:
-        unknown_orgs = whonet_df[~whonet_df['ORG_CODE'].isin(WHONET_ORGANISM_CODES.values())]['ORG_CODE'].unique()
-        if len(unknown_orgs) > 0:
-            validation['warnings'].append(f"Non-standard organism codes: {', '.join(unknown_orgs[:5])}")
+        unmapped = whonet_df[whonet_df['ORG_CODE'] == UNMAPPED_CODE]
+        if not unmapped.empty:
+            names = sorted(unmapped['ORGANISM'].dropna().astype(str).unique())
+            validation['errors'].append(
+                f"{len(unmapped)} row(s) carry no governed WHONET organism code: "
+                + ", ".join(names[:8])
+                + (f" and {len(names) - 8} more" if len(names) > 8 else "")
+                + ". Map these organisms before exporting; the platform will not "
+                  "invent a code for them.")
+            validation['is_valid'] = False
+        other = whonet_df[
+            (~whonet_df['ORG_CODE'].isin(WHONET_ORGANISM_CODES.values()))
+            & (whonet_df['ORG_CODE'] != UNMAPPED_CODE)]['ORG_CODE'].unique()
+        if len(other) > 0:
+            validation['warnings'].append(
+                f"Organism codes not in the governed set: {', '.join(map(str, other[:5]))}")
     
     # Check date format
     if 'SPEC_DATE' in whonet_df.columns:

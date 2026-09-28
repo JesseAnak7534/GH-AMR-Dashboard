@@ -437,9 +437,26 @@ class ReportGenerator:
             })
         ).reset_index()
         
+        # These cut-offs order a report; they are not action thresholds. The
+        # same hard-coded numbers in the alert module were the review's third
+        # priority, and the rebuilt signal rules compare against a baseline with
+        # an explicit denominator instead. A scheduled report is a summary, so
+        # the cut-offs remain -- but they are named for what they are, and the
+        # report says so rather than calling them alerts.
         return {
             'generated_at': datetime.now().isoformat(),
             'rates': rates.to_dict('records'),
+            'threshold_note': (
+                'Organism-agent pairs are listed above 50% and 80% '
+                'non-susceptibility. These are presentation cut-offs for this '
+                'summary, not approved action thresholds, and they are not '
+                'deduplicated to one isolate per patient. Reviewed signals with '
+                'explicit denominators and baselines are on the Signals & '
+                'Response page.'),
+            'above_50_percent': rates[rates['resistance_rate'] >= 50].to_dict('records'),
+            'above_80_percent': rates[rates['resistance_rate'] >= 80].to_dict('records'),
+            # Retained under the old keys so an existing scheduled report keeps
+            # rendering while templates are updated.
             'high_resistance': rates[rates['resistance_rate'] >= 50].to_dict('records'),
             'critical_alerts': rates[rates['resistance_rate'] >= 80].to_dict('records')
         }
