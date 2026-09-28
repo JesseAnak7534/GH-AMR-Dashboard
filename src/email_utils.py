@@ -19,25 +19,50 @@ def _get_secrets() -> dict:
 
 
 def get_smtp_config() -> dict:
-    """Retrieve SMTP configuration from env variables or Streamlit secrets if available."""
-    secrets_cfg = _get_secrets()
-    host = (secrets_cfg.get("SMTP_HOST") or os.getenv("SMTP_HOST") or "").lower()
-    username = secrets_cfg.get("SMTP_USERNAME") or os.getenv("SMTP_USERNAME")
-    from_secret = secrets_cfg.get("SMTP_FROM") or os.getenv("SMTP_FROM") or os.getenv("ADMIN_EMAIL")
+    """SMTP configuration, from the environment or Streamlit secrets.
 
-    # Default from to username for better deliverability, especially on Gmail
-    effective_from = from_secret or username or "no-reply@example.com"
+    Accepts SMTP_HOST or SMTP_SERVER for the same thing. This module read
+    SMTP_HOST while src/scheduler.py read SMTP_SERVER, and the deployment
+    configured only SMTP_SERVER -- so scheduled reports could send while
+    verification and password-reset emails silently had no host. Accepting both
+    is the fix that does not require every existing deployment to be edited.
+    """
+    from src.settings import get_bool, get_int, get_setting
 
-    config = {
-        "host": secrets_cfg.get("SMTP_HOST") or os.getenv("SMTP_HOST"),
-        "port": int(secrets_cfg.get("SMTP_PORT") or os.getenv("SMTP_PORT", "587")),
+    host = get_setting("SMTP_HOST") or get_setting("SMTP_SERVER")
+    username = get_setting("SMTP_USERNAME")
+    # Default the sender to the authenticated user: providers such as Gmail
+    # reject or spam-file mail whose From does not match the account.
+    from_email = (get_setting("SMTP_FROM") or get_setting("ADMIN_EMAIL")
+                  or username or "no-reply@example.com")
+
+    return {
+        "host": host,
+        "port": get_int("SMTP_PORT", 587),
         "username": username,
-        "password": secrets_cfg.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD"),
-        "from_email": effective_from,
-        "use_tls": str(secrets_cfg.get("SMTP_USE_TLS") or os.getenv("SMTP_USE_TLS", "true")).lower() in ("1", "true", "yes"),
-        "use_ssl": str(secrets_cfg.get("SMTP_USE_SSL") or os.getenv("SMTP_USE_SSL", "false")).lower() in ("1", "true", "yes"),
+        "password": get_setting("SMTP_PASSWORD"),
+        "from_email": from_email,
+        "from_name": get_setting("SMTP_FROM_NAME") or "ICBB-AMRSS",
+        "use_tls": get_bool("SMTP_USE_TLS", True),
+        "use_ssl": get_bool("SMTP_USE_SSL", False),
     }
-    return config
+
+
+def smtp_status() -> tuple:
+    """Whether email can be sent, and what is missing if not.
+
+    Returned so a page can say which setting is absent instead of reporting a
+    generic send failure after the fact.
+    """
+    config = get_smtp_config()
+    missing = [name for name, value in (
+        ("SMTP_HOST or SMTP_SERVER", config["host"]),
+        ("SMTP_USERNAME", config["username"]),
+        ("SMTP_PASSWORD", config["password"]),
+    ) if not value]
+    if missing:
+        return False, "Email is not configured: missing " + ", ".join(missing)
+    return True, f"Email configured via {config['host']}:{config['port']}"
 
 
 def get_app_base_url() -> Optional[str]:

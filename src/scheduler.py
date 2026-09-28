@@ -562,7 +562,10 @@ class EmailSender:
         # Reload dotenv to get latest values
         load_dotenv()
         
-        self.smtp_server = smtp_server or os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+        # Accepts either name; see email_utils.get_smtp_config for why.
+        from src.settings import get_setting
+        self.smtp_server = (smtp_server or get_setting('SMTP_SERVER')
+                            or get_setting('SMTP_HOST') or 'smtp.gmail.com')
         self.smtp_port = int(smtp_port or os.environ.get('SMTP_PORT', 587))
         self.username = username or os.environ.get('SMTP_USERNAME', '')
         self.password = password or os.environ.get('SMTP_PASSWORD', '')
