@@ -1841,8 +1841,10 @@ with st.sidebar:
         ("📂", "Data Management", [
             ("📤", "Upload & Data Quality"),
             ("🗄️", "Data Management"),
+            ("🧾", "Data Coverage & Quality"),
         ]),
         ("🔬", "Surveillance", [
+            ("🧫", "Surveillance Analysis"),
             ("📊", "Resistance Overview"),
             ("🟥", "Resistance Heat Map"),
             ("🦠", "Pathogen Profile"),
@@ -2434,6 +2436,18 @@ elif page == "Admin - Datasets":
 # ============================================================================
 # PAGE 3: RESISTANCE OVERVIEW
 # ============================================================================
+elif page == "Surveillance Analysis":
+    # Isolate-level analysis over the traceability chain: pathogen distribution,
+    # CLSI M39 cumulative antibiograms, and stratification by ward, specimen
+    # type and age.
+    from src.page_surveillance import render_surveillance_page
+    render_surveillance_page()
+
+elif page == "Data Coverage & Quality":
+    # Data-system performance as a surveillance product in its own right.
+    from src.page_data_quality import render_data_quality_page
+    render_data_quality_page()
+
 elif page == "Resistance Overview":
     st.header("Resistance Overview")
     

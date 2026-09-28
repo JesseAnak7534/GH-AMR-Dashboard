@@ -90,8 +90,16 @@ def render_pathogen_profile_page():
     # ── organism selector ───────────────────────────────────────────────
     all_ast = all_ast.dropna(subset=["organism", "result"])
     all_ast = all_ast[all_ast["result"].isin(["R", "I", "S"])]
-    org_counts = all_ast["organism"].value_counts()
-    org_list = org_counts.index.tolist()
+    # Rank organisms by ISOLATES, not by susceptibility tests. Ranking by tests
+    # put whichever organism happened to be run against the longest panel at the
+    # top: E. coli read as 534 where there are 182 isolates, an inflation that
+    # varies by organism (1.5x to 2.9x here) and so reorders the list rather
+    # than merely scaling it.
+    org_isolates = (all_ast.groupby("organism")["isolate_id"]
+                           .nunique().sort_values(ascending=False))
+    org_tests = all_ast["organism"].value_counts()
+    org_counts = org_isolates
+    org_list = org_isolates.index.tolist()
 
     if not org_list:
         st.info("No organisms found in the dataset.")
@@ -100,7 +108,8 @@ def render_pathogen_profile_page():
     selected_org = st.selectbox(
         "Select Organism",
         org_list,
-        format_func=lambda o: f"{o}  ({org_counts[o]:,} tests)",
+        format_func=lambda o: (f"{o}  ({org_isolates[o]:,} isolates, "
+                               f"{org_tests[o]:,} tests)"),
         key="pp_org",
     )
 
@@ -118,6 +127,7 @@ def render_pathogen_profile_page():
     overall_r = n_resistant / total_tests * 100 if total_tests else 0
     unique_abx = org_ast["antibiotic"].nunique()
     unique_samples = org_ast["sample_id"].nunique()
+    unique_isolates = org_ast["isolate_id"].nunique()
 
     # Risk score
     try:
@@ -130,10 +140,14 @@ def render_pathogen_profile_page():
 
     st.markdown(
         '<div class="kpi-row">'
-        + _kpi(f"{total_tests:,}", "Total Tests", "blue")
+        + _kpi(f"{unique_isolates:,}", "Isolates", "blue")
         + _kpi(f"{overall_r:.1f}%", "Resistance Rate", "red" if overall_r >= 40 else "amber")
         + _kpi(unique_abx, "Antibiotics Tested", "green")
-        + _kpi(unique_samples, "Isolates / Samples", "purple")
+        # "Isolates / Samples" showed the specimen count under a label that also
+        # claimed to mean isolates. They are different numbers -- one specimen can
+        # yield several isolates -- so both are now named for what they are.
+        + _kpi(f"{unique_samples:,}", "Specimens", "purple")
+        + _kpi(f"{total_tests:,}", "Susceptibility Tests", "blue")
         + _kpi(f"{risk_score:.0f}/100", f"Risk: {risk_level}", "red" if risk_level == "CRITICAL" else "amber")
         + "</div>",
         unsafe_allow_html=True,
