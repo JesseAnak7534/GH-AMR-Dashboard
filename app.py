@@ -2717,10 +2717,11 @@ elif page == "Resistance Overview":
             
             st.markdown("---")
             
-            # Data preview
-            st.subheader("Data Preview")
-            display_df = filtered_ast[['sample_id', 'organism', 'antibiotic', 'result', 'method', 'test_date']].head(100)
-            st.dataframe(display_df, use_container_width=True)
+            # A raw dump of the first hundred AST rows used to sit here, and
+            # another on the Trends page. Neither analysed anything, and two
+            # copies of "here are some rows" invite being read as the dataset.
+            # Records are downloadable from this page's CSV buttons; record-level
+            # detail also needs an administrator sign-in.
 
 # ============================================================================
 # PAGE: RESISTANCE HEAT MAP
@@ -2823,10 +2824,9 @@ elif page == "Trends":
             
             st.markdown("---")
             
-            # Data preview
-            st.subheader("Recent Test Data")
-            display_df = filtered_ast[['test_date', 'organism', 'antibiotic', 'result', 'sample_id']].sort_values('test_date', ascending=False).head(100)
-            st.dataframe(display_df, use_container_width=True)
+            # The second raw dump; see the note on Resistance Overview. A
+            # laboratory checking that its upload landed should use Upload &
+            # Data Quality, which reports what was stored and why.
 
 # ============================================================================
 # PAGE 5: MAP HOTSPOTS
