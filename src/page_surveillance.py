@@ -23,6 +23,8 @@ import streamlit as st
 
 from src import expert_rules, surveillance as sv
 
+ALL_OPTION = "__all__"
+
 _SECTOR_LABELS = {
     "human": "Human clinical",
     "animal": "Animal",
@@ -294,11 +296,98 @@ def _tab_antibiogram(frame: pd.DataFrame) -> None:
                     "identification errors and should be corrected at source."
                 )
 
+    st.markdown("##### Antibiogram matrix")
+    st.caption(
+        "Organisms down, agents across, percent susceptible in each cell. A "
+        "cell reading n<30 was tested but has too few isolates to report a "
+        "percentage; an empty cell was never tested. Those are different "
+        "facts, and a plain pivot of percentages shows both as blank."
+    )
+    matrix = _antibiogram_matrix(table)
+    if matrix.empty:
+        st.caption("Nothing to display.")
+    else:
+        st.dataframe(matrix, use_container_width=True)
+        _csv_export(table, provenance)
+
     _provenance_block(provenance)
 
 
+def _antibiogram_matrix(table: pd.DataFrame) -> pd.DataFrame:
+    """Organism x agent grid.
+
+    Distinguishes three states that a pivot of percentages collapses into one:
+    reported, tested but below the threshold, and never tested.
+    """
+    if table.empty:
+        return pd.DataFrame()
+
+    def cell(row) -> str:
+        if row["status"] == sv.STATUS_REPORTED:
+            return f"{row['percent_susceptible']:.0f}"
+        if row["status"] == sv.STATUS_SUPPRESSED:
+            return f"n<{sv.MIN_ISOLATES_FOR_REPORTING}"
+        return ""
+
+    working = table.copy()
+    working["_cell"] = working.apply(cell, axis=1)
+    grid = working.pivot_table(index="organism", columns="antibiotic",
+                               values="_cell", aggfunc="first")
+    return grid.fillna("").sort_index()
+
+
+def _csv_export(table: pd.DataFrame, provenance: Dict[str, object]) -> None:
+    """Export the antibiogram with its method recorded inside the file.
+
+    A table exported without its period, deduplication rule and threshold can be
+    reused later as though it were a plain list of percentages, which is how an
+    exploratory summary becomes a quoted figure.
+    """
+    header = pd.DataFrame({
+        "field": ["Analysis period", "Deduplication", "Reporting threshold",
+                  "QC failures excluded", "Sectors", "Generated"],
+        "value": [
+            f"{provenance.get('period_start')} to {provenance.get('period_end')}",
+            provenance.get("deduplication_summary", "not applied"),
+            f"{provenance.get('min_isolates')} isolates",
+            provenance.get("qc_failures_excluded", 0),
+            ", ".join(provenance.get("sectors") or []),
+            pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d %H:%M UTC"),
+        ],
+    })
+    body = table[["organism", "antibiotic", "tested", "susceptible",
+                  "intermediate", "resistant", "percent_susceptible",
+                  "ci_low", "ci_high", "status", "breakpoints"]]
+    separator = chr(10)   # blank line between the method header and the table
+    payload = header.to_csv(index=False) + separator + body.to_csv(index=False)
+    st.download_button(
+        "Download antibiogram (CSV, with method)",
+        data=payload.encode("utf-8"),
+        file_name=f"antibiogram_{pd.Timestamp.now():%Y%m%d}.csv",
+        mime="text/csv", key="sv_ab_csv")
+
+
+def _resistance_table(table: pd.DataFrame, label_column: str,
+                      stratum_label: str) -> pd.DataFrame:
+    """Pooled non-susceptibility, with the panel size beside every rate."""
+    return pd.DataFrame({
+        stratum_label: table[label_column],
+        "Isolates": table["isolates"],
+        "Observations": table["observations"],
+        "Susceptible": table["susceptible"],
+        "Non-susceptible": table["non_susceptible"],
+        "% non-susceptible": table["percent_non_susceptible"].map(_format_percent),
+        "95% CI": [
+            "—" if pd.isna(lo) or pd.isna(hi) else f"{lo:.1f} – {hi:.1f}"
+            for lo, hi in zip(table["ci_low"], table["ci_high"])
+        ],
+        "Organism–agent pairs": table["distinct_pairs"],
+        "Why not reported": [_STATUS_NOTE.get(s, "") for s in table["status"]],
+    })
+
+
 def _tab_stratified(frame: pd.DataFrame) -> None:
-    st.subheader("Susceptibility by stratum")
+    st.subheader("Resistance by stratum")
     st.caption(
         "An overall percentage can describe no one. The same organism and agent "
         "may be 80% susceptible in outpatients and 30% in intensive care, and "
@@ -317,34 +406,73 @@ def _tab_stratified(frame: pd.DataFrame) -> None:
 
     left, middle, right = st.columns(3)
     with left:
-        organism = st.selectbox("Organism", organisms, key="sv_st_org")
-    agents = sorted(working.loc[working["organism"] == organism,
-                                "antibiotic"].dropna().unique())
+        organism = st.selectbox(
+            "Organism", [ALL_OPTION] + organisms,
+            format_func=lambda o: "All organisms" if o == ALL_OPTION else o,
+            key="sv_st_org")
+    scope = working if organism == ALL_OPTION else working[
+        working["organism"] == organism]
+    agents = sorted(scope["antibiotic"].dropna().unique())
     with middle:
-        antibiotic = st.selectbox("Antibiotic", agents, key="sv_st_abx")
+        antibiotic = st.selectbox(
+            "Antibiotic", [ALL_OPTION] + agents,
+            format_func=lambda a: "All antibiotics" if a == ALL_OPTION else a,
+            key="sv_st_abx")
     available = [name for name, column in sv.STRATIFICATIONS.items()
                  if column in working.columns and column != "organism"]
     with right:
         stratum = st.selectbox("Break down by", available, key="sv_st_by")
 
     column = sv.STRATIFICATIONS[stratum]
-    table = sv.stratified_susceptibility(working, by=column, organism=organism,
-                                        antibiotic=antibiotic)
-    if table.empty:
-        st.info("No isolates for that combination.")
-        return
+    pooled = (organism == ALL_OPTION) or (antibiotic == ALL_OPTION)
+    chosen_organism = None if organism == ALL_OPTION else organism
+    chosen_antibiotic = None if antibiotic == ALL_OPTION else antibiotic
 
-    st.dataframe(_susceptibility_table(table, column)
-                 .rename(columns={column: stratum}),
-                 use_container_width=True, hide_index=True)
+    if pooled:
+        # Pooling across organism-agent pairs cannot use isolates as the
+        # denominator: with twelve agents per isolate the numerator would exceed
+        # it. The unit becomes the observation, and the panel size is shown so
+        # two strata are only compared when their panels are comparable.
+        table = sv.stratified_resistance(
+            working, by=column, organism=chosen_organism,
+            antibiotic=chosen_antibiotic)
+        if table.empty:
+            st.info("No observations for that combination.")
+            return
+
+        st.info(
+            "Pooled across "
+            + ("all organisms" if chosen_organism is None else chosen_organism)
+            + " and "
+            + ("all antibiotics" if chosen_antibiotic is None else chosen_antibiotic)
+            + ". The unit is one isolate tested against one agent, so the "
+              "percentage depends on which agents each laboratory tested. The "
+              "**Organism–agent pairs** column is there for that reason: two "
+              "strata are comparable only when their panels are similar. For a "
+              "clinically usable figure, choose one organism and one agent."
+        )
+        st.dataframe(_resistance_table(table, column, stratum),
+                     use_container_width=True, hide_index=True)
+        value_column, label = "percent_non_susceptible", "% non-susceptible"
+    else:
+        table = sv.stratified_susceptibility(
+            working, by=column, organism=chosen_organism,
+            antibiotic=chosen_antibiotic)
+        if table.empty:
+            st.info("No isolates for that combination.")
+            return
+        st.dataframe(_susceptibility_table(table, column)
+                     .rename(columns={column: stratum}),
+                     use_container_width=True, hide_index=True)
+        value_column, label = "percent_susceptible", "% susceptible"
 
     reported = table[table["status"] == sv.STATUS_REPORTED]
     if len(reported) >= 2:
-        figure = px.bar(reported, x=column, y="percent_susceptible",
-                        error_y=reported["ci_high"] - reported["percent_susceptible"],
-                        error_y_minus=reported["percent_susceptible"] - reported["ci_low"],
-                        labels={column: stratum,
-                                "percent_susceptible": "% susceptible"})
+        figure = px.bar(
+            reported, x=column, y=value_column,
+            error_y=reported["ci_high"] - reported[value_column],
+            error_y_minus=reported[value_column] - reported["ci_low"],
+            labels={column: stratum, value_column: label})
         figure.update_layout(yaxis_range=[0, 100],
                             margin=dict(l=10, r=10, t=30, b=10))
         st.plotly_chart(figure, use_container_width=True)
@@ -354,7 +482,7 @@ def _tab_stratified(frame: pd.DataFrame) -> None:
         only = table.iloc[0]
         if str(only[column]) == "Not recorded":
             st.warning(
-                f"Every isolate reads 'Not recorded' for {stratum.lower()}, so "
+                f"Every record reads 'Not recorded' for {stratum.lower()}, so "
                 "this breakdown has one group and tells you nothing about it. "
                 "The field is in the data model; it has not been collected. "
                 "**Data Coverage & Quality** lists which fields are populated."
@@ -366,17 +494,18 @@ def _tab_stratified(frame: pd.DataFrame) -> None:
             )
 
     # Infection-prevention view: high-acuity wards against the rest.
-    comparison = sv.high_acuity_comparison(working, organism=organism,
-                                           antibiotic=antibiotic)
-    if not comparison.empty and comparison["ward_group"].nunique() > 1:
-        st.markdown("##### High-acuity wards compared with the rest")
-        st.caption(
-            "ICU, neonatal, surgical, burns and haemato-oncology wards, where "
-            "device- and procedure-associated infection concentrates."
-        )
-        st.dataframe(_susceptibility_table(comparison, "ward_group")
-                     .rename(columns={"ward_group": "Ward group"}),
-                     use_container_width=True, hide_index=True)
+    if not pooled:
+        comparison = sv.high_acuity_comparison(
+            working, organism=chosen_organism, antibiotic=chosen_antibiotic)
+        if not comparison.empty and comparison["ward_group"].nunique() > 1:
+            st.markdown("##### High-acuity wards compared with the rest")
+            st.caption(
+                "ICU, neonatal, surgical, burns and haemato-oncology wards, "
+                "where device- and procedure-associated infection concentrates."
+            )
+            st.dataframe(_susceptibility_table(comparison, "ward_group")
+                         .rename(columns={"ward_group": "Ward group"}),
+                         use_container_width=True, hide_index=True)
 
 
 def _tab_dictionary() -> None:
@@ -432,7 +561,7 @@ def render_surveillance_page() -> None:
 
     distribution, antibiogram, stratified, dictionary = st.tabs([
         "Pathogen distribution", "Cumulative antibiogram",
-        "By ward, specimen and age", "Metric dictionary",
+        "Resistance by stratum", "Metric dictionary",
     ])
     with distribution:
         _tab_distribution(frame)

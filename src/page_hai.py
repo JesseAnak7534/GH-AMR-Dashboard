@@ -89,46 +89,44 @@ def _is_hospital_sample(row) -> bool:
     return source == "human" or any(h in site for h in HOSPITAL_SITE_TYPES)
 
 
-# MDR detection (≥3 antibiotic classes resistant)
-_ABX_CLASS_MAP = {
-    "amoxicillin": "Penicillins", "ampicillin": "Penicillins", "piperacillin": "Penicillins",
-    "oxacillin": "Penicillins", "penicillin": "Penicillins",
-    "amoxicillin-clavulanate": "BL-BLI", "piperacillin-tazobactam": "BL-BLI",
-    "ampicillin-sulbactam": "BL-BLI",
-    "cefazolin": "Cephalosporins-1", "cephalexin": "Cephalosporins-1",
-    "cefuroxime": "Cephalosporins-2", "cefoxitin": "Cephalosporins-2",
-    "ceftriaxone": "Cephalosporins-3", "cefotaxime": "Cephalosporins-3",
-    "ceftazidime": "Cephalosporins-3", "cefpodoxime": "Cephalosporins-3",
-    "cefepime": "Cephalosporins-4",
-    "imipenem": "Carbapenems", "meropenem": "Carbapenems", "ertapenem": "Carbapenems",
-    "doripenem": "Carbapenems",
-    "gentamicin": "Aminoglycosides", "amikacin": "Aminoglycosides", "tobramycin": "Aminoglycosides",
-    "ciprofloxacin": "Fluoroquinolones", "levofloxacin": "Fluoroquinolones",
-    "moxifloxacin": "Fluoroquinolones", "norfloxacin": "Fluoroquinolones",
-    "tetracycline": "Tetracyclines", "doxycycline": "Tetracyclines", "minocycline": "Tetracyclines",
-    "tigecycline": "Tetracyclines",
-    "trimethoprim-sulfamethoxazole": "Sulfonamides", "trimethoprim": "Sulfonamides",
-    "azithromycin": "Macrolides", "erythromycin": "Macrolides", "clarithromycin": "Macrolides",
-    "colistin": "Polymyxins", "polymyxin b": "Polymyxins",
-    "vancomycin": "Glycopeptides", "teicoplanin": "Glycopeptides",
-    "chloramphenicol": "Chloramphenicol",
-    "nitrofurantoin": "Nitrofurans",
-    "linezolid": "Oxazolidinones", "daptomycin": "Lipopeptides",
-}
+# MDR classification is delegated to src/mdr.py. A local copy of the class
+# map used to live here -- the third in the codebase, after src/alerts.py and
+# src/analytics.py -- and it carried the same three defects: one generic map
+# applied to every organism where the agreed definitions are
+# organism-specific; only 'R' counted, where the definitions use
+# non-susceptible (I or R); and intrinsic resistance counted towards the
+# total, so every Klebsiella scored a category for the ampicillin it was
+# always resistant to.
 
 
 def _classify_abx(name: str) -> str:
-    return _ABX_CLASS_MAP.get(name.strip().lower(), "Other")
+    """Antimicrobial category for display grouping.
+
+    Enterobacterales categories are used as the label set, since this page is
+    about hospital Gram-negatives; the MDR decision itself is organism-specific
+    and comes from src.mdr.
+    """
+    from src import mdr as _mdr
+    category = _mdr.categorise_agent(
+        name, _mdr.CATEGORY_SETS["Enterobacterales"])
+    return category or "Other"
 
 
-def _detect_mdr(isolate_df: pd.DataFrame) -> bool:
-    """Return True if isolate is MDR (resistant to ≥3 distinct antibiotic classes)."""
-    resistant = isolate_df[isolate_df["result"] == "R"]
-    if resistant.empty:
-        return False
-    classes = {_classify_abx(abx) for abx in resistant["antibiotic"]}
-    classes.discard("Other")
-    return len(classes) >= 3
+def _mdr_isolate_ids(ast_df: pd.DataFrame) -> set:
+    """Isolate ids meeting the MDR definition or worse.
+
+    Uses the organism-specific category sets, counts non-susceptible rather
+    than resistant only, and excludes intrinsic resistance.
+    """
+    from src import mdr as _mdr
+    if ast_df.empty:
+        return set()
+    classified = _mdr.classify_frame(ast_df)
+    if classified.empty:
+        return set()
+    multidrug = classified[classified['classification'].isin(
+        [_mdr.CLASS_MDR, _mdr.CLASS_XDR, _mdr.CLASS_PDR])]
+    return set(multidrug['isolate_id'].astype(str))
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -189,8 +187,7 @@ def render_hai_page():
     nosocomial_ast = hospital_ast[hospital_ast["is_nosocomial"]]
 
     # ── MDR detection ───────────────────────────────────────────────────
-    mdr_flags = hospital_ast.groupby("isolate_id").apply(_detect_mdr, include_groups=False)
-    mdr_isolate_ids = set(mdr_flags[mdr_flags].index)
+    mdr_isolate_ids = _mdr_isolate_ids(hospital_ast)
     hospital_ast["is_mdr"] = hospital_ast["isolate_id"].isin(mdr_isolate_ids)
 
     # ── KPIs ────────────────────────────────────────────────────────────

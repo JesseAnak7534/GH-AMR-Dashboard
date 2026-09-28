@@ -25,7 +25,7 @@ import plotly.graph_objects as go
 pio.templates["amrss"] = go.layout.Template(layout=dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+    font=dict(family="Calibri, Carlito, Segoe UI, sans-serif",
               color="#1a170e", size=12),
     colorway=["#194238", "#a27117", "#964517", "#2f5430", "#164161",
               "#741a10", "#b18a3a", "#5a8c6d"],
@@ -36,12 +36,12 @@ pio.templates["amrss"] = go.layout.Template(layout=dict(
                zerolinecolor="#e2d7bb", tickcolor="#b4a788",
                tickfont=dict(color="#58523e"), title=dict(font=dict(color="#1a170e"))),
     hoverlabel=dict(bgcolor="#fbf7ec", bordercolor="#b4a788",
-                    font=dict(family="Inter, sans-serif", color="#1a170e", size=12)),
+                    font=dict(family="Calibri, Carlito, Segoe UI, sans-serif", color="#1a170e", size=12)),
     legend=dict(bgcolor="rgba(0,0,0,0)", bordercolor="rgba(0,0,0,0)",
                 font=dict(color="#1a170e", size=11)),
     colorscale=dict(sequential=[[0, "#f3ead6"], [0.5, "#a27117"], [1, "#194238"]],
                     diverging=[[0, "#741a10"], [0.5, "#f3ead6"], [1, "#194238"]]),
-    title=dict(font=dict(family="Fraunces, Georgia, serif",
+    title=dict(font=dict(family="Calibri, Carlito, Segoe UI, sans-serif",
                          color="#1a170e", size=16)),
 ))
 pio.templates.default = "amrss"
@@ -493,7 +493,7 @@ except Exception:
 if st.session_state.get("show_login") and not st.session_state.authenticated:
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
         /* Palette — deep editorial, scientific institutional */
         :root {
             --paper:         #ebe2cd;
@@ -510,6 +510,10 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
             --forest-deep:   #061712;
             --forest-soft:   #d8e2dc;
             --gold:          #b18a3a;
+        /* Readable gold for text on white. The display gold above stays for
+           borders and fills, where contrast rules do not apply; #b18a3a as
+           body text measured 3.20:1 against white, below the 4.5:1 minimum. */
+        --gold-text:     #8a6a22;
             --gold-soft:     #e6d39c;
             --terracotta:    #964517;
             --ochre:         #a27117;
@@ -525,7 +529,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
 
         .stApp {
             background: var(--paper);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
             color: var(--ink);
         }
 
@@ -601,7 +605,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
             margin-bottom: 0.6rem;
         }
         .login-brand-pane .brand-title {
-            font-family: 'Fraunces', 'Georgia', serif;
+            font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 2.4rem;
             font-weight: 600;
             letter-spacing: -0.02em;
@@ -655,7 +659,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
             margin-bottom: 0.5rem;
         }
         .login-form-pane .form-title {
-            font-family: 'Fraunces', 'Georgia', serif;
+            font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-size: 1.9rem;
             font-weight: 600;
             color: var(--ink);
@@ -681,7 +685,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
             border: none !important;
             border-radius: 0 !important;
             padding: 0.75rem 0 !important;
-            font-family: 'Inter', sans-serif;
+            font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
             font-weight: 500;
             font-size: 0.92rem;
             color: var(--ink-muted);
@@ -762,7 +766,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
         /* Information tab list prose */
         .login-form-pane .stSubheader,
         .login-form-pane h3 {
-            font-family: 'Fraunces', 'Georgia', serif !important;
+            font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif !important;
             color: var(--ink) !important;
             font-weight: 600 !important;
             font-size: 1.15rem !important;
@@ -802,7 +806,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
                                   transform="translate(0 0) scale(0.86 0.86) translate(2.3 3.9)"/>
                             <circle cx="28" cy="17" r="1.8" fill="#e6d39c"/>
                             <text x="28" y="36" text-anchor="middle"
-                                  font-family="'Fraunces', Georgia, serif"
+                                  font-family="Calibri, Carlito, Segoe UI, sans-serif"
                                   font-size="11" font-weight="700"
                                   fill="#f4eedd" letter-spacing="1.2">ICBB</text>
                         </svg>
@@ -913,7 +917,7 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
                                     """
                                     <div style="position:fixed;inset:0;background:#ebe2cd;
                                                 display:flex;align-items:center;justify-content:center;
-                                                z-index:99999;font-family:'Fraunces',Georgia,serif;
+                                                z-index:99999;font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
                                                 color:#194238;font-size:1.1rem;letter-spacing:0.02em;">
                                         Loading your workspace…
                                     </div>
@@ -981,7 +985,7 @@ if st.session_state.pop("_show_login_overlay", False):
         <div id="_post_login_overlay" style="position:fixed;inset:0;
                     background:#ebe2cd;display:flex;align-items:center;
                     justify-content:center;z-index:99999;
-                    font-family:'Fraunces',Georgia,serif;color:#194238;
+                    font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;color:#194238;
                     font-size:1.1rem;letter-spacing:0.02em;
                     transition:opacity 250ms ease;">
             Loading your workspace…
@@ -1012,7 +1016,7 @@ if _pending_login_email:
 # Editorial, warm, human-designed theme for the authenticated app shell
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
     :root {
         /* Clean white surfaces for the main app body so charts and tables
            sit on neutral backgrounds.  The sidebar keeps its own dark
@@ -1032,6 +1036,10 @@ st.markdown("""
         --forest-deep:   #0d2a23;
         --forest-soft:   #d8e2dc;
         --gold:          #b18a3a;
+        /* Readable gold for text on white. The display gold above stays for
+           borders and fills, where contrast rules do not apply; #b18a3a as
+           body text measured 3.20:1 against white, below the 4.5:1 minimum. */
+        --gold-text:     #8a6a22;
         --gold-soft:     #e6d39c;
         --terracotta:    #964517;
         --ochre:         #a27117;
@@ -1076,7 +1084,7 @@ st.markdown("""
 
     .stApp {
         background: var(--paper) !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
         color: var(--ink);
         -webkit-font-smoothing: antialiased;
     }
@@ -1144,7 +1152,7 @@ st.markdown("""
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] summary svg {
         width: 12px !important; height: 12px !important;
-        color: #7a7260 !important;
+        color: #a59d85 !important;
     }
     [data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] {
         background: transparent !important;
@@ -1220,7 +1228,7 @@ st.markdown("""
     }
     .sidebar-brand .brand-icon svg { width: 46px; height: 46px; display: block; }
     .sidebar-brand .brand-name {
-        font-family: 'Fraunces', 'Georgia', serif;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
         font-size: 1.12rem; font-weight: 600; color: #f4eedd;
         letter-spacing: 0.005em;
     }
@@ -1259,7 +1267,7 @@ st.markdown("""
 
     /* Typography — serif display, warm ink body */
     h1 {
-        font-family: 'Fraunces', 'Georgia', serif !important;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif !important;
         color: var(--ink) !important;
         font-weight: 600 !important;
         letter-spacing: -0.02em !important;
@@ -1267,13 +1275,13 @@ st.markdown("""
         -webkit-text-fill-color: initial !important;
     }
     h2 {
-        font-family: 'Fraunces', 'Georgia', serif !important;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif !important;
         color: var(--forest) !important;
         font-weight: 600 !important;
         letter-spacing: -0.015em !important;
     }
     h3, h4 {
-        font-family: 'Inter', sans-serif !important;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
         color: var(--ink) !important;
         font-weight: 600 !important;
         letter-spacing: -0.005em !important;
@@ -1297,7 +1305,7 @@ st.markdown("""
     }
     [data-testid="stMetricValue"] {
         color: var(--ink) !important;
-        font-family: 'Fraunces', 'Georgia', serif !important;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif !important;
         font-weight: 600 !important;
         font-size: 2rem !important;
     }
@@ -1567,13 +1575,13 @@ st.markdown("""
     .amr-ticker:hover .amr-ticker__track { animation-play-state: paused; }
     .amr-ticker__item {
         display: inline-flex; align-items: center;
-        font-family: 'Inter', sans-serif;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
         font-size: 0.82rem; font-weight: 500;
         color: var(--ink-muted); letter-spacing: 0.04em;
         padding: 0 2.4rem;
     }
     .amr-ticker__item strong {
-        font-family: 'Fraunces', 'Georgia', serif;
+        font-family: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
         font-weight: 600; color: var(--forest-dark);
         margin-right: 0.45rem;
     }
@@ -1783,7 +1791,7 @@ with st.sidebar:
                           fill="none" stroke="#e6d39c" stroke-width="1.6" stroke-linejoin="round"/>
                     <circle cx="28" cy="12.5" r="1.6" fill="#e6d39c"/>
                     <text x="28" y="33" text-anchor="middle"
-                          font-family="Fraunces, Georgia, serif" font-size="12" font-weight="600"
+                          font-family="Calibri, Carlito, Segoe UI, sans-serif" font-size="12" font-weight="600"
                           letter-spacing="0.5" fill="#f4eedd">ICBB</text>
                 </svg>
             </div>
@@ -1864,7 +1872,7 @@ with st.sidebar:
         ]),
         ("📋", "Reports & Tools", [
             ("🔔", "Signals & Response"),
-            ("🧬", "Antibiogram"),
+
             ("📁", "WHONET Export"),
             ("📄", "Report Export"),
             ("🤖", "AI Assistant"),
@@ -2970,7 +2978,7 @@ elif page == "Advanced Analytics":
             "Trends & Forecasts",
             "Emerging Patterns",
             "Antibiotic Insights",
-            "Data Quality"
+            "Data quality"
         ])
         
         # TAB 1: STATISTICS
@@ -3145,46 +3153,20 @@ elif page == "Advanced Analytics":
         
         # TAB 5: DATA QUALITY
         with tab5:
-            st.subheader("Surveillance System Quality Metrics")
-            
-            quality = analytics.assess_data_quality(all_samples, all_ast)
-            kpis = analytics.calculate_kpis(all_samples, all_ast)
-            
-            if quality:
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Total Samples", quality.get('total_samples', 0))
-                with col2:
-                    st.metric("Total Tests", quality.get('total_tests', 0))
-                with col3:
-                    st.metric("Completeness", f"{quality.get('completeness_score', 0):.1f}%")
-                with col4:
-                    st.metric("Geographic Coverage", f"{quality.get('samples_with_coordinates', 0)} samples")
-                
-                st.markdown("---")
-                
-                if quality.get('data_quality_issues'):
-                    st.warning("**Data Quality Issues Detected:**")
-                    for issue in quality['data_quality_issues']:
-                        st.warning(f"• {issue}")
-                else:
-                    st.success("No data quality issues detected")
-                
-                st.markdown("---")
-                
-                # KPIs
-                st.subheader("Key Performance Indicators")
-                
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric("Tests/Sample", kpis.get('tests_per_sample', 0))
-                with col2:
-                    st.metric("Organisms ID'd", kpis.get('organisms_identified', 0))
-                with col3:
-                    st.metric("Antibiotics Tested", kpis.get('antibiotics_tested', 0))
-
+            # This tab computed its own completeness score and quality issue
+            # list, in parallel with the Data Coverage & Quality page. Two
+            # answers to 'is this data good enough' disagree the moment either
+            # changes, and the dedicated page is the fuller of the two: it
+            # scores 13 core fields, counts a stored 'Unknown' as missing,
+            # and reports linkage, timeliness and AST quality control.
+            st.subheader("Data quality")
+            st.info(
+                "Data coverage and quality has its own page, which reports "
+                "completeness of every core field, sector and laboratory "
+                "coverage, timeliness, chain linkage, AST quality control and "
+                "implausible results. Open **Data Coverage & Quality** under "
+                "Data Management."
+            )
 
 # ============================================================================
 # PAGE 7: RISK ASSESSMENT
@@ -4353,191 +4335,14 @@ elif page == "Signals & Response":
     from src.page_signals import render_signals_page
     render_signals_page()
 
-# ============================================================================
-# PAGE 10: ANTIBIOGRAM
-# ============================================================================
-elif page == "Antibiogram":
-    st.header("Cumulative Antibiogram")
-    
-    # Require dataset selection
-    if not st.session_state.active_dataset_id:
-        st.warning("Please select a dataset in the 'Data Management' page first.")
-        st.stop()
-    
-    # Import antibiogram module
-    from src.antibiogram import (
-        generate_antibiogram, antibiogram_to_html, antibiogram_to_excel,
-        generate_quarterly_antibiograms, compare_antibiograms,
-        CLSI_MIN_ISOLATES
-    )
-    
-    all_samples, all_ast = _load_active_dataset()
-    _render_dataset_banner(st.session_state.active_dataset_id)
+# The standalone Antibiogram page was removed here. It produced a second,
+# different antibiogram from src/antibiogram.py, which deduplicated on
+# isolate_id + antibiotic -- the method the review specifically rejected as
+# not being CLSI M39 first-isolate selection. Two antibiograms disagreeing
+# about the same organisms is worse than one, so the correct implementation
+# on Surveillance Analysis is now the only one, and it has taken over that
+# page's matrix view and CSV export.
 
-    if all_ast.empty:
-        _empty_state("No AST data available for antibiogram generation.")
-    else:
-        # Configuration
-        st.subheader("Antibiogram Configuration")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            min_isolates = st.slider(
-                "Minimum Isolates for Reporting",
-                min_value=5, max_value=50, value=30, step=5,
-                help=f"CLSI recommends minimum {CLSI_MIN_ISOLATES} isolates for cumulative antibiograms"
-            )
-        with col2:
-            include_all = st.checkbox(
-                "Include combinations below threshold",
-                value=False,
-                help="Show all combinations (marked with *) even if below minimum isolates"
-            )
-        with col3:
-            lab_filter = st.selectbox(
-                "Filter by Laboratory",
-                options=["All Laboratories"] + sorted(all_samples['lab_name'].dropna().unique().tolist())
-            )
-        
-        # Apply lab filter
-        if lab_filter != "All Laboratories":
-            filtered_samples = all_samples[all_samples['lab_name'] == lab_filter]
-            filtered_ast = all_ast[all_ast['sample_id'].isin(filtered_samples['sample_id'])]
-            lab_name = lab_filter
-        else:
-            filtered_ast = all_ast
-            lab_name = "All Laboratories"
-        
-        # Generate antibiogram
-        with st.spinner("Generating antibiogram..."):
-            antibiogram = generate_antibiogram(
-                filtered_ast,
-                lab_name=lab_name,
-                min_isolates=min_isolates,
-                include_all=include_all
-            )
-        
-        if 'error' in antibiogram and antibiogram.get('matrix') is None:
-            st.error(antibiogram['error'])
-        else:
-            # Summary statistics
-            st.subheader("Summary")
-            summary = antibiogram.get('summary', {})
-            
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Total Isolates", summary.get('total_isolates', 0))
-            with col2:
-                st.metric("Organisms", summary.get('total_organisms', 0))
-            with col3:
-                st.metric("Antibiotics", summary.get('total_antibiotics', 0))
-            with col4:
-                avg_susc = summary.get('overall_susceptibility', 0)
-                st.metric("Avg Susceptibility", f"{avg_susc:.1f}%" if avg_susc else "N/A")
-            
-            st.markdown("---")
-            
-            # Display antibiogram
-            st.subheader("Antibiogram Matrix")
-            st.markdown("*Values show % Susceptible (number tested)*")
-            
-            # Display as interactive DataFrame with color styling
-            matrix = antibiogram.get('matrix', pd.DataFrame())
-            numeric_matrix = antibiogram.get('numeric_matrix', pd.DataFrame())
-            
-            if not matrix.empty:
-                # Create styled dataframe
-                def color_cells(val):
-                    try:
-                        # Extract numeric value from string like "85 (20)"
-                        if pd.isna(val) or val == '-':
-                            return 'background-color: #f0f0f0'
-                        num_str = str(val).split('(')[0].strip().replace('*', '')
-                        num = float(num_str) if num_str else 0
-                        if num >= 90:
-                            return 'background-color: #10b981; color: white'
-                        elif num >= 70:
-                            return 'background-color: #84cc16; color: white'
-                        elif num >= 50:
-                            return 'background-color: #fbbf24; color: #1f2937'
-                        elif num >= 30:
-                            return 'background-color: #f97316; color: white'
-                        else:
-                            return 'background-color: #ef4444; color: white'
-                    except:
-                        return 'background-color: #f0f0f0'
-                
-                # pandas >= 2.1 removed Styler.applymap in favour of
-                # Styler.map; fall back to the old name for older envs.
-                _styler = matrix.style
-                _apply = getattr(_styler, "map", None) or _styler.applymap
-                styled_df = _apply(color_cells)
-                st.dataframe(styled_df, use_container_width=True, height=400)
-                
-                # Legend
-                st.markdown("""
-                <div style="margin-top: 15px; padding: 10px; background: #f8fafc; border-radius: 8px;">
-                    <p style="font-weight: 600; margin-bottom: 5px;">Legend:</p>
-                    <div style="display: flex; gap: 15px; flex-wrap: wrap; font-size: 12px;">
-                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #10b981; margin-right: 5px; vertical-align: middle;"></span>≥90% Susceptible</span>
-                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #84cc16; margin-right: 5px; vertical-align: middle;"></span>70-89%</span>
-                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #fbbf24; margin-right: 5px; vertical-align: middle;"></span>50-69%</span>
-                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #f97316; margin-right: 5px; vertical-align: middle;"></span>30-49%</span>
-                        <span><span style="display: inline-block; width: 15px; height: 15px; background: #ef4444; margin-right: 5px; vertical-align: middle;"></span>&lt;30%</span>
-                    </div>
-                    <p style="margin-top: 10px; font-size: 11px; color: #64748b;">* indicates fewer than minimum isolates (interpret with caution)</p>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.warning("No antibiogram matrix data available.")
-            
-            # High resistance alerts
-            if summary.get('lowest_susceptibility_combinations'):
-                st.markdown("---")
-                st.subheader("High Resistance Alerts")
-                st.markdown("*Organism-antibiotic combinations with lowest susceptibility:*")
-                
-                for combo in summary['lowest_susceptibility_combinations']:
-                    resistance = 100 - combo['pct_susceptible']
-                    color = '#ef4444' if resistance >= 70 else '#f97316' if resistance >= 50 else '#eab308'
-                    st.markdown(f"""
-                    <div style="background: #f8fafc; padding: 10px; margin: 5px 0; border-radius: 5px; border-left: 4px solid {color};">
-                        <strong>{combo['organism']}</strong> vs <strong>{combo['antibiotic']}</strong>: 
-                        <span style="color: {color}; font-weight: bold;">{resistance:.0f}% resistant</span>
-                        ({combo['total']} tested)
-                    </div>
-                    """, unsafe_allow_html=True)
-            
-            # Export options
-            st.markdown("---")
-            st.subheader("Export Antibiogram")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                # HTML export
-                html_data = antibiogram_to_html(antibiogram)
-                st.download_button(
-                    label="Download as HTML",
-                    data=html_data,
-                    file_name=f"antibiogram_{lab_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.html",
-                    mime="text/html"
-                )
-            with col2:
-                # Excel export
-                try:
-                    excel_data = antibiogram_to_excel(antibiogram)
-                    st.download_button(
-                        label="Download as Excel",
-                        data=excel_data,
-                        file_name=f"antibiogram_{lab_name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-                except Exception as e:
-                    st.warning(f"Excel export requires openpyxl: {e}")
-
-# ============================================================================
-# PAGE 11: WHONET EXPORT
-# ============================================================================
 elif page == "WHONET Export":
     st.header("WHONET Data Export")
     st.markdown("*Export data in WHONET format for integration with WHO GLASS and global surveillance networks.*")

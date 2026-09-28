@@ -546,7 +546,7 @@ def plot_point_map(samples_df: pd.DataFrame, ast_df: pd.DataFrame) -> go.Figure:
             y=0.95,
             xanchor='center',
             yanchor='top',
-            font=dict(size=18, color='#2c3e50', family='Arial, sans-serif')
+            font=dict(size=18, color='#2c3e50', family='Calibri, Carlito, Segoe UI, sans-serif')
         ),
         legend=dict(
             x=0.02,

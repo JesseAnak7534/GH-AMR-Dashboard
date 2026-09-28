@@ -317,7 +317,7 @@ def generate_html_report(
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Calibri, Carlito, 'Segoe UI', Tahoma, sans-serif;
             line-height: 1.6;
             color: #333;
             max-width: 1200px;
@@ -1238,14 +1238,14 @@ def generate_filtered_html_report(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{report_title}</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <style>
         * {{
             box-sizing: border-box;
         }}
 
         body {{
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: Calibri, Carlito, 'Segoe UI', Tahoma, sans-serif;
             line-height: 1.6;
             color: #1a202c;
             max-width: 1200px;

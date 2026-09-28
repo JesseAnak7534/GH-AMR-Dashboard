@@ -818,6 +818,89 @@ def stratified_susceptibility(frame: pd.DataFrame, *,
     return table.sort_values("tested", ascending=False).reset_index(drop=True)
 
 
+def stratified_resistance(frame: pd.DataFrame, *,
+                         by: str,
+                         organism: Optional[str] = None,
+                         antibiotic: Optional[str] = None,
+                         deduplicate: bool = True,
+                         min_observations: int = MIN_ISOLATES_FOR_REPORTING,
+                         allow_cross_sector: bool = False) -> pd.DataFrame:
+    """Non-susceptibility by stratum, pooled across organisms or agents.
+
+    ``stratified_susceptibility`` answers "how susceptible is this organism to
+    this agent, by ward" and counts isolates. This answers the broader question
+    "how much resistance is there, by ward" across many organism-agent pairs at
+    once, and it cannot use the same denominator: with twelve agents per isolate,
+    counting isolates as the denominator while counting results as the numerator
+    would produce a percentage over 100.
+
+    So the unit here is the **observation** -- one isolate against one agent --
+    and the column names say so. The figure is genuinely useful for comparing
+    strata, and genuinely dependent on which agents each laboratory happened to
+    test, which is why ``distinct_pairs`` is returned beside it: two strata are
+    only comparable when their panels are similar.
+    """
+    if frame.empty or by not in frame.columns:
+        return pd.DataFrame()
+
+    if not allow_cross_sector and "sector" in frame.columns:
+        assert_single_sector(frame["sector"].dropna().unique())
+
+    working = frame
+    if organism:
+        working = working[working["organism"] == organism]
+    if antibiotic:
+        working = working[working["antibiotic"] == antibiotic]
+    working = working[_tested_mask(working)]
+    if working.empty:
+        return pd.DataFrame()
+
+    if deduplicate:
+        working, _ = select_first_isolates(working)
+        if working.empty:
+            return pd.DataFrame()
+
+    rows: List[Dict[str, object]] = []
+    for stratum, group in working.groupby(by, dropna=False):
+        label = ("Not recorded"
+                 if not _is_informative(pd.Series([stratum])).iloc[0]
+                 else str(stratum))
+        results = group["result"].astype(str).str.strip().str.upper()
+        observations = int(len(group))
+        non_susceptible = int(results.isin(["I", "R", "NS"]).sum())
+        susceptible = int((results == "S").sum())
+        isolates = int(len(group.drop_duplicates(
+            subset=["dataset_id", "isolate_id"])))
+        pairs = int(group.groupby(["organism", "antibiotic"]).ngroups)
+
+        if observations == 0:
+            status, percent, low, high = STATUS_NO_DATA, None, None, None
+        elif observations < min_observations:
+            status, percent, low, high = STATUS_SUPPRESSED, None, None, None
+        else:
+            status = STATUS_REPORTED
+            percent = 100 * non_susceptible / observations
+            low, high = wilson_interval(non_susceptible, observations)
+
+        rows.append({
+            by: label,
+            "isolates": isolates,
+            "observations": observations,
+            "susceptible": susceptible,
+            "non_susceptible": non_susceptible,
+            "percent_non_susceptible": percent,
+            "ci_low": low,
+            "ci_high": high,
+            "distinct_pairs": pairs,
+            "status": status,
+        })
+
+    table = pd.DataFrame(rows)
+    if table.empty:
+        return table
+    return table.sort_values("observations", ascending=False).reset_index(drop=True)
+
+
 def high_acuity_comparison(frame: pd.DataFrame, *, organism: str,
                            antibiotic: str,
                            min_isolates: int = MIN_ISOLATES_FOR_REPORTING
@@ -873,7 +956,8 @@ __all__ = [
     "wilson_interval", "exclude_failed_qc",
     "DeduplicationReport", "select_first_isolates",
     "pathogen_distribution", "cumulative_antibiogram",
-    "stratified_susceptibility", "high_acuity_comparison", "sterile_site_share",
+    "stratified_susceptibility", "stratified_resistance",
+    "high_acuity_comparison", "sterile_site_share",
 ]
 
 
