@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from src import db
+from src import consumption, db
 
 # ── Shared styling ──────────────────────────────────────────────────────
 CARD_CSS = """
@@ -79,22 +79,58 @@ def render_amu_page():
     if 'region' in amu_df.columns and amu_df['region'].notna().any():
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         st.subheader("Regional AMU Comparison")
-        region_data = amu_df.groupby('region')['quantity_dispensed'].sum().sort_values(ascending=False).reset_index()
-        fig2 = px.bar(
-            region_data, x='region', y='quantity_dispensed',
-            labels={'quantity_dispensed': 'Quantity Dispensed', 'region': ''},
-            color='quantity_dispensed', color_continuous_scale='Blues',
-            text='quantity_dispensed',
+        st.caption(
+            "Defined daily doses per 1,000 patient-days, pooled from summed "
+            "doses over summed patient-days. This chart previously compared "
+            "raw quantity dispensed, under which a region with more hospitals "
+            "appeared to use more antibiotics per patient when it had simply "
+            "reported more of them."
         )
-        fig2.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
-        fig2.update_layout(**CHART_LAYOUT, showlegend=False, coloraxis_showscale=False)
-        st.plotly_chart(fig2, use_container_width=True)
+        pooled = consumption.pooled_ddd(amu_df, by='region')
+        region_data = pooled.table.dropna(subset=['ddd_per_1000_patient_days'])
+        if region_data.empty:
+            st.info(
+                "No region carries both defined daily doses and patient-days, "
+                "so a comparable rate cannot be computed. " + pooled.caveat)
+        else:
+            fig2 = px.bar(
+                region_data, x='region', y='ddd_per_1000_patient_days',
+                labels={'ddd_per_1000_patient_days': 'DDD / 1,000 patient-days',
+                        'region': ''},
+                color='ddd_per_1000_patient_days', color_continuous_scale='Blues',
+                text='ddd_per_1000_patient_days',
+                hover_data=['records', 'patient_days'],
+            )
+            fig2.update_traces(texttemplate='%{text:,.1f}', textposition='outside')
+            fig2.update_layout(**CHART_LAYOUT, showlegend=False, coloraxis_showscale=False)
+            st.plotly_chart(fig2, use_container_width=True)
+            st.caption(pooled.caveat)
+            with st.expander("Raw volume dispensed by region"):
+                st.caption(
+                    "Shown because procurement planning needs it. Not "
+                    "comparable between regions: it reflects how many "
+                    "facilities reported as much as how much they used, and "
+                    "units may differ between submissions."
+                )
+                st.dataframe(
+                    region_data[['region', 'quantity_dispensed', 'records']]
+                    .rename(columns={'region': 'Region',
+                                     'quantity_dispensed': 'Quantity dispensed',
+                                     'records': 'Records'}),
+                    use_container_width=True, hide_index=True)
 
     # ── DDD trend ───────────────────────────────────────────────────────
     if 'ddd_per_1000' in amu_df.columns and amu_df['ddd_per_1000'].notna().any():
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         st.subheader("DDD per 1,000 Patient-Days Over Time")
-        ddd_trend = amu_df.groupby('report_period')['ddd_per_1000'].mean().reset_index()
+        st.caption(
+            "Pooled: total doses over total patient-days in each period.")
+        # Pooled per period. The mean of each record's rate weighted a clinic
+        # reporting three prescriptions equally with a hospital reporting
+        # thirty thousand.
+        ddd_trend = (consumption.pooled_ddd(amu_df, by='report_period').table
+                     .rename(columns={'ddd_per_1000_patient_days': 'ddd_per_1000'})
+                     .sort_values('report_period'))
         fig3 = px.line(
             ddd_trend, x='report_period', y='ddd_per_1000',
             labels={'ddd_per_1000': 'DDD/1,000 PD', 'report_period': ''},

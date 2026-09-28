@@ -301,6 +301,64 @@ def _plausibility_section(dataset_id: Optional[str]) -> None:
     )
 
 
+def _denominator_section() -> None:
+    """Whether antimicrobial use and consumption can be normalised at all.
+
+    The review listed missing denominators among the measures a national system
+    should publish. Without patient-days, use is a volume; without biomass,
+    animal consumption reflects herd size as much as prescribing. Neither is
+    comparable between reporting units, so the coverage is the thing to know
+    before reading any of it.
+    """
+    from src import consumption
+
+    st.subheader("Denominators for use and consumption")
+    st.caption(
+        "A rate needs a denominator. These are the records that carry one, and "
+        "what is lost where they do not."
+    )
+
+    try:
+        amu = db.get_amu_records()
+        amc = db.get_amc_records()
+    except Exception as exc:                          # noqa: BLE001
+        st.error(f"Could not read use and consumption records: {exc}")
+        return
+
+    table = consumption.denominator_coverage(amu, amc)
+    if table.empty:
+        st.info("No antimicrobial use or consumption records have been "
+                "submitted yet.")
+        return
+
+    st.dataframe(
+        table.assign(Percent=table["Percent"].map(_percent)),
+        use_container_width=True, hide_index=True)
+
+    incomplete = table[table["Percent"].fillna(0) < 100]
+    if not incomplete.empty:
+        for _, row in incomplete.iterrows():
+            st.warning(
+                f"**{row['Dataset']}.** {int(row['With a usable denominator']):,} "
+                f"of {int(row['Records']):,} records carry "
+                f"{str(row['Denominator']).lower()}. {row['Consequence if missing']}"
+            )
+    else:
+        st.success(
+            "Every record carries its denominator, so use and consumption can "
+            "be reported as rates rather than volumes."
+        )
+
+    st.markdown("##### How these metrics are defined")
+    st.caption(
+        "Numerator, denominator, conversion and calculation for each. Pooled "
+        "rates divide summed numerator by summed denominator; a mean of "
+        "per-record rates has no denominator behind it and is not used."
+    )
+    st.dataframe(consumption.metrics_frame(), use_container_width=True,
+                 hide_index=True)
+
+
 def render_data_quality_page() -> None:
     st.header("Data Coverage & Quality")
     st.caption(
@@ -325,9 +383,10 @@ def render_data_quality_page() -> None:
 
     st.markdown(f"**{report.headline}**")
 
-    coverage, completeness, timeliness, linkage, quality, plausibility = st.tabs([
+    (coverage, completeness, timeliness, linkage, quality, plausibility,
+     denominators) = st.tabs([
         "Coverage", "Field completeness", "Timeliness", "Chain linkage",
-        "Result quality", "Implausible results",
+        "Result quality", "Implausible results", "Denominators",
     ])
     with coverage:
         _coverage_section(report)
@@ -341,6 +400,8 @@ def render_data_quality_page() -> None:
         _quality_section(report)
     with plausibility:
         _plausibility_section(dataset_id)
+    with denominators:
+        _denominator_section()
 
 
 __all__ = ["render_data_quality_page"]

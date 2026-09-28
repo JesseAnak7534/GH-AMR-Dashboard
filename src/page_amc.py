@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from src import db
+from src import consumption, db
 
 # ── Shared styling ──────────────────────────────────────────────────────
 CARD_CSS = """
@@ -94,16 +94,58 @@ def render_amc_page():
         st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
         st.subheader("Consumption Intensity (mg/kg biomass)")
         if 'species' in amc_df.columns:
-            intensity = amc_df.groupby('species')['mg_per_kg_biomass'].mean().sort_values().reset_index()
-            fig3 = px.bar(
-                intensity, y='species', x='mg_per_kg_biomass', orientation='h',
-                labels={'mg_per_kg_biomass': 'mg/kg biomass', 'species': ''},
-                color='mg_per_kg_biomass', color_continuous_scale='OrRd',
-                text='mg_per_kg_biomass',
+            st.caption(
+                "Total active ingredient over total biomass at risk, pooled "
+                "within each species. This chart previously averaged each "
+                "record's own ratio, which on this data overstated intensity "
+                "roughly threefold and reordered the species -- a species with "
+                "many small submissions outweighed one with few large ones."
             )
-            fig3.update_traces(texttemplate='%{text:,.1f}', textposition='outside')
-            fig3.update_layout(**CHART_LAYOUT, showlegend=False, coloraxis_showscale=False)
-            st.plotly_chart(fig3, use_container_width=True)
+            pooled = consumption.pooled_mg_per_kg(amc_df, by='species')
+            intensity = (pooled.table.dropna(subset=['mg_per_kg_biomass'])
+                         .sort_values('mg_per_kg_biomass'))
+            if intensity.empty:
+                st.info(
+                    "No species carries both an active-ingredient quantity and "
+                    "a biomass denominator, so intensity cannot be computed. "
+                    + pooled.caveat)
+            else:
+                fig3 = px.bar(
+                    intensity, y='species', x='mg_per_kg_biomass', orientation='h',
+                    labels={'mg_per_kg_biomass': 'mg active ingredient / kg biomass',
+                            'species': ''},
+                    color='mg_per_kg_biomass', color_continuous_scale='OrRd',
+                    text='mg_per_kg_biomass',
+                    hover_data=['records', 'biomass_kg', 'active_ingredient_kg'],
+                )
+                fig3.update_traces(texttemplate='%{text:,.0f}', textposition='outside')
+                fig3.update_layout(**CHART_LAYOUT, showlegend=False,
+                                   coloraxis_showscale=False)
+                st.plotly_chart(fig3, use_container_width=True)
+                st.caption(pooled.caveat)
+                with st.expander("How this differs from averaging each record"):
+                    st.caption(
+                        "The left column is what this page showed before: the "
+                        "mean of each submission's own ratio. The right is the "
+                        "pooled figure. They diverge whenever submissions differ "
+                        "in size, and only the pooled one has a denominator "
+                        "behind it."
+                    )
+                    comparison = consumption.naive_vs_pooled_amc(amc_df, 'species')
+                    st.dataframe(
+                        comparison.rename(columns={
+                            'species': 'Species',
+                            'mean_of_reported_ratios': 'Mean of record ratios',
+                            'pooled_ratio': 'Pooled mg/kg',
+                            'difference': 'Overstatement',
+                            'records': 'Records'}),
+                        use_container_width=True, hide_index=True)
+                    st.caption(
+                        "Active-ingredient mass is taken from quantity_kg. Where "
+                        "a submission reports product mass instead, the figure "
+                        "overstates consumption and the submission should be "
+                        "corrected at source."
+                    )
 
     # ── Purpose breakdown (donut) + Regional bar ────────────────────────
     has_purpose = 'purpose' in amc_df.columns and amc_df['purpose'].notna().any()
