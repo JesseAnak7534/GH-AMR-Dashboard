@@ -44,7 +44,10 @@ LAB_LOGIN_CODES: dict = {
     "Alma Medical Laboratory Ltd": "alma",
 }
 
-load_dotenv()
+# Importing src.settings loads .env from the project root. A bare
+# load_dotenv() searches upward from the working directory instead, so
+# launching from anywhere else left every value in .env invisible.
+from src import settings as _settings  # noqa: F401
 def _kobo_token() -> Optional[str]:
     """The KoboToolbox API token, read when it is needed.
 

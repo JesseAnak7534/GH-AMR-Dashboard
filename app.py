@@ -346,9 +346,12 @@ def _get_admin_config():
                 admin_password = st.secrets["ADMIN_PASSWORD"]
     except (FileNotFoundError, KeyError, AttributeError):
         pass
-    load_dotenv()
-    admin_email = admin_email or os.getenv("ADMIN_EMAIL")
-    admin_password = admin_password or os.getenv("ADMIN_PASSWORD")
+    # Reads the environment and Streamlit secrets through one helper, which
+    # has already loaded .env from the project root rather than from whatever
+    # directory the app happened to be launched in.
+    from src.settings import get_setting
+    admin_email = admin_email or get_setting("ADMIN_EMAIL")
+    admin_password = admin_password or get_setting("ADMIN_PASSWORD")
     return admin_email, admin_password
 
 

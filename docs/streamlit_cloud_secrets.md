@@ -16,7 +16,7 @@ ADMIN_EMAIL        = "<your admin email>"
 ADMIN_PASSWORD     = "<your admin password>"
 
 # ---- KoboToolbox sync -------------------------------------------------------
-KOBO_API_TOKEN     = "<40-character token from KoboToolbox>"
+KOBO_API_TOKEN     = "<ba71d3568e7cac3ae8e38f45106ad7db468fbe05>"
 
 # ---- email: verification, password reset, scheduled reports -----------------
 SMTP_SERVER        = "smtp.gmail.com"

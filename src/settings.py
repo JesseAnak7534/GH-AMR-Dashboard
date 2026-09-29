@@ -32,14 +32,30 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+#: The project root, derived from this file's own location rather than from the
+#: working directory.
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
+
 # Populate the environment from .env once, here, so no other module has to
 # remember to and no module's behaviour depends on import order.
+#
+# The path is explicit. load_dotenv() with no argument searches upward from the
+# *current working directory*, so launching Streamlit from anywhere other than
+# the project root meant .env was never found and every value in it -- the
+# KoboToolbox token, the mail password, the patient salt -- silently did not
+# exist. That is what produced "KoboToolbox API token is not configured" against
+# a .env that contained the token.
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    if os.path.isfile(ENV_FILE):
+        load_dotenv(ENV_FILE)
+    else:
+        load_dotenv()          # fall back to a search, for unusual layouts
+        logger.info("no .env at %s; searched the working directory instead",
+                    ENV_FILE)
 except Exception:                                     # noqa: BLE001
-    logger.debug("python-dotenv unavailable or no .env file; "
-                 "reading the environment directly")
+    logger.debug("python-dotenv unavailable; reading the environment directly")
 
 
 def get_setting(name: str, default: Optional[str] = None) -> Optional[str]:

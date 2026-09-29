@@ -27,11 +27,10 @@ import psycopg2.extras
 
 # Populate env vars from .env before DATABASE_URL is read. Safe no-op when
 # dotenv is absent or there is no .env file.
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except Exception:
-    pass
+# Importing src.settings loads .env from the project root. A bare
+# load_dotenv() searches upward from the working directory instead, so
+# launching from anywhere else left every value in .env invisible.
+from src import settings as _settings  # noqa: F401
 
 
 logger = logging.getLogger(__name__)

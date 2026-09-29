@@ -22,7 +22,10 @@ from dotenv import load_dotenv
 from . import db as _db
 
 # Load environment variables
-load_dotenv()
+# Importing src.settings loads .env from the project root. A bare
+# load_dotenv() searches upward from the working directory instead, so
+# launching from anywhere else left every value in .env invisible.
+from src import settings as _settings  # noqa: F401
 
 
 def _connect():
@@ -559,9 +562,10 @@ class EmailSender:
     
     def __init__(self, smtp_server: str = None, smtp_port: int = None,
                  username: str = None, password: str = None, use_tls: bool = True):
-        # Reload dotenv to get latest values
-        load_dotenv()
-        
+        # .env is loaded once, at the project root, when src.settings is
+        # imported. Re-running a bare load_dotenv() here searched the working
+        # directory instead and found nothing when the app was launched from
+        # elsewhere.
         # Accepts either name; see email_utils.get_smtp_config for why.
         from src.settings import get_setting
         self.smtp_server = (smtp_server or get_setting('SMTP_SERVER')

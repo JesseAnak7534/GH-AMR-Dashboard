@@ -417,13 +417,9 @@ def main() -> int:
                              "ast_results with the derived isolate ids")
     args = parser.parse_args()
 
-    if not os.environ.get("AMRSS_PATIENT_SALT"):
-        try:
-            from dotenv import load_dotenv
-            load_dotenv()
-        except Exception:
-            pass
-    if not os.environ.get("AMRSS_PATIENT_SALT"):
+    # Importing src.settings loads .env from the project root.
+    from src.settings import get_setting
+    if not get_setting("AMRSS_PATIENT_SALT"):
         print("AMRSS_PATIENT_SALT is not set. Human specimens cannot be given a "
               "pseudonym without it. Set it in .env and re-run.")
         return 2
