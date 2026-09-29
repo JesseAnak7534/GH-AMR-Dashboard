@@ -151,3 +151,26 @@ migration reported.
   by default — raise `DB_CONNECT_TIMEOUT` if you see timeouts on first load.
 - **Do not commit connection strings.** `.env` and `.streamlit/secrets.toml`
   are both gitignored; keep it that way.
+
+---
+
+## Row level security
+
+Supabase serves the `public` schema through an auto-generated REST API. Any
+table without row level security is readable through it using the project's
+anon key, and that key is public by design -- it is meant to be embedded in
+client applications.
+
+This was verified as a live exposure on 29 September 2026: an unauthenticated
+HTTPS request returned rows from `samples`, `ast_results` and `users`, the last
+including the `email` and `password_hash` columns. It is closed by
+`supabase/migrations/20260929_enable_rls_on_public_tables.sql`, which enables
+RLS on every table in the schema with no policy attached.
+
+**The application is unaffected.** It connects over Postgres as the table owner,
+and an owner bypasses RLS unless `FORCE ROW LEVEL SECURITY` is set, which it is
+not. Only the `anon` and `authenticated` REST roles are denied.
+
+**Any new table needs the same treatment.** A table created without RLS is
+exposed the moment it exists. Run the migration again after adding tables, or
+check the project's security advisors, which report `rls_disabled_in_public`.
