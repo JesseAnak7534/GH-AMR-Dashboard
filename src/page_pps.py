@@ -24,10 +24,15 @@ CARD_CSS = """
 .kpi-card .value { font-size: 2rem; font-weight: 700; color: #fff; }
 .kpi-card .label { font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-top: 0.25rem; }
 .section-divider { border: none; border-top: 1px solid rgba(0,0,0,0.10); margin: 2rem 0 1.5rem; }
-.gauge-container {
-    background: linear-gradient(135deg, #1a1f2e 0%, #0f1318 100%);
-    border-radius: 14px; padding: 1rem 0.5rem; margin-bottom: 0.5rem;
-    border: 1px solid rgba(255,255,255,0.06);
+/* The gauge labels. These used to live inside the Plotly figure at 14px,
+   under an empty dark panel: the panel was a <div class="gauge-container">
+   opened with one st.markdown call and closed with another, which Streamlit
+   renders as two separate elements -- so the div never wrapped the chart and
+   showed as a black bar above it. The label is now ordinary markdown above
+   each chart, which needs no wrapper and can be read at a glance. */
+.gauge-title {
+    font-size: 1.15rem; font-weight: 600; color: #0f172a;
+    margin: 0 0 0.35rem; letter-spacing: -0.01em;
 }
 </style>
 """
@@ -134,7 +139,6 @@ def render_pps_page():
                 mode="gauge+number+delta",
                 value=compliance,
                 number={'suffix': '%', 'font': {'size': 36, 'color': '#0f172a'}},
-                title={'text': "Guideline Compliance", 'font': {'size': 14, 'color': '#475569'}},
                 gauge={
                     'axis': {'range': [0, 100], 'tickcolor': '#475569', 'tickfont': {'color': '#475569'}},
                     'bar': {'color': '#10b981'},
@@ -147,10 +151,10 @@ def render_pps_page():
                     'threshold': {'line': {'color': '#f59e0b', 'width': 2}, 'thickness': 0.8, 'value': 80},
                 },
             ))
-            fig4.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=280, margin=dict(t=60, b=20))
-            st.markdown('<div class="gauge-container">', unsafe_allow_html=True)
+            fig4.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=260, margin=dict(t=20, b=20))
+            st.markdown('<div class="gauge-title">Guideline Compliance</div>',
+                        unsafe_allow_html=True)
             st.plotly_chart(fig4, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
     if 'indication_documented' in all_rx.columns:
         doc_rate = (all_rx['indication_documented'].sum() / total_rx * 100) if total_rx else 0
@@ -159,7 +163,6 @@ def render_pps_page():
                 mode="gauge+number",
                 value=doc_rate,
                 number={'suffix': '%', 'font': {'size': 36, 'color': '#0f172a'}},
-                title={'text': "Indication Documentation", 'font': {'size': 14, 'color': '#475569'}},
                 gauge={
                     'axis': {'range': [0, 100], 'tickcolor': '#475569', 'tickfont': {'color': '#475569'}},
                     'bar': {'color': '#3b82f6'},
@@ -172,10 +175,10 @@ def render_pps_page():
                     'threshold': {'line': {'color': '#f59e0b', 'width': 2}, 'thickness': 0.8, 'value': 80},
                 },
             ))
-            fig5.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=280, margin=dict(t=60, b=20))
-            st.markdown('<div class="gauge-container">', unsafe_allow_html=True)
+            fig5.update_layout(paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#1e293b"), height=260, margin=dict(t=20, b=20))
+            st.markdown('<div class="gauge-title">Indication Documentation</div>',
+                        unsafe_allow_html=True)
             st.plotly_chart(fig5, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
     # ── Ward breakdown ──────────────────────────────────────────────────
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)

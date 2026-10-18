@@ -347,6 +347,7 @@ def export_to_whonet_excel(whonet_df: pd.DataFrame,
     """
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
     from openpyxl.utils.dataframe import dataframe_to_rows
     
     if whonet_df.empty:
@@ -377,13 +378,23 @@ def export_to_whonet_excel(whonet_df: pd.DataFrame,
                 cell.font = header_font
                 cell.alignment = Alignment(horizontal='center')
     
-    # Adjust column widths
+    # Adjust column widths.
+    #
+    # The column letter comes from openpyxl rather than from arithmetic on
+    # chr(). The arithmetic here was `chr(64 + i)` up to column 26 and
+    # `'A' + chr(64 + i - 26)` beyond it, which is right as far as AZ and wrong
+    # after it: column 53 produced 'A[' -- the punctuation that follows 'Z' in
+    # ASCII -- and openpyxl rejected the whole export with "'A[' is not a valid
+    # column name". Columns 54 to 78 were the quieter half of the same bug,
+    # yielding names like 'At' that are valid and refer to the wrong column, so
+    # widths were applied silently to a neighbour. A WHONET export is one column
+    # per antibiotic and passes 52 columns easily.
     for col_idx, column in enumerate(whonet_df.columns, 1):
-        max_length = max(
-            len(str(column)),
-            whonet_df[column].astype(str).str.len().max() if not whonet_df.empty else 0
-        )
-        ws.column_dimensions[chr(64 + col_idx) if col_idx <= 26 else 'A' + chr(64 + col_idx - 26)].width = min(max_length + 2, 30)
+        longest_value = whonet_df[column].astype(str).str.len().max()
+        if longest_value != longest_value:            # all-empty column -> NaN
+            longest_value = 0
+        max_length = max(len(str(column)), int(longest_value or 0))
+        ws.column_dimensions[get_column_letter(col_idx)].width = min(max_length + 2, 30)
     
     # Add metadata sheet if requested
     if include_metadata:
