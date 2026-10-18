@@ -17,9 +17,14 @@ db/*.sqlite
 db/*.sqlite3
 # Lab credentials (plaintext passwords -- never commit)
 db/lab_credentials.json
-# Full database backups. Unlike db/cloud_snapshot.json.gz, which covers only
-# surveillance tables, these dump every public table including `users` and so
-# carry password hashes. They stay local.
+# Data snapshots. db/cloud_snapshot.json.gz used to be committed on purpose:
+# the app replayed it at startup to seed Supabase. That seed is gone, because a
+# dataset shipped inside the application reinstated itself every time the
+# database was deliberately cleared. Snapshots are backups now, and backups
+# stay local.
+db/cloud_snapshot.json.gz
+# These dump every public table including `users`, so they carry password
+# hashes as well.
 db/supabase_pre_upgrade_*.json.gz
 db/*_backup_*.json.gz
 Lab_Login_Credentials.docx

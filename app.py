@@ -9,7 +9,6 @@ import uuid
 import bcrypt
 import json
 import logging
-from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
@@ -92,60 +91,23 @@ def _init_db_once():
 _init_db_once()
 
 
-# ── Cloud-data seed: load the committed snapshot if the DB is empty ─────
-# We can't reach Supabase from the maintainer's network to run a normal
-# data migration, so we ship a small gzip-compressed snapshot of the
-# production tables in the repo and replay it the first time the cloud
-# app sees an empty `samples` table.  Idempotent: does nothing if
-# samples already exist.
-@st.cache_resource(show_spinner="Seeding initial surveillance data…")
-def _seed_cloud_data_once():
-    snapshot_path = Path("db") / "cloud_snapshot.json.gz"
-    if not snapshot_path.exists():
-        return False
-    try:
-        conn = db.get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM samples")
-        existing = cur.fetchone()[0]
-        if existing:
-            conn.close()
-            return False  # DB already has data; do nothing
-        import gzip as _gz
-        with _gz.open(snapshot_path, "rt", encoding="utf-8") as f:
-            snapshot = json.load(f)
-        for table, payload in snapshot.get("tables", {}).items():
-            # Never restore credentials from a snapshot, even if an older file
-            # still contains them. The snapshot is committed, so anything it
-            # carries is public; logins come from the bootstrap path instead.
-            if table in ("users", "lab_credentials"):
-                logger.warning("refusing to seed the %s table from a snapshot", table)
-                continue
-            cols = payload.get("columns") or []
-            rows = payload.get("rows") or []
-            if not rows:
-                continue
-            placeholders = ", ".join(["%s"] * len(cols))
-            collist = ", ".join(cols)
-            sql = (
-                f"INSERT INTO {table} ({collist}) VALUES ({placeholders}) "
-                f"ON CONFLICT DO NOTHING"
-            )
-            data = [tuple(r.get(c) for c in cols) for r in rows]
-            try:
-                cur.executemany(sql, data)
-                conn.commit()
-                logger.info("seeded %s with %d rows", table, len(rows))
-            except Exception:
-                conn.rollback()
-                logger.exception("seed insert failed for table %s", table)
-        conn.close()
-        return True
-    except Exception:
-        logger.exception("cloud-data seed failed")
-        return False
-
-_seed_cloud_data_once()
+# ── Why there is no data seed here ───────────────────────────────
+# This is where a startup seed used to sit. It replayed a gzip-compressed
+# snapshot of the demo tables, committed at db/cloud_snapshot.json.gz, whenever
+# it found the `samples` table empty.
+#
+# It was written when the maintainer's network could not reach Supabase and the
+# data had to arrive somehow. Both halves of that reasoning have since stopped
+# holding. The data is in Supabase; and an empty `samples` table is now a
+# deliberate state rather than a symptom -- it is what the database looks like
+# after it has been cleared to load a fresh dataset. The seed read that intent
+# backwards and restored the rows that had just been removed, so a wipe could
+# not stick and demo figures reappeared on the dashboard looking current.
+#
+# Data enters through the upload page, the KoboToolbox sync, or a migration.
+# None of those need a copy of the data compiled into the app, so the snapshot
+# is gone from the repository too: shipping a dataset inside the application is
+# what made it able to come back at all.
 
 # ── Keep-alive: prevent idle WebSocket disconnection ────────────────────
 st.markdown(
@@ -3580,7 +3542,18 @@ elif page == "WHONET Export":
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 except Exception as e:
-                    st.warning(f"Excel export requires openpyxl: {e}")
+                    # Not necessarily a missing package: this message
+                    # reported "requires openpyxl" for an invalid column
+                    # name this module itself had built, which sent the
+                    # reader looking for an install problem that was not
+                    # there. Say which it is.
+                    import importlib.util
+                    if importlib.util.find_spec("openpyxl") is None:
+                        st.warning(
+                            "Excel export needs the openpyxl package, which is "
+                            "not installed. Install it with: pip install openpyxl")
+                    else:
+                        st.warning(f"The Excel export failed: {e}")
             
             with col3:
                 # GLASS summary HTML report

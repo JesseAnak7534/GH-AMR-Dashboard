@@ -16,7 +16,7 @@ ADMIN_EMAIL        = "<your admin email>"
 ADMIN_PASSWORD     = "<your admin password>"
 
 # ---- KoboToolbox sync -------------------------------------------------------
-KOBO_API_TOKEN     = "<ba71d3568e7cac3ae8e38f45106ad7db468fbe05>"
+KOBO_API_TOKEN     = "<40-character token from KoboToolbox Account Settings > Security>"
 
 # ---- email: verification, password reset, scheduled reports -----------------
 SMTP_SERVER        = "smtp.gmail.com"
@@ -29,6 +29,19 @@ SMTP_FROM_NAME     = "AMR Surveillance Dashboard"
 SESSION_TIMEOUT_MINUTES = "30"
 APP_BASE_URL            = "https://<your-app>.streamlit.app"
 ```
+
+## Never paste a real value into this file
+
+Every value above is a placeholder describing what to put in Streamlit's secrets
+store. This file is committed and the repository is public, so a real secret
+written here is published the moment it is pushed -- angle brackets around it
+change nothing.
+
+That happened once: the KoboToolbox API token was written in full, wrapped in
+angle brackets as though it were a placeholder, and pushed. It was replaced with
+a placeholder here, but editing a file does not unpublish it -- the value stayed
+readable in the commit history, so the token had to be regenerated in
+KoboToolbox. Treat any secret that reaches this file as burned, and rotate it.
 
 ## Notes that matter
 

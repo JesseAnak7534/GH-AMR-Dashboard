@@ -1,12 +1,22 @@
 """
-Export the data tables from the currently-active database (local Postgres
-to a single gzip-compressed JSON snapshot at
-``db/cloud_snapshot.json.gz``.  The snapshot is small enough to commit
-to the repository (~2 MB for 1k samples + 5k AST results), and the
-Streamlit Cloud app loads it on first startup when the cloud Postgres
-tables are still empty -- this is how we seed Supabase without having
-to open an outbound connection from the maintainer's network (which is
-firewalled off from Supabase's pooler).
+Export the data tables from the currently-active database to a single
+gzip-compressed JSON snapshot at ``db/cloud_snapshot.json.gz``.
+
+This is a backup tool. It used to be half of a seeding mechanism: the snapshot
+was committed to the repository and the Streamlit app replayed it on startup
+whenever it found the `samples` table empty, which was how data reached Supabase
+from a network that could not open a connection to the pooler.
+
+That seed has been removed, and this script no longer feeds anything. The reason
+is worth recording: an empty `samples` table is a deliberate state -- it is what
+the database looks like once it has been cleared to load a fresh dataset -- and
+the seed treated it as damage to repair, restoring the rows that had just been
+deleted. A wipe therefore could not stick, and demo data reappeared on the
+dashboard looking current.
+
+The output path is gitignored for the same reason. Keep the snapshot as a local
+backup; do not commit it, and do not wire it back into application startup. Data
+belongs in the database, not compiled into the app that reads it.
 
 Usage (from project root):
     python scripts/export_data_snapshot.py
