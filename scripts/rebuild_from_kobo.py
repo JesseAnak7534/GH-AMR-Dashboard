@@ -237,7 +237,12 @@ def main() -> int:
             conn.rollback()
     conn.close()
 
-    print("\nDone. The platform is carrying KoboToolbox data only.")
+    print()
+    print("Done. The platform is carrying KoboToolbox data only.")
+    print("Note: genomic_results was cleared with everything else, and "
+          "the KoboToolbox form carries no sequencing data. Run "
+          "scripts/generate_genomes.py --yes to repopulate the genomic "
+          "layer, or load genomes from a pipeline export.")
     return 0
 
 

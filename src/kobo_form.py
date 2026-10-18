@@ -956,6 +956,16 @@ def submissions_to_frames(submissions) -> Tuple[pd.DataFrame, pd.DataFrame,
             "specimen_type": _label("specimen_type", flat.get("specimen_type")),
             "specimen_detail": _label("specimen_detail",
                                       flat.get("specimen_detail")),
+            # source_type is the specific material -- "Pond water", "Raw
+            # chicken", "Blood". The form collects it as specimen_detail, and
+            # nothing was carrying it across, so every Kobo specimen reached the
+            # legacy samples table with a null source_type. Pages that filter on
+            # that column then had an empty option list, and because the filters
+            # combine with AND, one blank column emptied whole pages. Falls back
+            # to the controlled specimen type when no detail was given.
+            "source_type": (_label("specimen_detail",
+                                   flat.get("specimen_detail"))
+                            or _label("specimen_type", flat.get("specimen_type"))),
             "collected_by": _label("collected_by", flat.get("collected_by")),
             "receipt_date": (str(flat.get("receipt_date"))[:10]
                              if flat.get("receipt_date") else None),

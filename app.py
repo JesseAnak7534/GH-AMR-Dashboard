@@ -331,6 +331,11 @@ def _get_lab_email_mapping() -> Dict[str, str]:
 # Shared UI / data helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+# The filter mask lives in src.filters so it can be tested without starting the
+# app. See that module for why an empty selection must not exclude everything.
+from src.filters import filter_mask as _filter_mask
+
+
 def sidebar_multiselect_all(label: str, options, key: str) -> list:
     """Render an 'All'-aware sidebar multiselect.
 
@@ -1849,6 +1854,7 @@ with st.sidebar:
             ("🟥", "Resistance Heat Map"),
             ("🦠", "Pathogen Profile"),
             ("🏥", "HAI Profile"),
+            ("🧬", "Genomics"),
         ]),
         ("📈", "Analytics", [
             ("📉", "Trends"),
@@ -2455,6 +2461,12 @@ elif page == "Data Coverage & Quality":
     from src.page_data_quality import render_data_quality_page
     render_data_quality_page()
 
+elif page == "Genomics":
+    # Reading sequencing results against the phenotypes they belong to. The
+    # genomic tables were written by ingest and read by nothing until this page.
+    from src.page_genomics import render_genomics_page
+    render_genomics_page()
+
 elif page == "Resistance Overview":
     st.header("Resistance Overview")
     
@@ -2503,30 +2515,22 @@ elif page == "Resistance Overview":
         )
 
         # Apply filters with validation
-        if selected_categories and selected_regions and selected_districts:
-            _mask = (
-                (all_samples['source_category'].astype(str).isin(selected_categories)) &
-                (all_samples['source_type'].astype(str).isin(selected_source_types)) &
-                (all_samples['site_type'].astype(str).isin(selected_site_types)) &
-                (all_samples['region'].astype(str).isin(selected_regions)) &
-                (all_samples['district'].astype(str).isin(selected_districts))
-            )
-            if selected_labs and 'lab_name' in all_samples.columns:
-                _mask = _mask & (all_samples['lab_name'].astype(str).isin(selected_labs))
-            filtered_samples = all_samples[_mask]
-        else:
-            filtered_samples = all_samples
-        
-        if selected_organisms and selected_antibiotics:
-            filtered_ast = all_ast[
-                (all_ast['organism'].astype(str).isin(selected_organisms)) &
-                (all_ast['antibiotic'].astype(str).isin(selected_antibiotics)) &
-                (all_ast['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str)))
-            ]
-        else:
-            filtered_ast = all_ast[
-                all_ast['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str))
-            ]
+        _mask = (
+            _filter_mask(all_samples, 'source_category', selected_categories)
+            & _filter_mask(all_samples, 'source_type', selected_source_types)
+            & _filter_mask(all_samples, 'site_type', selected_site_types)
+            & _filter_mask(all_samples, 'region', selected_regions)
+            & _filter_mask(all_samples, 'district', selected_districts)
+            & _filter_mask(all_samples, 'lab_name', selected_labs)
+        )
+        filtered_samples = all_samples[_mask]
+
+        filtered_ast = all_ast[
+            _filter_mask(all_ast, 'organism', selected_organisms)
+            & _filter_mask(all_ast, 'antibiotic', selected_antibiotics)
+            & all_ast['sample_id'].astype(str).isin(
+                filtered_samples['sample_id'].astype(str))
+        ]
         
         if filtered_ast.empty:
             st.warning("No data matches the selected filters.")
@@ -2748,13 +2752,10 @@ elif page == "Trends":
         time_agg = st.sidebar.selectbox("Time Aggregation", ["Monthly", "Quarterly", "Yearly"], key="tr_time")
         
         # Apply filters
-        if selected_organisms and selected_antibiotics:
-            filtered_ast = all_ast[
-                (all_ast['organism'].astype(str).isin(selected_organisms)) &
-                (all_ast['antibiotic'].astype(str).isin(selected_antibiotics))
-            ]
-        else:
-            filtered_ast = all_ast
+        filtered_ast = all_ast[
+            _filter_mask(all_ast, 'organism', selected_organisms)
+            & _filter_mask(all_ast, 'antibiotic', selected_antibiotics)
+        ]
         
         if filtered_ast.empty:
             st.warning("No data matches the selected filters. Try selecting different filters.")
@@ -3754,25 +3755,18 @@ elif page == "Report Export":
         st.markdown("---")
 
         # Apply sample filters
-        if selected_categories and selected_regions and selected_districts:
-            filtered_samples = all_samples[
-                (all_samples['source_category'].astype(str).isin(selected_categories)) &
-                (all_samples['source_type'].astype(str).isin(selected_source_types)) &
-                (all_samples['site_type'].astype(str).isin(selected_site_types)) &
-                (all_samples['region'].astype(str).isin(selected_regions)) &
-                (all_samples['district'].astype(str).isin(selected_districts))
-            ]
-        else:
-            filtered_samples = all_samples
+        filtered_samples = all_samples[
+            _filter_mask(all_samples, 'source_category', selected_categories)
+            & _filter_mask(all_samples, 'source_type', selected_source_types)
+            & _filter_mask(all_samples, 'site_type', selected_site_types)
+            & _filter_mask(all_samples, 'region', selected_regions)
+            & _filter_mask(all_samples, 'district', selected_districts)
+        ]
 
         # Apply AST filters
         base_ast_filter = all_ast['sample_id'].astype(str).isin(filtered_samples['sample_id'].astype(str))
-
-        if selected_organisms:
-            base_ast_filter &= all_ast['organism'].astype(str).isin(selected_organisms)
-
-        if selected_antibiotics:
-            base_ast_filter &= all_ast['antibiotic'].astype(str).isin(selected_antibiotics)
+        base_ast_filter &= _filter_mask(all_ast, 'organism', selected_organisms)
+        base_ast_filter &= _filter_mask(all_ast, 'antibiotic', selected_antibiotics)
 
         # Apply date filter if available
         if start_date and end_date and 'test_date' in all_ast.columns:
