@@ -350,6 +350,43 @@ def _store(conn, genomes: List[dict]) -> int:
     return len(rows)
 
 
+def _write_workbook(genomes: List[dict], path: str) -> None:
+    """Write the genomes as an upload file.
+
+    This is the shape a sequencing centre's results have to arrive in: one row
+    per sequenced isolate, with isolate_id naming an isolate the platform
+    already holds. Lists go in separator-delimited rather than as JSON, because
+    the people filling these in use a spreadsheet.
+    """
+    import pandas as pd
+    from src.upload_schema import SHEETS
+
+    contract = next(s for s in SHEETS if s.name == "genomics")
+    order = [c.name for c in contract.columns]
+
+    rows = []
+    for g in genomes:
+        row = dict(g)
+        for column in ("amr_genes", "amr_mutations", "plasmid_replicons",
+                       "virulence_genes"):
+            row[column] = ";".join(row.get(column) or [])
+        row["platform"] = "Illumina"
+        row["instrument"] = "NextSeq 2000"
+        row["run_date"] = row.get("analysis_date")
+        rows.append({name: row.get(name) for name in order})
+
+    frame = pd.DataFrame(rows, columns=order)
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        frame.to_excel(writer, sheet_name="genomics", index=False)
+    print()
+    print(f"wrote {path}")
+    print(f"  {len(frame):,} row(s), {len(order)} column(s)")
+    print("  required columns: " + ", ".join(
+        c.name for c in contract.columns if getattr(c, "required", False)))
+    print("  amr_genes, amr_mutations, plasmid_replicons and virulence_genes "
+          "are semicolon-separated")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -361,6 +398,13 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--delete", action="store_true",
                         help="remove previously generated genomes and exit")
+    parser.add_argument("--workbook",
+                        help="write an upload file here instead of writing to "
+                             "the database -- the format a sequencing centre's "
+                             "results must arrive in")
+    parser.add_argument("--import-workbook",
+                        help="import a genomics upload file, matching rows to "
+                             "isolates already in the database by isolate_id")
     args = parser.parse_args()
 
     from src import db
@@ -373,6 +417,19 @@ def main() -> int:
             conn.commit()
             print(f"removed generated genomes (created_by = {CREATED_BY})")
             return 0
+
+        if args.import_workbook:
+            import pandas as pd
+            from src.ingest import import_genomic_results
+            frame = pd.read_excel(args.import_workbook, sheet_name="genomics")
+            print(f"read {len(frame):,} row(s) from {args.import_workbook}")
+            result = import_genomic_results(frame, uploaded_by="genomics-import")
+            print(f"  {result.ok}: {result.message}")
+            if result.unmatched:
+                print(f"  unmatched isolate ids: {result.unmatched[:10]}")
+            if result.ambiguous:
+                print(f"  ambiguous isolate ids: {result.ambiguous[:10]}")
+            return 0 if result.ok else 1
 
         isolates, phenotypes = _load_chain(conn)
         print(f"isolates in the chain      : {len(isolates):,}")
@@ -390,6 +447,10 @@ def main() -> int:
         print(f"  failing assembly quality : {stats['qc_fail']:,}")
         print(f"  resistance left unexplained : {stats['unexplained']:,} result(s)")
         print(f"  determinant vs susceptible  : {stats['contradiction']:,}")
+
+        if args.workbook:
+            _write_workbook(genomes, args.workbook)
+            return 0
 
         if not args.yes:
             print("\nDry run. Nothing written. Re-run with --yes to store.")

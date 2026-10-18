@@ -2166,7 +2166,63 @@ elif page == "Upload & Data Quality":
 
                     if amr_saved or oh_any:
                         st.balloons()
-    
+
+    # ── Sequencing results, arriving on their own ──────────────────────
+    # Separate from the workbook above because sequencing happens weeks or
+    # months after culture. Its results come back referring to isolates the
+    # platform already holds, so they are matched on isolate_id rather than
+    # uploaded alongside the specimens they came from.
+    st.markdown("---")
+    st.subheader("Upload sequencing results")
+    st.caption(
+        "A file with a **genomics** sheet, one row per sequenced isolate. Only "
+        "`genomic_id` and `isolate_id` are required: isolate_id must name an "
+        "isolate already in the platform, which is how the results attach to "
+        "the specimen they came from. Gene lists are semicolon-separated. "
+        "Rows naming an unknown isolate are reported rather than silently "
+        "dropped."
+    )
+    genomics_file = st.file_uploader(
+        "Genomics file (.xlsx)", type=["xlsx", "xls"], key="genomics_upload")
+
+    if genomics_file and st.button("Attach sequencing results",
+                                   type="primary", key="genomics_import_btn"):
+        with st.spinner("Matching results to isolates..."):
+            try:
+                genomics_df = pd.read_excel(genomics_file,
+                                            sheet_name="genomics")
+            except Exception as exc:                  # noqa: BLE001
+                genomics_df = None
+                st.error(
+                    f"Could not read a 'genomics' sheet from that file: {exc}")
+
+            if genomics_df is not None:
+                from src.ingest import import_genomic_results
+                g_result = import_genomic_results(
+                    genomics_df,
+                    uploaded_by=(st.session_state.user_email or "System"))
+                if g_result.ok:
+                    st.success(g_result.message)
+                    _cached_all_datasets.clear()
+                else:
+                    st.error(g_result.message)
+                if g_result.unmatched:
+                    with st.expander(
+                            f"{len(g_result.unmatched)} isolate id(s) not found"):
+                        st.caption(
+                            "These rows were not stored. The isolate may not "
+                            "have been uploaded yet, or the identifier may "
+                            "differ from the one recorded with the specimen.")
+                        st.write(g_result.unmatched)
+                if g_result.ambiguous:
+                    with st.expander(
+                            f"{len(g_result.ambiguous)} ambiguous isolate id(s)"):
+                        st.caption(
+                            "These identifiers exist in more than one dataset, "
+                            "so the result was refused rather than attached to "
+                            "a guess.")
+                        st.write(g_result.ambiguous)
+
     st.markdown("---")
     
     # Show existing datasets

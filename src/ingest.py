@@ -829,3 +829,182 @@ def _report_dropped(validation, counts: Dict[str, int]) -> List[str]:
 
 
 __all__ = ["IngestResult", "ingest_validated_upload"]
+
+
+# ---------------------------------------------------------------------------
+# Genomic results arriving on their own
+# ---------------------------------------------------------------------------
+
+@dataclass
+class GenomicImport:
+    """What a genomics import did, and what it could not place."""
+    ok: bool
+    message: str
+    stored: int = 0
+    runs: int = 0
+    unmatched: List[str] = None
+    ambiguous: List[str] = None
+
+    def __post_init__(self):
+        self.unmatched = self.unmatched or []
+        self.ambiguous = self.ambiguous or []
+
+
+def _resolve_isolates(cur, isolate_ids: Sequence[str],
+                      dataset_id: Optional[str]) -> Tuple[Dict[str, str], List[str]]:
+    """Map each isolate_id to the dataset holding it.
+
+    Returns (resolved, ambiguous). An isolate_id present in more than one
+    dataset is ambiguous and is never guessed at: attaching a genome to the
+    wrong isolate is worse than refusing to attach it, because nothing
+    downstream would reveal the error.
+    """
+    if not isolate_ids:
+        return {}, []
+    unique = sorted({str(i).strip() for i in isolate_ids if str(i).strip()})
+    if not unique:
+        return {}, []
+
+    if dataset_id:
+        cur.execute(
+            "SELECT isolate_id, dataset_id FROM isolates "
+            "WHERE dataset_id = %s AND isolate_id = ANY(%s)",
+            (dataset_id, unique))
+        return ({str(r["isolate_id"]): str(r["dataset_id"])
+                 for r in cur.fetchall()}, [])
+
+    cur.execute(
+        "SELECT isolate_id, dataset_id FROM isolates WHERE isolate_id = ANY(%s)",
+        (unique,))
+    seen: Dict[str, List[str]] = {}
+    for row in cur.fetchall():
+        seen.setdefault(str(row["isolate_id"]), []).append(str(row["dataset_id"]))
+
+    resolved = {k: v[0] for k, v in seen.items() if len(v) == 1}
+    ambiguous = sorted(k for k, v in seen.items() if len(v) > 1)
+    return resolved, ambiguous
+
+
+def import_genomic_results(genomics: pd.DataFrame, *,
+                           dataset_id: Optional[str] = None,
+                           uploaded_by: str = "System") -> GenomicImport:
+    """Attach sequencing results to isolates already in the database.
+
+    Sequencing happens weeks or months after culture, so its results arrive on
+    their own and have to find isolates that are already stored. The combined
+    workbook upload could not do this: it matched a genomics row only against
+    isolates in the *same* file, and silently skipped the rest, so a laboratory
+    uploading results for isolates it had submitted in March got no rows and no
+    error.
+
+    Matching is on ``isolate_id``. Where the same identifier exists in more than
+    one dataset the row is refused rather than guessed at, and rows matching
+    nothing are reported by name -- an import that quietly stores a fraction of
+    what it was given is worse than one that fails, because the gap looks like
+    an absence of sequencing rather than an absence of matching.
+
+    ``dataset_id`` restricts matching to one dataset, which removes the
+    ambiguity entirely when the caller knows where the isolates belong.
+    """
+    if genomics is None or genomics.empty:
+        return GenomicImport(False, "There were no genomic rows to import.")
+
+    if "isolate_id" not in genomics.columns:
+        return GenomicImport(
+            False, "The genomics sheet has no isolate_id column, so nothing "
+                   "can be attached to an isolate.")
+
+    conn = db.get_connection()
+    try:
+        cur = conn.cursor()
+        raw = cur.raw
+
+        resolved, ambiguous = _resolve_isolates(
+            cur, genomics["isolate_id"].tolist(), dataset_id)
+
+        genomic_rows: List[tuple] = []
+        run_rows: Dict[Tuple[str, str], tuple] = {}
+        unmatched: List[str] = []
+
+        for _, row in genomics.iterrows():
+            isolate_id = _text(row, "isolate_id")
+            genomic_id = _text(row, "genomic_id")
+            if not isolate_id or not genomic_id:
+                continue
+            owner = resolved.get(isolate_id)
+            if owner is None:
+                if isolate_id not in ambiguous:
+                    unmatched.append(isolate_id)
+                continue
+
+            run_id = _text(row, "run_id")
+            if run_id and (owner, run_id) not in run_rows:
+                run_rows[(owner, run_id)] = (
+                    owner, run_id, _text(row, "platform"),
+                    _text(row, "instrument"), _text(row, "library_kit"),
+                    _text(row, "read_type"), _date(row, "run_date"),
+                    _text(row, "lab_name"), _text(row, "operator"), uploaded_by,
+                )
+
+            built = _build_genomics(pd.DataFrame([row]), owner, uploaded_by,
+                                    {isolate_id})
+            genomic_rows.extend(built)
+
+        if not genomic_rows:
+            detail = []
+            if unmatched:
+                detail.append(f"{len(unmatched)} row(s) name an isolate that is "
+                              f"not in the database")
+            if ambiguous:
+                detail.append(f"{len(ambiguous)} isolate id(s) exist in more "
+                              "than one dataset")
+            return GenomicImport(
+                False,
+                "Nothing was attached. " + ("; ".join(detail) or
+                                            "No row carried both a genomic_id "
+                                            "and a known isolate_id") + ".",
+                unmatched=sorted(set(unmatched)), ambiguous=ambiguous)
+
+        # Runs first: genomic_run_fk requires the run to exist.
+        runs = _insert_many(
+            raw,
+            _insert_sql("sequencing_runs",
+                        ("dataset_id", "run_id", "platform", "instrument",
+                         "library_kit", "read_type", "run_date", "lab_name",
+                         "operator", "created_by")),
+            list(run_rows.values()))
+
+        stored = _insert_many(
+            raw, _insert_sql("genomic_results", _GENOMIC_COLUMNS), genomic_rows)
+
+        insert_custody_events(raw, [
+            custody_event_row(
+                row[0], "genomic_result", row[1], "sequenced",
+                actor=uploaded_by, source_system=SOURCE_SYSTEM,
+                reason="sequencing result attached to an existing isolate")
+            for row in genomic_rows])
+
+        conn.commit()
+
+        message = f"Attached {stored:,} genomic result(s) to existing isolates."
+        if unmatched:
+            message += (f" {len(unmatched)} row(s) named an isolate that is not "
+                        "in the database and were not stored.")
+        if ambiguous:
+            message += (f" {len(ambiguous)} isolate id(s) exist in more than one "
+                        "dataset and were refused rather than guessed at.")
+        return GenomicImport(True, message, stored=stored, runs=runs,
+                             unmatched=sorted(set(unmatched)),
+                             ambiguous=ambiguous)
+    except Exception as exc:                          # noqa: BLE001
+        try:
+            conn.rollback()
+        except Exception:                             # noqa: BLE001
+            pass
+        logger.exception("import_genomic_results failed")
+        return GenomicImport(False, f"Nothing was stored. Database error: {exc}")
+    finally:
+        try:
+            conn.close()
+        except Exception:                             # noqa: BLE001
+            pass
