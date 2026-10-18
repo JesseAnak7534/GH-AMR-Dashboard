@@ -144,7 +144,70 @@ DETERMINANTS: Tuple[Determinant, ...] = (
     Determinant("ermB", ("Erythromycin", "Clindamycin", "Azithromycin"),
                 "rRNA methylase"),
     Determinant("catA1", ("Chloramphenicol",), "Acetyltransferase"),
+    Determinant("floR", ("Chloramphenicol",), "Phenicol efflux"),
+    # -- narrow-spectrum oxacillinase --------------------------------------
+    # Common, and commonly misread. It is poorly inhibited by clavulanate and
+    # tazobactam, so it accounts for resistance to the inhibitor combinations
+    # while leaving cephalosporins and carbapenems untouched. Reading it as a
+    # general beta-lactamase would explain away resistance it has nothing to do
+    # with.
+    Determinant("blaOXA-1", ("Amoxicillin-Clavulanate", "Piperacillin-Tazobactam",
+                             "Ampicillin", "Amoxicillin"), "Oxacillinase",
+                note="Not an ESBL and not a carbapenemase. Explains the "
+                     "inhibitor combinations, not cephalosporins."),
+    # -- staphylococcal penicillinase --------------------------------------
+    Determinant("blaZ", ("Penicillin", "Ampicillin", "Amoxicillin"),
+                "Staphylococcal penicillinase",
+                note="Does not confer oxacillin resistance; that needs mec."),
+    # -- acinetobacter carbapenemases --------------------------------------
+    Determinant("blaOXA-23", ("Meropenem", "Imipenem"),
+                "OXA-23-like carbapenemase",
+                note="The usual cause of carbapenem resistance in "
+                     "Acinetobacter baumannii."),
+    Determinant("blaOXA-51", ("Meropenem",), "Intrinsic oxacillinase",
+                strong=False,
+                note="Intrinsic to A. baumannii and used to identify the "
+                     "species. On its own it gives little or no carbapenem "
+                     "resistance, so a susceptible result is expected."),
+    # -- aminoglycoside: streptomycin only ---------------------------------
+    # strA and strB. They travel together and act on streptomycin; they do not
+    # explain gentamicin or amikacin, and treating them as general
+    # aminoglycoside resistance would hide a real 16S methylase.
+    Determinant("aph(3'')-Ib", ("Streptomycin",), "Aminoglycoside "
+                "phosphotransferase",
+                note="strA. Streptomycin only."),
+    Determinant("aph(6)-Id", ("Streptomycin",), "Aminoglycoside "
+                "phosphotransferase",
+                note="strB, usually alongside strA. Streptomycin only."),
+    # -- macrolide ---------------------------------------------------------
+    Determinant("mph(A)", ("Azithromycin", "Erythromycin", "Clarithromycin"),
+                "Macrolide phosphotransferase"),
+    Determinant("ermC", ("Erythromycin", "Clindamycin", "Azithromycin"),
+                "rRNA methylase"),
+    # -- tetracycline ------------------------------------------------------
+    Determinant("tet(M)", ("Tetracycline", "Doxycycline"),
+                "Ribosomal protection", strong=False,
+                note="Doxycycline and tigecycline often remain active."),
 )
+
+#: Determinants that are real, and are not antibiotic resistance.
+#:
+#: They turn up in the same gene call tables and would otherwise sit in the
+#: "no rule" list forever, implying the rule set is incomplete when it is not.
+#: Naming them is also the honest answer to a question the concordance check
+#: cannot be asked: no susceptibility result on any panel corresponds to them,
+#: so they can neither agree nor disagree with a phenotype.
+NON_RESISTANCE_MARKERS: Dict[str, str] = {
+    "qacE": "Quaternary ammonium efflux -- disinfectant tolerance, and a marker "
+            "of a class 1 integron rather than of resistance to any antibiotic.",
+    "qacEdelta1": "Truncated qacE, carried on class 1 integrons. As above.",
+    "sitABCD": "Iron and manganese transport. A fitness and virulence factor, "
+               "not a resistance determinant; it belongs with virulence genes.",
+    "intI1": "Class 1 integrase. Marks a mobile platform that often carries "
+             "resistance genes, but confers none itself.",
+    "IS26": "Insertion sequence. Mobilises resistance genes without conferring "
+            "resistance.",
+}
 
 #: gene -> Determinant, for lookup.
 BY_GENE: Dict[str, Determinant] = {d.gene: d for d in DETERMINANTS}
@@ -559,10 +622,16 @@ def determinant_frequency(genomic: pd.DataFrame, *, by: Optional[str] = None,
             if str(n).strip()})
         for gene, count in sorted(tally.items(), key=lambda kv: -kv[1]):
             known = BY_GENE.get(gene)
+            if known is not None:
+                mechanism = known.mechanism
+            elif gene in NON_RESISTANCE_MARKERS:
+                mechanism = "not a resistance determinant"
+            else:
+                mechanism = "not in the rule set"
             rows.append({
                 (by or "group"): label,
                 "determinant": gene,
-                "mechanism": known.mechanism if known else "not in the rule set",
+                "mechanism": mechanism,
                 "isolates": count,
                 "genomes_examined": examined,
                 "percent": round(100.0 * count / examined, 1) if examined else None,
@@ -584,7 +653,22 @@ def determinants_not_in_rules(genomic: pd.DataFrame) -> List[str]:
     seen: set = set()
     for _, genome in genomic.iterrows():
         seen.update(determinants_of(genome))
-    return sorted(seen - set(BY_GENE))
+    return sorted(seen - set(BY_GENE) - set(NON_RESISTANCE_MARKERS))
+
+
+def non_resistance_markers_found(genomic: pd.DataFrame) -> Dict[str, str]:
+    """Known markers present in the data that confer no antibiotic resistance.
+
+    Reported separately so they neither inflate the "no rule" list nor sit in a
+    resistance frequency as though they belonged there.
+    """
+    if genomic.empty:
+        return {}
+    seen: set = set()
+    for _, genome in genomic.iterrows():
+        seen.update(determinants_of(genome))
+    return {gene: NON_RESISTANCE_MARKERS[gene]
+            for gene in sorted(seen & set(NON_RESISTANCE_MARKERS))}
 
 
 # ---------------------------------------------------------------------------
@@ -726,5 +810,6 @@ __all__ = [
     "CONCORDANT_RESISTANT", "CONCORDANT_SUSCEPTIBLE", "GENOTYPE_ONLY",
     "PHENOTYPE_ONLY",
     "determinant_frequency", "determinants_not_in_rules",
+    "NON_RESISTANCE_MARKERS", "non_resistance_markers_found",
     "ClusterReport", "clusters", "sequencing_coverage",
 ]

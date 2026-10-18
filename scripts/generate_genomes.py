@@ -78,11 +78,19 @@ MLST: Dict[str, Tuple[str, Tuple[str, ...]]] = {
 #: Determinants that occur without explaining anything on the tested panel --
 #: real genomes carry plenty. They give the rule set something to ignore and
 #: populate "determinants not in the rule set".
-INCIDENTAL = ("aph(3'')-Ib", "aph(6)-Id", "mph(A)", "qacE", "floR",
-              "tet(M)", "blaOXA-1", "sitABCD")
+INCIDENTAL = ("aph(3'')-Ib", "aph(6)-Id", "mph(A)", "floR", "tet(M)",
+              "blaOXA-1", "blaZ", "ermC")
+
+#: Markers that are real and are not antibiotic resistance -- integron and
+#: mobile-element machinery. Carried so the page has to say what they are
+#: rather than listing them as determinants it has no rule for. sitABCD was in
+#: the list above until the rule set was extended: it is an iron transporter,
+#: a virulence factor, and had no business among the resistance genes.
+NON_RESISTANCE = ("qacE", "intI1", "IS26")
 
 PLASMIDS = ("IncF", "IncFII", "IncI1", "IncX3", "IncN", "IncHI2", "ColpVC")
-VIRULENCE = ("fimH", "iutA", "traT", "ompT", "hlyA", "papC", "ybtS")
+VIRULENCE = ("fimH", "iutA", "traT", "ompT", "hlyA", "papC", "ybtS",
+             "sitABCD")
 
 
 def _pick_explaining(agent: str, rng: random.Random, strong_only: bool = False,
@@ -162,7 +170,23 @@ def build_genomes(isolates: List[dict], phenotypes: Dict[str, List[dict]],
                  else genes).add(determinant.gene)
                 stats["contradiction"] += 1
 
-        genes.update(rng.sample(INCIDENTAL, rng.randint(0, 3)))
+        # Incidental genes are real findings that happen to be carried, so they
+        # must not contradict the phenotype either. Several of them -- blaOXA-1,
+        # blaZ, mph(A) -- gained rules when the rule set was extended, and
+        # scattering them at random immediately manufactured contradictions:
+        # an isolate given blaOXA-1 that tested susceptible to
+        # amoxicillin-clavulanate became a discrepancy that nothing in the data
+        # justified. Agreement fell three points and the contradiction count
+        # nearly doubled, none of it real.
+        from src.genomics import BY_GENE
+        for gene in rng.sample(INCIDENTAL, rng.randint(0, 3)):
+            rule = BY_GENE.get(gene)
+            if rule and rule.strong and set(rule.agents) & susceptible_to:
+                continue
+            genes.add(gene)
+        # These confer no antibiotic resistance, so they cannot contradict
+        # anything and are added freely.
+        genes.update(rng.sample(NON_RESISTANCE, rng.randint(0, 2)))
 
         # Quality. One assembly in twelve is poor enough that its absent genes
         # cannot be told from genes it simply failed to assemble.

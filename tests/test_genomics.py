@@ -228,3 +228,85 @@ def test_no_clusters_says_so_rather_than_showing_an_empty_table():
 def test_every_determinant_rule_names_a_mechanism():
     for determinant in gx.DETERMINANTS:
         assert determinant.gene and determinant.agents and determinant.mechanism
+
+
+# ---------------------------------------------------------------------------
+# The extended rule set
+#
+# Added after running at scale showed five of the six most common determinants
+# in the data had no rule, so they explained nothing and some "unexplained
+# resistance" was simply an unmapped gene.
+# ---------------------------------------------------------------------------
+
+def test_oxacillinase_explains_the_inhibitor_combinations_only():
+    """blaOXA-1 is poorly inhibited by clavulanate and tazobactam, so it
+    accounts for those combinations. Reading it as a general beta-lactamase
+    would explain away cephalosporin resistance it has nothing to do with."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(amr_genes=["blaOXA-1"])]))
+    phen = pd.DataFrame([
+        _phenotype("ISO-1", "Amoxicillin-Clavulanate", "R"),
+        _phenotype("ISO-1", "Ceftriaxone", "R"),
+        _phenotype("ISO-1", "Meropenem", "R"),
+    ])
+    table = gx.concordance(frame, phen).set_index("antibiotic")
+    assert table.loc["Amoxicillin-Clavulanate", "verdict"] == gx.CONCORDANT_RESISTANT
+    assert table.loc["Ceftriaxone", "verdict"] == gx.PHENOTYPE_ONLY
+    assert table.loc["Meropenem", "verdict"] == gx.PHENOTYPE_ONLY
+
+
+def test_streptomycin_enzymes_do_not_explain_gentamicin():
+    """strA and strB act on streptomycin. Treating them as general
+    aminoglycoside resistance would hide a real 16S methylase."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(amr_genes=["aph(3'')-Ib",
+                                                               "aph(6)-Id"])]))
+    phen = pd.DataFrame([_phenotype("ISO-1", "Streptomycin", "R"),
+                         _phenotype("ISO-1", "Gentamicin", "R")])
+    table = gx.concordance(frame, phen).set_index("antibiotic")
+    assert table.loc["Streptomycin", "verdict"] == gx.CONCORDANT_RESISTANT
+    assert table.loc["Gentamicin", "verdict"] == gx.PHENOTYPE_ONLY
+
+
+def test_staphylococcal_penicillinase_does_not_explain_oxacillin():
+    """blaZ gives penicillin resistance; oxacillin resistance needs mec."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(
+        organism="Staphylococcus aureus", amr_genes=["blaZ"])]))
+    phen = pd.DataFrame([_phenotype("ISO-1", "Penicillin", "R"),
+                         _phenotype("ISO-1", "Oxacillin", "R")])
+    table = gx.concordance(frame, phen).set_index("antibiotic")
+    assert table.loc["Penicillin", "verdict"] == gx.CONCORDANT_RESISTANT
+    assert table.loc["Oxacillin", "verdict"] == gx.PHENOTYPE_ONLY
+
+
+def test_intrinsic_oxacillinase_is_not_treated_as_carbapenem_resistance():
+    """blaOXA-51 identifies A. baumannii. On its own it gives little or no
+    carbapenem resistance, so a susceptible result is expected."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(
+        organism="Acinetobacter baumannii", amr_genes=["blaOXA-51"])]))
+    phen = pd.DataFrame([_phenotype("ISO-1", "Meropenem", "S")])
+    table = gx.concordance(frame, phen)
+    assert not bool(table.iloc[0]["notable"]), "an intrinsic marker must not be flagged"
+
+
+def test_markers_that_confer_no_resistance_are_named_not_left_unmapped():
+    """qacE is disinfectant tolerance and an integron marker. Listing it as a
+    determinant with no rule implies the rule set is incomplete when it is not."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(
+        amr_genes=["qacE", "intI1", "sitABCD"])]))
+    assert gx.determinants_not_in_rules(frame) == []
+    found = gx.non_resistance_markers_found(frame)
+    assert set(found) == {"qacE", "intI1", "sitABCD"}
+    assert all(text for text in found.values()), "each must carry an explanation"
+
+
+def test_non_resistance_markers_are_labelled_in_the_frequency_table():
+    frame = gx.assess_quality(pd.DataFrame([_genome(amr_genes=["qacE"])]))
+    table = gx.determinant_frequency(frame)
+    assert table.iloc[0]["mechanism"] == "not a resistance determinant"
+
+
+def test_a_genuinely_unknown_gene_is_still_reported_as_unmapped():
+    """The two categories must stay distinct: classifying something as
+    not-resistance is a decision, not a way of emptying the list."""
+    frame = gx.assess_quality(pd.DataFrame([_genome(
+        amr_genes=["qacE", "blaNEW-1"])]))
+    assert gx.determinants_not_in_rules(frame) == ["blaNEW-1"]

@@ -197,6 +197,20 @@ def render_genomics_page() -> None:
                 "and some unexplained resistance may simply be an unmapped "
                 f"gene: {', '.join(unmapped)}.")
 
+        markers = gx.non_resistance_markers_found(frame)
+        if markers:
+            with st.expander(
+                    f"{len(markers)} marker(s) present that confer no antibiotic "
+                    "resistance"):
+                st.caption(
+                    "Real findings, reported here rather than among the "
+                    "determinants. No susceptibility result corresponds to "
+                    "them, so they can neither agree nor disagree with a "
+                    "phenotype, and counting them as resistance genes would "
+                    "overstate what is circulating.")
+                for gene, explanation in markers.items():
+                    st.markdown(f"- **{gene}** - {explanation}")
+
     # ── clusters ───────────────────────────────────────────────────────
     with tabs[2]:
         report = gx.clusters(frame)
