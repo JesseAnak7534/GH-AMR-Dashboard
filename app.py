@@ -208,14 +208,11 @@ else:
 # comparison work for every visitor. What used to gate those was a per-lab login
 # account, and those accounts are gone.
 
-#: A frame holding any of these columns describes individual records rather than
-#: an aggregate. Testing the data beats remembering to gate each call site: a
-#: table added later is covered without anyone having to think about it.
-_RECORD_ID_COLUMNS = frozenset({
-    "sample_id", "specimen_id", "isolate_id", "subject_id", "encounter_id",
-    "genomic_id", "patient_pseudonym", "accession_number", "local_patient_id",
-    "email", "password_hash",
-})
+# The record-identifying columns, and the test for them, live in
+# src.disclosure: they are a disclosure rule rather than a detail of this
+# entrypoint, and keeping them there lets them be tested without starting the
+# app.
+from src.disclosure import RECORD_ID_COLUMNS as _RECORD_ID_COLUMNS
 
 
 def is_admin() -> bool:
@@ -1923,10 +1920,26 @@ with st.sidebar:
             st.success("Signed out")
             st.rerun()
     else:
-        st.caption("Aggregate view — sign in for record-level detail.")
-        if st.button("Sign in", use_container_width=True):
-            st.session_state.show_login = True
-            st.rerun()
+        # No sign-in control on the public surface. A visitor to a public
+        # surveillance site has no account and no use for a login box; offering
+        # one invites them to try, and makes the page look like something they
+        # are being kept out of rather than something published for them.
+        #
+        # Administrators reach it at ?admin=1. That is not a security measure --
+        # the password is -- it only keeps the door off the shop front.
+        _wants_admin = False
+        try:
+            _wants_admin = str(st.query_params.get("admin", "")).lower() in (
+                "1", "true", "yes")
+        except Exception:                             # noqa: BLE001
+            _wants_admin = False
+        if _wants_admin:
+            st.caption("Aggregate view — sign in for record-level detail.")
+            if st.button("Sign in", use_container_width=True):
+                st.session_state.show_login = True
+                st.rerun()
+        else:
+            st.caption("Aggregate view. No individual record is shown.")
 
     page = st.session_state.active_page
 
@@ -1958,7 +1971,11 @@ if os.path.exists(_pp_filter_path):
 # DASHBOARD LANDING PAGE
 # ============================================================================
 if page == "Home":
-    render_dashboard_page()
+    # The public landing page. Everything on it is aggregate and passes through
+    # src.disclosure first; see src/page_home.py for why the filtering rather
+    # than the headline figures is what needed protecting.
+    from src.page_home import render_home_page
+    render_home_page()
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY

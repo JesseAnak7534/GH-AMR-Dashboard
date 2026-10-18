@@ -124,3 +124,52 @@ def test_original_frame_is_not_mutated():
     frame = _table()
     apply_disclosure_control(frame, ["isolates"], group_by="ward")
     assert frame.loc[1, "isolates"] == 2, "the caller's frame must be untouched"
+
+
+# ---------------------------------------------------------------------------
+# What may never reach a public view
+# ---------------------------------------------------------------------------
+
+def test_a_record_level_frame_is_recognised():
+    """Testing the data beats remembering to gate each call site: a table added
+    later is covered without anyone having to think about it."""
+    from src.disclosure import is_record_level
+    assert is_record_level(pd.DataFrame({"isolate_id": ["A"], "organism": ["Ec"]}))
+    assert is_record_level(pd.DataFrame({"patient_pseudonym": ["x"]}))
+    assert is_record_level(pd.DataFrame({"Sample_ID": ["s1"]})), "case must not matter"
+
+
+def test_an_aggregate_frame_is_not_flagged():
+    from src.disclosure import is_record_level
+    assert not is_record_level(
+        pd.DataFrame({"organism": ["Ec"], "isolates": [40], "percent": [50.0]}))
+
+
+def test_the_shapes_the_landing_page_draws_carry_no_identifier():
+    """The page counts distinct specimens and isolates, which is aggregate, but
+    the tables it renders must never carry the identifiers themselves."""
+    from src.disclosure import is_record_level
+
+    antibiogram = pd.DataFrame({
+        "organism": ["Escherichia coli"], "antibiotic": ["Ceftriaxone"],
+        "tested": [272], "percent_susceptible": [49.3],
+        "ci_low": [43.4], "ci_high": [55.2], "status": ["reported"]})
+    distribution = pd.DataFrame({
+        "organism": ["Escherichia coli"], "isolates": [411], "percent": [26.2]})
+    by_sector = pd.DataFrame({"sector": ["human"], "isolates": [1675]})
+
+    for name, frame in (("antibiogram", antibiogram),
+                        ("pathogen distribution", distribution),
+                        ("sector breakdown", by_sector)):
+        assert not is_record_level(frame), f"{name} carries an identifier"
+
+
+def test_counting_distinct_identifiers_is_not_disclosure():
+    """nunique() over a column of identifiers yields a count, which identifies
+    nobody. The rule is about columns rendered, not columns touched."""
+    from src.disclosure import is_record_level
+    records = pd.DataFrame({"isolate_id": ["A", "B", "B"], "organism": ["Ec"]*3})
+    assert is_record_level(records)
+    summary = pd.DataFrame({"organism": ["Ec"],
+                            "isolates": [records["isolate_id"].nunique()]})
+    assert not is_record_level(summary)

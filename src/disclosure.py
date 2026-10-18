@@ -49,6 +49,25 @@ import pandas as pd
 #: query.
 MIN_PUBLIC_CELL = 5
 
+#: A frame holding any of these columns describes individual records rather than
+#: an aggregate, and must never reach a public view. Testing the data beats
+#: remembering to gate each call site: a table added later is covered without
+#: anyone having to think about it.
+RECORD_ID_COLUMNS = frozenset({
+    "sample_id", "specimen_id", "isolate_id", "subject_id", "encounter_id",
+    "genomic_id", "patient_pseudonym", "accession_number", "local_patient_id",
+    "email", "password_hash",
+})
+
+
+def is_record_level(data) -> bool:
+    """Whether a frame describes individual records."""
+    columns = getattr(data, "columns", None)
+    if columns is None:
+        return False
+    return bool(RECORD_ID_COLUMNS
+                & {str(c).strip().lower() for c in columns})
+
 #: What a withheld cell shows. Not zero, and not blank: a reader has to be able
 #: to tell "too few to publish" from "none found", because treating the first as
 #: the second is how a suppressed table becomes a misleading one.
@@ -189,6 +208,6 @@ def safe_to_publish(frame: pd.DataFrame, count_column: str,
 
 
 __all__ = [
-    "MIN_PUBLIC_CELL", "WITHHELD", "PRIMARY", "SECONDARY",
+    "MIN_PUBLIC_CELL", "RECORD_ID_COLUMNS", "is_record_level", "WITHHELD", "PRIMARY", "SECONDARY",
     "SuppressionReport", "apply_disclosure_control", "safe_to_publish",
 ]
