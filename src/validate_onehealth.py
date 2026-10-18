@@ -12,6 +12,7 @@ from typing import Tuple, List, Dict
 from io import BytesIO
 from openpyxl import load_workbook
 from src.lab_management import APPROVED_LABS
+from src.upload_schema import excel_engine
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -171,13 +172,25 @@ def validate_unified_upload(file_obj) -> Tuple[bool, List[str], Dict]:
     except Exception as e:
         return False, [f"Cannot read Excel file: {e}"], {}
 
+    # One parse, reused for every sheet below. Calling pandas' read_excel with
+    # the file handle re-reads and re-parses the whole workbook each time, so
+    # four sheets meant four full parses -- of a file the AMR validator has
+    # already parsed four times for its own sheets. Sheets now come from this
+    # single handle.
+    try:
+        file_obj.seek(0)
+        book = pd.ExcelFile(file_obj, engine=excel_engine())
+    except Exception as e:
+        return False, [f"Cannot read Excel file: {e}"], {}
+
+    def _sheet(name: str) -> pd.DataFrame:
+        return book.parse(sheet_name=name)
+
     # ── PPS (needs both sheets) ─────────────────────────────────────────
     if 'pps_survey' in sheets and 'prescriptions' in sheets:
         found_any = True
-        file_obj.seek(0)
-        survey_df = pd.read_excel(file_obj, sheet_name='pps_survey')
-        file_obj.seek(0)
-        rx_df = pd.read_excel(file_obj, sheet_name='prescriptions')
+        survey_df = _sheet('pps_survey')
+        rx_df = _sheet('prescriptions')
 
         if survey_df.empty:
             errors.append("[PPS] pps_survey sheet is empty")
@@ -203,8 +216,7 @@ def validate_unified_upload(file_obj) -> Tuple[bool, List[str], Dict]:
     # ── AMU ─────────────────────────────────────────────────────────────
     if 'amu_data' in sheets:
         found_any = True
-        file_obj.seek(0)
-        amu_df = pd.read_excel(file_obj, sheet_name='amu_data')
+        amu_df = _sheet('amu_data')
         if amu_df.empty:
             errors.append("[AMU] amu_data sheet is empty")
         else:
@@ -223,8 +235,7 @@ def validate_unified_upload(file_obj) -> Tuple[bool, List[str], Dict]:
     # ── AMC ─────────────────────────────────────────────────────────────
     if 'amc_data' in sheets:
         found_any = True
-        file_obj.seek(0)
-        amc_df = pd.read_excel(file_obj, sheet_name='amc_data')
+        amc_df = _sheet('amc_data')
         if amc_df.empty:
             errors.append("[AMC] amc_data sheet is empty")
         else:
@@ -244,6 +255,8 @@ def validate_unified_upload(file_obj) -> Tuple[bool, List[str], Dict]:
                         errors.append(f"[AMC] Invalid sector values: {', '.join(str(s) for s in inv)}")
                 if not any('[AMC]' in e for e in errors):
                     result['amc_data'] = amc_df
+
+    book.close()
 
     if not found_any:
         errors.append(

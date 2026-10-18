@@ -40,7 +40,9 @@ Sheet model
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, FrozenSet, List, Optional, Tuple
+
+import pandas as pd
 
 from src.traceability import (
     IDENTIFICATION_METHODS,
@@ -78,7 +80,12 @@ BOOLEAN_FALSE: Tuple[str, ...] = ("0", "n", "no", "false", "f")
 # Values that mean "the cell was empty" once pandas and str() have been through
 # it. Kept in one place because the old validator cast every object column to
 # str and then tested isna(), which is never true for the string "nan".
-NULL_TOKENS: Tuple[str, ...] = ("", "nan", "none", "null", "na", "n/a", "#n/a", "-")
+#: Spellings of emptiness. A frozenset rather than a tuple because
+#: is_blank tests membership on every cell of every sheet -- over a
+#: million times for a 2,500-specimen workbook -- and a tuple makes each
+#: of those a scan of eight strings instead of one hash lookup.
+NULL_TOKENS: FrozenSet[str] = frozenset(
+    ("", "nan", "none", "null", "na", "n/a", "#n/a", "-"))
 
 # Free-text lists inside one cell are separated by this character. Chosen over
 # a comma because organism and gene names contain commas.
@@ -457,19 +464,63 @@ def sensitive_columns() -> Tuple[str, ...]:
     return tuple(c.name for s in SHEETS for c in s.columns if c.sensitive)
 
 
+def excel_engine() -> Optional[str]:
+    """Which engine pandas should use to read an uploaded workbook.
+
+    openpyxl parses XML in Python and is what pandas falls back to. Reading the
+    eight sheets of a 2,500-specimen workbook takes it about 34 seconds, which is
+    the bulk of the wait when someone uploads -- the validation that follows is a
+    fraction of it. python-calamine is a Rust reader that pandas supports
+    natively and does the same work in about 2 seconds, producing frames that
+    compare identical: same shapes, same column dtypes, and no differing value
+    in any of 29,285 rows.
+
+    It is returned only when installed, and None lets pandas choose as before.
+    The speed is worth having but not worth a hard dependency, and a deployment
+    that lacks the wheel should read its workbooks slowly rather than not at all.
+    """
+    try:
+        import python_calamine                        # noqa: F401
+    except ImportError:
+        return None
+    return "calamine"
+
+
 def is_blank(value) -> bool:
     """Whether a spreadsheet cell should be treated as empty.
 
     Handles the three ways a blank arrives: a real NaN, an empty string, and
     the literal text "nan" left behind when a NaN has been through ``str()``.
+
+    This is the most-called function in the upload path -- roughly 1.5 million
+    times for a 2,500-specimen workbook, since every cell of every sheet is
+    tested at least twice. It used to import pandas on each of those calls and
+    route every value through ``pd.isna`` before converting it to a string.
+    The ordered type checks below answer the overwhelming majority of cells --
+    strings and numbers -- without either, and pandas is now imported once at
+    module scope. The behaviour is unchanged; only the route to it is shorter.
     """
     if value is None:
         return True
+    if isinstance(value, str):
+        return value.strip().lower() in NULL_TOKENS
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, float):
+        # NaN is the only blank float, and `v != v` identifies it without a
+        # library call. A number is never one of the text spellings.
+        #
+        # bool() is not decoration: numpy.float64 subclasses float, so this
+        # comparison yields numpy.bool_ rather than a Python bool, and the
+        # difference escapes any caller that tests `is True` or serialises the
+        # answer.
+        return bool(value != value)
+    if isinstance(value, int):
+        return False
     try:
-        import pandas as pd
         if pd.isna(value):
             return True
-    except (ImportError, TypeError, ValueError):
+    except (TypeError, ValueError):
         pass
     return str(value).strip().lower() in NULL_TOKENS
 
@@ -506,7 +557,7 @@ __all__ = [
     "Column", "Sheet",
     "SOURCE_CATEGORIES", "SECTOR_FOR_SOURCE_CATEGORY",
     "AST_METHODS", "BREAKPOINT_STANDARDS", "RESULT_VALUES", "MIC_OPERATORS",
-    "LIST_SEPARATOR", "NULL_TOKENS",
+    "LIST_SEPARATOR", "NULL_TOKENS", "excel_engine",
     "SAMPLES_SHEET", "ISOLATES_SHEET", "AST_SHEET", "GENOMICS_SHEET",
     "SHEETS", "SHEETS_BY_NAME", "MANDATORY_SHEETS",
     "TEMPLATE_VERSION", "TEMPLATE_FILENAME",

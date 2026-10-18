@@ -36,6 +36,7 @@ from src.interpretation import interpret_ast_result, platform_breakpoint_label
 from src.lab_management import get_lab_names
 from src.traceability import STERILE_SITE_SPECIMENS, age_to_band
 from src.upload_schema import (
+    excel_engine,
     AST_SHEET,
     GENOMICS_SHEET,
     ISOLATES_SHEET,
@@ -983,15 +984,33 @@ def validate_workbook(file_obj) -> UploadValidation:
 
     sheet_names: List[str] = list(info.get("sheets", []))
     raw: Dict[str, pd.DataFrame] = {}
-    for sheet in SHEETS:
-        if sheet.name not in sheet_names:
-            continue
-        try:
-            file_obj.seek(0)
-            raw[sheet.name] = pd.read_excel(file_obj, sheet_name=sheet.name)
-        except Exception as exc:                      # noqa: BLE001
-            log.add(sheet.name, f"Could not read the sheet: {exc}",
-                    rule="read-failure")
+
+    # One parse for the whole workbook. pd.read_excel(file_obj, sheet_name=...)
+    # re-reads and re-parses the entire file on every call, so fetching four
+    # sheets parsed the workbook four times -- and the upload page then runs the
+    # One Health validator over the same file, which did the same again for its
+    # four sheets. On a 2,500-specimen workbook, whose AST sheet alone holds
+    # nearly twenty thousand rows, that was most of the wait before validation
+    # had even started. pd.ExcelFile parses once and hands out sheets from it.
+    try:
+        file_obj.seek(0)
+        workbook = pd.ExcelFile(file_obj, engine=excel_engine())
+    except Exception as exc:                          # noqa: BLE001
+        log.add("workbook", f"Could not read the workbook: {exc}",
+                rule="read-failure")
+        return UploadValidation(ok=False, issues=log.finish())
+
+    try:
+        for sheet in SHEETS:
+            if sheet.name not in sheet_names:
+                continue
+            try:
+                raw[sheet.name] = workbook.parse(sheet_name=sheet.name)
+            except Exception as exc:                  # noqa: BLE001
+                log.add(sheet.name, f"Could not read the sheet: {exc}",
+                        rule="read-failure")
+    finally:
+        workbook.close()
 
     return _validate_raw_frames(raw, log)
 
@@ -1223,9 +1242,9 @@ def load_excel_sheets(file_obj) -> Tuple[pd.DataFrame, pd.DataFrame, str]:
     """Load the two core sheets. Retained for callers that want the raw frames."""
     try:
         file_obj.seek(0)
-        samples_df = pd.read_excel(file_obj, sheet_name=SAMPLES_SHEET.name)
-        file_obj.seek(0)
-        ast_df = pd.read_excel(file_obj, sheet_name=AST_SHEET.name)
+        with pd.ExcelFile(file_obj, engine=excel_engine()) as workbook:      # parse once, not per sheet
+            samples_df = workbook.parse(sheet_name=SAMPLES_SHEET.name)
+            ast_df = workbook.parse(sheet_name=AST_SHEET.name)
         return samples_df, ast_df, ""
     except Exception as exc:                          # noqa: BLE001
         return pd.DataFrame(), pd.DataFrame(), f"Error loading sheets: {exc}"
