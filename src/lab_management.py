@@ -156,15 +156,95 @@ class KoboToolboxManager:
             url = f"{KOBO_API_BASE}/assets/"
             response = self.session.post(url, json=form_payload, timeout=10)
             
-            if response.status_code in [200, 201]:
-                form_data = response.json()
-                return True, "Form created successfully", form_data
-            else:
+            if response.status_code not in [200, 201]:
                 return False, f"Form creation failed: {response.status_code} - {response.text[:300]}", None
-        
+
+            form_data = response.json()
+
+            # Creating an asset leaves it as a draft, and a draft accepts no
+            # submissions -- it has no collection link at all. This used to stop
+            # here, so the button produced a form that looked created and could
+            # not be filled in, and the only way to finish the job was to open
+            # KoboToolbox and deploy by hand. Deploy it here instead, so
+            # "create" means a form someone can actually answer.
+            uid = form_data.get("uid")
+            deployed, deploy_msg = self.deploy_form(uid) if uid else (False, "no uid returned")
+            if not deployed:
+                return (True,
+                        f"Form created, but deploying it failed: {deploy_msg}. "
+                        "Open it in KoboToolbox and press Deploy to start "
+                        "collecting.", form_data)
+
+            return True, "Form created and deployed", form_data
+
         except Exception as e:
             return False, f"Form creation error: {str(e)}", None
+
+    def deploy_form(self, form_id: str) -> Tuple[bool, str]:
+        """Deploy a form so it can receive submissions.
+
+        A newly created asset is a draft. Deployment is what mints the version
+        that submissions attach to and the Enketo links people actually open.
+        """
+        try:
+            if not self.session:
+                ok, msg = self.authenticate()
+                if not ok:
+                    return False, msg
+            response = self.session.post(
+                f"{KOBO_API_BASE}/assets/{form_id}/deployment/",
+                json={"active": True}, timeout=60)
+            if response.status_code in [200, 201]:
+                return True, "Deployed"
+            return False, f"{response.status_code} - {response.text[:200]}"
+        except Exception as exc:                          # noqa: BLE001
+            return False, f"Deployment error: {exc}"
     
+    def update_form(self, form_id: str) -> Tuple[bool, str]:
+        """Rewrite a deployed form from src.kobo_form and redeploy it.
+
+        Used when the survey definition changes and the existing form must keep
+        the submissions it already holds. Creating a replacement form would
+        orphan them, and Kobo versions a redeployment rather than discarding
+        history, so an update is both safer and what the API is designed for.
+
+        Submissions collected under an earlier version remain readable; fields
+        added later simply come back empty for them.
+        """
+        try:
+            if not self.session:
+                ok, msg = self.authenticate()
+                if not ok:
+                    return False, msg
+
+            from src.kobo_form import build_survey, FORM_VERSION
+            survey, choices = build_survey()
+
+            response = self.session.patch(
+                f"{KOBO_API_BASE}/assets/{form_id}/",
+                json={"content": {"survey": survey, "choices": choices}},
+                timeout=90)
+            if response.status_code not in (200, 201):
+                return (False, f"Could not update the form: "
+                               f"{response.status_code} - {response.text[:200]}")
+
+            # Redeploy, otherwise the change sits in the draft and the live form
+            # that people open is still the old one.
+            asset = self.session.get(f"{KOBO_API_BASE}/assets/{form_id}/?format=json",
+                                     timeout=60).json()
+            version = asset.get("version_id")
+            deploy = self.session.patch(
+                f"{KOBO_API_BASE}/assets/{form_id}/deployment/",
+                json={"active": True, "version_id": version}, timeout=90)
+            if deploy.status_code not in (200, 201, 202):
+                return (True, f"Form updated to v{FORM_VERSION}, but redeploying "
+                              f"failed: {deploy.status_code} - "
+                              f"{deploy.text[:200]}. Open it in KoboToolbox and "
+                              "press Deploy.")
+            return True, f"Form updated to v{FORM_VERSION} and redeployed"
+        except Exception as exc:                      # noqa: BLE001
+            return False, f"Form update error: {exc}"
+
     def fetch_submitted_data(self, form_id: str) -> Tuple[bool, str, Optional[pd.DataFrame]]:
         """Fetch submitted AST data from KoboToolbox form.
 
@@ -282,6 +362,22 @@ def kobo_submissions_to_frames(submissions_df):
     """
     from src.kobo_form import submissions_to_frames
     return submissions_to_frames(submissions_df)
+
+
+def kobo_submissions_to_consumption(submissions_df):
+    """Convert KoboToolbox submissions into the consumption and prescribing frames.
+
+    Returns ``(amu, amc, pps_survey, pps_prescriptions)``. Form version 3.1
+    added these three submission types; before it, the mobile path could carry
+    susceptibility results and nothing else, so a field team could report what
+    an organism resisted but not how much antibiotic the facility had used.
+
+    The frames carry the column names ``src.db.save_amu_records``,
+    ``save_amc_records`` and ``save_pps_survey`` read, so a mobile submission
+    and a workbook sheet reach the database by the same route.
+    """
+    from src.kobo_form import submissions_to_consumption
+    return submissions_to_consumption(submissions_df)
 
 
 

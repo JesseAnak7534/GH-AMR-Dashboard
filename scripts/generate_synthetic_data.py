@@ -272,6 +272,112 @@ BREAKPOINT_EDITIONS = [("CLSI", "M100-Ed35 (2025)"), ("CLSI", "M100-Ed34 (2024)"
                        ("EUCAST", "v15.0 (2025)")]
 
 
+# ---------------------------------------------------------------------------
+# Consumption and prescribing structure (AMU, AMC, PPS)
+#
+# These three sheets exist to exercise src.consumption, which was rewritten to
+# pool rates -- sum(numerator) / sum(denominator) -- instead of averaging
+# row-level rates. A mean of rates and a pooled rate are the same number only
+# when every denominator is equal, so data with equal denominators would let the
+# old arithmetic pass unnoticed. The structure below therefore makes the
+# denominators deliberately unequal, and correlates small denominators with high
+# rates, which is the shape that makes mean-of-rates overstate consumption.
+# ---------------------------------------------------------------------------
+
+#: Human facilities reporting antimicrobial use: name, region, district, typical
+#: monthly occupied-bed-days, and the DDD/1000 band they report in.
+#:
+#: Korle-Bu records roughly twenty times the patient-days of Eikwe while
+#: reporting a third of its rate. Averaging the facility rates therefore gives a
+#: national figure pulled towards the smallest hospitals; pooling gives one
+#: dominated by the largest, which is the correct answer and a visibly different
+#: number.
+AMU_FACILITIES: List[Tuple[str, str, str, int, float, float]] = [
+    ("Korle-Bu Teaching Hospital",             "Greater Accra", "Ablekuma South", 38000, 280, 430),
+    ("Komfo Anokye Teaching Hospital",         "Ashanti",       "Kumasi Metro",   32000, 310, 460),
+    ("Tamale Teaching Hospital",               "Northern",      "Tamale Metro",   21000, 350, 520),
+    ("Ho Teaching Hospital",                   "Volta",         "Ho Municipal",   14000, 390, 560),
+    ("Cape Coast Teaching Hospital",           "Central",       "Cape Coast",     13000, 400, 580),
+    ("Sunyani Teaching Hospital",              "Bono",          "Sunyani Munic.",  9000, 470, 660),
+    ("Eastern Regional Hospital",              "Eastern",       "New Juaben",      7000, 520, 720),
+    ("Lekma Hospital",                         "Greater Accra", "Ledzokuku",       3000, 880, 1180),
+    ("St. Martin De Porres Hospital Eikwe",    "Western",       "Ellembelle",      1800, 950, 1400),
+]
+
+#: Antibiotic, ATC code, WHO AWaRe category, formulation.
+AMU_AGENTS: List[Tuple[str, str, str, str]] = [
+    ("Amoxicillin",              "J01CA04", "Access",  "Capsule"),
+    ("Amoxicillin/Clavulanate",  "J01CR02", "Access",  "Tablet"),
+    ("Metronidazole",            "J01XD01", "Access",  "Infusion"),
+    ("Gentamicin",               "J01GB03", "Access",  "Injection"),
+    ("Ceftriaxone",              "J01DD04", "Watch",   "Injection"),
+    ("Ciprofloxacin",            "J01MA02", "Watch",   "Tablet"),
+    ("Azithromycin",             "J01FA10", "Watch",   "Tablet"),
+    ("Vancomycin",               "J01XA01", "Watch",   "Infusion"),
+    ("Meropenem",                "J01DH02", "Watch",   "Injection"),
+    ("Colistin",                 "J01XB01", "Reserve", "Infusion"),
+]
+
+#: Animal and aquaculture strata: species, sector, production type, typical
+#: biomass in kilograms per reporting period, and the mg/kg band.
+#:
+#: Biomass spans four orders of magnitude here, from broiler flocks to a handful
+#: of village goats. Goats carry the highest row-level mg/kg and by far the
+#: smallest biomass, so they top a table of averaged rates and fall well down a
+#: pooled one -- the reordering that showed the original calculation was wrong.
+AMC_STRATA: List[Tuple[str, str, str, int, float, float]] = [
+    ("Poultry (broiler)", "ANIMAL",      "Intensive commercial",    2400000,  70, 110),
+    ("Poultry (layer)",   "ANIMAL",      "Intensive commercial",    1100000,  60,  95),
+    ("Cattle",            "ANIMAL",      "Semi-intensive",          1800000,  30,  60),
+    ("Pig",               "ANIMAL",      "Intensive commercial",     600000, 110, 175),
+    ("Sheep",             "ANIMAL",      "Backyard / smallholder",   120000,  95, 150),
+    ("Goat",              "ANIMAL",      "Backyard / smallholder",    90000, 640, 1150),
+    ("Tilapia",           "AQUACULTURE", "Cage aquaculture",         300000, 140, 230),
+    ("Catfish",           "AQUACULTURE", "Pond aquaculture",          80000, 200, 320),
+]
+
+#: Veterinary agents: name, class, ATCvet code, route, purpose.
+AMC_AGENTS: List[Tuple[str, str, str, str, str]] = [
+    ("Oxytetracycline", "Tetracyclines",   "QJ01AA06", "In water", "Therapeutic"),
+    ("Doxycycline",     "Tetracyclines",   "QJ01AA02", "In feed",  "Therapeutic"),
+    ("Enrofloxacin",    "Fluoroquinolones","QJ01MA90", "In water", "Therapeutic"),
+    ("Tylosin",         "Macrolides",      "QJ01FA90", "In feed",  "Growth promotion"),
+    ("Sulfadiazine/Trimethoprim", "Sulfonamides", "QJ01EW10", "In water", "Therapeutic"),
+    ("Amoxicillin",     "Penicillins",     "QJ01CA04", "In feed",  "Metaphylaxis"),
+    ("Colistin",        "Polymyxins",      "QJ01XB01", "In water", "Metaphylaxis"),
+    ("Florfenicol",     "Amphenicols",     "QJ01BA90", "In feed",  "Therapeutic"),
+]
+
+#: Ward, share of prescriptions, documented-indication rate, guideline-compliance
+#: rate. Compliance differs by ward so the PPS stratification has something real
+#: to separate -- surgical prophylaxis is the classic weak point.
+PPS_WARDS: List[Tuple[str, float, float, float]] = [
+    ("Medical",                0.30, 0.78, 0.72),
+    ("Surgical",               0.26, 0.61, 0.48),
+    ("Paediatric",             0.18, 0.82, 0.75),
+    ("Obstetric/Gynaecology",  0.14, 0.70, 0.64),
+    ("ICU",                    0.12, 0.86, 0.55),
+]
+
+PPS_AGE_GROUPS: List[Tuple[str, float]] = [
+    ("<1", 0.08), ("1-4", 0.10), ("5-14", 0.09), ("15-44", 0.33),
+    ("45-64", 0.24), ("65+", 0.16),
+]
+
+PPS_INDICATIONS: List[Tuple[str, float]] = [
+    ("Community-acquired pneumonia", 0.17),
+    ("Hospital-acquired pneumonia",  0.09),
+    ("Urinary tract infection",      0.16),
+    ("Skin and soft tissue infection", 0.12),
+    ("Surgical prophylaxis",         0.20),
+    ("Sepsis",                       0.11),
+    ("Intra-abdominal infection",    0.09),
+    ("Meningitis",                   0.06),
+]
+
+PPS_ROUTES: List[Tuple[str, float]] = [("IV", 0.56), ("Oral", 0.36), ("IM", 0.08)]
+
+
 def _pick(rng: random.Random, weighted: Sequence[Tuple[str, float]]) -> str:
     values = [v for v, _ in weighted]
     weights = [w for _, w in weighted]
@@ -293,12 +399,19 @@ class Generator:
         self.isolates: List[Dict] = []
         self.ast: List[Dict] = []
         self.genomics: List[Dict] = []
+        #: Consumption and prescribing, built after run().
+        self.amu: List[Dict] = []
+        self.amc: List[Dict] = []
+        self.pps_surveys: List[Dict] = []
+        self.pps_prescriptions: List[Dict] = []
         #: Patients who will contribute more than one specimen, so that
         #: deduplication has something to remove.
         self.repeat_patients: List[Tuple[str, str]] = []
         self.stats: Dict[str, int] = {
             "implausible_results": 0, "qc_failures": 0, "rejected": 0,
             "culture_negative": 0, "repeat_specimens": 0, "outbreak_isolates": 0,
+            "amu_missing_denominator": 0, "amc_small_denominator": 0,
+            "pps_surveys": 0,
         }
 
     # -- helpers ---------------------------------------------------------
@@ -663,6 +776,199 @@ class Generator:
             self.stats["outbreak_isolates"] += 1
 
     # -- output ----------------------------------------------------------
+    # -- consumption and prescribing -------------------------------------
+    #
+    # Built after run(), from the same seeded generator, so the whole workbook
+    # is reproducible together.
+
+    def _periods(self) -> List[str]:
+        """Reporting periods as YYYY-MM, oldest first, over the same span as
+        the specimens so consumption and resistance can be compared."""
+        out: List[str] = []
+        year, month = self.start.year, self.start.month
+        while (year, month) <= (self.end.year, self.end.month):
+            out.append(f"{year:04d}-{month:02d}")
+            month += 1
+            if month > 12:
+                year, month = year + 1, 1
+        return out
+
+    def build_amu(self) -> None:
+        """Human antimicrobial use, one row per facility, period and agent."""
+        for period in self._periods():
+            for (facility, region, district, beds,
+                 low, high) in AMU_FACILITIES:
+                # Occupancy moves month to month; the facility's scale does not.
+                patient_days = int(beds * self.rng.uniform(0.86, 1.14))
+                agents = self.rng.sample(
+                    AMU_AGENTS, self.rng.randint(5, len(AMU_AGENTS)))
+                for name, atc, aware, formulation in agents:
+                    # Reserve agents are used sparingly, and mostly in the
+                    # tertiary centres, so the AWaRe split is not uniform.
+                    if aware == "Reserve" and (beds < 12000
+                                               or self.rng.random() < 0.55):
+                        continue
+                    if aware == "Watch" and self.rng.random() < 0.10:
+                        continue
+                    share = {"Access": self.rng.uniform(0.22, 0.40),
+                             "Watch": self.rng.uniform(0.06, 0.18),
+                             "Reserve": self.rng.uniform(0.01, 0.04)}[aware]
+                    rate = round(self.rng.uniform(low, high) * share, 2)
+
+                    # One record in twelve arrives with no denominator. The
+                    # coverage report exists to say so rather than quietly
+                    # pooling over whatever happens to be present.
+                    days: Optional[int] = patient_days
+                    if self.rng.random() < 0.08:
+                        days = None
+                        self.stats["amu_missing_denominator"] += 1
+
+                    # quantity_dispensed is defined units, reconstructed from
+                    # the rate so the two columns cannot contradict each other.
+                    quantity = round(rate * patient_days / 1000.0
+                                     * self.rng.uniform(0.9, 1.1), 1)
+
+                    self.amu.append({
+                        "facility_name": facility,
+                        "report_period": period,
+                        "region": region,
+                        "district": district,
+                        "sector": "HUMAN",
+                        "antibiotic_name": name,
+                        "atc_code": atc,
+                        "aware_category": aware,
+                        "formulation": formulation,
+                        "unit_of_measure": "DDD",
+                        "quantity_dispensed": quantity,
+                        "ddd_per_1000": rate,
+                        "patient_days": days,
+                    })
+
+    def build_amc(self) -> None:
+        """Animal and aquaculture consumption, one row per stratum, period and
+        agent.
+
+        A minority of goat and sheep returns cover a single smallholder cluster:
+        a few hundred kilograms of biomass against a normal quantity of drug,
+        which produces an enormous mg/kg for that row. Those rows are real in
+        shape -- small denominators do occur -- and they are what makes a mean of
+        row-level rates diverge from the pooled figure.
+        """
+        for period in self._periods():
+            for (species, sector, production, biomass_typical,
+                 low, high) in AMC_STRATA:
+                region = self.rng.choice(GHANA_REGIONS)
+                agents = self.rng.sample(AMC_AGENTS, self.rng.randint(3, 6))
+                for name, drug_class, atcvet, route, purpose in agents:
+                    biomass = biomass_typical * self.rng.uniform(0.75, 1.25)
+                    rate = self.rng.uniform(low, high)
+
+                    tiny = (species in ("Goat", "Sheep")
+                            and self.rng.random() < 0.18)
+                    if tiny:
+                        biomass *= self.rng.uniform(0.008, 0.03)
+                        rate *= self.rng.uniform(3.0, 7.0)
+                        self.stats["amc_small_denominator"] += 1
+
+                    biomass = round(biomass, 1)
+                    # quantity_kg is active ingredient; mg/kg follows from it,
+                    # so the stored rate and the stored masses agree.
+                    quantity_kg = round(rate * biomass / 1_000_000.0, 4)
+                    mg_per_kg = round(quantity_kg * 1_000_000.0 / biomass, 2) \
+                        if biomass > 0 else None
+
+                    self.amc.append({
+                        "report_period": period,
+                        "region": region,
+                        "sector": sector,
+                        "species": species,
+                        "production_type": production,
+                        "antibiotic_class": drug_class,
+                        "antibiotic_name": name,
+                        "atc_vet_code": atcvet,
+                        "quantity_kg": quantity_kg,
+                        "biomass_kg": biomass,
+                        "mg_per_kg_biomass": mg_per_kg,
+                        "route": route,
+                        "purpose": purpose,
+                    })
+
+    def build_pps(self, surveys: int = 12) -> None:
+        """Point prevalence surveys and the prescriptions belonging to them.
+
+        Every prescription names its facility and survey date. The upload page
+        used to split the prescriptions sheet into equal blocks by row position,
+        so naming them is what proves the attribution is done by key -- and a
+        multi-facility workbook is the only kind that can show the difference.
+        """
+        facilities = [(f, r, d) for f, r, d, *_ in AMU_FACILITIES]
+        used: set = set()
+        for index in range(surveys):
+            facility, region, district = facilities[index % len(facilities)]
+            # Distinct (facility, date) per survey: identical pairs cannot be
+            # told apart, and the validator rejects them rather than guess.
+            while True:
+                when = self.start + timedelta(
+                    days=self.rng.randint(30, max((self.end - self.start).days, 60)))
+                key = (facility, when.isoformat())
+                if key not in used:
+                    used.add(key)
+                    break
+
+            total_patients = self.rng.randint(80, 340)
+            on_antibiotics = int(total_patients
+                                 * self.rng.uniform(0.38, 0.58))
+            # Some patients receive more than one agent, so prescriptions
+            # exceed patients on antibiotics -- which is why the prevalence
+            # denominator is patients, not prescriptions.
+            n_rx = max(1, int(on_antibiotics * self.rng.uniform(1.05, 1.45)))
+
+            self.pps_surveys.append({
+                "facility_name": facility,
+                "survey_date": when.isoformat(),
+                "region": region,
+                "district": district,
+                "total_patients": total_patients,
+                "patients_on_antibiotics": on_antibiotics,
+            })
+
+            for _ in range(n_rx):
+                ward = _pick(self.rng, [(w, s) for w, s, _, _ in PPS_WARDS])
+                documented, compliant = next(
+                    (doc, comp) for w, _, doc, comp in PPS_WARDS if w == ward)
+                indication = _pick(self.rng, PPS_INDICATIONS)
+                # Surgical prophylaxis beyond one day is the classic failure,
+                # so its duration is drawn long and its compliance is lower.
+                if indication == "Surgical prophylaxis":
+                    duration = self.rng.choice([1, 1, 2, 3, 4, 5, 7])
+                    compliant *= 0.55
+                else:
+                    duration = self.rng.randint(3, 14)
+                agent, _atc, _aware, _form = self.rng.choice(AMU_AGENTS)
+                self.pps_prescriptions.append({
+                    "facility_name": facility,
+                    "survey_date": when.isoformat(),
+                    "ward": ward,
+                    "patient_age_group": _pick(self.rng, PPS_AGE_GROUPS),
+                    "antibiotic_name": agent,
+                    "route": _pick(self.rng, PPS_ROUTES),
+                    "indication": indication,
+                    "indication_documented":
+                        "Yes" if self.rng.random() < documented else "No",
+                    "guideline_compliant":
+                        "Yes" if self.rng.random() < compliant else "No",
+                    "duration_days": duration,
+                })
+            self.stats["pps_surveys"] += 1
+
+    def onehealth_frames(self) -> Tuple[pd.DataFrame, pd.DataFrame,
+                                        pd.DataFrame, pd.DataFrame]:
+        """(pps_survey, prescriptions, amu_data, amc_data)."""
+        return (pd.DataFrame(self.pps_surveys),
+                pd.DataFrame(self.pps_prescriptions),
+                pd.DataFrame(self.amu),
+                pd.DataFrame(self.amc))
+
     def frames(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         return (pd.DataFrame(self.samples), pd.DataFrame(self.isolates),
                 pd.DataFrame(self.ast), pd.DataFrame(self.genomics))
@@ -682,6 +988,53 @@ def _delete_existing() -> int:
             removed += 1 if ok else 0
             print(f"  deleted {dataset['dataset_id']}  {name}")
     return removed
+
+
+def _store_onehealth(pps_survey, pps_rx, amu, amc, uploaded_by: str) -> None:
+    """Persist the consumption and prescribing sheets.
+
+    These do not go through ingest_validated_upload -- they are not part of the
+    specimen chain -- so they take the same three db.save_* calls the upload page
+    makes, including attributing prescriptions to their survey by key rather
+    than by row position.
+    """
+    import uuid as _uuid
+    from src import db
+    from src.validate_onehealth import attribute_prescriptions
+
+    if not pps_survey.empty:
+        attribution, errors = attribute_prescriptions(pps_survey, pps_rx)
+        for message in errors:
+            print("   PPS", message)
+        stored_surveys = stored_rx = 0
+        for position, (_, row) in enumerate(pps_survey.iterrows()):
+            chunk = attribution.get(position)
+            if chunk is None or chunk.empty:
+                continue
+            ok, message = db.save_pps_survey(
+                f"PPS-{_uuid.uuid4().hex[:8]}",
+                str(row["facility_name"]), str(row["survey_date"]),
+                str(row.get("region", "")), str(row.get("district", "")),
+                int(row.get("total_patients", 0)),
+                int(row.get("patients_on_antibiotics", 0)),
+                chunk, uploaded_by=uploaded_by)
+            if ok:
+                stored_surveys += 1
+                stored_rx += len(chunk)
+            else:
+                print("   PPS save failed:", message)
+        print(f"    pps_surveys          {stored_surveys:,}")
+        print(f"    pps_prescriptions    {stored_rx:,}")
+
+    if not amu.empty:
+        ok, message = db.save_amu_records(amu, uploaded_by)
+        print(f"    amu_records          {len(amu):,}" if ok
+              else f"   AMU save failed: {message}")
+
+    if not amc.empty:
+        ok, message = db.save_amc_records(amc, uploaded_by)
+        print(f"    amc_records          {len(amc):,}" if ok
+              else f"   AMC save failed: {message}")
 
 
 def main() -> int:
@@ -708,12 +1061,20 @@ def main() -> int:
           f"(seed {args.seed}) ...")
     generator = Generator(args.specimens, seed=args.seed, months=args.months)
     generator.run()
+    generator.build_amu()
+    generator.build_amc()
+    generator.build_pps()
     samples, isolates, ast, genomics = generator.frames()
+    pps_survey, pps_rx, amu, amc = generator.onehealth_frames()
 
     print(f"  specimens   {len(samples):,}")
     print(f"  isolates    {len(isolates):,}")
     print(f"  AST results {len(ast):,}")
     print(f"  genomes     {len(genomics):,}")
+    print(f"  PPS surveys {len(pps_survey):,}")
+    print(f"  PPS scripts {len(pps_rx):,}")
+    print(f"  AMU records {len(amu):,}")
+    print(f"  AMC records {len(amc):,}")
     for key, value in generator.stats.items():
         print(f"  {key:22s} {value:,}")
 
@@ -724,6 +1085,12 @@ def main() -> int:
             isolates.to_excel(writer, sheet_name="isolates", index=False)
             ast.to_excel(writer, sheet_name="ast_results", index=False)
             genomics.to_excel(writer, sheet_name="genomics", index=False)
+            # The upload page takes one workbook for everything. Sheet names
+            # are what src.validate_onehealth looks for, so they are fixed.
+            pps_survey.to_excel(writer, sheet_name="pps_survey", index=False)
+            pps_rx.to_excel(writer, sheet_name="prescriptions", index=False)
+            amu.to_excel(writer, sheet_name="amu_data", index=False)
+            amc.to_excel(writer, sheet_name="amc_data", index=False)
         print(f"\nwrote workbook {args.workbook}")
 
     from src import ingest, validate
@@ -755,6 +1122,11 @@ def main() -> int:
         print(f"    {key:20s} {value:,}")
     for note in result.notes:
         print("   note:", note[:150])
+
+    if result.ok:
+        print()
+        print("Storing consumption and prescribing ...")
+        _store_onehealth(pps_survey, pps_rx, amu, amc, "synthetic-generator")
 
     print("\nEvery record in this dataset is invented. Its resistance "
           "percentages describe nothing real and must not be quoted.")
