@@ -114,6 +114,13 @@ CORE_FIELDS: Tuple[Tuple[str, str], ...] = (
 #: recorded would make a coverage report congratulate itself.
 _EMPTY_VALUES = {"", "unknown", "not done", "none", "nan", "n/a", "(null)"}
 
+#: Subject identifiers minted by ``src.ingest._subject_identity`` when the
+#: source record carried nothing to group specimens by. The value is unique per
+#: specimen by construction, so it identifies a row -- it does not identify a
+#: patient, a herd or a sampling point, and two specimens from one patient
+#: receive two different ones.
+UNLINKED_SUBJECT_PREFIX = "specimen:"
+
 
 # ---------------------------------------------------------------------------
 # Metric dictionary
@@ -493,19 +500,46 @@ class DeduplicationReport:
         return self.isolates_before - self.isolates_after
 
     @property
+    def linkable_isolates(self) -> int:
+        """Isolates that carried a subject key, so a repeat could be detected."""
+        return max(self.isolates_before - self.unkeyed_isolates, 0)
+
+    @property
+    def is_deduplicable(self) -> bool:
+        """Whether the data could be deduplicated at all.
+
+        False when no isolate carried a subject key. The distinction matters:
+        a dataset with no repeats and a dataset in which repeats are undetectable
+        both yield 0% removed, and only the first is a deduplicated antibiogram.
+        """
+        return self.linkable_isolates > 0
+
+    @property
     def summary(self) -> str:
         if not self.isolates_before:
             return "No isolates in scope."
-        pct = 100 * self.removed / self.isolates_before
         window = ""
         if self.period_start and self.period_end:
             window = (f" between {self.period_start.isoformat()} and "
                       f"{self.period_end.isoformat()}")
+
+        # No subject key anywhere: say that, rather than reporting a removal
+        # percentage that only looks like a deduplicated result.
+        if not self.is_deduplicable:
+            return (f"Deduplication could not be applied. None of the "
+                    f"{self.isolates_before:,} isolates{window} carried a "
+                    "subject identifier, so repeat sampling of one patient or "
+                    "one unit cannot be detected and every isolate is counted. "
+                    "Rates below may be weighted towards whichever subjects "
+                    "were sampled most often. Intended rule: " + self.rule)
+
+        pct = 100 * self.removed / self.isolates_before
         note = ""
         if self.unkeyed_isolates:
-            note = (f" {self.unkeyed_isolates} isolate(s) had no patient key and "
-                    "were kept as distinct, since repeat sampling of one subject "
-                    "cannot be detected without one.")
+            note = (f" {self.unkeyed_isolates:,} of them ("
+                    f"{100 * self.unkeyed_isolates / self.isolates_before:.1f}%) "
+                    "carried no subject identifier and were kept as distinct, "
+                    "since repeat sampling cannot be detected without one.")
         return (f"{self.rule} Kept {self.isolates_after:,} of "
                 f"{self.isolates_before:,} isolates{window} "
                 f"({pct:.1f}% removed as repeats) across {self.patients:,} "
@@ -581,7 +615,14 @@ def select_first_isolates(frame: pd.DataFrame, *,
     # each such isolate stands alone rather than being silently merged with
     # another subject's.
     subject = isolates["subject_id"].astype(str)
-    has_key = _is_informative(isolates["subject_id"])
+    # A subject_id of the form "specimen:<id>" is not a subject key: ingest
+    # mints it precisely when the record carried no patient, herd or site
+    # identifier, so it is unique per specimen. Counting it as a key would make
+    # deduplication report one subject per isolate and 0% repeats -- the same
+    # output as a fully deduplicated dataset, from data that cannot be
+    # deduplicated at all.
+    has_key = (_is_informative(isolates["subject_id"])
+               & ~subject.str.startswith(UNLINKED_SUBJECT_PREFIX))
     isolates["_subject_key"] = np.where(
         has_key, subject, "unkeyed:" + isolates["isolate_id"].astype(str))
     unkeyed = int((~has_key).sum())
@@ -607,7 +648,11 @@ def select_first_isolates(frame: pd.DataFrame, *,
     report = DeduplicationReport(
         isolates_before=before,
         isolates_after=len(keepers),
-        patients=int(keepers["_subject_key"].nunique()),
+        # Only genuinely keyed subjects are counted. An unkeyed isolate gets a
+        # synthetic key of its own, so including those would report one subject
+        # per isolate and make an unlinkable dataset look like a wide cohort.
+        patients=int(keepers.loc[keepers["_subject_key"].isin(
+            subject[has_key]), "_subject_key"].nunique()),
         unkeyed_isolates=unkeyed,
         period_start=period_start,
         period_end=period_end,

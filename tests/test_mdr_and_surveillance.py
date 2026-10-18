@@ -212,6 +212,48 @@ def test_isolates_without_a_subject_key_are_not_merged():
     assert report.unkeyed_isolates == 3
 
 
+def test_per_specimen_subject_ids_do_not_count_as_patient_keys():
+    """``specimen:<id>`` is minted by ingest exactly when no patient, herd or
+    site identifier was supplied, so it is unique per specimen by construction.
+
+    Counting it as a subject key makes deduplication report one subject per
+    isolate and 0% repeats removed -- byte for byte the output of a correctly
+    deduplicated antibiogram, from data in which a repeat cannot be seen at all.
+    """
+    frame = _observations(3)
+    frame["subject_id"] = ["specimen:S1", "specimen:S2", "specimen:S3"]
+    _, report = sv.select_first_isolates(frame, period_months=None)
+    assert report.unkeyed_isolates == 3, (
+        "a per-specimen identifier is not a subject key")
+    assert report.patients == 0, "there are no known subjects here"
+    assert not report.is_deduplicable
+
+
+def test_undeduplicable_data_says_so_instead_of_reporting_zero_percent():
+    frame = _observations(3)
+    frame["subject_id"] = ["specimen:S1", "specimen:S2", "specimen:S3"]
+    _, report = sv.select_first_isolates(frame, period_months=None)
+    summary = report.summary
+    assert "could not be applied" in summary
+    assert "0.0% removed" not in summary, (
+        "a removal percentage here would read as a deduplicated result")
+
+
+def test_mixed_keyed_and_unkeyed_counts_only_real_subjects():
+    frame = _observations(4)
+    frame["organism"] = "Escherichia coli"
+    frame["subject_id"] = ["patient-a", "patient-a",
+                           "specimen:S3", "specimen:S4"]
+    _, report = sv.select_first_isolates(frame, period_months=None)
+    # patient-a's two isolates of one organism collapse to one; the two
+    # unlinkable specimens stand alone.
+    assert report.isolates_after == 3
+    assert report.unkeyed_isolates == 2
+    assert report.patients == 1, "only patient-a is a known subject"
+    assert report.is_deduplicable
+    assert "carried no subject identifier" in report.summary
+
+
 def test_failed_quality_control_is_excluded_and_counted():
     frame = _observations(5)
     frame.loc[frame.index[:2], "qc_status"] = "Fail"

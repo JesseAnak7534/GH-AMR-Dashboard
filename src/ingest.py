@@ -56,7 +56,8 @@ import psycopg2.extras
 from src import db
 from src.traceability import (
     make_patient_pseudonym,
-    record_custody_event,
+    custody_event_row,
+    insert_custody_events,
 )
 from src.upload_schema import is_blank
 
@@ -558,7 +559,7 @@ def _build_legacy_ast(ast: pd.DataFrame, dataset_id: str) -> List[tuple]:
 # Custody log
 # ---------------------------------------------------------------------------
 
-def _log_custody(cur, dataset_id: str, actor: str, samples: pd.DataFrame,
+def _log_custody(raw_cur, dataset_id: str, actor: str, samples: pd.DataFrame,
                  isolates: pd.DataFrame, genomics: pd.DataFrame,
                  sample_to_subject: Dict[str, str],
                  subject_basis: Dict[str, str],
@@ -569,98 +570,84 @@ def _log_custody(cur, dataset_id: str, actor: str, samples: pd.DataFrame,
     one laboratory action, so it is one ``ast_performed`` event carrying the
     number of drugs, not one event per drug: inflating the log would make it
     harder to read without recording anything more.
+
+    Every event is built first and written in a single statement at the end.
+    Writing them one at a time made roughly four network round trips per
+    specimen -- about ten thousand for a 2,500-specimen upload -- with the
+    ingest transaction held open throughout. On a hosted database that ran for
+    more than half an hour before being abandoned.
     """
-    written = 0
+    events: List[tuple] = []
+
+    def add(entity_type: str, entity_id: str, event_type: str, **kwargs) -> None:
+        kwargs.setdefault("actor", actor)
+        kwargs.setdefault("source_system", SOURCE_SYSTEM)
+        events.append(custody_event_row(dataset_id, entity_type, entity_id,
+                                        event_type, **kwargs))
 
     for subject_id, how in subject_basis.items():
-        record_custody_event(
-            cur, dataset_id, "subject", subject_id, "transferred",
-            actor=actor, source_system=SOURCE_SYSTEM,
+        add("subject", subject_id, "transferred",
             reason=f"subject identity established from {how}")
-        written += 1
 
     for _, row in samples.iterrows():
         sample_id = _text(row, "sample_id")
         if not sample_id or sample_id not in sample_to_subject:
             continue
-        record_custody_event(
-            cur, dataset_id, "specimen", sample_id, "collected", actor=actor,
+        add("specimen", sample_id, "collected",
             event_datetime=_text(row, "collection_datetime"),
             site=_text(row, "ward_at_collection") or _text(row, "district") or "",
-            source_system=SOURCE_SYSTEM,
             reason=_text(row, "sampling_purpose") or "")
-        written += 1
 
         receipt = _text(row, "receipt_datetime")
         condition = _text(row, "condition_on_receipt")
         if receipt or condition:
             rejected = condition == "Rejected"
-            record_custody_event(
-                cur, dataset_id, "specimen", sample_id,
-                "rejected" if rejected else "received", actor=actor,
+            add("specimen", sample_id, "rejected" if rejected else "received",
                 event_datetime=receipt, site=_text(row, "lab_name") or "",
-                source_system=SOURCE_SYSTEM,
                 reason=(_text(row, "rejection_reason") or "") if rejected
                        else (condition or ""))
-            written += 1
 
     for _, row in isolates.iterrows():
         isolate_id = _text(row, "isolate_id")
         if not isolate_id:
             continue
         identified = _date(row, "identification_date")
-        record_custody_event(
-            cur, dataset_id, "isolate", isolate_id, "identified", actor=actor,
+        add("isolate", isolate_id, "identified",
             event_datetime=identified.isoformat() if identified else None,
-            source_system=SOURCE_SYSTEM,
             reason=(f"{_text(row, 'organism') or 'organism'} by "
                     f"{_text(row, 'identification_method') or 'unrecorded method'}"))
-        written += 1
 
         tested = phenotype_counts.get(isolate_id, 0)
         if tested:
-            record_custody_event(
-                cur, dataset_id, "isolate", isolate_id, "ast_performed",
-                actor=actor, source_system=SOURCE_SYSTEM,
+            add("isolate", isolate_id, "ast_performed",
                 reason=f"{tested} antibiotic(s) tested")
-            written += 1
 
     for _, row in genomics.iterrows():
         genomic_id = _text(row, "genomic_id")
         if not genomic_id:
             continue
         run_date = _date(row, "run_date")
-        record_custody_event(
-            cur, dataset_id, "genomic_result", genomic_id, "sequenced",
-            actor=actor,
+        add("genomic_result", genomic_id, "sequenced",
             event_datetime=run_date.isoformat() if run_date else None,
-            source_system=SOURCE_SYSTEM,
             reason=f"run {_text(row, 'run_id') or 'unrecorded'} on "
                    f"{_text(row, 'platform') or 'unrecorded platform'}")
-        written += 1
 
         analysed = _date(row, "analysis_date")
         if analysed or _text(row, "pipeline_name"):
-            record_custody_event(
-                cur, dataset_id, "genomic_result", genomic_id,
-                "sequence_analysed", actor=_text(row, "analysed_by") or actor,
+            add("genomic_result", genomic_id, "sequence_analysed",
+                actor=_text(row, "analysed_by") or actor,
                 event_datetime=analysed.isoformat() if analysed else None,
-                source_system=SOURCE_SYSTEM,
                 reason=(f"{_text(row, 'pipeline_name') or 'pipeline'} "
                         f"{_text(row, 'pipeline_version') or ''}".strip()
                         + f", {_text(row, 'amr_db_name') or 'database'} "
                           f"{_text(row, 'amr_db_version') or 'version unrecorded'}"))
-            written += 1
 
         if _text(row, "review_status") == "Accepted":
-            record_custody_event(
-                cur, dataset_id, "genomic_result", genomic_id,
-                "sequence_reviewed",
+            add("genomic_result", genomic_id, "sequence_reviewed",
                 actor=_text(row, "reviewed_by") or actor,
-                source_system=SOURCE_SYSTEM, reason="review accepted")
-            written += 1
+                reason="review accepted")
 
-    return written
+    return insert_custody_events(raw_cur, events)
 
 
 # ---------------------------------------------------------------------------
@@ -767,7 +754,7 @@ def ingest_validated_upload(dataset_id: str, dataset_name: str,
             phenotype_counts[row[1]] = phenotype_counts.get(row[1], 0) + 1
 
         counts["custody_events"] = _log_custody(
-            cur, dataset_id, actor, samples, isolates, genomics,
+            raw, dataset_id, actor, samples, isolates, genomics,
             sample_to_subject, subject_basis, phenotype_counts)
 
         conn.commit()
@@ -795,7 +782,17 @@ def ingest_validated_upload(dataset_id: str, dataset_name: str,
             logger.warning("could not refresh planner statistics after ingest",
                            exc_info=True)
     except Exception as exc:                          # noqa: BLE001
-        conn.rollback()
+        # Roll back defensively. When the failure was the connection itself
+        # dropping, rollback raises "connection already closed" -- and that
+        # second exception replaced the first, so the caller saw a traceback
+        # about rollback instead of the reason the ingest failed, and this
+        # function raised where it is documented to return a result. The server
+        # discards the transaction when the connection dies, so there is nothing
+        # to clean up in that case anyway.
+        try:
+            conn.rollback()
+        except Exception:                             # noqa: BLE001
+            logger.debug("rollback skipped; the connection was already gone")
         logger.exception("ingest_validated_upload failed")
         return IngestResult(False, f"Nothing was written. Database error: {exc}")
     finally:

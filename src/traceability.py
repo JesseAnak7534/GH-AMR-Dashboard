@@ -45,7 +45,7 @@ from __future__ import annotations
 import hashlib
 import os
 from datetime import datetime, timezone
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 # ---------------------------------------------------------------------------
 # Controlled vocabularies
@@ -339,6 +339,24 @@ def _sql_list(values: Iterable[str]) -> str:
     return ", ".join("'" + str(v).replace("'", "''") + "'" for v in values)
 
 
+def _finite(column: str) -> str:
+    """SQL asserting a float column holds an actual number.
+
+    IEEE 754 NaN and the infinities are valid ``double precision`` values, and
+    PostgreSQL orders NaN as greater than every number -- so ``NaN > 0`` and
+    ``NaN >= 0`` are both true, and a range check written with only a lower
+    bound admits them silently. A NaN MIC then reaches the database looking like
+    a measurement and turns every average, minimum and percentile computed over
+    that column into NaN.
+
+    (A two-sided ``BETWEEN`` happens to reject NaN already, since ``NaN <= x``
+    is false. This is for the one-sided cases, which do not.)
+    """
+    return (f"{column} <> 'NaN'::double precision "
+            f"AND {column} <> 'Infinity'::double precision "
+            f"AND {column} <> '-Infinity'::double precision")
+
+
 def _add_constraint(cur, table: str, name: str, definition: str) -> None:
     """Add a named constraint when the database does not already have it.
 
@@ -406,11 +424,20 @@ def init_traceability_schema(cur) -> None:
             created_by TEXT,
             PRIMARY KEY (dataset_id, subject_id),
 
-            -- a human subject is meaningless without its pseudonym and the
-            -- facility that scopes it
+            -- A human subject is meaningless without its pseudonym and the
+            -- facility that scopes it -- unless the source record carried no
+            -- patient identifier at all, which ingest marks by giving the
+            -- subject a 'specimen:' key (see _subject_identity). That case is
+            -- real: anonymised historical extracts arrive with results and no
+            -- patient number. Forbidding it outright does not make the data
+            -- linkable, it only pushes someone to invent an identifier, and a
+            -- fabricated pseudonym is worse than an admitted gap -- it looks
+            -- like linkage that is not there. The 'specimen:' key is unique per
+            -- specimen, so deduplication treats it as unkeyed and says so.
             CONSTRAINT subjects_human_needs_pseudonym CHECK (
                 sector <> 'human'
                 OR (patient_pseudonym IS NOT NULL AND facility_code IS NOT NULL)
+                OR subject_id LIKE 'specimen:%'
             )
         )
     """)
@@ -556,7 +583,9 @@ def init_traceability_schema(cur) -> None:
             antibiotic TEXT NOT NULL,
             antibiotic_code TEXT,
             result TEXT CHECK (result IS NULL OR result IN ('S', 'I', 'R', 'NS')),
-            mic_value DOUBLE PRECISION CHECK (mic_value IS NULL OR mic_value > 0),
+            mic_value DOUBLE PRECISION
+                CHECK (mic_value IS NULL
+                       OR (mic_value > 0 AND {_finite('mic_value')})),
             mic_operator TEXT
                 CHECK (mic_operator IS NULL OR mic_operator IN ('=', '<', '<=', '>', '>=')),
             zone_diameter DOUBLE PRECISION
@@ -621,13 +650,19 @@ def init_traceability_schema(cur) -> None:
             assembly_path TEXT,
             assembly_checksum TEXT,
 
-            total_reads DOUBLE PRECISION CHECK (total_reads IS NULL OR total_reads >= 0),
-            mean_depth DOUBLE PRECISION CHECK (mean_depth IS NULL OR mean_depth >= 0),
+            total_reads DOUBLE PRECISION
+                CHECK (total_reads IS NULL
+                       OR (total_reads >= 0 AND {_finite('total_reads')})),
+            mean_depth DOUBLE PRECISION
+                CHECK (mean_depth IS NULL
+                       OR (mean_depth >= 0 AND {_finite('mean_depth')})),
             coverage_breadth DOUBLE PRECISION
                 CHECK (coverage_breadth IS NULL OR (coverage_breadth BETWEEN 0 AND 100)),
             contamination_pct DOUBLE PRECISION
                 CHECK (contamination_pct IS NULL OR (contamination_pct BETWEEN 0 AND 100)),
-            n50 DOUBLE PRECISION CHECK (n50 IS NULL OR n50 >= 0),
+            n50 DOUBLE PRECISION
+                CHECK (n50 IS NULL
+                       OR (n50 >= 0 AND {_finite('n50')})),
             contig_count INTEGER CHECK (contig_count IS NULL OR contig_count >= 0),
             qc_status TEXT
                 CHECK (qc_status IS NULL OR qc_status IN ({_sql_list(QC_STATUSES)})),
@@ -730,6 +765,18 @@ def init_traceability_schema(cur) -> None:
                     f"CHECK (age_band_at_collection IS NULL "
                     f"OR age_band_at_collection IN ({_sql_list(AGE_BANDS)}))")
 
+    # An earlier version of subjects_human_needs_pseudonym had no exemption for
+    # the unlinkable case, so it rejected rows that ingest itself builds. Unlike
+    # the additions above this one replaces an existing constraint, so it is
+    # dropped first; both statements are idempotent.
+    cur.execute("ALTER TABLE subjects "
+                "DROP CONSTRAINT IF EXISTS subjects_human_needs_pseudonym")
+    _add_constraint(cur, "subjects", "subjects_human_needs_pseudonym",
+                    "CHECK (sector <> 'human' "
+                    "OR (patient_pseudonym IS NOT NULL "
+                    "AND facility_code IS NOT NULL) "
+                    "OR subject_id LIKE 'specimen:%')")
+
     # -- indexes -----------------------------------------------------------
     # The joins this model exists to make fast: walking the chain in either
     # direction, slicing by ward type or specimen type, and pulling an
@@ -796,19 +843,69 @@ def record_custody_event(cur, dataset_id: str, entity_type: str, entity_id: str,
 
     # recorded_at is set by the database default, so the audit timestamp comes
     # from the server clock rather than whichever machine happened to call in.
-    cur.execute("""
-        INSERT INTO custody_events
-        (dataset_id, entity_type, entity_id, event_type, event_datetime,
-         actor, actor_role, site, source_system, reason,
-         field_changed, old_value, new_value)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (
+    cur.execute(
+        f"INSERT INTO custody_events ({', '.join(CUSTODY_COLUMNS)}) "
+        "VALUES (" + ", ".join(["%s"] * len(CUSTODY_COLUMNS)) + ")",
+        custody_event_row(
+            dataset_id, entity_type, entity_id, event_type, actor=actor,
+            actor_role=actor_role, site=site, event_datetime=event_datetime,
+            source_system=source_system, reason=reason,
+            field_changed=field_changed, old_value=old_value,
+            new_value=new_value))
+
+
+#: Column order for custody_events, shared by the single-row and batch writers
+#: so the two cannot drift apart.
+CUSTODY_COLUMNS: Tuple[str, ...] = (
+    "dataset_id", "entity_type", "entity_id", "event_type", "event_datetime",
+    "actor", "actor_role", "site", "source_system", "reason",
+    "field_changed", "old_value", "new_value",
+)
+
+
+def custody_event_row(dataset_id: str, entity_type: str, entity_id: str,
+                      event_type: str, *, actor: str = "",
+                      actor_role: str = "", site: str = "",
+                      event_datetime: Optional[str] = None,
+                      source_system: str = "", reason: str = "",
+                      field_changed: str = "", old_value: str = "",
+                      new_value: str = "") -> tuple:
+    """Validate one event and return it as a row in ``CUSTODY_COLUMNS`` order.
+
+    Split out from record_custody_event so a caller writing many events can
+    validate them all and insert them in one statement.
+    """
+    errs = (validate_vocabulary(entity_type, ENTITY_TYPES, "entity_type", required=True)
+            + validate_vocabulary(event_type, CUSTODY_EVENT_TYPES, "event_type", required=True))
+    if errs:
+        raise ValueError("; ".join(errs))
+    return (
         dataset_id, entity_type, entity_id, event_type,
         event_datetime or _utcnow(), actor, actor_role, site,
         source_system, reason, field_changed,
         str(old_value) if old_value is not None else None,
         str(new_value) if new_value is not None else None,
-    ))
+    )
+
+
+def insert_custody_events(raw_cur, rows: Sequence[tuple]) -> int:
+    """Append many events in one statement.
+
+    An upload evidences roughly four events per specimen, so a 2,500-specimen
+    workbook writes on the order of ten thousand. Sent one INSERT at a time that
+    is ten thousand network round trips: against a database on the same machine
+    it merely looked slow, and against a hosted one it ran for over half an hour
+    with the transaction held open the whole time. The rows are identical in
+    shape, so they go in one execute_values call.
+    """
+    if not rows:
+        return 0
+    import psycopg2.extras
+    psycopg2.extras.execute_values(
+        raw_cur,
+        f"INSERT INTO custody_events ({', '.join(CUSTODY_COLUMNS)}) VALUES %s",
+        rows, page_size=500)
+    return len(rows)
 
 
 __all__ = [
@@ -820,4 +917,5 @@ __all__ = [
     "make_patient_pseudonym", "age_to_band",
     "validate_vocabulary", "assert_single_sector",
     "init_traceability_schema", "record_custody_event",
+    "custody_event_row", "insert_custody_events", "CUSTODY_COLUMNS",
 ]

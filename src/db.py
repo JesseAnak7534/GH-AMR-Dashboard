@@ -312,6 +312,47 @@ def get_connection() -> _ConnectionWrapper:
     return _ConnectionWrapper(raw)
 
 
+def _num(value):
+    """A number fit to store, or None.
+
+    Pandas represents a blank numeric cell as NaN, and a column with one blank
+    becomes float64 throughout. Passed straight to the database that NaN is
+    either rejected or, worse, accepted:
+
+      * into an integer column PostgreSQL raises "integer out of range" -- the
+        message names a range problem that is not there, and the whole batch is
+        lost because one facility left one field empty;
+      * into a double precision column it is stored, and NaN is contagious in
+        arithmetic, so every sum, mean and pooled rate computed over that column
+        silently becomes NaN afterwards.
+
+    A value nobody recorded is NULL. That is what the consumption module's
+    coverage report is built to count, and it cannot count what never arrived.
+    """
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):          # not a scalar pandas understands
+        pass
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            value = float(text)
+        except ValueError:
+            return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if number != number or number in (float("inf"), float("-inf")):
+        return None
+    return value
+
+
 def _fetch_df(sql: str, params=None) -> pd.DataFrame:
     """Run a SELECT and return a DataFrame. Stays off pandas's connection-
     detection path, which insists on SQLAlchemy engines for non-sqlite."""
@@ -1039,6 +1080,52 @@ def delete_non_admin_users(admin_email: Optional[str] = None) -> Tuple[int, str]
 # PPS CRUD
 # ---------------------------------------------------------------------------
 
+#: Written once per row in each batched save below. Kept as module constants so
+#: the column list and the tuple built for it cannot drift apart.
+_PPS_RX_COLUMNS = (
+    "survey_id", "ward", "patient_age_group", "antibiotic_name", "route",
+    "indication", "indication_documented", "guideline_compliant",
+    "duration_days",
+)
+
+_AMU_COLUMNS = (
+    "facility_name", "report_period", "region", "district", "sector",
+    "antibiotic_name", "atc_code", "formulation", "unit_of_measure",
+    "quantity_dispensed", "ddd_per_1000", "patient_days",
+    "uploaded_by", "uploaded_at",
+)
+
+_AMC_COLUMNS = (
+    "report_period", "region", "sector", "species", "production_type",
+    "antibiotic_class", "antibiotic_name", "atc_vet_code",
+    "quantity_kg", "biomass_kg", "mg_per_kg_biomass",
+    "route", "purpose", "uploaded_by", "uploaded_at",
+)
+
+
+def _flag(value) -> int:
+    """A yes/no cell as 0 or 1."""
+    return 1 if str(value).strip().lower() in ("1", "yes", "true") else 0
+
+
+def _insert_rows(cur, table: str, columns, rows) -> int:
+    """Insert many rows in one statement.
+
+    These three tables were written a row at a time, which is one network round
+    trip per record. A 3,000-row consumption upload therefore made 3,000 of them
+    with the transaction held open throughout: slow enough to look like a hang
+    against a hosted database, and long enough to block other writers. The rows
+    are uniform, so they go in one execute_values call.
+    """
+    if not rows:
+        return 0
+    psycopg2.extras.execute_values(
+        cur,
+        f"INSERT INTO {table} ({', '.join(columns)}) VALUES %s",
+        rows, page_size=500)
+    return len(rows)
+
+
 def save_pps_survey(survey_id, facility_name, survey_date, region, district,
                     total_patients, patients_on_antibiotics,
                     prescriptions_df, uploaded_by="System"):
@@ -1054,20 +1141,15 @@ def save_pps_survey(survey_id, facility_name, survey_date, region, district,
               total_patients, patients_on_antibiotics, uploaded_by,
               datetime.now().isoformat()))
 
-        for _, row in prescriptions_df.iterrows():
-            cur.execute("""
-                INSERT INTO pps_prescriptions
-                (survey_id, ward, patient_age_group, antibiotic_name,
-                 route, indication, indication_documented,
-                 guideline_compliant, duration_days)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (survey_id,
-                  row.get('ward'), row.get('patient_age_group'),
-                  row.get('antibiotic_name'), row.get('route'),
-                  row.get('indication'),
-                  1 if str(row.get('indication_documented', 0)).strip().lower() in ('1', 'yes', 'true') else 0,
-                  1 if str(row.get('guideline_compliant', 0)).strip().lower() in ('1', 'yes', 'true') else 0,
-                  row.get('duration_days')))
+        rows = [
+            (survey_id, row.get('ward'), row.get('patient_age_group'),
+             row.get('antibiotic_name'), row.get('route'), row.get('indication'),
+             _flag(row.get('indication_documented', 0)),
+             _flag(row.get('guideline_compliant', 0)),
+             _num(row.get('duration_days')))
+            for _, row in prescriptions_df.iterrows()
+        ]
+        _insert_rows(cur.raw, "pps_prescriptions", _PPS_RX_COLUMNS, rows)
 
         conn.commit()
         return True, "PPS survey saved"
@@ -1097,24 +1179,19 @@ def save_amu_records(records_df, uploaded_by="System"):
     cur = conn.cursor()
     now = datetime.now().isoformat()
     try:
-        for _, row in records_df.iterrows():
-            cur.execute("""
-                INSERT INTO amu_records
-                (facility_name, report_period, region, district, sector,
-                 antibiotic_name, atc_code, formulation, unit_of_measure,
-                 quantity_dispensed, ddd_per_1000, patient_days,
-                 uploaded_by, uploaded_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                row.get('facility_name'), row.get('report_period'),
-                row.get('region'), row.get('district'),
-                row.get('sector', 'HUMAN'),
-                row.get('antibiotic_name'), row.get('atc_code'),
-                row.get('formulation'), row.get('unit_of_measure'),
-                row.get('quantity_dispensed'), row.get('ddd_per_1000'),
-                row.get('patient_days'), uploaded_by, now))
+        rows = [
+            (row.get('facility_name'), row.get('report_period'),
+             row.get('region'), row.get('district'),
+             row.get('sector', 'HUMAN'),
+             row.get('antibiotic_name'), row.get('atc_code'),
+             row.get('formulation'), row.get('unit_of_measure'),
+             _num(row.get('quantity_dispensed')), _num(row.get('ddd_per_1000')),
+             _num(row.get('patient_days')), uploaded_by, now)
+            for _, row in records_df.iterrows()
+        ]
+        _insert_rows(cur.raw, "amu_records", _AMU_COLUMNS, rows)
         conn.commit()
-        return True, f"{len(records_df)} AMU records saved"
+        return True, f"{len(rows)} AMU records saved"
     except Exception as e:
         conn.rollback()
         return False, f"AMU save error: {e}"
@@ -1135,26 +1212,20 @@ def save_amc_records(records_df, uploaded_by="System"):
     cur = conn.cursor()
     now = datetime.now().isoformat()
     try:
-        for _, row in records_df.iterrows():
-            cur.execute("""
-                INSERT INTO amc_records
-                (report_period, region, sector, species, production_type,
-                 antibiotic_class, antibiotic_name, atc_vet_code,
-                 quantity_kg, biomass_kg, mg_per_kg_biomass,
-                 route, purpose, uploaded_by, uploaded_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                row.get('report_period'), row.get('region'),
-                row.get('sector', 'ANIMAL'), row.get('species'),
-                row.get('production_type'),
-                row.get('antibiotic_class'), row.get('antibiotic_name'),
-                row.get('atc_vet_code'),
-                row.get('quantity_kg'), row.get('biomass_kg'),
-                row.get('mg_per_kg_biomass'),
-                row.get('route'), row.get('purpose'),
-                uploaded_by, now))
+        rows = [
+            (row.get('report_period'), row.get('region'),
+             row.get('sector', 'ANIMAL'), row.get('species'),
+             row.get('production_type'),
+             row.get('antibiotic_class'), row.get('antibiotic_name'),
+             row.get('atc_vet_code'),
+             _num(row.get('quantity_kg')), _num(row.get('biomass_kg')),
+             _num(row.get('mg_per_kg_biomass')),
+             row.get('route'), row.get('purpose'), uploaded_by, now)
+            for _, row in records_df.iterrows()
+        ]
+        _insert_rows(cur.raw, "amc_records", _AMC_COLUMNS, rows)
         conn.commit()
-        return True, f"{len(records_df)} AMC records saved"
+        return True, f"{len(rows)} AMC records saved"
     except Exception as e:
         conn.rollback()
         return False, f"AMC save error: {e}"
