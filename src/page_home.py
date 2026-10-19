@@ -1,263 +1,241 @@
 """
-Public landing page.
+The public landing page.
 
-What an anonymous visitor sees, and the only page written on the assumption
-that the reader has no account, no briefing and no obligation to stay. It has
-to answer three questions in the first screen -- what this is, what the data
-says, and how much of it there is -- before offering anything to explore.
+A door, not a dashboard. It is the only page written on the assumption that the
+reader has no account, no briefing and no obligation to stay, so it answers
+three questions in the first screen -- what this is, how much data stands
+behind it, and what can be looked at -- and then gets out of the way.
 
-Two rules shape everything on it.
+Deliberately, no analysis happens here. An earlier version of this page carried
+four tabs of tables and charts, which meant a first-time visitor met a
+cumulative antibiogram before they had been told what they were looking at, and
+every section competed with the others for the same screen. The sections now
+live on their own pages (``src/page_public.py``) and this page is six cards that
+lead to them.
+
+Each card carries one live number, so the grid is not a menu of promises: a
+reader can see before clicking that the genomics section has 1,800 genomes
+behind it or that it has none. Those numbers come from one cached count query,
+because six cards each running their own aggregate would open six connections
+on the one page that has to be fast.
+
+Three rules hold here as on every public page.
 
 **Nothing identifies a person.** No patient pseudonym, no specimen identifier,
-no record-level row, and every count passes through
-``src.disclosure`` before it is drawn. That module exists because the risk here
-is not the headline figures but the filtering: a visitor who narrows by ward,
-organism, region and period can reach a cell holding one patient, and each
-filter is another attribute attached to them. Counts below the threshold are
-withheld, rates computed over withheld counts go with them, and a second cell
-goes when the first could be recovered by subtracting the rest from the total.
+no record-level row. The cards show collection-level totals only.
 
-**Nothing is stated more confidently than the data supports.** Rates carry their
-denominator and a confidence interval. A figure resting on too few isolates is
-withheld rather than drawn faintly. The coverage note at the foot is not a
-disclaimer; it is the part that lets a reader judge everything above it.
+**Nothing is stated more confidently than the data supports.** The coverage line
+at the foot is not a disclaimer; it is the part that lets a reader judge
+everything above it.
 
-Laboratory identity is shown deliberately. It is in the data, attribution is the
-point of sentinel surveillance, and a rate nobody can attribute is a rate nobody
-can act on.
+**Colour never carries a meaning on its own.** Each card's colour is repeated by
+its badge text and its title, so a reader who sees no colour at all loses
+nothing but speed. See ``src.palette``.
+
+Laboratory identity is shown deliberately. It is in the data, attribution is
+the point of sentinel surveillance, and a rate nobody can attribute is a rate
+nobody can act on.
 """
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Dict, Optional
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
-from src import disclosure, surveillance as sv
+from src import palette
+from src.page_public import SECTIONS, Section, go, landing_counts
 
-_SECTOR_COLOUR = {
-    "human": "#0e7490",
-    "animal": "#b45309",
-    "food": "#15803d",
-    "environment": "#4338ca",
-    "aquaculture": "#0891b2",
-}
+#: The institution behind the platform, named on the page a visitor arrives at.
+#: A surveillance figure with no owner is a figure nobody is accountable for.
+OWNER = "Institute for Clinical Biochemistry and Biotechnology"
+OWNER_SHORT = "ICBB-AMRSS"
 
 
-@st.cache_data(ttl=300, show_spinner="Loading surveillance data…")
-def _frame() -> pd.DataFrame:
-    return sv.load_surveillance_frame()
+def _hero(counts: Dict[str, object]) -> None:
+    st.markdown(
+        f"<div style='font-size:0.85rem;letter-spacing:0.12em;"
+        f"text-transform:uppercase;color:{palette.GREY};margin-bottom:0.2rem'>"
+        f"{OWNER_SHORT} &middot; antimicrobial resistance surveillance</div>",
+        unsafe_allow_html=True)
+    st.title("Antimicrobial resistance in Ghana")
+    st.markdown(
+        "Resistance, the organisms behind it, the antimicrobials being used "
+        "and the genomes explaining it -- collected across human, animal, "
+        "food, environmental and aquaculture sources and reported together. "
+        f"Published by the {OWNER}, University of Ghana.")
+    st.caption(
+        "Everything on these pages is an aggregate. No patient, specimen or "
+        "individual result is shown, and any figure resting on too few records "
+        "is withheld rather than published.")
 
 
-def _headline(frame: pd.DataFrame) -> None:
-    isolates = frame["isolate_id"].nunique()
-    specimens = frame["specimen_id"].nunique()
-    labs = frame["lab_name"].nunique()
-    sectors = frame["sector"].nunique()
-    collected = frame["collection_datetime"].dropna()
+def _headline(counts: Dict[str, object]) -> None:
+    cells = st.columns(5)
+    cells[0].metric("Specimens", f"{int(counts.get('specimens') or 0):,}")
+    cells[1].metric("Isolates", f"{int(counts.get('isolates') or 0):,}")
+    cells[2].metric("Susceptibility results",
+                    f"{int(counts.get('results') or 0):,}")
+    cells[3].metric("Genomes", f"{int(counts.get('genomes') or 0):,}")
+    cells[4].metric("Laboratories", f"{int(counts.get('labs') or 0):,}")
 
-    columns = st.columns(5)
-    columns[0].metric("Specimens", f"{specimens:,}")
-    columns[1].metric("Isolates", f"{isolates:,}")
-    columns[2].metric("Susceptibility results", f"{len(frame):,}")
-    columns[3].metric("Laboratories", f"{labs:,}")
-    columns[4].metric("Sectors", f"{sectors:,}")
+    period = _period(counts)
+    if period:
+        st.caption(period)
 
-    if not collected.empty:
+
+def _period(counts: Dict[str, object]) -> Optional[str]:
+    """The collection window, stated in words rather than as two timestamps."""
+    first = counts.get("first_collected")
+    last = counts.get("last_collected")
+    try:
+        start = pd.to_datetime(first, errors="coerce", utc=True)
+        end = pd.to_datetime(last, errors="coerce", utc=True)
+    except Exception:                                 # noqa: BLE001
+        return None
+    if pd.isna(start) or pd.isna(end):
+        return None
+    sectors = int(counts.get("sectors") or 0)
+    regions = int(counts.get("regions") or 0)
+    return (f"Specimens collected between {start:%B %Y} and {end:%B %Y}, "
+            f"across {sectors} sector{'s' if sectors != 1 else ''} and "
+            f"{regions} region{'s' if regions != 1 else ''}. Each patient's "
+            "first isolate of an organism is counted once, following CLSI M39, "
+            "so repeat sampling of one patient does not weight any figure.")
+
+
+def _card(section: Section, counts: Dict[str, object]) -> None:
+    """One card.
+
+    Streamlit has no clickable container, so the card is a bordered block with
+    a button at its foot rather than a link-shaped div. That is the honest
+    version: a reader can see what is clickable instead of discovering it by
+    hovering, and it keeps the whole card out of raw HTML, which is what broke
+    the layout the last time this page was built with wrapper markup.
+    """
+    value, unit = section.stat(counts)
+    with st.container(border=True):
+        st.markdown(
+            f"<div style='display:flex;align-items:center;gap:0.55rem;"
+            f"margin-bottom:0.35rem'>"
+            f"<span style='background:{section.colour};color:#ffffff;"
+            f"font-size:0.7rem;font-weight:700;letter-spacing:0.08em;"
+            f"padding:0.15rem 0.45rem;border-radius:0.25rem'>"
+            f"{section.icon}</span>"
+            f"<span style='font-size:1.15rem;font-weight:700'>"
+            f"{section.title}</span></div>"
+            f"<div style='font-size:2.1rem;font-weight:700;line-height:1.1;"
+            f"color:{section.colour}'>{value}</div>"
+            f"<div style='font-size:0.8rem;color:{palette.GREY};"
+            f"margin-bottom:0.5rem'>{unit}</div>",
+            unsafe_allow_html=True)
+        st.write(section.blurb)
+        if st.button(f"Open {section.title}", key=f"card_{section.key}",
+                     use_container_width=True):
+            go(section.key)
+
+
+#: Card styling. Streamlit draws a bordered container as a flat box, which is
+#: correct for a form and too quiet for something a reader is meant to click.
+#: This lifts it on hover and gives the button inside it the whole card's width
+#: -- the only two cues available without rebuilding the card as raw HTML,
+#: which is what broke this layout the last time it was attempted.
+_CARD_CSS = """
+<style>
+  div[data-testid="stVerticalBlockBorderWrapper"] {
+      border-radius: 0.6rem;
+      transition: box-shadow 140ms ease, transform 140ms ease;
+      height: 100%;
+  }
+  div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+      transform: translateY(-2px);
+  }
+</style>
+"""
+
+
+def _grid(counts: Dict[str, object]) -> None:
+    st.markdown(_CARD_CSS, unsafe_allow_html=True)
+    st.subheader("Explore the surveillance")
+    st.caption(
+        "Each section opens its own page, with its own filters and its own "
+        "statement of what it does not show.")
+    for start in range(0, len(SECTIONS), 3):
+        row = SECTIONS[start:start + 3]
+        columns = st.columns(3)
+        for column, section in zip(columns, row):
+            with column:
+                _card(section, counts)
+
+
+def _footer() -> None:
+    st.markdown("---")
+    left, right = st.columns([3, 2])
+    with left:
+        st.markdown("**How to read anything on these pages**")
         st.caption(
-            f"Specimens collected between {collected.min():%B %Y} and "
-            f"{collected.max():%B %Y}. Figures below count each patient's first "
-            "isolate of an organism once, following CLSI M39, so repeat "
-            "sampling of one patient does not weight the result.")
+            "A percentage is never published on fewer than thirty isolates, "
+            "every percentage carries a 95% confidence interval, rates are "
+            "pooled rather than averaged across facilities, and sectors are "
+            "never combined into one national figure unless a page says so. "
+            "Counts resting on fewer than five records are withheld -- and "
+            "withheld means too few to publish, not none found.")
+    with right:
+        st.markdown("**What this is and is not**")
+        st.caption(
+            "This is laboratory-based sentinel surveillance. It describes the "
+            "isolates that reached a participating laboratory, which is not a "
+            "random sample of infections in the country: specimens arrive more "
+            "often from severe infections and from facilities with a "
+            "laboratory on site. It is not a measure of the burden of "
+            "resistance in the general population.")
+
+    st.caption(
+        f"{OWNER}, University of Ghana. Laboratories are named throughout, "
+        "because a rate nobody can attribute is a rate nobody can act on.")
+
+    _admin_hint()
 
 
-def _resistance_table(human: pd.DataFrame, threshold: int) -> None:
-    table, report = sv.cumulative_antibiogram(human, period_months=None)
-    if table.empty:
-        st.info("No susceptibility results are available for this selection.")
-        return
+def _admin_hint() -> None:
+    """Shown only to someone who already asked for it.
 
-    reported = table[table["status"] == sv.STATUS_REPORTED].copy()
-    if reported.empty:
-        st.warning(
-            "No organism and antibiotic combination in this selection reaches "
-            f"{sv.MIN_ISOLATES_FOR_REPORTING} isolates, which is the minimum "
-            "this platform will publish a percentage on. Counts are shown "
-            "elsewhere; a rate is not, because a percentage over a handful of "
-            "results is not a measurement.")
-        return
-
-    shown, suppression = disclosure.apply_disclosure_control(
-        reported, ["tested"], threshold=threshold,
-        also_blank=["percent_susceptible", "ci_low", "ci_high"])
-
-    columns = [c for c in ("organism", "antibiotic", "tested",
-                           "percent_susceptible", "ci_low", "ci_high")
-               if c in shown.columns]
-    display = shown[columns].rename(columns={
-        "tested": "Isolates tested",
-        "percent_susceptible": "% susceptible",
-        "ci_low": "95% CI low",
-        "ci_high": "95% CI high",
-    })
-    st.dataframe(display, use_container_width=True, hide_index=True)
-    st.caption(report.summary)
-    if suppression.withheld:
-        st.caption(suppression.summary)
+    There is no sign-in control on the public surface: a visitor has no account
+    and no use for a login box, and offering one makes a published page look
+    like something they are being kept out of. Administrators append
+    ``?admin=1``. That is not the security measure -- the password is -- it
+    only keeps the staff door off the shop front.
+    """
+    try:
+        wants = str(st.query_params.get("admin", "")).lower() in (
+            "1", "true", "yes")
+    except Exception:                                 # noqa: BLE001
+        wants = False
+    if wants:
+        st.caption("Administrative view requested. Sign in from the sidebar.")
 
 
 def render_home_page() -> None:
-    st.title("Antimicrobial resistance in Ghana")
-    st.markdown(
-        "Surveillance across human, animal, food, environmental and "
-        "aquaculture sources, reported together. Everything on this page is "
-        "aggregate: no individual patient, specimen or result is shown."
-    )
+    counts = landing_counts()
 
-    frame = _frame()
-    if frame.empty:
+    _hero(counts)
+
+    if not int(counts.get("specimens") or 0):
         st.info(
-            "No surveillance data has been published yet. This page will show "
-            "resistance rates, the organisms behind them and how much data "
-            "stands behind each figure, once data is available.")
+            "No surveillance data has been published yet. Once data is "
+            "available, this page will show how much of it there is and open "
+            "onto the resistance, organism, One Health, genomic and "
+            "antimicrobial-use sections.")
+        _footer()
         return
 
-    _headline(frame)
+    st.markdown("")
+    _headline(counts)
     st.markdown("---")
+    _grid(counts)
+    _footer()
 
-    # ── what the reader can change ─────────────────────────────────────
-    controls = st.columns([2, 2, 2, 1])
-    sectors = sorted(frame["sector"].dropna().unique().tolist())
-    chosen_sectors = controls[0].multiselect(
-        "Sector", sectors, default=sectors,
-        help="Human, animal, food, environmental and aquaculture isolates are "
-             "never pooled into one rate unless you ask for it: resistance "
-             "means different things in each.")
-    regions = sorted(frame["region"].dropna().unique().tolist())
-    chosen_regions = controls[1].multiselect("Region", regions, default=regions)
-    labs = sorted(frame["lab_name"].dropna().unique().tolist())
-    chosen_labs = controls[2].multiselect("Laboratory", labs, default=labs)
-    threshold = controls[3].number_input(
-        "Minimum cell", min_value=disclosure.MIN_PUBLIC_CELL, max_value=50,
-        value=disclosure.MIN_PUBLIC_CELL, step=5,
-        help="Counts below this are withheld. It can be raised, never lowered.")
 
-    working = frame
-    for column, chosen in (("sector", chosen_sectors), ("region", chosen_regions),
-                           ("lab_name", chosen_labs)):
-        if chosen:
-            working = working[working[column].isin(chosen)]
-
-    if working.empty:
-        st.warning("Nothing matches that selection.")
-        return
-
-    deduplicated, dedup_report = sv.select_first_isolates(
-        working, period_months=None)
-
-    tabs = st.tabs(["Resistance", "Organisms", "One Health", "About this data"])
-
-    # ── resistance ─────────────────────────────────────────────────────
-    with tabs[0]:
-        st.subheader("Susceptibility by organism and antibiotic")
-        st.caption(
-            "Each row is the proportion of tested isolates that remained "
-            "susceptible, with the number tested and a 95% confidence interval. "
-            "A wide interval means few isolates, not a wide range of opinion.")
-        human = deduplicated[deduplicated["sector"] == "human"]
-        source = human if not human.empty else deduplicated
-        if human.empty:
-            st.caption("No human isolates in this selection; showing all "
-                       "sectors together, which should be read with care.")
-        _resistance_table(source, int(threshold))
-
-    # ── organisms ──────────────────────────────────────────────────────
-    with tabs[1]:
-        st.subheader("What is being isolated")
-        try:
-            distribution = sv.pathogen_distribution(
-                deduplicated, allow_cross_sector=True)
-        except Exception:                             # noqa: BLE001
-            distribution = pd.DataFrame()
-        if distribution.empty:
-            st.info("No organisms to show for this selection.")
-        else:
-            shown, suppression = disclosure.apply_disclosure_control(
-                distribution, ["isolates"], threshold=int(threshold),
-                also_blank=["percent"])
-            visible = shown[shown["isolates"] != disclosure.WITHHELD]
-            if not visible.empty:
-                figure = px.bar(
-                    visible.head(12), x="isolates", y="organism",
-                    orientation="h", color_discrete_sequence=["#0e7490"])
-                figure.update_layout(
-                    height=max(320, 26 * min(12, len(visible))),
-                    margin=dict(t=10, b=10), paper_bgcolor="rgba(0,0,0,0)",
-                    xaxis_title="Isolates", yaxis_title="")
-                st.plotly_chart(figure, use_container_width=True)
-            st.dataframe(shown, use_container_width=True, hide_index=True)
-            if suppression.withheld:
-                st.caption(suppression.summary)
-
-    # ── one health ─────────────────────────────────────────────────────
-    with tabs[2]:
-        st.subheader("Across sectors")
-        st.caption(
-            "Resistance does not stay where it is looked for. These are the "
-            "same organisms counted in each sector separately, never pooled "
-            "into a single national percentage, because a rate mixing hospital "
-            "isolates with river water describes nothing.")
-        by_sector = (deduplicated
-                     .drop_duplicates(["dataset_id", "isolate_id"])
-                     .groupby("sector", dropna=False)
-                     .size().reset_index(name="isolates"))
-        shown, suppression = disclosure.apply_disclosure_control(
-            by_sector, ["isolates"], threshold=int(threshold))
-        visible = shown[shown["isolates"] != disclosure.WITHHELD]
-        if not visible.empty:
-            figure = px.bar(visible, x="sector", y="isolates", color="sector",
-                            color_discrete_map=_SECTOR_COLOUR)
-            figure.update_layout(showlegend=False, height=320,
-                                 margin=dict(t=10, b=10),
-                                 paper_bgcolor="rgba(0,0,0,0)",
-                                 xaxis_title="", yaxis_title="Isolates")
-            st.plotly_chart(figure, use_container_width=True)
-        st.dataframe(shown, use_container_width=True, hide_index=True)
-        if suppression.withheld:
-            st.caption(suppression.summary)
-
-    # ── about ──────────────────────────────────────────────────────────
-    with tabs[3]:
-        st.subheader("How to read these figures")
-        st.markdown(
-            f"""
-**Deduplication.** {dedup_report.summary}
-
-**What is withheld.** Any figure resting on fewer than {int(threshold)} records
-is withheld rather than shown, and so is any percentage calculated over it.
-Withheld is not zero: it means too few to publish, not none found. Where
-withholding one value would let it be recovered by subtracting the rest from a
-total, a second value is withheld as well.
-
-**Confidence intervals.** Every percentage carries one. It is calculated by the
-Wilson method, which behaves properly near nought and one hundred per cent where
-the ordinary approximation does not.
-
-**Suppression below {sv.MIN_ISOLATES_FOR_REPORTING} isolates.** A percentage is
-not published on fewer, following CLSI M39. The count is still reported where it
-is large enough to show.
-
-**Laboratories are named.** Attribution is the point of sentinel surveillance,
-and a rate nobody can attribute is a rate nobody can act on.
-
-**No individual is shown.** No patient identifier, specimen identifier or
-individual result appears on this page.
-            """
-        )
-        coverage = sv.coverage_report()
-        if getattr(coverage, "completeness", None) is not None:
-            st.caption("Completeness of the fields these figures depend on:")
-            st.dataframe(coverage.completeness, use_container_width=True,
-                         hide_index=True)
+__all__ = ["render_home_page", "OWNER", "OWNER_SHORT"]

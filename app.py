@@ -1774,6 +1774,42 @@ _components.html(
     height=0,
 )
 
+# ── Is this render the public surface? ────────────────────────────────────
+# The public surface is the landing page and the public section pages, seen by
+# someone who has not signed in. The sidebar is the staff entrance: twenty
+# analytic pages, upload, dataset and user administration. A visitor who came
+# to read a resistance rate has no use for any of it, and showing it makes a
+# published page look like an application they are locked out of.
+#
+# Hiding it is not the access control -- the password is. It keeps the staff
+# door off the shop front. Administrators append ?admin=1, which puts the
+# sign-in control back in the sidebar.
+PUBLIC_PAGE_PREFIX = "public:"
+if "active_page" not in st.session_state:
+    st.session_state.active_page = "Home"
+try:
+    WANTS_ADMIN = str(st.query_params.get("admin", "")).lower() in (
+        "1", "true", "yes")
+except Exception:                                     # noqa: BLE001
+    WANTS_ADMIN = False
+_page_now = str(st.session_state.active_page)
+_on_public_surface = (
+    not st.session_state.get("authenticated")
+    and not WANTS_ADMIN
+    and (_page_now == "Home" or _page_now.startswith(PUBLIC_PAGE_PREFIX)))
+if _on_public_surface:
+    st.markdown(
+        """
+        <style>
+          [data-testid="stSidebar"],
+          [data-testid="stSidebarCollapsedControl"],
+          [data-testid="collapsedControl"] { display: none !important; }
+          [data-testid="stSidebarNav"] { display: none !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
 # Sidebar navigation with user info and admin panel
 with st.sidebar:
     # Logo/Title
@@ -1927,13 +1963,7 @@ with st.sidebar:
         #
         # Administrators reach it at ?admin=1. That is not a security measure --
         # the password is -- it only keeps the door off the shop front.
-        _wants_admin = False
-        try:
-            _wants_admin = str(st.query_params.get("admin", "")).lower() in (
-                "1", "true", "yes")
-        except Exception:                             # noqa: BLE001
-            _wants_admin = False
-        if _wants_admin:
+        if WANTS_ADMIN:
             st.caption("Aggregate view — sign in for record-level detail.")
             if st.button("Sign in", use_container_width=True):
                 st.session_state.show_login = True
@@ -1968,9 +1998,23 @@ if os.path.exists(_pp_filter_path):
             st.caption(f"{len(pp_names)} pathogens selected")
 
 # ============================================================================
+# PUBLIC SECTION PAGES
+# ============================================================================
+# One branch for all six. The router recognises a public page by its key prefix
+# rather than by listing them, so adding a section is a change in one file.
+if str(page).startswith(PUBLIC_PAGE_PREFIX):
+    from src.page_public import render_public_page
+    if not render_public_page(str(page)):
+        # An unknown public key can only come from a stale session or a
+        # hand-edited URL. Falling back to the landing page beats a blank
+        # screen with no way out of it.
+        st.session_state.active_page = "Home"
+        st.rerun()
+
+# ============================================================================
 # DASHBOARD LANDING PAGE
 # ============================================================================
-if page == "Home":
+elif page == "Home":
     # The public landing page. Everything on it is aggregate and passes through
     # src.disclosure first; see src/page_home.py for why the filtering rather
     # than the headline figures is what needed protecting.

@@ -191,6 +191,59 @@ def apply_disclosure_control(frame: pd.DataFrame,
     return out, report
 
 
+def cell_text(value) -> str:
+    """One cell, as a reader should see it.
+
+    Counts keep their thousands separators, a missing value becomes an empty
+    string rather than the word "nan", and a withheld marker passes through
+    untouched.
+    """
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    if number != number:                            # NaN
+        return ""
+    if float(number).is_integer():
+        return f"{int(number):,}"
+    return f"{number:,.1f}"
+
+
+def for_display(frame: pd.DataFrame) -> pd.DataFrame:
+    """Make a suppressed frame safe to hand to a table widget.
+
+    A column holding both integers and the word "withheld" has object dtype,
+    and Arrow -- which Streamlit uses to ship a table to the browser -- refuses
+    it: it infers an integer column from the first values and then fails on the
+    string, so the table silently does not arrive. The frame itself is correct;
+    it simply cannot be transmitted in that shape.
+
+    The fix is to render the whole column as text rather than to drop the
+    marker, because dropping it is the one thing that must not happen. A blank
+    reads as zero, and the distinction between "too few to publish" and "none
+    found" is what the rest of this module exists to preserve. Thousands
+    separators are kept so a count still reads as a count.
+
+    Only columns that actually hold a withheld marker are touched. Everything
+    else keeps its dtype, so numeric columns stay sortable in the widget.
+    """
+    if frame.empty:
+        return frame
+    out = frame.copy()
+    for column in out.columns:
+        if out[column].dtype != object:
+            continue
+        values = out[column]
+        if not bool((values == WITHHELD).any()):
+            continue
+        out[column] = values.map(cell_text)
+    return out
+
+
 def safe_to_publish(frame: pd.DataFrame, count_column: str,
                     threshold: int = MIN_PUBLIC_CELL) -> bool:
     """Whether a frame can be shown at all.
@@ -209,5 +262,7 @@ def safe_to_publish(frame: pd.DataFrame, count_column: str,
 
 __all__ = [
     "MIN_PUBLIC_CELL", "RECORD_ID_COLUMNS", "is_record_level", "WITHHELD", "PRIMARY", "SECONDARY",
-    "SuppressionReport", "apply_disclosure_control", "safe_to_publish",
+    "SuppressionReport", "apply_disclosure_control", "for_display",
+    "cell_text",
+    "safe_to_publish",
 ]
