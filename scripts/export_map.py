@@ -20,8 +20,22 @@ and the table beneath the map repeats the lot.
 
 Circles, not shading. No specimen in the platform carries usable coordinates
 and there are no boundary polygons here, so each region is a circle at its
-centroid. Area is proportional to isolates -- scaling the radius instead makes
-a region with four times the isolates look sixteen times the size.
+centroid.
+
+**The circle is sized by the figure on display.** On the resistant layer a
+bigger circle means more resistance, on the susceptible layer it means more
+susceptibility, and on the count layer it means more isolates. Sizing every
+layer by the isolate count instead left sixteen near-identical circles, since
+every region here reports a similar number -- the map showed nothing.
+
+The size scale for a rate runs between the smallest and largest value on the
+layer rather than from zero. A set of rates between 30% and 48% mapped from
+zero gives circles within a fifth of each other, which is no scale at all. The
+legend therefore prints the three reference sizes with the values they stand
+for, so a reader can decode a circle rather than guess at it, and the exact
+figure is on every tooltip. Counts, which have a true zero, are scaled from it
+by area -- scaling the radius would make four times the isolates look sixteen
+times the size.
 """
 
 from __future__ import annotations
@@ -98,18 +112,70 @@ def _legend(layer: Dict[str, object]) -> str:
             f'{layer["name"]}</div>{rows}')
 
 
-def _legend_html() -> str:
+#: Circle radii, in pixels, from the smallest value on a layer to the largest.
+R_MIN, R_MAX = 7.0, 27.0
+
+
+def _sizer(values: List[float], from_zero: bool):
+    """Return a function mapping a value to a radius, and the key points.
+
+    ``from_zero`` is right for a count, which has a true zero and should be
+    compared by area. It is wrong for a rate: a set of rates between 30% and
+    48% anchored at zero produces circles within a fifth of each other, and a
+    map nobody can read is not more honest than one with a stated scale.
+    """
+    if not values:
+        return (lambda v: R_MIN), []
+    low, high = min(values), max(values)
+    if from_zero:
+        low = 0.0
+    span = high - low
+
+    def radius(value: Optional[float]) -> float:
+        if value is None:
+            return R_MIN
+        if span <= 0:
+            return (R_MIN + R_MAX) / 2
+        share = (value - low) / span
+        # Area-proportional for counts, linear for a rate's narrow band.
+        share = share ** 0.5 if from_zero else share
+        return R_MIN + (R_MAX - R_MIN) * max(0.0, min(1.0, share))
+
+    marks = [low, (low + high) / 2, high] if span > 0 else [high]
+    return radius, marks
+
+
+def _size_key(marks: List[float], suffix: str, radius) -> str:
+    """Three reference circles, so a size can be read back as a number."""
+    if not marks:
+        return ""
+    circles = ""
+    for mark in marks:
+        r = radius(mark)
+        circles += (
+            f'<div style="display:flex;align-items:center;gap:6px;margin:3px 0">'
+            f'<span style="display:inline-flex;width:{2*R_MAX:.0f}px;'
+            f'justify-content:center"><span style="display:inline-block;'
+            f'width:{2*r:.0f}px;height:{2*r:.0f}px;border-radius:50%;'
+            f'background:#cfd6da;border:1px solid rgba(0,0,0,.35)"></span></span>'
+            f'<span>{mark:,.1f}{suffix}</span></div>')
+    return ('<div style="font-weight:700;margin:7px 0 2px">Circle size</div>'
+            + circles)
+
+
+def _legend_html(size_key: str) -> str:
     blocks = "".join(_legend(layer) for layer in LAYERS if layer["key"])
     return f"""
     <div style="position:fixed;bottom:16px;left:12px;z-index:9999;
                 background:rgba(255,255,255,.95);border:1px solid #c9ced1;
-                border-radius:6px;padding:8px 10px;max-height:62%;
+                border-radius:6px;padding:8px 10px;max-height:66%;
                 overflow:auto;font:11.5px/1.35 system-ui,-apple-system,
                 'Segoe UI',sans-serif;color:#16181a">
       <div style="font-weight:700;margin-bottom:2px">Share of results</div>
       {blocks}
-      <div style="margin-top:6px;color:#6b7378">Circle area = isolates.<br>
-        Pick a result top right.</div>
+      {size_key}
+      <div style="margin-top:6px;color:#6b7378">Size and shade both follow the
+        result you pick, top right.</div>
     </div>
     """
 
@@ -159,9 +225,10 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
     ``regions`` is the already-suppressed export payload, so nothing reaches
     the map that was not cleared for publication.
     """
-    counts = [float(r["isolates"]) for r in regions
-              if isinstance(r.get("isolates"), (int, float))]
-    largest = max(counts) if counts else 1.0
+    def values_for(key: Optional[str]) -> List[float]:
+        field = f"percent_{key}" if key else "isolates"
+        return [float(r[field]) for r in regions
+                if isinstance(r.get(field), (int, float))]
 
     # The basemap is added with control=False so it does not appear in the
     # layer control beside the data layers. Folium would otherwise list it as a
@@ -182,8 +249,14 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
     folium.TileLayer("OpenStreetMap", control=False).add_to(world)
     world.fit_bounds(GHANA_BOUNDS)
 
+    size_keys: List[str] = []
+
     for layer in LAYERS:
         key = layer["key"]
+        # Each layer gets its own scale, because a percentage and a count are
+        # not comparable and a shared scale would flatten one of them.
+        radius_for, marks = _sizer(values_for(key), from_zero=key is None)
+        size_keys.append(_size_key(marks, "%" if key else "", radius_for))
         # overlay=False makes each a *base* layer, so Leaflet renders the
         # control as radio buttons: one result at a time, which is what a
         # comparison between regions needs.
@@ -214,7 +287,7 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
             ramp = layer["ramp"]                       # type: ignore[index]
             fill = "#ffffff" if step < 0 else ramp[step]
 
-            radius = 5 + 13 * (isolates / largest) ** 0.5
+            radius = radius_for(percent if key else isolates)
             folium.CircleMarker(
                 location=[lat, lon], radius=radius, color="#16181a", weight=1,
                 opacity=0.45, fill=True, fill_color=fill, fill_opacity=0.85,
@@ -234,7 +307,11 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
         group.add_to(world)
 
     folium.LayerControl(collapsed=False, position="topright").add_to(world)
-    world.get_root().html.add_child(folium.Element(_legend_html()))
+    # The key for the layer shown first. Each layer has its own scale, and a
+    # legend that changed on click would need scripting the saved page does
+    # not carry; the tooltip gives the exact figure on every circle either way.
+    world.get_root().html.add_child(
+        folium.Element(_legend_html(size_keys[0] if size_keys else "")))
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     world.save(out_path)

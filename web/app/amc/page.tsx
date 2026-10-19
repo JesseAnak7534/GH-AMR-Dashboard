@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Container, Note, PageHeader } from "@/components/Chrome";
-import { PooledSection } from "@/components/Pooled";
+import { ConsumptionView } from "@/components/ConsumptionView";
 import { getUse } from "@/lib/data";
 import { OKABE_ITO } from "@/lib/palette";
 
@@ -19,15 +19,17 @@ export default function AmcPage() {
         badge="AMC"
         colour="#999999"
         title="AMC"
-        lede="Veterinary consumption, as milligrams of active ingredient per kilogram of biomass."
+        lede="Veterinary antimicrobial consumption: milligrams of active ingredient per kilogram of biomass."
       />
       <Container>
-        <PooledSection
-          title="Milligrams per kilogram of biomass"
+        <ConsumptionView
           blocks={data.amc}
           valueKey="mg_per_kg_biomass"
           unit="mg per kg biomass"
-          colour={OKABE_ITO.grey}
+          colour={OKABE_ITO.vermillion}
+          volumeKey="active_ingredient_kg"
+          volumeUnit="Active ingredient (kg)"
+          compositionKeys={["sector", "purpose", "route"]}
           note="Biomass is the denominator: the same tonnage means something different across poultry than across cattle."
         />
         <Note>

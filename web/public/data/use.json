@@ -783,6 +783,366 @@
     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "sector",
+   "rows": [
+    {
+     "group": "AQUACULTURE",
+     "records": 343,
+     "records_with_denominator": 343,
+     "active_ingredient_kg": 13019.0996,
+     "biomass_kg": 65240896.7,
+     "mg_per_kg_biomass": 199.55427130111778
+    },
+    {
+     "group": "ANIMAL",
+     "records": 1027,
+     "records_with_denominator": 1027,
+     "active_ingredient_kg": 90136.325,
+     "biomass_kg": 1018921743.0999999,
+     "mg_per_kg_biomass": 88.46246103824066
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 2,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "purpose",
+   "rows": [
+    {
+     "group": "Growth promotion",
+     "records": 159,
+     "records_with_denominator": 159,
+     "active_ingredient_kg": 12023.1179,
+     "biomass_kg": 121993557.9,
+     "mg_per_kg_biomass": 98.5553508477516
+    },
+    {
+     "group": "Metaphylaxis",
+     "records": 344,
+     "records_with_denominator": 344,
+     "active_ingredient_kg": 25576.7543,
+     "biomass_kg": 265566565.4,
+     "mg_per_kg_biomass": 96.31014454502562
+    },
+    {
+     "group": "Therapeutic",
+     "records": 867,
+     "records_with_denominator": 867,
+     "active_ingredient_kg": 65555.5524,
+     "biomass_kg": 696602516.5,
+     "mg_per_kg_biomass": 94.10754461436115
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "route",
+   "rows": [
+    {
+     "group": "In water",
+     "records": 694,
+     "records_with_denominator": 694,
+     "active_ingredient_kg": 53894.6302,
+     "biomass_kg": 559652467.9,
+     "mg_per_kg_biomass": 96.30017428893036
+    },
+    {
+     "group": "In feed",
+     "records": 676,
+     "records_with_denominator": 676,
+     "active_ingredient_kg": 49260.7944,
+     "biomass_kg": 524510171.9,
+     "mg_per_kg_biomass": 93.91771034974661
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 2,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "report_period",
+   "rows": [
+    {
+     "group": "2024-08",
+     "records": 32,
+     "records_with_denominator": 32,
+     "active_ingredient_kg": 2485.7697,
+     "biomass_kg": 23639712.1,
+     "mg_per_kg_biomass": 105.15228313630773
+    },
+    {
+     "group": "2024-11",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2734.0063,
+     "biomass_kg": 26246911.500000004,
+     "mg_per_kg_biomass": 104.16487669415883
+    },
+    {
+     "group": "2024-05",
+     "records": 30,
+     "records_with_denominator": 30,
+     "active_ingredient_kg": 2504.8481,
+     "biomass_kg": 24062270.900000002,
+     "mg_per_kg_biomass": 104.098574503207
+    },
+    {
+     "group": "2026-05",
+     "records": 63,
+     "records_with_denominator": 63,
+     "active_ingredient_kg": 4509.1829,
+     "biomass_kg": 43362850.300000004,
+     "mg_per_kg_biomass": 103.98723489816349
+    },
+    {
+     "group": "2025-09",
+     "records": 35,
+     "records_with_denominator": 35,
+     "active_ingredient_kg": 2360.4972,
+     "biomass_kg": 22830934.599999998,
+     "mg_per_kg_biomass": 103.39030098224714
+    },
+    {
+     "group": "2024-03",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2811.9346,
+     "biomass_kg": 27835747.400000002,
+     "mg_per_kg_biomass": 101.01882875974079
+    },
+    {
+     "group": "2026-09",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5180.7516,
+     "biomass_kg": 51682093.3,
+     "mg_per_kg_biomass": 100.24268115316453
+    },
+    {
+     "group": "2025-02",
+     "records": 33,
+     "records_with_denominator": 33,
+     "active_ingredient_kg": 2141.8063,
+     "biomass_kg": 21588896.000000004,
+     "mg_per_kg_biomass": 99.2086996945096
+    },
+    {
+     "group": "2025-11",
+     "records": 35,
+     "records_with_denominator": 35,
+     "active_ingredient_kg": 2657.5728,
+     "biomass_kg": 26843489.2,
+     "mg_per_kg_biomass": 99.0025097035448
+    },
+    {
+     "group": "2026-08",
+     "records": 72,
+     "records_with_denominator": 72,
+     "active_ingredient_kg": 5602.6637,
+     "biomass_kg": 57277441.5,
+     "mg_per_kg_biomass": 97.81623538474567
+    },
+    {
+     "group": "2025-04",
+     "records": 47,
+     "records_with_denominator": 47,
+     "active_ingredient_kg": 3746.9132,
+     "biomass_kg": 38681690.1,
+     "mg_per_kg_biomass": 96.86529182963491
+    },
+    {
+     "group": "2024-10",
+     "records": 41,
+     "records_with_denominator": 41,
+     "active_ingredient_kg": 3253.2325,
+     "biomass_kg": 33949934.4,
+     "mg_per_kg_biomass": 95.82441196116126
+    },
+    {
+     "group": "2025-01",
+     "records": 39,
+     "records_with_denominator": 39,
+     "active_ingredient_kg": 2963.4596,
+     "biomass_kg": 31015106.9,
+     "mg_per_kg_biomass": 95.54890813547382
+    },
+    {
+     "group": "2026-03",
+     "records": 80,
+     "records_with_denominator": 80,
+     "active_ingredient_kg": 6332.3389,
+     "biomass_kg": 66356473.199999996,
+     "mg_per_kg_biomass": 95.42910577712863
+    },
+    {
+     "group": "2026-07",
+     "records": 72,
+     "records_with_denominator": 72,
+     "active_ingredient_kg": 5361.1937,
+     "biomass_kg": 56424491.6,
+     "mg_per_kg_biomass": 95.01536563246589
+    },
+    {
+     "group": "2025-08",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2821.4555,
+     "biomass_kg": 29715695.400000002,
+     "mg_per_kg_biomass": 94.94832485057711
+    },
+    {
+     "group": "2025-03",
+     "records": 33,
+     "records_with_denominator": 33,
+     "active_ingredient_kg": 2346.4021,
+     "biomass_kg": 24836155.5,
+     "mg_per_kg_biomass": 94.47525403035908
+    },
+    {
+     "group": "2024-06",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2664.0383,
+     "biomass_kg": 28245263.800000004,
+     "mg_per_kg_biomass": 94.3180534217563
+    },
+    {
+     "group": "2025-06",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2998.6886,
+     "biomass_kg": 31884295.1,
+     "mg_per_kg_biomass": 94.04907935380388
+    },
+    {
+     "group": "2026-01",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2642.2297,
+     "biomass_kg": 28142442.8,
+     "mg_per_kg_biomass": 93.8877168118469
+    },
+    {
+     "group": "2025-12",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2611.7794,
+     "biomass_kg": 27866413.5,
+     "mg_per_kg_biomass": 93.72499263315676
+    },
+    {
+     "group": "2026-02",
+     "records": 32,
+     "records_with_denominator": 32,
+     "active_ingredient_kg": 2480.3257,
+     "biomass_kg": 26569995.0,
+     "mg_per_kg_biomass": 93.35062727712219
+    },
+    {
+     "group": "2025-07",
+     "records": 39,
+     "records_with_denominator": 39,
+     "active_ingredient_kg": 2785.3575,
+     "biomass_kg": 30330414.7,
+     "mg_per_kg_biomass": 91.83380865544183
+    },
+    {
+     "group": "2024-04",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 3112.8471,
+     "biomass_kg": 34065746.199999996,
+     "mg_per_kg_biomass": 91.3776284753745
+    },
+    {
+     "group": "2024-07",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2631.3301,
+     "biomass_kg": 28808955.700000003,
+     "mg_per_kg_biomass": 91.33722608348485
+    },
+    {
+     "group": "2024-12",
+     "records": 31,
+     "records_with_denominator": 31,
+     "active_ingredient_kg": 2267.5922,
+     "biomass_kg": 24870391.4,
+     "mg_per_kg_biomass": 91.1763777067055
+    },
+    {
+     "group": "2025-05",
+     "records": 34,
+     "records_with_denominator": 34,
+     "active_ingredient_kg": 2821.4981,
+     "biomass_kg": 31149624.000000004,
+     "mg_per_kg_biomass": 90.57888146579232
+    },
+    {
+     "group": "2026-04",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5506.218,
+     "biomass_kg": 61966833.1,
+     "mg_per_kg_biomass": 88.8575020626639
+    },
+    {
+     "group": "2024-09",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2612.302,
+     "biomass_kg": 29571443.799999997,
+     "mg_per_kg_biomass": 88.33866948356442
+    },
+    {
+     "group": "2026-06",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5354.5849,
+     "biomass_kg": 60728100.7,
+     "mg_per_kg_biomass": 88.17310006864746
+    },
+    {
+     "group": "2025-10",
+     "records": 38,
+     "records_with_denominator": 38,
+     "active_ingredient_kg": 2852.6043,
+     "biomass_kg": 33612826.1,
+     "mg_per_kg_biomass": 84.86654146584836
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 31,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
   }
  ],
  "pps": {
@@ -961,6 +1321,101 @@
    }
   ],
   "indicationDocumentedPercent": 74.0,
-  "prescriptions": 2448
+  "prescriptions": 2448,
+  "guidelineCompliantPercent": 58.4,
+  "durationMedianDays": 7.0,
+  "duration": [
+   {
+    "days": 1,
+    "prescriptions": 143
+   },
+   {
+    "days": 2,
+    "prescriptions": 57
+   },
+   {
+    "days": 3,
+    "prescriptions": 210
+   },
+   {
+    "days": 4,
+    "prescriptions": 225
+   },
+   {
+    "days": 5,
+    "prescriptions": 270
+   },
+   {
+    "days": 6,
+    "prescriptions": 136
+   },
+   {
+    "days": 7,
+    "prescriptions": 230
+   },
+   {
+    "days": 8,
+    "prescriptions": 169
+   },
+   {
+    "days": 9,
+    "prescriptions": 149
+   },
+   {
+    "days": 10,
+    "prescriptions": 175
+   },
+   {
+    "days": 11,
+    "prescriptions": 184
+   },
+   {
+    "days": 12,
+    "prescriptions": 154
+   },
+   {
+    "days": 13,
+    "prescriptions": 163
+   },
+   {
+    "days": 14,
+    "prescriptions": 183
+   }
+  ],
+  "wards": [
+   {
+    "ward": "Medical",
+    "prescriptions": 736,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "Surgical",
+    "prescriptions": 632,
+    "median_duration": 8.0
+   },
+   {
+    "ward": "Paediatric",
+    "prescriptions": 474,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "Obstetric/Gynaecology",
+    "prescriptions": 336,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "ICU",
+    "prescriptions": 270,
+    "median_duration": 7.0
+   }
+  ],
+  "wardSuppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 5,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
  }
 }

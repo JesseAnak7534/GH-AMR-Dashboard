@@ -227,6 +227,15 @@ export interface UseData {
     prevalencePercent?: number | null;
     prescriptions?: number;
     indicationDocumentedPercent?: number | null;
+    guidelineCompliantPercent?: number | null;
+    durationMedianDays?: number | null;
+    duration?: { days: number; prescriptions: Cell }[];
+    wards?: {
+      ward: string;
+      prescriptions: Cell;
+      median_duration: number | null;
+    }[];
+    wardSuppression?: Suppression;
     breakdowns?: {
       key: string;
       label: string;

@@ -370,7 +370,8 @@ def export_use(threshold: int) -> Dict[str, object]:
 
     amc_blocks = []
     if amc is not None and not amc.empty:
-        for column in ("species", "region", "antibiotic_class"):
+        for column in ("species", "region", "antibiotic_class", "sector",
+                       "purpose", "route", "report_period"):
             if column in amc.columns:
                 block = pooled(consumption.pooled_mg_per_kg(amc, by=column),
                                column, "mg_per_kg_biomass")
@@ -418,6 +419,45 @@ def export_use(threshold: int) -> Dict[str, object]:
                 round(100.0 * float(documented.gt(0).mean()), 1)
                 if len(documented) else None)
             pps["prescriptions"] = int(len(prescriptions))
+
+            # Guideline compliance, the second of the two quality indicators
+            # the old prescribing page showed as gauges.
+            compliant = pd.to_numeric(
+                prescriptions.get("guideline_compliant"),
+                errors="coerce").fillna(0)
+            pps["guidelineCompliantPercent"] = (
+                round(100.0 * float(compliant.gt(0).mean()), 1)
+                if len(compliant) else None)
+
+            # Duration of therapy. The median rather than the mean: a handful
+            # of long courses pulls a mean somewhere no patient was.
+            duration = pd.to_numeric(prescriptions.get("duration_days"),
+                                     errors="coerce").dropna()
+            pps["durationMedianDays"] = (round(float(duration.median()), 1)
+                                         if len(duration) else None)
+            if len(duration):
+                histogram = (duration.round().astype(int)
+                             .value_counts().sort_index()
+                             .reset_index())
+                histogram.columns = ["days", "prescriptions"]
+                shown_hist, _ = _suppress(histogram, ["prescriptions"],
+                                          threshold)
+                pps["duration"] = _rows(shown_hist)
+
+            # Prescriptions per ward, with the median duration beside each.
+            if "ward" in prescriptions.columns:
+                ward = (prescriptions.groupby("ward", dropna=False)
+                        .agg(prescriptions=("antibiotic_name", "size"),
+                             median_duration=("duration_days", "median"))
+                        .reset_index()
+                        .sort_values("prescriptions", ascending=False))
+                ward["ward"] = ward["ward"].fillna("Not recorded")
+                ward["median_duration"] = pd.to_numeric(
+                    ward["median_duration"], errors="coerce").round(1)
+                shown_ward, ward_suppression = _suppress(
+                    ward, ["prescriptions"], threshold)
+                pps["wards"] = _rows(shown_ward)
+                pps["wardSuppression"] = ward_suppression
 
     return {"amu": amu_blocks, "amc": amc_blocks, "pps": pps}
 

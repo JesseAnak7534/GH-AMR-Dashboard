@@ -17,6 +17,15 @@ import { count, percent } from "@/lib/format";
  * that was never measured.
  */
 
+/** Round an axis top up to something a reader can divide by four. */
+function niceCeiling(value: number): number {
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  for (const step of [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 7.5, 10]) {
+    if (value <= step * magnitude) return step * magnitude;
+  }
+  return 10 * magnitude;
+}
+
 const AXIS = "#c9ced1";
 const GRID = "#eceff0";
 const LABEL = "#6b7378";
@@ -40,12 +49,20 @@ export function TrendChart({
   unit,
   denominatorLabel = "tested",
   height = 290,
+  axisMax,
 }: {
   series: TrendSeries[];
   unit: string;
   denominatorLabel?: string;
   height?: number;
+  /** The top of the y axis. Omitted means 100, for a percentage. `null`
+   *  scales to the data, which is what a consumption rate needs — DDD per
+   *  1,000 patient-days is not bounded at a hundred. */
+  axisMax?: number | null;
 }) {
+  // A percentage axis prints a percentage; anything else prints a number.
+  // Appending % to a consumption rate turned 100.2 mg/kg into "100.2%".
+  const isPercentage = axisMax === undefined;
   const titleId = useId();
   const [active, setActive] = useState<string | null>(null);
 
@@ -54,20 +71,39 @@ export function TrendChart({
   ).sort();
   if (!periods.length) return null;
 
+  const observed = series.flatMap((s) =>
+    s.points
+      .map((p) => Math.max(p.value ?? 0, p.high ?? 0))
+      .filter((v) => Number.isFinite(v)),
+  );
+  const top =
+    axisMax === undefined
+      ? 100
+      : axisMax === null
+        ? niceCeiling(Math.max(1, ...observed))
+        : axisMax;
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * top);
+
+  // Whether any series carries bounds at all. Consumption rates do not, and a
+  // caption describing a band nobody drew is just noise.
+  const hasBands = series.some((s) =>
+    s.points.some((p) => p.low !== null && p.high !== null),
+  );
+
   const width = 720;
   const left = 42;
   const right = 14;
-  const top = 10;
+  const topPad = 10;
   const bottom = 34;
   const plotWidth = width - left - right;
-  const plotHeight = height - top - bottom;
+  const plotHeight = height - topPad - bottom;
 
   const x = (period: string) => {
     const index = periods.indexOf(period);
     if (periods.length === 1) return left + plotWidth / 2;
     return left + (index / (periods.length - 1)) * plotWidth;
   };
-  const y = (value: number) => top + (1 - value / 100) * plotHeight;
+  const y = (value: number) => topPad + (1 - value / top) * plotHeight;
 
   // One label in four when the series is long, so the axis does not turn into
   // a smear of overlapping text.
@@ -85,7 +121,7 @@ export function TrendChart({
           {`${series.length} series over ${periods.length} periods, ${unit}`}
         </title>
 
-        {[0, 25, 50, 75, 100].map((tick) => (
+        {ticks.map((tick) => (
           <g key={tick}>
             <line
               x1={left}
@@ -95,8 +131,14 @@ export function TrendChart({
               stroke={tick === 0 ? AXIS : GRID}
               strokeWidth={1}
             />
-            <text x={left - 7} y={y(tick) + 3.5} fontSize={9.5} fill={LABEL} textAnchor="end">
-              {tick}
+            <text
+              x={left - 7}
+              y={y(tick) + 3.5}
+              fontSize={9.5}
+              fill={LABEL}
+              textAnchor="end"
+            >
+              {top > 1000 ? Math.round(tick).toLocaleString("en-GB") : Number(tick.toFixed(top < 10 ? 1 : 0))}
             </text>
           </g>
         ))}
@@ -218,8 +260,12 @@ export function TrendChart({
                 <span className="text-ink">{line.label}</span>
                 {last ? (
                   <span className="tabular-nums text-ink-faint">
-                    {percent(last.value)} ({count(last.denominator)}{" "}
-                    {denominatorLabel})
+                    {isPercentage
+                      ? percent(last.value)
+                      : (last.value ?? 0).toLocaleString("en-GB", {
+                          maximumFractionDigits: 1,
+                        })}{" "}
+                    ({count(last.denominator)} {denominatorLabel})
                   </span>
                 ) : null}
               </button>
@@ -229,11 +275,15 @@ export function TrendChart({
       </ul>
 
       <figcaption className="mt-1.5 text-[0.74rem] text-ink-faint">
-        {unit}. {series.length > 2
-          ? "Point at a series to see its 95% confidence interval."
-          : "The band is the 95% confidence interval."}{" "}
-        Where intervals overlap between periods, the change is within the
-        uncertainty. The line breaks where a period had too few results.
+        {unit}.{" "}
+        {hasBands
+          ? `${
+              series.length > 2
+                ? "Point at a series to see its 95% confidence interval."
+                : "The band is the 95% confidence interval."
+            } Where intervals overlap between periods, the change is within the uncertainty.`
+          : ""}{" "}
+        The line breaks where a period had too few results to plot.
       </figcaption>
     </figure>
   );
