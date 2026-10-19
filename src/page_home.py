@@ -6,18 +6,28 @@ reader has no account, no briefing and no obligation to stay, so it answers
 three questions in the first screen -- what this is, how much data stands
 behind it, and what can be looked at -- and then gets out of the way.
 
-Deliberately, no analysis happens here. An earlier version of this page carried
-four tabs of tables and charts, which meant a first-time visitor met a
-cumulative antibiogram before they had been told what they were looking at, and
-every section competed with the others for the same screen. The sections now
-live on their own pages (``src/page_public.py``) and this page is six cards that
-lead to them.
+Deliberately, no analysis happens here. An earlier version carried four tabs of
+tables and charts, which meant a first-time visitor met a cumulative
+antibiogram before being told what they were looking at. The sections now live
+on their own pages (``src/page_public.py``) and this page is six cards leading
+to them.
+
+**The whole card is the link.** Streamlit has no clickable container, so the
+card is not a Streamlit container at all: the grid is one block of HTML in
+which each card is an ``<a>``. That buys three things a button inside a
+bordered box cannot. The entire box is a target, not a strip at its foot. Every
+section gets a real URL -- ``?page=public:resistance`` -- so a reader can
+bookmark a section, a colleague can be sent a link to it, and the browser's
+back button works. And the cards lay out on a CSS grid, so they keep equal
+heights and reflow on a narrow screen instead of staying three fixed columns.
+
+Nothing inside the HTML is a Streamlit widget. That is what went wrong the last
+time this page used wrapper markup: a ``st.markdown`` div opened around real
+widgets does not contain them, it just leaves an empty box drawn on the page.
 
 Each card carries one live number, so the grid is not a menu of promises: a
-reader can see before clicking that the genomics section has 1,800 genomes
-behind it or that it has none. Those numbers come from one cached count query,
-because six cards each running their own aggregate would open six connections
-on the one page that has to be fast.
+reader can see before clicking whether the genomics section has 1,800 genomes
+behind it or none. Those numbers come from one cached count query.
 
 Three rules hold here as on every public page.
 
@@ -25,8 +35,7 @@ Three rules hold here as on every public page.
 no record-level row. The cards show collection-level totals only.
 
 **Nothing is stated more confidently than the data supports.** The coverage line
-at the foot is not a disclaimer; it is the part that lets a reader judge
-everything above it.
+is not a disclaimer; it is the part that lets a reader judge everything else.
 
 **Colour never carries a meaning on its own.** Each card's colour is repeated by
 its badge text and its title, so a reader who sees no colour at all loses
@@ -39,162 +48,355 @@ nobody can act on.
 
 from __future__ import annotations
 
+from html import escape
 from typing import Dict, Optional
+from urllib.parse import urlencode
 
 import pandas as pd
 import streamlit as st
 
 from src import palette
-from src.page_public import SECTIONS, Section, go, landing_counts
+from src.page_public import SECTIONS, Section, landing_counts
 
 #: The institution behind the platform, named on the page a visitor arrives at.
 #: A surveillance figure with no owner is a figure nobody is accountable for.
 OWNER = "Institute for Clinical Biochemistry and Biotechnology"
 OWNER_SHORT = "ICBB-AMRSS"
 
-
-def _hero(counts: Dict[str, object]) -> None:
-    st.markdown(
-        f"<div style='font-size:0.85rem;letter-spacing:0.12em;"
-        f"text-transform:uppercase;color:{palette.GREY};margin-bottom:0.2rem'>"
-        f"{OWNER_SHORT} &middot; antimicrobial resistance surveillance</div>",
-        unsafe_allow_html=True)
-    st.title("Antimicrobial resistance in Ghana")
-    st.markdown(
-        "Resistance, the organisms behind it, the antimicrobials being used "
-        "and the genomes explaining it -- collected across human, animal, "
-        "food, environmental and aquaculture sources and reported together. "
-        f"Published by the {OWNER}, University of Ghana.")
-    st.caption(
-        "Everything on these pages is an aggregate. No patient, specimen or "
-        "individual result is shown, and any figure resting on too few records "
-        "is withheld rather than published.")
+#: Warm editorial tokens, matching the theme in ``.streamlit/config.toml`` so
+#: the page does not read as two designs stacked on each other.
+_INK = "#1a170e"
+_DEEP = "#1d4d43"
+_SURFACE = "#fdfaf2"
+_LINE = "rgba(26, 23, 14, 0.14)"
+_MUTED = "rgba(26, 23, 14, 0.62)"
 
 
-def _headline(counts: Dict[str, object]) -> None:
-    cells = st.columns(5)
-    cells[0].metric("Specimens", f"{int(counts.get('specimens') or 0):,}")
-    cells[1].metric("Isolates", f"{int(counts.get('isolates') or 0):,}")
-    cells[2].metric("Susceptibility results",
-                    f"{int(counts.get('results') or 0):,}")
-    cells[3].metric("Genomes", f"{int(counts.get('genomes') or 0):,}")
-    cells[4].metric("Laboratories", f"{int(counts.get('labs') or 0):,}")
+def _href(page: Optional[str]) -> str:
+    """A link to one page, preserving whatever else is in the URL.
 
-    period = _period(counts)
-    if period:
-        st.caption(period)
-
-
-def _period(counts: Dict[str, object]) -> Optional[str]:
-    """The collection window, stated in words rather than as two timestamps."""
-    first = counts.get("first_collected")
-    last = counts.get("last_collected")
-    try:
-        start = pd.to_datetime(first, errors="coerce", utc=True)
-        end = pd.to_datetime(last, errors="coerce", utc=True)
-    except Exception:                                 # noqa: BLE001
-        return None
-    if pd.isna(start) or pd.isna(end):
-        return None
-    sectors = int(counts.get("sectors") or 0)
-    regions = int(counts.get("regions") or 0)
-    return (f"Specimens collected between {start:%B %Y} and {end:%B %Y}, "
-            f"across {sectors} sector{'s' if sectors != 1 else ''} and "
-            f"{regions} region{'s' if regions != 1 else ''}. Each patient's "
-            "first isolate of an organism is counted once, following CLSI M39, "
-            "so repeat sampling of one patient does not weight any figure.")
-
-
-def _card(section: Section, counts: Dict[str, object]) -> None:
-    """One card.
-
-    Streamlit has no clickable container, so the card is a bordered block with
-    a button at its foot rather than a link-shaped div. That is the honest
-    version: a reader can see what is clickable instead of discovering it by
-    hovering, and it keeps the whole card out of raw HTML, which is what broke
-    the layout the last time this page was built with wrapper markup.
+    ``?admin=1`` has to survive a click, or an administrator who followed a
+    card loses the staff door and has to retype the query string.
     """
-    value, unit = section.stat(counts)
-    with st.container(border=True):
-        st.markdown(
-            f"<div style='display:flex;align-items:center;gap:0.55rem;"
-            f"margin-bottom:0.35rem'>"
-            f"<span style='background:{section.colour};color:#ffffff;"
-            f"font-size:0.7rem;font-weight:700;letter-spacing:0.08em;"
-            f"padding:0.15rem 0.45rem;border-radius:0.25rem'>"
-            f"{section.icon}</span>"
-            f"<span style='font-size:1.15rem;font-weight:700'>"
-            f"{section.title}</span></div>"
-            f"<div style='font-size:2.1rem;font-weight:700;line-height:1.1;"
-            f"color:{section.colour}'>{value}</div>"
-            f"<div style='font-size:0.8rem;color:{palette.GREY};"
-            f"margin-bottom:0.5rem'>{unit}</div>",
-            unsafe_allow_html=True)
-        st.write(section.blurb)
-        if st.button(f"Open {section.title}", key=f"card_{section.key}",
-                     use_container_width=True):
-            go(section.key)
+    params = {}
+    try:
+        for key, value in st.query_params.items():
+            if key != "page":
+                params[key] = value
+    except Exception:                                 # noqa: BLE001
+        params = {}
+    if page:
+        params["page"] = page
+    return "?" + urlencode(params) if params else "?"
 
 
-#: Card styling. Streamlit draws a bordered container as a flat box, which is
-#: correct for a form and too quiet for something a reader is meant to click.
-#: This lifts it on hover and gives the button inside it the whole card's width
-#: -- the only two cues available without rebuilding the card as raw HTML,
-#: which is what broke this layout the last time it was attempted.
-_CARD_CSS = """
+_CSS = f"""
 <style>
-  div[data-testid="stVerticalBlockBorderWrapper"] {
+  .amr-hero {{
+      background: linear-gradient(135deg, {_DEEP} 0%, #16382f 100%);
+      color: #f6efdd;
+      border-radius: 0.9rem;
+      padding: 2.4rem 2.2rem 2rem 2.2rem;
+      margin-bottom: 1.1rem;
+  }}
+  .amr-eyebrow {{
+      font-size: 0.74rem;
+      letter-spacing: 0.17em;
+      text-transform: uppercase;
+      color: rgba(246, 239, 221, 0.72);
+      margin-bottom: 0.7rem;
+  }}
+  .amr-hero h1 {{
+      font-size: clamp(1.9rem, 4.2vw, 3rem);
+      line-height: 1.07;
+      font-weight: 700;
+      margin: 0 0 0.85rem 0;
+      color: #f6efdd;
+      letter-spacing: -0.015em;
+  }}
+  .amr-hero p {{
+      font-size: 1.04rem;
+      line-height: 1.62;
+      max-width: 60ch;
+      margin: 0;
+      color: rgba(246, 239, 221, 0.9);
+  }}
+  .amr-hero .amr-fineprint {{
+      font-size: 0.86rem;
+      margin-top: 0.9rem;
+      color: rgba(246, 239, 221, 0.68);
+      max-width: 72ch;
+  }}
+
+  .amr-stats {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+  }}
+  .amr-stat-cell {{
+      background: {_SURFACE};
+      border: 1px solid {_LINE};
       border-radius: 0.6rem;
-      transition: box-shadow 140ms ease, transform 140ms ease;
-      height: 100%;
-  }
-  div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
-      transform: translateY(-2px);
-  }
+      padding: 0.85rem 0.95rem;
+  }}
+  .amr-stat-cell .n {{
+      display: block;
+      font-size: 1.62rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: {_INK};
+      letter-spacing: -0.01em;
+  }}
+  .amr-stat-cell .k {{
+      display: block;
+      font-size: 0.78rem;
+      color: {_MUTED};
+      margin-top: 0.15rem;
+  }}
+  .amr-coverage {{
+      font-size: 0.86rem;
+      line-height: 1.55;
+      color: {_MUTED};
+      margin: 0 0 1.6rem 0;
+      max-width: 88ch;
+  }}
+
+  .amr-section-label {{
+      font-size: 0.74rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: {_MUTED};
+      margin-bottom: 0.55rem;
+  }}
+
+  .amr-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.6rem;
+  }}
+  .amr-card {{
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background: {_SURFACE};
+      border: 1px solid {_LINE};
+      border-radius: 0.7rem;
+      padding: 1.15rem 1.15rem 1.05rem 1.3rem;
+      text-decoration: none !important;
+      color: {_INK} !important;
+      transition: box-shadow 150ms ease, transform 150ms ease,
+                  border-color 150ms ease;
+  }}
+  .amr-card:hover, .amr-card:focus-visible {{
+      box-shadow: 0 10px 26px rgba(26, 23, 14, 0.14);
+      transform: translateY(-3px);
+      border-color: rgba(26, 23, 14, 0.3);
+      outline: none;
+  }}
+  .amr-card:focus-visible {{
+      box-shadow: 0 0 0 3px rgba(29, 77, 67, 0.45);
+  }}
+  .amr-rule {{
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 5px;
+  }}
+  .amr-card-head {{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+  }}
+  .amr-badge {{
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #ffffff;
+      padding: 0.17rem 0.42rem;
+      border-radius: 0.25rem;
+  }}
+  .amr-card-title {{
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+  }}
+  .amr-stat {{
+      font-size: 2.15rem;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+  }}
+  .amr-unit {{
+      font-size: 0.79rem;
+      color: {_MUTED};
+      margin-bottom: 0.6rem;
+  }}
+  .amr-blurb {{
+      font-size: 0.89rem;
+      line-height: 1.55;
+      color: rgba(26, 23, 14, 0.78);
+      flex-grow: 1;
+  }}
+  .amr-cta {{
+      font-size: 0.83rem;
+      font-weight: 600;
+      margin-top: 0.85rem;
+  }}
+
+  .amr-notes {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.3rem;
+      border-top: 1px solid {_LINE};
+      padding-top: 1.2rem;
+  }}
+  .amr-notes h4 {{
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 0 0.4rem 0;
+      color: {_INK};
+  }}
+  .amr-notes p {{
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: {_MUTED};
+      margin: 0;
+  }}
+  .amr-owner {{
+      font-size: 0.82rem;
+      color: {_MUTED};
+      margin-top: 1.2rem;
+  }}
 </style>
 """
 
 
-def _grid(counts: Dict[str, object]) -> None:
-    st.markdown(_CARD_CSS, unsafe_allow_html=True)
-    st.subheader("Explore the surveillance")
-    st.caption(
-        "Each section opens its own page, with its own filters and its own "
-        "statement of what it does not show.")
-    for start in range(0, len(SECTIONS), 3):
-        row = SECTIONS[start:start + 3]
-        columns = st.columns(3)
-        for column, section in zip(columns, row):
-            with column:
-                _card(section, counts)
+def _hero() -> str:
+    return f"""
+<div class="amr-hero">
+  <div class="amr-eyebrow">{escape(OWNER_SHORT)} &middot; One Health surveillance</div>
+  <h1>Antimicrobial resistance in Ghana</h1>
+  <p>Resistance, the organisms behind it, the antimicrobials being used and the
+  genomes explaining it &mdash; collected across human, animal, food,
+  environmental and aquaculture sources, and reported together.</p>
+  <div class="amr-fineprint">Published by the {escape(OWNER)}, University of
+  Ghana. Everything on these pages is an aggregate: no patient, specimen or
+  individual result is shown, and any figure resting on too few records is
+  withheld rather than published.</div>
+</div>
+"""
 
 
-def _footer() -> None:
-    st.markdown("---")
-    left, right = st.columns([3, 2])
-    with left:
-        st.markdown("**How to read anything on these pages**")
-        st.caption(
-            "A percentage is never published on fewer than thirty isolates, "
-            "every percentage carries a 95% confidence interval, rates are "
-            "pooled rather than averaged across facilities, and sectors are "
-            "never combined into one national figure unless a page says so. "
-            "Counts resting on fewer than five records are withheld -- and "
-            "withheld means too few to publish, not none found.")
-    with right:
-        st.markdown("**What this is and is not**")
-        st.caption(
-            "This is laboratory-based sentinel surveillance. It describes the "
-            "isolates that reached a participating laboratory, which is not a "
-            "random sample of infections in the country: specimens arrive more "
-            "often from severe infections and from facilities with a "
-            "laboratory on site. It is not a measure of the burden of "
-            "resistance in the general population.")
+def _stats(counts: Dict[str, object]) -> str:
+    cells = [
+        (int(counts.get("specimens") or 0), "Specimens"),
+        (int(counts.get("isolates") or 0), "Isolates"),
+        (int(counts.get("results") or 0), "Susceptibility results"),
+        (int(counts.get("genomes") or 0), "Genomes sequenced"),
+        (int(counts.get("labs") or 0), "Laboratories"),
+        (int(counts.get("regions") or 0), "Regions"),
+    ]
+    blocks = "".join(
+        f'<div class="amr-stat-cell"><span class="n">{value:,}</span>'
+        f'<span class="k">{escape(label)}</span></div>'
+        for value, label in cells)
+    return f'<div class="amr-stats">{blocks}</div>'
 
-    st.caption(
-        f"{OWNER}, University of Ghana. Laboratories are named throughout, "
-        "because a rate nobody can attribute is a rate nobody can act on.")
+
+def _coverage(counts: Dict[str, object]) -> str:
+    """The collection window, stated in words rather than as two timestamps."""
+    try:
+        start = pd.to_datetime(counts.get("first_collected"), errors="coerce",
+                               utc=True)
+        end = pd.to_datetime(counts.get("last_collected"), errors="coerce",
+                             utc=True)
+    except Exception:                                 # noqa: BLE001
+        return ""
+    if pd.isna(start) or pd.isna(end):
+        return ""
+    sectors = int(counts.get("sectors") or 0)
+    return (
+        f'<p class="amr-coverage">Specimens collected between '
+        f'<strong>{start:%B %Y}</strong> and <strong>{end:%B %Y}</strong>, '
+        f'across {sectors} sector{"s" if sectors != 1 else ""}. Each '
+        "patient's first isolate of an organism is counted once, following "
+        "CLSI M39, so repeat sampling of one patient does not weight any "
+        "figure.</p>")
+
+
+def _card(section: Section, counts: Dict[str, object]) -> str:
+    value, unit = section.stat(counts)
+    return f"""
+<a class="amr-card" href="{escape(_href(section.key))}" target="_self"
+   aria-label="Open {escape(section.title)}">
+  <span class="amr-rule" style="background:{section.colour}"></span>
+  <span class="amr-card-head">
+    <span class="amr-badge" style="background:{section.colour}">{escape(section.icon)}</span>
+    <span class="amr-card-title">{escape(section.title)}</span>
+  </span>
+  <span class="amr-stat" style="color:{section.colour}">{escape(value)}</span>
+  <span class="amr-unit">{escape(unit)}</span>
+  <span class="amr-blurb">{escape(section.blurb)}</span>
+  <span class="amr-cta" style="color:{section.colour}">Open {escape(section.title)} &rarr;</span>
+</a>
+"""
+
+
+def _grid(counts: Dict[str, object]) -> str:
+    cards = "".join(_card(section, counts) for section in SECTIONS)
+    return (f'<div class="amr-section-label">Explore the surveillance</div>'
+            f'<div class="amr-grid">{cards}</div>')
+
+
+def _notes() -> str:
+    return f"""
+<div class="amr-notes">
+  <div>
+    <h4>How to read anything on these pages</h4>
+    <p>A percentage is never published on fewer than thirty isolates, every
+    percentage carries a 95% confidence interval, rates are pooled rather than
+    averaged across facilities, and sectors are never combined into one
+    national figure unless a page says so. Counts resting on fewer than five
+    records are withheld &mdash; and withheld means too few to publish, not
+    none found.</p>
+  </div>
+  <div>
+    <h4>What this is and is not</h4>
+    <p>This is laboratory-based sentinel surveillance. It describes the
+    isolates that reached a participating laboratory, which is not a random
+    sample of infections in the country: specimens arrive more often from
+    severe infections and from facilities with a laboratory on site. It is not
+    a measure of the burden of resistance in the general population.</p>
+  </div>
+</div>
+<p class="amr-owner">{escape(OWNER)}, University of Ghana. Laboratories are
+named throughout, because a rate nobody can attribute is a rate nobody can act
+on.</p>
+"""
+
+
+def render_home_page() -> None:
+    counts = landing_counts()
+
+    st.markdown(_CSS, unsafe_allow_html=True)
+    st.markdown(_hero(), unsafe_allow_html=True)
+
+    if not int(counts.get("specimens") or 0):
+        st.info(
+            "No surveillance data has been published yet. Once data is "
+            "available, this page will show how much of it there is and open "
+            "onto the resistance, organism, One Health, genomic and "
+            "antimicrobial-use sections.")
+        st.markdown(_notes(), unsafe_allow_html=True)
+        return
+
+    # One block, so the browser lays the grid out rather than Streamlit laying
+    # out three columns that cannot equalise their heights.
+    st.markdown(_stats(counts) + _coverage(counts) + _grid(counts) + _notes(),
+                unsafe_allow_html=True)
 
     _admin_hint()
 
@@ -215,27 +417,6 @@ def _admin_hint() -> None:
         wants = False
     if wants:
         st.caption("Administrative view requested. Sign in from the sidebar.")
-
-
-def render_home_page() -> None:
-    counts = landing_counts()
-
-    _hero(counts)
-
-    if not int(counts.get("specimens") or 0):
-        st.info(
-            "No surveillance data has been published yet. Once data is "
-            "available, this page will show how much of it there is and open "
-            "onto the resistance, organism, One Health, genomic and "
-            "antimicrobial-use sections.")
-        _footer()
-        return
-
-    st.markdown("")
-    _headline(counts)
-    st.markdown("---")
-    _grid(counts)
-    _footer()
 
 
 __all__ = ["render_home_page", "OWNER", "OWNER_SHORT"]

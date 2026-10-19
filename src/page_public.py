@@ -29,7 +29,9 @@ a rate nobody can attribute is a rate nobody can act on.
 
 from __future__ import annotations
 
+from html import escape
 from typing import Callable, Dict, List, NamedTuple, Tuple
+from urllib.parse import urlencode
 
 import pandas as pd
 import plotly.express as px
@@ -110,21 +112,78 @@ def landing_counts() -> Dict[str, object]:
 
 
 def go(page: str) -> None:
-    """Navigate, which on this platform means setting one session key."""
+    """Navigate, and put it in the URL.
+
+    Session state alone would make a section unlinkable: the reader could not
+    bookmark it, could not send it to a colleague, and the browser's back
+    button would leave the page where it was. So the URL carries the page and
+    the session key follows it.
+    """
     st.session_state.active_page = page
+    try:
+        if page == "Home":
+            if "page" in st.query_params:
+                del st.query_params["page"]
+        else:
+            st.query_params["page"] = page
+    except Exception:                                 # noqa: BLE001
+        pass
     st.rerun()
 
 
+def _overview_href() -> str:
+    """A link back to the landing page, keeping ``?admin=1`` if it is set."""
+    params = {}
+    try:
+        for key, value in st.query_params.items():
+            if key != "page":
+                params[key] = value
+    except Exception:                                 # noqa: BLE001
+        params = {}
+    return "?" + urlencode(params) if params else "?"
+
+
 def _back_bar(title: str, subtitle: str) -> None:
-    left, right = st.columns([5, 1])
-    with left:
-        st.title(title)
-        st.caption(subtitle)
-    with right:
-        st.write("")
-        if st.button("Back to overview", use_container_width=True,
-                     key=f"back_{title}"):
-            go("Home")
+    """The header every section page shares.
+
+    The way back is an anchor rather than a button so it behaves like a link:
+    it can be opened in a new tab, it shows its destination on hover, and it
+    does not cost a server round trip to find out where it goes.
+    """
+    st.markdown(
+        f"""
+        <style>
+          .amr-crumb {{
+              display: inline-block;
+              font-size: 0.84rem;
+              font-weight: 600;
+              color: #1d4d43 !important;
+              text-decoration: none !important;
+              margin-bottom: 0.35rem;
+          }}
+          .amr-crumb:hover {{ text-decoration: underline !important; }}
+          .amr-page-title {{
+              font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+              font-weight: 700;
+              line-height: 1.12;
+              letter-spacing: -0.015em;
+              margin: 0 0 0.3rem 0;
+              color: #1a170e;
+          }}
+          .amr-page-sub {{
+              font-size: 1rem;
+              line-height: 1.6;
+              color: rgba(26, 23, 14, 0.66);
+              max-width: 70ch;
+              margin: 0 0 1.1rem 0;
+          }}
+        </style>
+        <a class="amr-crumb" href="{escape(_overview_href())}" target="_self">
+          &larr; All sections</a>
+        <h1 class="amr-page-title">{escape(title)}</h1>
+        <p class="amr-page-sub">{escape(subtitle)}</p>
+        """,
+        unsafe_allow_html=True)
 
 
 class Scope(NamedTuple):

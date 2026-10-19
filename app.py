@@ -1792,6 +1792,40 @@ try:
         "1", "true", "yes")
 except Exception:                                     # noqa: BLE001
     WANTS_ADMIN = False
+
+
+def _clear_page_param() -> None:
+    """Drop ?page= without disturbing ?admin=.
+
+    Called when the sidebar navigates, because a stale ?page= in the URL would
+    otherwise win on the next run and bounce the reader straight back to the
+    public page they just left.
+    """
+    try:
+        if "page" in st.query_params:
+            del st.query_params["page"]
+    except Exception:                                 # noqa: BLE001
+        pass
+
+
+# The URL is the source of truth for the public pages, so every section has a
+# real address: a reader can bookmark one, a colleague can be sent a link to
+# it, and the browser's back button works. Only public keys are honoured --
+# the staff pages stay behind the sidebar, where a URL would be a way of
+# guessing at them.
+_url_page = ""
+try:
+    _url_page = str(st.query_params.get("page", "")).strip()
+except Exception:                                     # noqa: BLE001
+    _url_page = ""
+if _url_page:
+    if _url_page.lower() in ("home", "overview", "landing"):
+        st.session_state.active_page = "Home"
+    elif _url_page.startswith(PUBLIC_PAGE_PREFIX):
+        st.session_state.active_page = _url_page
+    else:
+        _clear_page_param()
+
 _page_now = str(st.session_state.active_page)
 _on_public_surface = (
     not st.session_state.get("authenticated")
@@ -1928,6 +1962,7 @@ with st.sidebar:
     st.markdown(f'<div class="{_home_cls}">', unsafe_allow_html=True)
     if st.button("🏠  Home", key="nav_Home", use_container_width=True):
         st.session_state.active_page = "Home"
+        _clear_page_param()
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -1939,6 +1974,7 @@ with st.sidebar:
                 st.markdown(f'<div class="{_css_class}">', unsafe_allow_html=True)
                 if st.button(f"{_picon}  {_pname}", key=f"nav_{_pname}", use_container_width=True):
                     st.session_state.active_page = _pname
+                    _clear_page_param()
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
