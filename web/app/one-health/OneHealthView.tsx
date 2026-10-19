@@ -110,11 +110,6 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
         />
       </div>
 
-      <Note>
-        Sectors are never pooled into one percentage. A rate mixing hospital
-        isolates with river water describes neither.
-      </Note>
-
       <StatStrip
         stats={[
           { value: count(data.sectorsPresent.length), label: "Sectors" },
@@ -128,18 +123,12 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
         ]}
       />
 
-      <Section
-        title="Isolates by sector"
-        intro="Counted separately. Sector colours are fixed across the site."
-      >
+      <Section title="Isolates by sector">
         <BarChart rows={sectorRows} unit="Isolates" labelWidth={140} />
         <SuppressionNote suppression={data.sectorSuppression} />
       </Section>
 
-      <Section
-        title="Organisms found in more than one sector"
-        intro="Shared presence is a reason to look, not evidence of transmission."
-      >
+      <Section title="Organisms found in more than one sector">
         {grid.organisms.length === 0 ? (
           <Empty>
             No organism in this data was isolated from more than one sector.
@@ -190,23 +179,14 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
             </table>
           </div>
         )}
-        <Caption>
-          Three states kept apart: a count, &ldquo;withheld&rdquo; (found but
-          too few to publish) and &ldquo;none found&rdquo; (not isolated there).
-        </Caption>
         <SuppressionNote suppression={data.sharedSuppression} />
       </Section>
 
-      <Note tone="limit">
-        <strong>What this cannot show.</strong> Establishing a link between
-        sectors needs related genomes, dated sampling and a plausible route —
-        see the genomics section.
-      </Note>
+      <Caption>
+        Shared presence is a reason to look, not evidence of transmission.
+      </Caption>
 
-      <Note>
-        <strong>Method.</strong> {data.deduplication} Sector counts are
-        isolates, with secondary suppression across each organism&rsquo;s row.
-      </Note>
+
     </>
   );
 }

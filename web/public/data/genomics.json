@@ -430,8 +430,8 @@
   "primary": 0,
   "secondary": 0,
   "cellsTotal": 46,
-  "threshold": 5,
-  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "concordance": {
   "summary": {
@@ -566,8 +566,8 @@
    "primary": 0,
    "secondary": 0,
    "cellsTotal": 24,
-   "threshold": 5,
-   "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
   }
  },
  "clusters": [
@@ -976,10 +976,24 @@
    "first_collected": "2024-09-12T15:15:00+00:00",
    "last_collected": "2025-10-20T00:00:00+00:00",
    "span_days": 402
+  },
+  {
+   "cluster_id": "CL-030",
+   "method": "cgMLST",
+   "isolates": 3,
+   "organisms": 3,
+   "organism": "Klebsiella pneumoniae; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 1,
+   "sector_mix": "human",
+   "sequence_types": "ST307",
+   "labs": 3,
+   "first_collected": "2025-03-03T16:15:00+00:00",
+   "last_collected": "2026-06-30T00:00:00+00:00",
+   "span_days": 483
   }
  ],
  "clustersTotal": 30,
- "clustersWithheld": 1,
+ "clustersWithheld": 0,
  "clustersUnassigned": 230,
  "clusterMethods": [
   "MLST + core-genome SNP (<=15 SNPs)",
@@ -1131,8 +1145,8 @@
   "primary": 0,
   "secondary": 0,
   "cellsTotal": 33,
-  "threshold": 5,
-  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "plasmids": {
   "label": "Plasmid replicons",
@@ -1178,8 +1192,8 @@
    "primary": 0,
    "secondary": 0,
    "cellsTotal": 7,
-   "threshold": 5,
-   "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
   },
   "examined": 1860
  },
@@ -1232,8 +1246,8 @@
    "primary": 0,
    "secondary": 0,
    "cellsTotal": 8,
-   "threshold": 5,
-   "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
   },
   "examined": 1860
  }

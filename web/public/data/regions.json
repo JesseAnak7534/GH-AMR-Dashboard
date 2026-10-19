@@ -246,8 +246,8 @@
   "primary": 0,
   "secondary": 0,
   "cellsTotal": 16,
-  "threshold": 5,
-  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "bySector": [
   {
@@ -283,12 +283,12 @@
   {
    "region": "Ashanti",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "Ashanti",
    "sector": "environment",
-   "isolates": "withheld"
+   "isolates": 9
   },
   {
    "region": "Ashanti",
@@ -308,12 +308,12 @@
   {
    "region": "Bono",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "Bono",
    "sector": "environment",
-   "isolates": "withheld"
+   "isolates": 7
   },
   {
    "region": "Bono",
@@ -358,12 +358,12 @@
   {
    "region": "Central",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "Central",
    "sector": "environment",
-   "isolates": "withheld"
+   "isolates": 13
   },
   {
    "region": "Central",
@@ -378,12 +378,12 @@
   {
    "region": "Eastern",
    "sector": "animal",
-   "isolates": "withheld"
+   "isolates": 13
   },
   {
    "region": "Eastern",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 2
   },
   {
    "region": "Eastern",
@@ -433,7 +433,7 @@
   {
    "region": "North East",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "North East",
@@ -443,7 +443,7 @@
   {
    "region": "North East",
    "sector": "food",
-   "isolates": "withheld"
+   "isolates": 12
   },
   {
    "region": "North East",
@@ -578,12 +578,12 @@
   {
    "region": "Volta",
    "sector": "animal",
-   "isolates": "withheld"
+   "isolates": 12
   },
   {
    "region": "Volta",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "Volta",
@@ -633,12 +633,12 @@
   {
    "region": "Western North",
    "sector": "aquaculture",
-   "isolates": "withheld"
+   "isolates": 4
   },
   {
    "region": "Western North",
    "sector": "environment",
-   "isolates": "withheld"
+   "isolates": 6
   },
   {
    "region": "Western North",
@@ -652,12 +652,12 @@
   }
  ],
  "bySectorSuppression": {
-  "withheld": 14,
-  "primary": 7,
-  "secondary": 7,
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
   "cellsTotal": 80,
-  "threshold": 5,
-  "summary": "14 of 80 values (17.5%) are withheld because fewer than 5 records stand behind them. 7 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "centroids": {
   "Ahafo": {

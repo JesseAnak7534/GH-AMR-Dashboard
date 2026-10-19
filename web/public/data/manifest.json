@@ -1,17 +1,21 @@
 {
- "generatedAt": "2026-10-19T19:20:02.593850+00:00",
- "threshold": 5,
+ "generatedAt": "2026-10-19T20:35:39.146209+00:00",
+ "threshold": 1,
  "minIsolatesForReporting": 30,
  "counts": {
   "genomes": 1860,
   "useRecords": 3574,
+  "amu": 2186,
+  "amc": 1370,
+  "pps": 18,
   "specimens": 2478,
   "isolates": 2667,
   "results": 20826,
   "organisms": 13,
   "laboratories": 19,
   "sectors": 5,
-  "regions": 16
+  "regions": 16,
+  "months": 31
  },
  "period": {
   "first": "2024-03-02T00:00:00+00:00",

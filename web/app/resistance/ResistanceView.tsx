@@ -243,14 +243,6 @@ export function ResistanceView({
       align: "right",
       format: "percent",
     },
-    {
-      key: "ci",
-      header: "95% CI",
-      align: "right",
-      format: "text",
-      value: (row) => interval(row.ci_low, row.ci_high),
-    },
-    { key: "breakpoints", header: "Breakpoints", format: "text" },
   ];
 
   const activeStratum =
@@ -270,13 +262,6 @@ export function ResistanceView({
       header: "% non-susceptible",
       align: "right",
       format: "percent",
-    },
-    {
-      key: "ci",
-      header: "95% CI",
-      align: "right",
-      format: "text",
-      value: (row) => interval(row.ci_low, row.ci_high),
     },
     { key: "distinct_pairs", header: "Distinct pairs", align: "right" },
   ];
@@ -395,10 +380,7 @@ export function ResistanceView({
             </div>
           </Section>
 
-          <Section
-            title="Every published combination"
-            intro="Search and sort. Every row shown has already passed disclosure control."
-          >
+          <Section title="Every published combination">
             <DataTable
               columns={antibiogramColumns}
               rows={rows}
@@ -412,10 +394,7 @@ export function ResistanceView({
       )}
 
       {activeStratum ? (
-        <Section
-          title="Resistance by setting"
-          intro="The unit is one isolate against one agent, not the isolate."
-        >
+        <Section title="Resistance by setting">
           <Segmented
             label="Split by"
             options={(slice?.strata ?? []).map((s) => s.key)}
@@ -432,11 +411,8 @@ export function ResistanceView({
             />
           </div>
           <Caption>
-            Comparable only where similar panels were tested — the distinct-pair
-            count beside each says how similar. Published per sector, so it does
-            not follow the narrowing filters above.
+            Published per sector, so it does not follow the filters above.
           </Caption>
-          <SuppressionNote suppression={activeStratum.suppression} />
         </Section>
       ) : null}
 

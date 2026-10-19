@@ -209,10 +209,7 @@ export function OrganismsView({
         <Empty>No organism in this view matches those filters.</Empty>
       ) : (
         <>
-          <Section
-            title="Most frequently isolated"
-            intro="First isolate per patient per organism, so repeat sampling does not weight the ranking."
-          >
+          <Section title="Most frequently isolated">
             <BarChart rows={chartRows} unit="Isolates" colour={slice?.colour} />
           </Section>
 
@@ -229,10 +226,7 @@ export function OrganismsView({
         </>
       )}
 
-      <Section
-        title="Specimen types behind these isolates"
-        intro="What the isolate was grown from changes what it means."
-      >
+      <Section title="Specimen types behind these isolates">
         <DataTable
           columns={specimenColumns}
           rows={slice?.specimenTypes ?? []}
@@ -241,20 +235,9 @@ export function OrganismsView({
           initialSort={{ key: "isolates", direction: "desc" }}
         />
         <SuppressionNote suppression={slice?.specimenTypeSuppression} />
-        {slice?.sterileSitePercent !== null &&
-        slice?.sterileSitePercent !== undefined ? (
-          <Caption>
-            {percent(slice.sterileSitePercent)} came from a normally sterile
-            site. Blood or CSF is almost certainly disease; a wound swab may be
-            colonisation.
-          </Caption>
-        ) : null}
       </Section>
 
-      <Note>
-        <strong>Method.</strong> {data.deduplication} Counts are isolates, not
-        susceptibility results.
-      </Note>
+      <Caption>Counts are isolates, not susceptibility results.</Caption>
     </>
   );
 }

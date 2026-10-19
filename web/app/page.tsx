@@ -38,9 +38,9 @@ export default function HomePage() {
             food, environmental and aquaculture sources, and reported together.
           </p>
           <p className="mt-5 max-w-[78ch] text-[0.87rem] leading-relaxed text-white/70">
-            Institute for Clinical Biochemistry and Biotechnology, University
-            of Ghana. Aggregate figures only — nothing resting on fewer than{" "}
-            {manifest.threshold} records is published.
+            Institute of Computational Biology and Bioinformatics, University
+            of Ghana. Every figure is an aggregate: no patient, specimen or
+            individual result is shown.
           </p>
         </div>
       </section>
@@ -140,7 +140,7 @@ export default function HomePage() {
 
       {/* ── How to read it ─────────────────────────────────────────── */}
       <section className="border-t border-rule bg-shell">
-        <div className="mx-auto grid max-w-[1180px] gap-10 px-5 py-12 lg:grid-cols-3">
+        <div className="mx-auto grid max-w-[1180px] gap-10 px-5 py-12 lg:grid-cols-2">
           <div>
             <h2 className="text-[1.06rem] font-bold">
               How to read anything on this site
@@ -149,15 +149,6 @@ export default function HomePage() {
               No percentage below {manifest.minIsolatesForReporting} isolates.
               Every percentage carries a 95% confidence interval. Rates are
               pooled, not averaged. Sectors are never combined into one figure.
-            </p>
-          </div>
-          <div>
-            <h2 className="text-[1.06rem] font-bold">What is withheld</h2>
-            <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              Counts below {manifest.threshold} records are withheld, and so is
-              any percentage over them.{" "}
-              <strong className="font-semibold">Withheld is not zero</strong> —
-              it means too few to publish, not none found.
             </p>
           </div>
           <div>

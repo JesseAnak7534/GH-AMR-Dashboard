@@ -142,8 +142,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "series": []
   },
@@ -153,7 +153,7 @@
    "periods": [
     {
      "period": "2024Q1",
-     "isolates": "withheld",
+     "isolates": 4,
      "observations": 24,
      "susceptible": 14,
      "non_susceptible": 10,
@@ -285,12 +285,12 @@
     }
    ],
    "suppression": {
-    "withheld": 1,
-    "primary": 1,
+    "withheld": 0,
+    "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "1 of 11 values (9.1%) are withheld because fewer than 5 records stand behind them. Withheld is not zero."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "series": []
   },
@@ -436,8 +436,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "series": []
   },
@@ -583,8 +583,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "series": []
   },
@@ -730,8 +730,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "series": [
     {
@@ -876,8 +876,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1022,8 +1022,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1168,8 +1168,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1314,8 +1314,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1460,8 +1460,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1606,8 +1606,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1752,8 +1752,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     },
     {
@@ -1898,8 +1898,8 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 11,
-      "threshold": 5,
-      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+      "threshold": 1,
+      "summary": "No cell was withheld. Every value shown rests on at least 1 records."
      }
     }
    ]

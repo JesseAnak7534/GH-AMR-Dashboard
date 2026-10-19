@@ -58,6 +58,9 @@ export interface Manifest {
   counts: {
     genomes: number;
     useRecords: number;
+    amu: number;
+    amc: number;
+    pps: number;
     specimens: number;
     isolates: number;
     results: number;
@@ -65,6 +68,7 @@ export interface Manifest {
     laboratories: number;
     sectors: number;
     regions: number;
+    months: number;
   };
   period: { first: string | null; last: string | null };
   sectors: string[];
@@ -285,7 +289,7 @@ export const SECTIONS: SectionMeta[] = [
     blurb:
       "How resistance has moved by quarter, with the confidence band drawn so a change can be read against its uncertainty.",
     colour: "#56B4E9",
-    stat: (m) => ({ value: m.counts.results, unit: "results over time" }),
+    stat: (m) => ({ value: m.counts.months, unit: "months of data" }),
   },
   {
     href: "/mdr",
@@ -333,25 +337,28 @@ export const SECTIONS: SectionMeta[] = [
     stat: (m) => ({ value: m.counts.genomes, unit: "genomes sequenced" }),
   },
   {
-    href: "/antimicrobial-use",
+    href: "/amu",
     badge: "AMU",
     title: "Antimicrobial use",
-    blurb:
-      "Human and veterinary consumption and hospital prescribing, as pooled rates with their denominators.",
+    blurb: "Human consumption, as defined daily doses per 1,000 patient-days.",
     colour: "#E69F00",
-    stat: (m) => ({
-      value: m.counts.useRecords,
-      unit: "use and prescribing records",
-    }),
+    stat: (m) => ({ value: m.counts.amu, unit: "consumption records" }),
   },
   {
-    href: "/about",
-    badge: "DOC",
-    title: "About this data",
-    blurb:
-      "How every figure is calculated, what is withheld and why, and what laboratory-based surveillance cannot tell you.",
+    href: "/amc",
+    badge: "AMC",
+    title: "Veterinary consumption",
+    blurb: "Animal-sector consumption, as milligrams per kilogram of biomass.",
     colour: "#999999",
-    stat: (m) => ({ value: m.counts.laboratories, unit: "contributing laboratories" }),
+    stat: (m) => ({ value: m.counts.amc, unit: "veterinary records" }),
+  },
+  {
+    href: "/pps",
+    badge: "PPS",
+    title: "Point prevalence",
+    blurb: "How many hospital patients were on an antibiotic, and what was prescribed.",
+    colour: "#8a6a22",
+    stat: (m) => ({ value: m.counts.pps, unit: "prevalence surveys" }),
   },
 ];
 

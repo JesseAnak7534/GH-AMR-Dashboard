@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Column, DataTable } from "@/components/DataTable";
 import {
+  Caption,
   Empty,
   Note,
   Section,
@@ -149,10 +150,7 @@ export function TrendsView({ data }: { data: TrendsData }) {
       </Section>
 
       {pairs.length ? (
-        <Section
-          title="The most-tested pairs"
-          intro="Susceptibility, not non-susceptibility, so a falling line is a worsening picture."
-        >
+        <Section title="The most-tested pairs (susceptibility)">
           <TrendChart series={pairs} unit="% susceptible" />
         </Section>
       ) : (
@@ -175,12 +173,10 @@ export function TrendsView({ data }: { data: TrendsData }) {
         <SuppressionNote suppression={slice.suppression} />
       </Section>
 
-      <Note>
-        <strong>Method.</strong> Quarterly, and deduplicated inside each quarter
-        rather than across the series — a patient&rsquo;s isolate a year later
-        is next year&rsquo;s data point, not a repeat. A quarter with fewer than{" "}
-        {data.minObservations} results is not plotted and the line breaks there.
-      </Note>
+      <Caption>
+        Quarterly, deduplicated inside each quarter. A quarter with fewer than{" "}
+        {data.minObservations} results is not plotted.
+      </Caption>
     </>
   );
 }

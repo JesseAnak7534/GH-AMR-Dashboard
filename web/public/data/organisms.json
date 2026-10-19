@@ -78,8 +78,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 13,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -124,8 +124,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 9,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 18.465227817745802
   },
@@ -162,8 +162,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 4,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -176,8 +176,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 1,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 0.0
   },
@@ -209,8 +209,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 3,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -223,8 +223,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 1,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 0.0
   },
@@ -261,8 +261,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 4,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -275,8 +275,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 1,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 0.0
   },
@@ -313,8 +313,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 4,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -327,8 +327,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 1,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 0.0
   },
@@ -410,8 +410,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 13,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "specimenTypes": [
     {
@@ -452,8 +452,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 8,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "sterileSitePercent": 27.582089552238806
   }

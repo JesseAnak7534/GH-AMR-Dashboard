@@ -97,18 +97,20 @@ app/
                       with the WHO and Ghana priority lists as a lens
   trends/             resistance by quarter, with confidence bands
   mdr/                MDR and XDR to the Magiorakos definitions
+  regions/            the Folium map and the region table
   organisms/          what is being isolated, counted as isolates
   one-health/         sectors side by side; the cross-sector grid
-  regions/            proportional-symbol map and the region table
   genomics/           determinants, concordance, clusters, STs, plasmids
-  antimicrobial-use/  pooled AMU and AMC rates, prescribing
-  about/              method, what is withheld, field completeness
+  amu/                human consumption, DDD per 1,000 patient-days
+  amc/                veterinary consumption, mg per kg biomass
+  pps/                point prevalence of antibiotic use
 components/
   Chrome.tsx          page header, sections, stat strips, notes
   Charts.tsx          SVG charts: bars, point-with-interval, proportion
   TrendChart.tsx      time series with its confidence band
   HeatGrid.tsx        the antibiogram as a matrix
-  RegionMap.tsx       regions as proportional symbols
+  FoliumMap.tsx       embeds the Folium map built by the export
+  Pooled.tsx          a pooled consumption rate, shared by AMU and AMC
   DataTable.tsx       sortable, searchable, withheld-aware table
   Segmented.tsx       the control that switches between published slices
 lib/
@@ -189,11 +191,18 @@ against two categories cannot answer a question about three, so it is reported
 as "insufficient testing" rather than as "not MDR" — otherwise a laboratory
 with a small panel looks like one with little resistance.
 
-**The region map uses symbols, not shading.** No specimen carries coordinates
-and the repository holds no boundary polygons, so each region is a circle at
-its centroid with area proportional to isolates. A circle at a point claims
-less than a filled district, and the map is of where specimens were collected,
-not of where resistance is.
+**The region map is built by Folium**, in `scripts/export_map.py`, and embedded
+as the page it produces — one map implementation rather than two, on the same
+OpenStreetMap basemap and region centroids the Streamlit pages use. Circles,
+not shading: no specimen carries coordinates and there are no boundary polygons
+here. The map is of where specimens were collected, not of where resistance is.
+
+**Suppression is a setting, not a constant.** The export defaults to
+`--threshold 1`, which publishes every count, and says so on every run. The
+machinery stays in place: `--threshold 5` or higher turns it back on and
+nothing downstream changes. **Raise it before this site carries real patient
+data.** The UI follows the setting — the withheld language and the withheld
+columns appear only when something was actually withheld.
 
 **Hospital identity is not published.** Laboratories are named — attribution is
 the point of sentinel surveillance — but facility names are not, which is why

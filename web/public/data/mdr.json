@@ -34,14 +34,14 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 4,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
      "organism": "Acinetobacter baumannii",
      "classification": "Insufficient testing",
-     "isolates": "withheld"
+     "isolates": 3
     },
     {
      "organism": "Acinetobacter baumannii",
@@ -51,7 +51,7 @@
     {
      "organism": "Acinetobacter baumannii",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 18
     },
     {
      "organism": "Campylobacter jejuni",
@@ -71,7 +71,7 @@
     {
      "organism": "Escherichia coli",
      "classification": "Insufficient testing",
-     "isolates": "withheld"
+     "isolates": 4
     },
     {
      "organism": "Escherichia coli",
@@ -81,7 +81,7 @@
     {
      "organism": "Escherichia coli",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 253
     },
     {
      "organism": "Haemophilus influenzae",
@@ -170,12 +170,12 @@
     }
    ],
    "byOrganismSuppression": {
-    "withheld": 4,
-    "primary": 2,
-    "secondary": 2,
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
     "cellsTotal": 26,
-    "threshold": 5,
-    "summary": "4 of 26 values (15.4%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   },
   {
@@ -207,8 +207,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 3,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
@@ -252,8 +252,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 7,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   },
   {
@@ -281,8 +281,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 2,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
@@ -298,31 +298,31 @@
     {
      "organism": "Pseudomonas aeruginosa",
      "classification": "MDR",
-     "isolates": "withheld"
+     "isolates": 4
     },
     {
      "organism": "Pseudomonas aeruginosa",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 24
     },
     {
      "organism": "Salmonella enterica",
      "classification": "MDR",
-     "isolates": "withheld"
+     "isolates": 3
     },
     {
      "organism": "Salmonella enterica",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 18
     }
    ],
    "byOrganismSuppression": {
-    "withheld": 4,
-    "primary": 2,
-    "secondary": 2,
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
     "cellsTotal": 6,
-    "threshold": 5,
-    "summary": "4 of 6 values (66.7%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   },
   {
@@ -355,19 +355,19 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 3,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
      "organism": "Acinetobacter baumannii",
      "classification": "MDR",
-     "isolates": "withheld"
+     "isolates": 19
     },
     {
      "organism": "Acinetobacter baumannii",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 4
     },
     {
      "organism": "Escherichia coli",
@@ -406,12 +406,12 @@
     }
    ],
    "byOrganismSuppression": {
-    "withheld": 2,
-    "primary": 1,
-    "secondary": 1,
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
     "cellsTotal": 9,
-    "threshold": 5,
-    "summary": "2 of 9 values (22.2%) are withheld because fewer than 5 records stand behind them. 1 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   },
   {
@@ -443,8 +443,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 3,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
@@ -488,8 +488,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 7,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   },
   {
@@ -526,14 +526,14 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 4,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "byOrganism": [
     {
      "organism": "Acinetobacter baumannii",
      "classification": "Insufficient testing",
-     "isolates": "withheld"
+     "isolates": 3
     },
     {
      "organism": "Acinetobacter baumannii",
@@ -543,7 +543,7 @@
     {
      "organism": "Acinetobacter baumannii",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 14
     },
     {
      "organism": "Campylobacter jejuni",
@@ -563,7 +563,7 @@
     {
      "organism": "Escherichia coli",
      "classification": "Insufficient testing",
-     "isolates": "withheld"
+     "isolates": 4
     },
     {
      "organism": "Escherichia coli",
@@ -573,7 +573,7 @@
     {
      "organism": "Escherichia coli",
      "classification": "Not MDR",
-     "isolates": "withheld"
+     "isolates": 160
     },
     {
      "organism": "Haemophilus influenzae",
@@ -662,12 +662,12 @@
     }
    ],
    "byOrganismSuppression": {
-    "withheld": 4,
-    "primary": 2,
-    "secondary": 2,
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
     "cellsTotal": 26,
-    "threshold": 5,
-    "summary": "4 of 26 values (15.4%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    }
   }
  ],

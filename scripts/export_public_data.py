@@ -49,6 +49,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts import export_sections as sections  # noqa: E402
+from scripts import export_map  # noqa: E402
 from scripts import export_slices as slices  # noqa: E402
 from src import consumption, db, disclosure, genomics as gx, palette  # noqa: E402
 from src import surveillance as sv  # noqa: E402
@@ -465,6 +466,19 @@ def _priority_lookup() -> Dict[str, object]:
         return {}
 
 
+def _use_record_split():
+    """AMU, AMC and PPS counted separately, for the three section cards."""
+    out = []
+    for loader in (db.get_amu_records, db.get_amc_records, db.get_pps_surveys):
+        try:
+            frame = loader()
+        except Exception:                             # noqa: BLE001
+            out.append(0)
+            continue
+        out.append(int(len(frame)) if frame is not None and not frame.empty else 0)
+    return tuple(out)
+
+
 def _use_record_total() -> int:
     """Consumption and prescribing records, counted together.
 
@@ -487,16 +501,22 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default=DEFAULT_OUT,
                         help=f"output directory (default: {DEFAULT_OUT})")
-    parser.add_argument("--threshold", type=int,
-                        default=disclosure.MIN_PUBLIC_CELL,
-                        help="smallest publishable cell; may be raised, never "
-                             "lowered")
+    parser.add_argument("--threshold", type=int, default=1,
+                        help="smallest publishable cell. 1 publishes every "
+                             "count. Raise it to "
+                             f"{disclosure.MIN_PUBLIC_CELL} or above before "
+                             "publishing real patient data.")
     args = parser.parse_args()
 
-    threshold = max(int(args.threshold), disclosure.MIN_PUBLIC_CELL)
-    if threshold != args.threshold:
-        print(f"Threshold raised to the floor of {threshold}: the minimum "
-              "publishable cell cannot be lowered.")
+    # Suppression is a setting, not a constant, and the export says which way
+    # it is set every time it runs. The machinery stays in place either way --
+    # turning it on is one argument, and nothing downstream has to change.
+    threshold = max(1, int(args.threshold))
+    if threshold < disclosure.MIN_PUBLIC_CELL:
+        print("Disclosure suppression is OFF: every count is published, "
+              f"including cells of one. Before this site carries real patient "
+              f"data, re-run with --threshold {disclosure.MIN_PUBLIC_CELL} "
+              "(or higher).\n")
 
     os.makedirs(args.out, exist_ok=True)
     print(f"Exporting public figures to {args.out} "
@@ -523,8 +543,13 @@ def main() -> int:
            sections.export_trends(frame, threshold, _rows, _suppress))
     _write(args.out, "mdr.json",
            sections.export_mdr(frame, threshold, _rows, _suppress))
-    _write(args.out, "regions.json",
-           sections.export_regions(frame, threshold, _rows, _suppress))
+    regions = sections.export_regions(frame, threshold, _rows, _suppress)
+    _write(args.out, "regions.json", regions)
+    map_path = export_map.build_region_map(
+        regions.get("regions", []),
+        os.path.join(args.out, "..", "maps", "regions.html"))
+    print(f"  {'maps/regions.html':<22} "
+          f"{os.path.getsize(map_path) / 1024:7.1f} KB")
     _write(args.out, "priority.json",
            sections.export_priority(frame, _priority_lookup(), threshold,
                                     _rows, _suppress))
@@ -544,6 +569,7 @@ def main() -> int:
     # every section file to find them, so they are repeated in the manifest.
     genome_count = int((genomics.get("coverage") or {}).get("sequenced") or 0)
     use_records = _use_record_total()
+    amu_records, amc_records, pps_surveys = _use_record_split()
 
     manifest = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -552,6 +578,9 @@ def main() -> int:
         "counts": {
             "genomes": genome_count,
             "useRecords": use_records,
+            "amu": amu_records,
+            "amc": amc_records,
+            "pps": pps_surveys,
             "specimens": int(frame["specimen_id"].nunique()),
             "isolates": total_isolates,
             "results": int(len(frame)),
@@ -559,6 +588,8 @@ def main() -> int:
             "laboratories": int(frame["lab_name"].nunique()),
             "sectors": int(frame["sector"].nunique()),
             "regions": int(frame["region"].nunique()),
+            "months": int(collected.dt.to_period("M").nunique())
+            if not collected.empty else 0,
         },
         "period": {
             "first": _clean(collected.min()) if not collected.empty else None,

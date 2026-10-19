@@ -164,15 +164,7 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         />
       </div>
 
-      <Note tone="limit">
-        Sequencing coverage is the ceiling on every statement here: a gene
-        frequency from a tenth of the collection describes that tenth.
-      </Note>
-
-      <Section
-        title="Resistance determinants found"
-        intro="The denominator is genomes examined, so each figure is the proportion of sequenced isolates carrying it."
-      >
+      <Section title="Resistance determinants found">
         <BarChart
           rows={determinantChart}
           unit="Genomes carrying the determinant"
@@ -186,18 +178,11 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
           searchLabel="Search gene or mechanism"
           initialSort={{ key: "isolates", direction: "desc" }}
         />
-        <Caption>
-          Every row names the database and version behind the call. A
-          determinant outside the rule set is labelled, not dropped.
-        </Caption>
         <SuppressionNote suppression={data.determinantSuppression} />
       </Section>
 
       {data.concordance ? (
-        <Section
-          title="Do the genes explain the laboratory result?"
-          intro="Four outcomes, not one score. Each is a different finding and calls for different follow-up."
-        >
+        <Section title="Do the genes explain the laboratory result?">
           <ProportionBar
             parts={data.concordance.verdicts.map((verdict) => ({
               label: verdict.verdict,
@@ -262,10 +247,7 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         </Section>
       )}
 
-      <Section
-        title="Sequence types, plasmids and virulence"
-        intro="A plasmid replicon says how a gene may be moving; a virulence gene says what the organism may do. Neither is a resistance determinant, so they are counted apart from one."
-      >
+      <Section title="Sequence types, plasmids and virulence">
         <div className="grid gap-6 lg:grid-cols-3">
           {data.sequenceTypes?.length ? (
             <div>
@@ -312,10 +294,7 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         </div>
       </Section>
 
-      <Section
-        title="Genomes that look alike"
-        intro="Cluster membership is read from the sequencing pipeline rather than recomputed here."
-      >
+      <Section title="Genomes that look alike">
         {data.clusters.length === 0 ? (
           <Empty>
             {data.clusterSummary ??
@@ -327,11 +306,18 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
               stats={[
                 { value: count(data.clustersTotal), label: "Clusters assigned" },
                 { value: count(data.clusters.length), label: "Published" },
-                {
-                  value: count(data.clustersWithheld),
-                  label: "Withheld",
-                  hint: "fewer genomes than the minimum cell",
-                },
+                // The withheld card appears only when something was withheld.
+                // A card reading "0 Withheld" is noise, and it describes a
+                // suppression setting rather than the data.
+                ...(data.clustersWithheld > 0
+                  ? [
+                      {
+                        value: count(data.clustersWithheld),
+                        label: "Withheld",
+                        hint: "fewer genomes than the minimum cell",
+                      },
+                    ]
+                  : []),
                 {
                   value: count(data.clustersUnassigned),
                   label: "Genomes with no cluster",
@@ -347,14 +333,12 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
                 initialSort={{ key: "isolates", direction: "desc" }}
               />
             </div>
-            <Caption>
-              A cluster below the minimum cell is dropped whole rather than
-              shown with its size withheld — the rest of the row describes
-              those few specimens either way.{" "}
-              {data.clustersWithheld > 0
-                ? `${count(data.clustersWithheld)} dropped for that reason. `
-                : ""}
-            </Caption>
+            {data.clustersWithheld > 0 ? (
+              <Caption>
+                {count(data.clustersWithheld)} clusters below the minimum cell
+                are dropped whole rather than shown with their size withheld.
+              </Caption>
+            ) : null}
           </>
         )}
         <Note tone="limit">
@@ -364,11 +348,6 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         </Note>
       </Section>
 
-      <Note>
-        <strong>Method.</strong> Determinant calls come from the sequencing
-        pipeline, interpreted against a documented rule set. Genomes failing QC
-        are excluded from frequencies and counted separately above.
-      </Note>
     </>
   );
 }

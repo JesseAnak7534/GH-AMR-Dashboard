@@ -31,8 +31,8 @@
   "primary": 0,
   "secondary": 0,
   "cellsTotal": 5,
-  "threshold": 5,
-  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "sharedOrganisms": [
   {
@@ -151,8 +151,8 @@
   "primary": 0,
   "secondary": 0,
   "cellsTotal": 22,
-  "threshold": 5,
-  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
  },
  "organismsTotal": 13,
  "organismsShared": 7,

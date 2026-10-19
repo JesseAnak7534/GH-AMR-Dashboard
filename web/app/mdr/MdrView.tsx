@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ProportionBar } from "@/components/Charts";
 import { Column, DataTable } from "@/components/DataTable";
 import {
+  Caption,
   Empty,
   Note,
   Section,
@@ -146,10 +147,10 @@ export function MdrView({ data }: { data: MdrData }) {
         </dl>
       </Section>
 
-      <Note>
-        <strong>Method.</strong> Magiorakos et al. (2012), applied per organism
-        against its own category set. {data.deduplication}
-      </Note>
+      <Caption>
+        Magiorakos et al. (2012), applied per organism against its own category
+        set.
+      </Caption>
     </>
   );
 }

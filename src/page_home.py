@@ -60,7 +60,7 @@ from src.page_public import SECTIONS, Section, landing_counts
 
 #: The institution behind the platform, named on the page a visitor arrives at.
 #: A surveillance figure with no owner is a figure nobody is accountable for.
-OWNER = "Institute for Clinical Biochemistry and Biotechnology"
+OWNER = "Institute of Computational Biology and Bioinformatics"
 OWNER_SHORT = "ICBB-AMRSS"
 
 #: Warm editorial tokens, matching the theme in ``.streamlit/config.toml`` so

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     "One Health antimicrobial resistance surveillance across human, animal, " +
     "food, environmental and aquaculture sources in Ghana. Published by the " +
-    "Institute for Clinical Biochemistry and Biotechnology, University of Ghana.",
+    "Institute of Computational Biology and Bioinformatics, University of Ghana.",
   openGraph: {
     title: "Antimicrobial resistance in Ghana",
     description:
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const OWNER = "Institute for Clinical Biochemistry and Biotechnology";
+const OWNER = "Institute of Computational Biology and Bioinformatics";
 
 /**
  * The shell.
@@ -103,8 +103,10 @@ export default function RootLayout({
               <p className="eyebrow mb-2">How to read it</p>
               <p className="text-[0.82rem] leading-relaxed text-ink-soft">
                 No percentage below {manifest.minIsolatesForReporting}{" "}
-                isolates. Counts below {manifest.threshold} records are withheld
-                — withheld is not zero.
+                isolates. Every percentage carries a 95% confidence interval.
+                {manifest.threshold > 1
+                  ? ` Counts below ${manifest.threshold} records are withheld — withheld is not zero.`
+                  : ""}
               </p>
             </div>
 

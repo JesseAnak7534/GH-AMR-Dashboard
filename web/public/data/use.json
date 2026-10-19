@@ -81,8 +81,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 8,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
   },
@@ -194,8 +194,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 11,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
   },
@@ -487,8 +487,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 31,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
   }
@@ -567,8 +567,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 8,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from all 1,370 records."
   },
@@ -709,8 +709,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 16,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from all 1,370 records."
   },
@@ -779,8 +779,8 @@
     "primary": 0,
     "secondary": 0,
     "cellsTotal": 7,
-    "threshold": 5,
-    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
    },
    "caveat": "Computed from all 1,370 records."
   }
@@ -833,8 +833,8 @@
      "primary": 0,
      "secondary": 0,
      "cellsTotal": 8,
-     "threshold": 5,
-     "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
     }
    },
    {
@@ -859,8 +859,8 @@
      "primary": 0,
      "secondary": 0,
      "cellsTotal": 3,
-     "threshold": 5,
-     "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
     }
    },
    {
@@ -917,8 +917,8 @@
      "primary": 0,
      "secondary": 0,
      "cellsTotal": 11,
-     "threshold": 5,
-     "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
     }
    },
    {
@@ -955,8 +955,8 @@
      "primary": 0,
      "secondary": 0,
      "cellsTotal": 6,
-     "threshold": 5,
-     "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
     }
    }
   ],

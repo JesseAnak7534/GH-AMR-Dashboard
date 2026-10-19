@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { Column, DataTable } from "@/components/DataTable";
-import { Note, Section, StatStrip, SuppressionNote } from "@/components/Chrome";
+import { Caption, Section, StatStrip, SuppressionNote } from "@/components/Chrome";
 import {
   FilterBar,
   ThresholdControl,
   sectorOptions,
 } from "@/components/FilterBar";
-import { RegionMap } from "@/components/RegionMap";
+import { FoliumMap } from "@/components/FoliumMap";
 import type { RegionsData } from "@/lib/data";
 import { count, interval, isWithheld, numeric, titleCase } from "@/lib/format";
 
@@ -20,24 +20,6 @@ export function RegionsView({ data }: { data: RegionsData }) {
   // dozen isolates -- too few to publish, and misleading if it were.
   const [sector, setSector] = useState("all");
   const [minIsolates, setMinIsolates] = useState(0);
-
-  const points = useMemo(
-    () =>
-      data.regions
-        .map((row) => {
-          const centroid = data.centroids[row.region];
-          if (!centroid) return null;
-          return {
-            region: row.region,
-            isolates: row.isolates,
-            percentNonSusceptible: row.percent_non_susceptible,
-            lat: centroid.lat,
-            lon: centroid.lon,
-          };
-        })
-        .filter((p): p is NonNullable<typeof p> => p !== null),
-    [data],
-  );
 
   const sectors = useMemo(
     () => [...new Set(data.bySector.map((row) => row.sector))].sort(),
@@ -154,18 +136,8 @@ export function RegionsView({ data }: { data: RegionsData }) {
         ]}
       />
 
-      <Note tone="limit">
-        A map of where specimens were collected and sent, not of where
-        resistance is. A region with a large laboratory reports more isolates
-        whatever is happening there.
-      </Note>
-
       <Section title="Isolates by region">
-        <RegionMap
-          points={points.filter((point) =>
-            visible.some((row) => row.region === point.region),
-          )}
-        />
+        <FoliumMap />
       </Section>
 
       <Section title="The figures">
@@ -181,11 +153,10 @@ export function RegionsView({ data }: { data: RegionsData }) {
         <SuppressionNote suppression={data.bySectorSuppression} />
       </Section>
 
-      <Note>
-        <strong>Method.</strong> {data.deduplication} The per-region rate pools
-        every organism and agent, so it compares regions only where similar
-        panels were tested.
-      </Note>
+      <Caption>
+        A map of where specimens were collected and sent, not of where
+        resistance is.
+      </Caption>
     </>
   );
 }
