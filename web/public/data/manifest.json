@@ -1,0 +1,74 @@
+{
+ "generatedAt": "2026-10-19T15:29:39.086855+00:00",
+ "threshold": 5,
+ "minIsolatesForReporting": 30,
+ "counts": {
+  "genomes": 1860,
+  "useRecords": 3574,
+  "specimens": 2478,
+  "isolates": 2667,
+  "results": 20826,
+  "organisms": 13,
+  "laboratories": 19,
+  "sectors": 5,
+  "regions": 16
+ },
+ "period": {
+  "first": "2024-03-02T00:00:00+00:00",
+  "last": "2026-09-01T07:30:00+00:00"
+ },
+ "sectors": [
+  "animal",
+  "aquaculture",
+  "environment",
+  "food",
+  "human"
+ ],
+ "laboratories": [
+  "Accra Veterinary Laboratory",
+  "Alma Medical Laboratory Ltd",
+  "CSIR – Water Research Institute (Microbiology Laboratory)",
+  "Cape Coast Teaching Hospital",
+  "Central Veterinary Laboratory",
+  "Eastern Regional Hospital",
+  "Ho Teaching Hospital",
+  "Komfo Anokye Teaching Hospital",
+  "Korle-Bu Teaching Hospital",
+  "Kumasi Veterinary Laboratory",
+  "Lekma Hospital",
+  "Metropolis Health Care Limited",
+  "National Food Safety Laboratory",
+  "Pong Tamale School",
+  "Quadushah Medical Diagnostic Limited",
+  "Sekondi Public Health Reference Laboratory",
+  "St. Martin De Porres Hospital Eikwe",
+  "Sunyani Teaching Hospital",
+  "Tamale Teaching Hospital"
+ ],
+ "palette": {
+  "sector": {
+   "human": "#0072B2",
+   "animal": "#E69F00",
+   "food": "#009E73",
+   "environment": "#CC79A7",
+   "aquaculture": "#56B4E9"
+  },
+  "sequence": [
+   "#0072B2",
+   "#E69F00",
+   "#009E73",
+   "#D55E00",
+   "#56B4E9",
+   "#CC79A7",
+   "#F0E442",
+   "#999999"
+  ],
+  "result": {
+   "S": "#0072B2",
+   "I": "#E69F00",
+   "R": "#D55E00",
+   "NS": "#D55E00"
+  },
+  "missing": "#999999"
+ }
+}

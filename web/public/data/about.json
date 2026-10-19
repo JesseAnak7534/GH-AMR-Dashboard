@@ -1,0 +1,186 @@
+{
+ "minIsolatesForReporting": 30,
+ "minPublicCell": 5,
+ "withheldLabel": "withheld",
+ "completeness": [
+  {
+   "Field": "Sex (human)",
+   "Scope": "human records",
+   "Recorded": 12914,
+   "Of": 13111,
+   "Percent": 98.4974448936008,
+   "Status": "complete"
+  },
+  {
+   "Field": "Collection date",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Region",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Reporting laboratory",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Organism",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Interpreted result",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Breakpoint standard",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Specimen type",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Breakpoint edition",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Ward type (human)",
+   "Scope": "human records",
+   "Recorded": 13111,
+   "Of": 13111,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Age band (human)",
+   "Scope": "human records",
+   "Recorded": 13111,
+   "Of": 13111,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "Patient key (human)",
+   "Scope": "human records",
+   "Recorded": 13111,
+   "Of": 13111,
+   "Percent": 100.0,
+   "Status": "complete"
+  },
+  {
+   "Field": "AST quality control",
+   "Scope": "all records",
+   "Recorded": 20826,
+   "Of": 20826,
+   "Percent": 100.0,
+   "Status": "complete"
+  }
+ ],
+ "metrics": [
+  {
+   "Metric": "Percent susceptible (%S)",
+   "Unit": "percent of isolates",
+   "Numerator": "Isolates with result S for that organism-agent pair",
+   "Denominator": "Isolates with any interpreted result (S, I, R or NS) for that pair",
+   "Period": "The selected analysis period; 12 months unless narrowed",
+   "Deduplication": "First isolate per patient per organism per period (CLSI M39)",
+   "Standard": "CLSI M39 presentation convention; interpretation per the breakpoint standard and edition recorded on each result",
+   "Suppression": "Percentage withheld below 30 isolates; the count is still shown",
+   "Intended use": "Describing susceptibility patterns in a defined population and period, for stewardship and empirical-therapy review by a clinical governance group",
+   "Not to be used for": "Choosing therapy for an individual patient, comparing facilities without agreed case mix, or pooling across sectors"
+  },
+  {
+   "Metric": "Percent resistant (%R)",
+   "Unit": "percent of isolates",
+   "Numerator": "Isolates with result R for that organism-agent pair",
+   "Denominator": "Isolates with any interpreted result for that pair",
+   "Period": "The selected analysis period",
+   "Deduplication": "First isolate per patient per organism per period",
+   "Standard": "Breakpoint standard and edition as recorded per result",
+   "Suppression": "Withheld below 30 isolates",
+   "Intended use": "Trend and burden description within one sector",
+   "Not to be used for": "Inferring transmission, or adding to %S to reach 100 -- intermediate and non-susceptible results occupy the remainder"
+  },
+  {
+   "Metric": "Isolate count",
+   "Unit": "isolates",
+   "Numerator": "Distinct (dataset, isolate) pairs",
+   "Denominator": "Not applicable; a count",
+   "Period": "The selected analysis period",
+   "Deduplication": "Optional; stated wherever the count is shown",
+   "Standard": "Platform definition: one isolate is one organism from one specimen, however many agents were tested against it",
+   "Suppression": "None; counts are shown at any size",
+   "Intended use": "Pathogen distribution, denominators, and judging whether a rate is supportable",
+   "Not to be used for": "Standing in for patient or infection counts -- one patient may contribute several isolates unless deduplication is applied"
+  },
+  {
+   "Metric": "Patient count",
+   "Unit": "patients",
+   "Numerator": "Distinct patient pseudonyms",
+   "Denominator": "Not applicable; a count",
+   "Period": "The selected analysis period",
+   "Deduplication": "Inherent; the pseudonym is the unit",
+   "Standard": "Facility-scoped salted pseudonym; a patient at two facilities counts twice by design, since the platform cannot and should not link them",
+   "Suppression": "None",
+   "Intended use": "Denominators for patient-level rates and judging deduplication impact",
+   "Not to be used for": "Counting individuals nationally, for the reason above"
+  },
+  {
+   "Metric": "Culture positivity",
+   "Unit": "percent of specimens",
+   "Numerator": "Specimens with one or more isolates",
+   "Denominator": "All specimens received, including culture-negative",
+   "Period": "The selected analysis period",
+   "Deduplication": "None; the specimen is the unit",
+   "Standard": "Platform definition",
+   "Suppression": "Withheld below 30 specimens",
+   "Intended use": "Laboratory workload, sampling yield, and detecting under-reporting of negative cultures",
+   "Not to be used for": "Infection incidence -- specimens are not sampled at random from any population"
+  },
+  {
+   "Metric": "Field completeness",
+   "Unit": "percent of records",
+   "Numerator": "Records with a non-empty value that is not 'Unknown'",
+   "Denominator": "All records in scope",
+   "Period": "The selected analysis period",
+   "Deduplication": "None",
+   "Standard": "Platform definition; 'Unknown' counts as missing, because a stored placeholder carries no information",
+   "Suppression": "None",
+   "Intended use": "Directing data-quality effort and qualifying every other figure on this page",
+   "Not to be used for": "Judging laboratory performance in isolation -- a field may be absent because the collection form never asked for it"
+  }
+ ],
+ "deduplication": "First isolate per subject per organism per period (CLSI M39). Kept 2,502 of 2,667 isolates between 2024-03-02 and 2026-09-01 (6.2% removed as repeats) across 1,769 subject(s). 311 of them (11.7%) carried no subject identifier and were kept as distinct, since repeat sampling cannot be detected without one."
+}

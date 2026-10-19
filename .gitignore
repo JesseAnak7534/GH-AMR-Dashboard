@@ -103,3 +103,10 @@ Proposal/
 
 # Stray Windows shortcuts
 *.lnk
+
+# Next.js public site (web/) — build output and dependencies
+web/node_modules/
+web/.next/
+web/out/
+web/next-env.d.ts
+web/*.tsbuildinfo

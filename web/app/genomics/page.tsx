@@ -1,0 +1,28 @@
+import type { Metadata } from "next";
+import { Container, PageHeader } from "@/components/Chrome";
+import { getGenomics } from "@/lib/data";
+import { GenomicsView } from "./GenomicsView";
+
+export const metadata: Metadata = {
+  title: "Genomics",
+  description:
+    "Resistance determinants found by sequencing, how often they explain the " +
+    "laboratory result, and which genomes are closely related.",
+};
+
+export default function GenomicsPage() {
+  const data = getGenomics();
+  return (
+    <>
+      <PageHeader
+        badge="WGS"
+        colour="#CC79A7"
+        title="Genomics"
+        lede="What sequencing adds: the mechanisms behind the resistance, how often they explain the laboratory result, and which genomes look alike."
+      />
+      <Container>
+        <GenomicsView data={data} />
+      </Container>
+    </>
+  );
+}
