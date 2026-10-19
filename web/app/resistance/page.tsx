@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Container, PageHeader } from "@/components/Chrome";
-import { getPriority, getResistance } from "@/lib/data";
+import { getFilters, getPriority, getResistance } from "@/lib/data";
 import { ResistanceView } from "./ResistanceView";
 
 export const metadata: Metadata = {
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function ResistancePage() {
   const data = getResistance();
   const priority = getPriority();
+  const filters = getFilters();
   return (
     <>
       <PageHeader
@@ -27,7 +28,11 @@ export default function ResistancePage() {
         lede="The proportion of tested isolates that remained susceptible, with the number tested and a 95% confidence interval."
       />
       <Container>
-        <ResistanceView data={data} priority={priority} />
+        <ResistanceView
+          data={data}
+          priority={priority}
+          filters={filters.resistance}
+        />
       </Container>
     </>
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BarChart } from "@/components/Charts";
+import { FilterBar, ThresholdControl } from "@/components/FilterBar";
 import {
   Caption,
   Empty,
@@ -27,6 +28,9 @@ import { count, isWithheld, titleCase } from "@/lib/format";
  * the error the suppression exists to prevent.
  */
 export function OneHealthView({ data }: { data: OneHealthData }) {
+  const [minIsolates, setMinIsolates] = useState(0);
+  const [onlyShared, setOnlyShared] = useState("all");
+
   const sectorRows = data.sectors.map((row) => ({
     label: titleCase(row.sector),
     value: row.isolates,
@@ -48,11 +52,19 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
         (sum: number, value) => sum + (typeof value === "number" ? value : 0),
         0,
       );
-    const organisms = [...byOrganism.keys()].sort(
-      (a, b) => total(b) - total(a),
-    );
+    const organisms = [...byOrganism.keys()]
+      .filter((name) => {
+        const row = byOrganism.get(name);
+        if (!row) return false;
+        const counted = [...row.values()].filter(
+          (value) => typeof value === "number" && value >= minIsolates,
+        );
+        if (minIsolates > 0 && counted.length === 0) return false;
+        return onlyShared === "three" ? row.size >= 3 : true;
+      })
+      .sort((a, b) => total(b) - total(a));
     return { sectors, organisms, byOrganism };
-  }, [data]);
+  }, [data, minIsolates, onlyShared]);
 
   if (!data.sectors.length) {
     return (
@@ -65,6 +77,39 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
 
   return (
     <>
+      <FilterBar
+        controls={[
+          {
+            key: "shared",
+            label: "Organisms shown",
+            value: onlyShared,
+            options: [
+              { value: "all", label: "Found in more than one sector" },
+              { value: "three", label: "Found in three or more sectors" },
+            ],
+            note: "Shared presence is a reason to look, not evidence of transmission.",
+            onChange: setOnlyShared,
+          },
+        ]}
+        canReset={onlyShared !== "all" || minIsolates > 0}
+        onReset={() => {
+          setOnlyShared("all");
+          setMinIsolates(0);
+        }}
+      />
+
+      <div className="flex flex-wrap gap-x-5 gap-y-3">
+        <ThresholdControl
+          label="Minimum isolates per cell"
+          value={minIsolates}
+          min={0}
+          max={200}
+          step={5}
+          onChange={setMinIsolates}
+          note="Hides published cells resting on fewer."
+        />
+      </div>
+
       <Note>
         Sectors are never pooled into one percentage. A rate mixing hospital
         isolates with river water describes neither.

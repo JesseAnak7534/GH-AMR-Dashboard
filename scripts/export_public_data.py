@@ -49,6 +49,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scripts import export_sections as sections  # noqa: E402
+from scripts import export_slices as slices  # noqa: E402
 from src import consumption, db, disclosure, genomics as gx, palette  # noqa: E402
 from src import surveillance as sv  # noqa: E402
 
@@ -527,6 +528,13 @@ def main() -> int:
     _write(args.out, "priority.json",
            sections.export_priority(frame, _priority_lookup(), threshold,
                                     _rows, _suppress))
+    _write(args.out, "filters.json", {
+        "resistance": slices.export_resistance_slices(
+            frame, args.out, threshold, _rows, _suppress),
+        "organisms": slices.export_organism_slices(
+            frame, args.out, threshold, _rows, _suppress),
+    })
+
     extras = sections.export_genomic_extras(threshold, _rows, _suppress)
     if extras:
         genomics.update(extras)

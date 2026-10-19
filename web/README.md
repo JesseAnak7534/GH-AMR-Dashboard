@@ -122,6 +122,40 @@ client component for the interactive parts. The figures therefore arrive in the
 HTML: a reader on a slow connection sees numbers in the first paint rather than
 a spinner.
 
+## Filters
+
+Two kinds, and they are not interchangeable.
+
+**Slice filters** — sector, period, region, laboratory — select a view that was
+computed and suppressed in Python and written to its own file. Changing one
+fetches a different published file; the default view is already in the HTML, so
+only a non-default filter costs a request. The site cannot compose a
+combination nobody exported, which is exactly what stops a reader narrowing
+onto one person.
+
+One secondary dimension at a time. The cross-product of sector, region,
+laboratory and period is several thousand tables, almost all of them empty.
+
+**Row filters** — organism, antibiotic, minimum isolates, mechanism — work on
+rows already on the page. They can only show less than was published, never
+more, so they run in the browser.
+
+A slice holds only the rows that passed, so most are under a kilobyte: a region
+with nothing publishable is a file of counts rather than a hundred withheld
+rows. 194 slices come to about 280 KB in total.
+
+### What the filters honestly return
+
+A regional or laboratory antibiogram in this collection reaches the
+thirty-isolate floor for **nought to eight** organism–antibiotic pairs out of
+roughly a hundred and ten. Those filters are still offered, and each option
+carries its own evidence in the dropdown — "Ahafo — 85 isolates, 0 rates" —
+so a reader knows before selecting. Choosing one shows the counts and says
+plainly that this is a statement about how much data the view holds, not about
+how much resistance is in it.
+
+Period filters do support rates: 43 to 59 published pairs per year.
+
 ## Rules the code keeps
 
 **Copy stays short.** One line of intro per section, one method line per page,

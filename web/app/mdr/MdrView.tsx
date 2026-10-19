@@ -10,7 +10,7 @@ import {
   StatStrip,
   SuppressionNote,
 } from "@/components/Chrome";
-import { Segmented } from "@/components/Segmented";
+import { FilterBar, sectorOptions } from "@/components/FilterBar";
 import type { MdrData } from "@/lib/data";
 import { count, isWithheld, percent, titleCase } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
@@ -48,7 +48,6 @@ export function MdrView({ data }: { data: MdrData }) {
     return <Empty>No isolates could be classified yet.</Empty>;
   }
 
-  const colours = Object.fromEntries(data.slices.map((s) => [s.name, s.colour]));
 
   const parts = slice.counts
     .filter((row) => typeof row.isolates === "number")
@@ -71,12 +70,22 @@ export function MdrView({ data }: { data: MdrData }) {
 
   return (
     <>
-      <Segmented
-        label="Sector"
-        options={names}
-        value={name}
-        onChange={setName}
-        colours={colours}
+      <FilterBar
+        controls={[
+          {
+            key: "sector",
+            label: "Sector",
+            value: name,
+            options: sectorOptions(names),
+            note: "Classification is per isolate, so sectors can be shown together.",
+            onChange: setName,
+          },
+        ]}
+        summary={`${
+          name === "all" ? "All sectors" : titleCase(name)
+        } \u2014 ${count(slice.classifiable)} of ${count(
+          slice.isolates,
+        )} isolates had enough categories tested to classify.`}
       />
 
       <StatStrip

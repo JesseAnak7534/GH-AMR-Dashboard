@@ -11,7 +11,7 @@ import {
   StatStrip,
   SuppressionNote,
 } from "@/components/Chrome";
-import { Segmented } from "@/components/Segmented";
+import { FilterBar } from "@/components/FilterBar";
 import type { PooledBlock, UseData } from "@/lib/data";
 import { count, humanise, numeric, percent } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
@@ -82,11 +82,20 @@ function PooledSection({
   return (
     <Section title={title} intro={intro}>
       {blocks.length > 1 ? (
-        <Segmented
-          label="Split by"
-          options={blocks.map((b) => b.by)}
-          value={block.by}
-          onChange={setBy}
+        <FilterBar
+          controls={[
+            {
+              key: "by",
+              label: "Split by",
+              value: block.by,
+              options: blocks.map((b) => ({
+                value: b.by,
+                label: humanise(b.by),
+              })),
+              note: "Each split is pooled separately; they do not combine.",
+              onChange: setBy,
+            },
+          ]}
         />
       ) : null}
       <div className="mt-4 space-y-4">
@@ -201,11 +210,19 @@ export function UseView({ data }: { data: UseData }) {
 
             {breakdown ? (
               <div className="mt-6 space-y-4">
-                <Segmented
-                  label="Break down by"
-                  options={breakdowns.map((b) => b.key)}
-                  value={breakdown.key}
-                  onChange={setBreakdownKey}
+                <FilterBar
+                  controls={[
+                    {
+                      key: "breakdown",
+                      label: "Break down by",
+                      value: breakdown.key,
+                      options: breakdowns.map((b) => ({
+                        value: b.key,
+                        label: b.label,
+                      })),
+                      onChange: setBreakdownKey,
+                    },
+                  ]}
                 />
                 <DataTable
                   columns={breakdownColumns}

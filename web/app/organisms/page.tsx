@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Container, PageHeader } from "@/components/Chrome";
-import { getOrganisms } from "@/lib/data";
+import { getFilters, getOrganisms } from "@/lib/data";
 import { OrganismsView } from "./OrganismsView";
 
 export const metadata: Metadata = {
@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 export default function OrganismsPage() {
   const data = getOrganisms();
+  const filters = getFilters();
   return (
     <>
       <PageHeader
@@ -21,7 +22,7 @@ export default function OrganismsPage() {
         lede="What is actually being isolated, counted as isolates rather than as test results, and the specimens they were grown from."
       />
       <Container>
-        <OrganismsView data={data} />
+        <OrganismsView data={data} filters={filters.organisms} />
       </Container>
     </>
   );

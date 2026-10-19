@@ -449,3 +449,26 @@ export const getTrends = () => read<TrendsData>("trends.json");
 export const getMdr = () => read<MdrData>("mdr.json");
 export const getRegions = () => read<RegionsData>("regions.json");
 export const getPriority = () => read<PriorityData>("priority.json");
+
+/** The manifest of pre-computed filtered views. See lib/slices.ts. */
+export interface FiltersFile {
+  resistance: {
+    dimensions: { key: string; label: string; note?: string }[];
+    available: Record<
+      string,
+      Record<
+        string,
+        { value: string; slug: string; isolates: number; pairsReported?: number }[]
+      >
+    >;
+  };
+  organisms: {
+    dimensions: { key: string; label: string; note?: string }[];
+    available: Record<
+      string,
+      Record<string, { value: string; slug: string; isolates: number }[]>
+    >;
+  };
+}
+
+export const getFilters = () => read<FiltersFile>("filters.json");

@@ -9,10 +9,10 @@ import {
   StatStrip,
   SuppressionNote,
 } from "@/components/Chrome";
-import { Segmented } from "@/components/Segmented";
+import { FilterBar, sectorOptions } from "@/components/FilterBar";
 import { TrendChart } from "@/components/TrendChart";
 import type { TrendPeriodRow, TrendsData } from "@/lib/data";
-import { count, interval, numeric, percent } from "@/lib/format";
+import { count, interval, numeric, percent, titleCase } from "@/lib/format";
 import { ramp } from "@/lib/palette";
 
 export function TrendsView({ data }: { data: TrendsData }) {
@@ -26,7 +26,6 @@ export function TrendsView({ data }: { data: TrendsData }) {
     return <Empty>Not enough dated results to show a trend yet.</Empty>;
   }
 
-  const colours = Object.fromEntries(data.slices.map((s) => [s.sector, s.colour]));
 
   const overall = [
     {
@@ -93,12 +92,20 @@ export function TrendsView({ data }: { data: TrendsData }) {
 
   return (
     <>
-      <Segmented
-        label="Sector"
-        options={sectors}
-        value={sector}
-        onChange={setSector}
-        colours={colours}
+      <FilterBar
+        controls={[
+          {
+            key: "sector",
+            label: "Sector",
+            value: sector,
+            options: sectorOptions(sectors),
+            note: "Each sector has its own series; they are never pooled.",
+            onChange: setSector,
+          },
+        ]}
+        summary={`${titleCase(sector)} \u2014 ${drawn.length} of ${
+          slice.periods.length
+        } quarters hold enough results to plot.`}
       />
 
       <StatStrip

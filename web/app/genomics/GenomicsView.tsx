@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { BarChart, ProportionBar } from "@/components/Charts";
+import { FilterBar, ThresholdControl } from "@/components/FilterBar";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -30,6 +32,14 @@ type ClusterRow = GenomicsData["clusters"][number];
  * all four outcomes instead of one headline percentage.
  */
 export function GenomicsView({ data }: { data: GenomicsData }) {
+  const [mechanism, setMechanism] = useState("");
+  const [minGenomes, setMinGenomes] = useState(0);
+
+  const mechanisms = useMemo(
+    () => [...new Set(data.determinants.map((row) => row.mechanism))].sort(),
+    [data.determinants],
+  );
+
   const sequenced = Number(data.coverage?.sequenced ?? 0);
 
   if (!sequenced) {
@@ -44,7 +54,17 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
   }
 
   const percentSequenced = numeric(data.coverage?.percent_sequenced);
-  const determinantChart = data.determinants
+
+  const determinants = useMemo(() => {
+    let out = data.determinants;
+    if (mechanism) out = out.filter((row) => row.mechanism === mechanism);
+    if (minGenomes > 0) {
+      out = out.filter((row) => (numeric(row.isolates) ?? 0) >= minGenomes);
+    }
+    return out;
+  }, [data.determinants, mechanism, minGenomes]);
+
+  const determinantChart = determinants
     .filter((row) => numeric(row.isolates) !== null)
     .slice(0, 15)
     .map((row) => ({
@@ -110,6 +130,40 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         ]}
       />
 
+      <FilterBar
+        controls={[
+          {
+            key: "mechanism",
+            label: "Mechanism",
+            value: mechanism,
+            options: [
+              { value: "", label: "All mechanisms" },
+              ...mechanisms.map((m) => ({ value: m, label: m })),
+            ],
+            note: "Markers that are not resistance determinants are labelled as such.",
+            onChange: setMechanism,
+          },
+        ]}
+        canReset={Boolean(mechanism) || minGenomes > 0}
+        onReset={() => {
+          setMechanism("");
+          setMinGenomes(0);
+        }}
+        summary={`${determinants.length} of ${data.determinants.length} determinants shown.`}
+      />
+
+      <div className="flex flex-wrap gap-x-5 gap-y-3">
+        <ThresholdControl
+          label="Minimum genomes carrying it"
+          value={minGenomes}
+          min={0}
+          max={1000}
+          step={10}
+          onChange={setMinGenomes}
+          note="Hides published determinants found on fewer."
+        />
+      </div>
+
       <Note tone="limit">
         Sequencing coverage is the ceiling on every statement here: a gene
         frequency from a tenth of the collection describes that tenth.
@@ -127,7 +181,7 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
         />
         <DataTable
           columns={determinantColumns}
-          rows={data.determinants}
+          rows={determinants}
           searchKeys={["determinant", "mechanism"]}
           searchLabel="Search gene or mechanism"
           initialSort={{ key: "isolates", direction: "desc" }}
