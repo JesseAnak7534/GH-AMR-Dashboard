@@ -431,6 +431,13 @@ export interface RegionsData {
     percent_non_susceptible: number | null;
     ci_low: number | null;
     ci_high: number | null;
+    interpreted?: number;
+    susceptible?: number;
+    intermediate?: number;
+    resistant?: number;
+    percent_susceptible: number | null;
+    percent_intermediate: number | null;
+    percent_resistant: number | null;
   }[];
   suppression: Suppression;
   bySector: { region: string; sector: string; isolates: Cell }[];
@@ -482,3 +489,15 @@ export interface FiltersFile {
 }
 
 export const getFilters = () => read<FiltersFile>("filters.json");
+
+export interface CustodyData {
+  stages: { table: string; label: string; note: string; records: number }[];
+  linked: Record<string, number>;
+  events: { event: string; events: number }[];
+  totalEvents: number;
+  genomesTraceable: number;
+  genomes: number;
+  percentGenomesTraceable: number | null;
+}
+
+export const getCustody = () => read<CustodyData>("custody.json");

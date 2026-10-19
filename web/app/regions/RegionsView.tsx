@@ -10,7 +10,7 @@ import {
 } from "@/components/FilterBar";
 import { FoliumMap } from "@/components/FoliumMap";
 import type { RegionsData } from "@/lib/data";
-import { count, interval, isWithheld, numeric, titleCase } from "@/lib/format";
+import { count, numeric, titleCase } from "@/lib/format";
 
 type RegionRow = RegionsData["regions"][number];
 
@@ -53,11 +53,10 @@ export function RegionsView({ data }: { data: RegionsData }) {
     (row) => numeric(row.isolates) !== null,
   ).length;
   const withRate = data.regions.filter(
-    (row) => row.percent_non_susceptible !== null,
+    (row) => row.percent_resistant !== null,
   );
   const highest = [...withRate].sort(
-    (a, b) =>
-      (b.percent_non_susceptible ?? 0) - (a.percent_non_susceptible ?? 0),
+    (a, b) => (b.percent_resistant ?? 0) - (a.percent_resistant ?? 0),
   )[0];
 
   const columns: Column<RegionRow>[] = [
@@ -66,17 +65,22 @@ export function RegionsView({ data }: { data: RegionsData }) {
     { key: "organisms", header: "Organisms", align: "right" },
     { key: "laboratories", header: "Laboratories", align: "right" },
     {
-      key: "percent_non_susceptible",
-      header: "% non-susceptible",
+      key: "percent_resistant",
+      header: "% R",
       align: "right",
       format: "percent",
     },
     {
-      key: "ci",
-      header: "95% CI",
+      key: "percent_intermediate",
+      header: "% I",
       align: "right",
-      format: "text",
-      value: (row) => interval(row.ci_low, row.ci_high),
+      format: "percent",
+    },
+    {
+      key: "percent_susceptible",
+      header: "% S",
+      align: "right",
+      format: "percent",
     },
     ...sectors.map((sector) => ({
       key: sector,
@@ -127,9 +131,9 @@ export function RegionsView({ data }: { data: RegionsData }) {
           { value: count(data.regions.length), label: "Regions in the data" },
           {
             value: highest ? highest.region : "—",
-            label: "Highest non-susceptibility",
+            label: "Most resistance reported",
             hint: highest
-              ? `${highest.percent_non_susceptible?.toFixed(1)}% — see the caveat below`
+              ? `${highest.percent_resistant?.toFixed(1)}% of results resistant`
               : undefined,
           },
           { value: count(sectors.length), label: "Sectors" },
@@ -154,8 +158,11 @@ export function RegionsView({ data }: { data: RegionsData }) {
       </Section>
 
       <Caption>
-        A map of where specimens were collected and sent, not of where
-        resistance is.
+        Pick resistant, intermediate or susceptible on the map to shade the
+        regions by that result; the circle size is the number of isolates
+        either way. Regions differ in how much they report as well as in what
+        they find, so a region with a large laboratory contributes more
+        isolates whatever is happening there.
       </Caption>
     </>
   );

@@ -43,6 +43,11 @@ export interface BarRow {
   value: number | string | null;
   colour?: string;
   note?: string;
+  /** Confidence bounds, drawn as a whisker when both are present. */
+  low?: number | null;
+  high?: number | null;
+  /** The denominator, printed after the value so a bar is never read alone. */
+  denominator?: number | string | null;
 }
 
 export function BarChart({
@@ -50,17 +55,49 @@ export function BarChart({
   unit,
   labelWidth = 190,
   colour = "#0072b2",
+  max: fixedMax,
+  suffix = "",
+  decimals,
 }: {
   rows: BarRow[];
   unit: string;
   labelWidth?: number;
   colour?: string;
+  /** Fix the axis, e.g. 100 for a percentage, so bars are not rescaled to
+   *  whatever happens to be in the current filter. */
+  max?: number;
+  suffix?: string;
+  /** Decimal places on the printed value. A rate wants one; a count wants
+   *  none, and printing 7.514% implies a precision the denominator of 173
+   *  does not support. */
+  decimals?: number;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const titleId = useId();
 
+  // A rate gets one decimal place by default, a count none.
+  const places = decimals ?? (suffix === "%" ? 1 : 0);
+  const show = (value: number) =>
+    places > 0
+      ? value.toLocaleString("en-GB", {
+          minimumFractionDigits: places,
+          maximumFractionDigits: places,
+        })
+      : count(value);
+
+  // Roughly six pixels a character at this size, so the label fits the gutter
+  // it was given instead of a fixed thirty characters.
+  const maxLabel = Math.max(12, Math.floor((labelWidth - 14) / 5.9));
+
   const drawable = rows.filter((row) => numeric(row.value) !== null);
-  const max = Math.max(1, ...drawable.map((row) => numeric(row.value) as number));
+  const max =
+    fixedMax ??
+    Math.max(
+      1,
+      ...drawable.map((row) =>
+        Math.max(numeric(row.value) as number, numeric(row.high) ?? 0),
+      ),
+    );
   const rowHeight = 26;
   const chartWidth = 560;
   const barArea = chartWidth - labelWidth - 72;
@@ -120,7 +157,10 @@ export function BarChart({
                 fill="#16181a"
                 textAnchor="end"
               >
-                {row.label.length > 30 ? `${row.label.slice(0, 29)}…` : row.label}
+                {row.label.length > maxLabel
+                  ? `${row.label.slice(0, maxLabel - 1)}…`
+                  : row.label}
+                <title>{row.label}</title>
               </text>
               {value === null ? (
                 <text
@@ -142,14 +182,43 @@ export function BarChart({
                     fill={fill}
                     rx={1.5}
                   />
+                  {/* The interval, where the data carries one. A bar without
+                      it invites a reader to compare two heights that overlap
+                      entirely. */}
+                  {numeric(row.low) !== null && numeric(row.high) !== null ? (
+                    <g stroke="#16181a" strokeWidth={1.1} opacity={0.55}>
+                      <line
+                        x1={labelWidth + scale(numeric(row.low) as number)}
+                        x2={labelWidth + scale(numeric(row.high) as number)}
+                        y1={y + (rowHeight - 12) / 2 + 3}
+                        y2={y + (rowHeight - 12) / 2 + 3}
+                      />
+                      <line
+                        x1={labelWidth + scale(numeric(row.low) as number)}
+                        x2={labelWidth + scale(numeric(row.low) as number)}
+                        y1={y + 5}
+                        y2={y + rowHeight - 10}
+                      />
+                      <line
+                        x1={labelWidth + scale(numeric(row.high) as number)}
+                        x2={labelWidth + scale(numeric(row.high) as number)}
+                        y1={y + 5}
+                        y2={y + rowHeight - 10}
+                      />
+                    </g>
+                  ) : null}
                   <text
-                    x={labelWidth + scale(value) + 6}
+                    x={labelWidth + scale(numeric(row.high) ?? value) + 6}
                     y={y + 13}
                     fontSize={10.5}
                     fill="#4a5156"
                     fontVariant="tabular-nums"
                   >
-                    {count(value)}
+                    {show(value)}
+                    {suffix}
+                    {row.denominator !== undefined && row.denominator !== null
+                      ? `  (${count(row.denominator)})`
+                      : ""}
                   </text>
                 </>
               )}
@@ -395,5 +464,143 @@ export function ProportionBar({
         ))}
       </ul>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Stacked bars
+// ---------------------------------------------------------------------------
+
+export interface StackedRow {
+  label: string;
+  /** Series name to value. Missing or non-numeric values are skipped. */
+  parts: Record<string, number | string | null>;
+}
+
+/**
+ * One bar per category, split into named series.
+ *
+ * Used where a table of category x series was unreadable: MDR by organism,
+ * organisms across sectors. Each bar is normalised to its own total, because
+ * the question is the mix within a category rather than its size — the total
+ * is printed at the end of the bar so the size is not lost.
+ */
+export function StackedBars({
+  rows,
+  series,
+  colours,
+  labelWidth = 190,
+  showPercent = true,
+}: {
+  rows: StackedRow[];
+  series: string[];
+  colours: Record<string, string>;
+  labelWidth?: number;
+  showPercent?: boolean;
+}) {
+  const [active, setActive] = useState<string | null>(null);
+  const titleId = useId();
+
+  const drawable = rows
+    .map((row) => {
+      const values = series.map((name) => numeric(row.parts[name]) ?? 0);
+      const total = values.reduce((sum, value) => sum + value, 0);
+      return { label: row.label, values, total };
+    })
+    .filter((row) => row.total > 0);
+
+  if (!drawable.length) return null;
+
+  const rowHeight = 26;
+  const chartWidth = 620;
+  const barArea = chartWidth - labelWidth - 66;
+  const height = drawable.length * rowHeight + 8;
+
+  return (
+    <figure className="overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${chartWidth} ${height}`}
+        className="h-auto w-full min-w-[480px]"
+        role="img"
+        aria-labelledby={titleId}
+      >
+        <title id={titleId}>
+          {`${drawable.length} categories split across ${series.length} series`}
+        </title>
+        {drawable.map((row, index) => {
+          const y = index * rowHeight + 4;
+          let offset = 0;
+          return (
+            <g key={`${row.label}-${index}`}>
+              <text
+                x={labelWidth - 8}
+                y={y + 13}
+                fontSize={11}
+                fill="#16181a"
+                textAnchor="end"
+              >
+                {row.label.length > 30 ? `${row.label.slice(0, 29)}…` : row.label}
+              </text>
+              {row.values.map((value, position) => {
+                const name = series[position];
+                const width = (value / row.total) * barArea;
+                const x = labelWidth + offset;
+                offset += width;
+                if (width <= 0) return null;
+                return (
+                  <rect
+                    key={name}
+                    x={x}
+                    y={y + 3}
+                    width={width}
+                    height={rowHeight - 12}
+                    fill={colours[name] ?? "#999999"}
+                    opacity={active === null || active === name ? 1 : 0.3}
+                  >
+                    <title>{`${row.label} — ${name}: ${count(value)}`}</title>
+                  </rect>
+                );
+              })}
+              <text
+                x={labelWidth + barArea + 6}
+                y={y + 13}
+                fontSize={10.5}
+                fill="#4a5156"
+                fontVariant="tabular-nums"
+              >
+                {count(row.total)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5">
+        {series.map((name) => (
+          <li key={name}>
+            <button
+              type="button"
+              onMouseEnter={() => setActive(name)}
+              onMouseLeave={() => setActive(null)}
+              onFocus={() => setActive(name)}
+              onBlur={() => setActive(null)}
+              className="flex items-center gap-1.5 text-[0.82rem]"
+            >
+              <span
+                aria-hidden="true"
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{ background: colours[name] ?? "#999999" }}
+              />
+              {name}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {showPercent ? (
+        <figcaption className="mt-1 text-[0.74rem] text-ink-faint">
+          Each bar is the mix within that category; the figure at the end is its
+          total.
+        </figcaption>
+      ) : null}
+    </figure>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { BarChart } from "@/components/Charts";
 import { Column, DataTable } from "@/components/DataTable";
 import { Caption, Empty, Note, Section, StatStrip } from "@/components/Chrome";
 import { FilterBar } from "@/components/FilterBar";
 import type { UseData } from "@/lib/data";
-import { count, percent } from "@/lib/format";
+import { count, numeric, percent } from "@/lib/format";
 
 type Row = { value: string; prescriptions: number | string | null };
 
@@ -72,7 +73,23 @@ export function PpsView({ data }: { data: UseData }) {
               },
             ]}
           />
-          <div className="mt-4">
+          <div className="mt-4 space-y-5">
+            <BarChart
+              rows={[...breakdown.rows]
+                .sort(
+                  (a, b) =>
+                    (numeric(b.prescriptions) ?? 0) -
+                    (numeric(a.prescriptions) ?? 0),
+                )
+                .slice(0, 14)
+                .map((row) => ({
+                  label: row.value,
+                  value: row.prescriptions,
+                  colour: "#8a6a22",
+                }))}
+              unit="Prescriptions"
+              labelWidth={200}
+            />
             <DataTable
               columns={columns}
               rows={breakdown.rows}

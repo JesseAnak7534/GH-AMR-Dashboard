@@ -214,6 +214,31 @@ def export_regions(frame: pd.DataFrame, threshold: int, rows, suppress
     resistance = sv.stratified_resistance(deduplicated, by="region",
                                           deduplicate=False,
                                           allow_cross_sector=True)
+
+    # S, I and R counted separately per region. The map colours by whichever
+    # the reader picks, so each needs its own numerator against the same
+    # denominator -- interpreted observations, not isolates, because one
+    # isolate contributes one result per agent tested.
+    interpreted = deduplicated[
+        deduplicated["result"].astype(str).str.strip().str.upper()
+        .isin(["S", "I", "R"])].copy()
+    interpreted["sir"] = (interpreted["result"].astype(str).str.strip()
+                          .str.upper())
+    sir = (interpreted.pivot_table(index="region", columns="sir",
+                                   values="isolate_id", aggfunc="size",
+                                   fill_value=0)
+           .reset_index())
+    for letter in ("S", "I", "R"):
+        if letter not in sir.columns:
+            sir[letter] = 0
+    sir["interpreted"] = sir["S"] + sir["I"] + sir["R"]
+    for letter, name in (("S", "susceptible"), ("I", "intermediate"),
+                         ("R", "resistant")):
+        sir[name] = sir[letter]
+        sir[f"percent_{name}"] = (100.0 * sir[letter] / sir["interpreted"]
+                                  ).where(sir["interpreted"] > 0).round(1)
+    sir = sir.drop(columns=["S", "I", "R"])
+    sir["region"] = sir["region"].fillna("Not recorded")
     isolates = deduplicated.drop_duplicates(["dataset_id", "isolate_id"])
     counts = (isolates.groupby("region", dropna=False)
               .agg(isolates=("isolate_id", "size"),
@@ -222,9 +247,15 @@ def export_regions(frame: pd.DataFrame, threshold: int, rows, suppress
               .reset_index())
     counts["region"] = counts["region"].fillna("Not recorded")
 
-    merged = counts.merge(
-        resistance.rename(columns={"region": "region"}), on="region",
-        how="left", suffixes=("", "_strat"))
+    # Only the columns the page uses are carried across. The stratified table
+    # has its own "isolates" and "susceptible", which would collide with the
+    # counts and the S/I/R breakdown and arrive as susceptible_x and _y.
+    keep = [c for c in ("region", "observations", "percent_non_susceptible",
+                        "ci_low", "ci_high", "distinct_pairs", "status")
+            if c in resistance.columns]
+    merged = (counts
+              .merge(resistance[keep], on="region", how="left")
+              .merge(sir, on="region", how="left"))
     merged = merged.sort_values("isolates", ascending=False)
 
     shown, suppression = suppress(
@@ -390,5 +421,119 @@ def export_genomic_extras(threshold: int, rows, suppress) -> Dict[str, object]:
     }
 
 
-__all__ = ["export_trends", "export_mdr", "export_regions", "export_priority",
+__all__ = ["export_custody", "export_trends", "export_mdr", "export_regions", "export_priority",
            "export_genomic_extras", "PERIOD_FREQ", "MIN_PERIOD_OBSERVATIONS"]
+
+
+# ---------------------------------------------------------------------------
+# Chain of custody
+# ---------------------------------------------------------------------------
+
+#: The stages a sample passes through, in order. Each row is a link in the
+#: chain the platform exists to keep: a genome at the end has to be traceable
+#: back to the patient it came from, or it cannot be acted on.
+CHAIN_STAGES = [
+    ("subjects", "Patient or source", "Pseudonymised. No hospital number is "
+                                      "ever stored."),
+    ("encounters", "Encounter", "The admission or visit the specimen belongs "
+                                "to, where one is recorded."),
+    ("specimens", "Specimen", "Collected, transported, received."),
+    ("isolates", "Isolate", "What grew, and what it was identified as."),
+    ("phenotypes", "Susceptibility result", "One row per isolate per agent "
+                                            "tested."),
+    ("genomic_results", "Genome", "Sequenced, analysed, reviewed."),
+]
+
+
+def export_custody(threshold: int, rows, suppress) -> Dict[str, object]:
+    """The traceability chain, as counts rather than as records.
+
+    Every figure here is a count of links, never a link itself: the chain is
+    shown to be intact without putting any identifier on a public page. The
+    question it answers is the one a surveillance system has to answer about
+    itself -- can a result at the end be followed back to its beginning.
+    """
+    from src import db
+
+    conn = db.get_connection()
+    try:
+        cur = conn.cursor()
+
+        def scalar(sql: str) -> int:
+            try:
+                cur.execute(sql)
+                row = cur.fetchone()
+                if row is None:
+                    return 0
+                value = list(row.values())[0] if isinstance(row, dict) else row[0]
+                return int(value or 0)
+            except Exception:                         # noqa: BLE001
+                conn.rollback()
+                return 0
+
+        stages = []
+        for table, label, note in CHAIN_STAGES:
+            stages.append({
+                "table": table,
+                "label": label,
+                "note": note,
+                "records": scalar(f"SELECT COUNT(*) FROM {table}"),
+            })
+
+        # How many records at each stage carry the link back to the previous
+        # one. A stage that cannot be joined backwards is where the chain
+        # breaks, and that is worth publishing whether or not it is flattering.
+        linked = {
+            "specimens_to_subject": scalar(
+                "SELECT COUNT(*) FROM specimens sp JOIN subjects s "
+                "ON s.dataset_id = sp.dataset_id AND s.subject_id = sp.subject_id"),
+            "specimens_to_encounter": scalar(
+                "SELECT COUNT(*) FROM specimens WHERE encounter_id IS NOT NULL"),
+            "isolates_to_specimen": scalar(
+                "SELECT COUNT(*) FROM isolates i JOIN specimens sp "
+                "ON sp.dataset_id = i.dataset_id AND sp.specimen_id = i.specimen_id"),
+            "phenotypes_to_isolate": scalar(
+                "SELECT COUNT(*) FROM phenotypes ph JOIN isolates i "
+                "ON i.dataset_id = ph.dataset_id AND i.isolate_id = ph.isolate_id"),
+            "genomes_to_isolate": scalar(
+                "SELECT COUNT(*) FROM genomic_results g JOIN isolates i "
+                "ON i.dataset_id = g.dataset_id AND i.isolate_id = g.isolate_id"),
+            "genomes_to_subject": scalar(
+                "SELECT COUNT(*) FROM genomic_results g "
+                "JOIN isolates  i  ON i.dataset_id = g.dataset_id AND i.isolate_id = g.isolate_id "
+                "JOIN specimens sp ON sp.dataset_id = i.dataset_id AND sp.specimen_id = i.specimen_id "
+                "JOIN subjects  s  ON s.dataset_id = sp.dataset_id AND s.subject_id = sp.subject_id"),
+        }
+
+        events: List[Dict[str, object]] = []
+        try:
+            cur.execute("SELECT event_type, COUNT(*) AS events "
+                        "FROM custody_events GROUP BY event_type "
+                        "ORDER BY 2 DESC")
+            for row in cur.fetchall():
+                record = dict(row) if isinstance(row, dict) else {
+                    "event_type": row[0], "events": row[1]}
+                events.append({"event": str(record.get("event_type", "")),
+                               "events": int(record.get("events", 0) or 0)})
+        except Exception:                             # noqa: BLE001
+            conn.rollback()
+    finally:
+        try:
+            conn.close()
+        except Exception:                             # noqa: BLE001
+            pass
+
+    total_events = sum(e["events"] for e in events)
+    genomes = next((s["records"] for s in stages
+                    if s["table"] == "genomic_results"), 0)
+    return {
+        "stages": stages,
+        "linked": linked,
+        "events": events,
+        "totalEvents": total_events,
+        "genomesTraceable": linked.get("genomes_to_subject", 0),
+        "genomes": genomes,
+        "percentGenomesTraceable": (
+            round(100.0 * linked.get("genomes_to_subject", 0) / genomes, 1)
+            if genomes else None),
+    }

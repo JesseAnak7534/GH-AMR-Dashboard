@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { IntervalChart } from "@/components/Charts";
+import { BarChart } from "@/components/Charts";
 import { HeatGrid } from "@/components/HeatGrid";
 import { Column, DataTable } from "@/components/DataTable";
 import {
@@ -126,6 +126,7 @@ export function ResistanceView({
           low: row.ci_low,
           high: row.ci_high,
           denominator: row.tested,
+          colour: "#2ca02c",
         })),
     [rows],
   );
@@ -363,7 +364,14 @@ export function ResistanceView({
             </div>
             <div className="mt-4">
               {view === "chart" ? (
-                <IntervalChart rows={lowest} colour={slice?.colour} />
+                <BarChart
+                  rows={lowest}
+                  unit="% susceptible (95% CI, isolates tested in brackets)"
+                  labelWidth={290}
+                  max={100}
+                  suffix="%"
+                  colour="#2ca02c"
+                />
               ) : (
                 <HeatGrid
                   cells={rows.map((row) => ({
@@ -400,27 +408,37 @@ export function ResistanceView({
             options={(slice?.strata ?? []).map((s) => s.key)}
             value={activeStratum.key}
             onChange={setStratum}
+            labels={Object.fromEntries(
+              (slice?.strata ?? []).map((s) => [s.key, s.label]),
+            )}
           />
           <div className="mt-4">
-            <DataTable
-              columns={stratumColumns}
-              rows={activeStratum.rows}
-              searchKeys={["stratum"]}
-              searchLabel="Search"
-              initialSort={{ key: "observations", direction: "desc" }}
+            <BarChart
+              rows={[...activeStratum.rows]
+                .filter((row) => row.percent_non_susceptible !== null)
+                .sort(
+                  (a, b) =>
+                    (b.percent_non_susceptible ?? 0) -
+                    (a.percent_non_susceptible ?? 0),
+                )
+                .map((row) => ({
+                  label: row.stratum,
+                  value: row.percent_non_susceptible,
+                  low: row.ci_low,
+                  high: row.ci_high,
+                  denominator: row.observations,
+                  colour: "#d62728",
+                }))}
+              unit="% non-susceptible (95% CI, results in brackets)"
+              labelWidth={230}
+              max={100}
+              suffix="%"
+              colour="#d62728"
             />
           </div>
-          <Caption>
-            Published per sector, so it does not follow the filters above.
-          </Caption>
         </Section>
       ) : null}
 
-      <Note>
-        <strong>Method.</strong> {slice?.method.deduplication} No percentage
-        below {slice?.method.minIsolates} isolates (CLSI M39); Wilson intervals.
-        QC failures excluded: {count(slice?.method.qcExcluded)}.
-      </Note>
     </>
   );
 }

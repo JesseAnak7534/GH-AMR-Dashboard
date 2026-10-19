@@ -21,12 +21,16 @@ export function Segmented({
   onChange,
   label,
   colours,
+  labels,
 }: {
   options: string[];
   value: string;
   onChange: (next: string) => void;
   label: string;
   colours?: Record<string, string>;
+  /** Display text per option, where the raw value is a column name rather
+   *  than something a reader should see. */
+  labels?: Record<string, string>;
 }) {
   return (
     <div role="radiogroup" aria-label={label} className="flex flex-col gap-1.5">
@@ -58,7 +62,8 @@ export function Segmented({
                   }}
                 />
               ) : null}
-              {option === "all" ? "All sectors" : titleCase(option)}
+              {labels?.[option] ??
+                (option === "all" ? "All sectors" : titleCase(option))}
             </button>
           );
         })}

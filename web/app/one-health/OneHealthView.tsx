@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BarChart } from "@/components/Charts";
+import { BarChart, StackedBars } from "@/components/Charts";
 import { FilterBar, ThresholdControl } from "@/components/FilterBar";
 import {
   Caption,
@@ -129,6 +129,24 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
       </Section>
 
       <Section title="Organisms found in more than one sector">
+        {grid.organisms.length > 0 ? (
+          <div className="mb-5">
+            <StackedBars
+              rows={grid.organisms.map((organism) => ({
+                label: organism,
+                parts: Object.fromEntries(
+                  grid.sectors.map((sector) => [
+                    sector,
+                    grid.byOrganism.get(organism)?.get(sector) ?? 0,
+                  ]),
+                ),
+              }))}
+              series={grid.sectors}
+              colours={data.palette}
+              labelWidth={180}
+            />
+          </div>
+        ) : null}
         {grid.organisms.length === 0 ? (
           <Empty>
             No organism in this data was isolated from more than one sector.

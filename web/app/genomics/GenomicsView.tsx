@@ -12,7 +12,8 @@ import {
   StatStrip,
   SuppressionNote,
 } from "@/components/Chrome";
-import type { GenomicsData } from "@/lib/data";
+import { CustodyChain } from "@/components/CustodyChain";
+import type { CustodyData, GenomicsData } from "@/lib/data";
 import { count, numeric, percent } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
 
@@ -31,7 +32,13 @@ type ClusterRow = GenomicsData["clusters"][number];
  * own category rather than counted as an error, and the proportion bar shows
  * all four outcomes instead of one headline percentage.
  */
-export function GenomicsView({ data }: { data: GenomicsData }) {
+export function GenomicsView({
+  data,
+  custody,
+}: {
+  data: GenomicsData;
+  custody: CustodyData;
+}) {
   const [mechanism, setMechanism] = useState("");
   const [minGenomes, setMinGenomes] = useState(0);
 
@@ -113,6 +120,8 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
 
   return (
     <>
+      <CustodyChain data={custody} />
+
       <StatStrip
         stats={[
           { value: count(sequenced), label: "Genomes" },

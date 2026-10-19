@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProportionBar } from "@/components/Charts";
+import { ProportionBar, StackedBars } from "@/components/Charts";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -124,6 +124,21 @@ export function MdrView({ data }: { data: MdrData }) {
       </Section>
 
       <Section title="By organism">
+        <StackedBars
+          rows={grid.organisms.map((organism) => ({
+            label: organism,
+            parts: Object.fromEntries(
+              grid.classes.map((c) => [
+                c,
+                grid.cells.get(`${organism}||${c}`) ?? 0,
+              ]),
+            ),
+          }))}
+          series={grid.classes}
+          colours={CLASSIFICATION_COLOUR}
+          labelWidth={200}
+        />
+        <div className="mt-5" />
         <DataTable
           columns={organismColumns}
           rows={grid.organisms.map((organism) => ({ organism }))}

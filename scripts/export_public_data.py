@@ -550,6 +550,8 @@ def main() -> int:
         os.path.join(args.out, "..", "maps", "regions.html"))
     print(f"  {'maps/regions.html':<22} "
           f"{os.path.getsize(map_path) / 1024:7.1f} KB")
+    _write(args.out, "custody.json",
+           sections.export_custody(threshold, _rows, _suppress))
     _write(args.out, "priority.json",
            sections.export_priority(frame, _priority_lookup(), threshold,
                                     _rows, _suppress))

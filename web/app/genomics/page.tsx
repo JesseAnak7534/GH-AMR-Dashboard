@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Container, PageHeader } from "@/components/Chrome";
-import { getGenomics } from "@/lib/data";
+import { getCustody, getGenomics } from "@/lib/data";
 import { GenomicsView } from "./GenomicsView";
 
 export const metadata: Metadata = {
@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 
 export default function GenomicsPage() {
   const data = getGenomics();
+  const custody = getCustody();
   return (
     <>
       <PageHeader
@@ -21,7 +22,7 @@ export default function GenomicsPage() {
         lede="What sequencing adds: the mechanisms behind the resistance, how often they explain the laboratory result, and which genomes look alike."
       />
       <Container>
-        <GenomicsView data={data} />
+        <GenomicsView data={data} custody={custody} />
       </Container>
     </>
   );
