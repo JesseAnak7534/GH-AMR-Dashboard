@@ -190,6 +190,20 @@ export interface GenomicsData {
   clusterSummary?: string;
   verdictLabels?: Record<string, string>;
   sequenced?: number;
+  sequenceTypes?: { sequence_type: string; genomes: Cell }[];
+  sequenceTypeSuppression?: Suppression;
+  plasmids?: {
+    label: string;
+    examined?: number;
+    rows: { name: string; genomes: Cell; percent: number | null }[];
+    suppression?: Suppression;
+  };
+  virulence?: {
+    label: string;
+    examined?: number;
+    rows: { name: string; genomes: Cell; percent: number | null }[];
+    suppression?: Suppression;
+  };
 }
 
 export interface PooledBlock {
@@ -265,6 +279,33 @@ export const SECTIONS: SectionMeta[] = [
     stat: (m) => ({ value: m.counts.results, unit: "susceptibility results" }),
   },
   {
+    href: "/trends",
+    badge: "TIME",
+    title: "Trends",
+    blurb:
+      "How resistance has moved by quarter, with the confidence band drawn so a change can be read against its uncertainty.",
+    colour: "#56B4E9",
+    stat: (m) => ({ value: m.counts.results, unit: "results over time" }),
+  },
+  {
+    href: "/mdr",
+    badge: "MDR",
+    title: "Multidrug resistance",
+    blurb:
+      "Isolates resistant across three or more antimicrobial categories, to the Magiorakos definitions.",
+    colour: "#000000",
+    stat: (m) => ({ value: m.counts.isolates, unit: "isolates classified" }),
+  },
+  {
+    href: "/regions",
+    badge: "GEO",
+    title: "Regions",
+    blurb:
+      "Where the isolates were collected, region by region, and how much each region contributes.",
+    colour: "#1d4d43",
+    stat: (m) => ({ value: m.counts.regions, unit: "regions reporting" }),
+  },
+  {
     href: "/organisms",
     badge: "ORG",
     title: "Organisms",
@@ -309,7 +350,102 @@ export const SECTIONS: SectionMeta[] = [
     title: "About this data",
     blurb:
       "How every figure is calculated, what is withheld and why, and what laboratory-based surveillance cannot tell you.",
-    colour: "#56B4E9",
+    colour: "#999999",
     stat: (m) => ({ value: m.counts.laboratories, unit: "contributing laboratories" }),
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Sections added after the first release
+// ---------------------------------------------------------------------------
+
+export interface TrendPeriodRow {
+  period: string;
+  isolates: Cell;
+  observations: number;
+  percent_non_susceptible: number | null;
+  ci_low: number | null;
+  ci_high: number | null;
+  status: string;
+}
+
+export interface TrendPairRow {
+  period: string;
+  tested: Cell;
+  percent_susceptible: number | null;
+  ci_low: number | null;
+  ci_high: number | null;
+}
+
+export interface TrendsData {
+  slices: {
+    sector: string;
+    colour: string;
+    periods: TrendPeriodRow[];
+    suppression: Suppression;
+    series: {
+      organism: string;
+      antibiotic: string;
+      points: TrendPairRow[];
+      suppression: Suppression;
+    }[];
+  }[];
+  frequency: string;
+  minObservations: number;
+}
+
+export interface MdrData {
+  slices: {
+    name: string;
+    colour: string;
+    isolates: number;
+    classifiable: number;
+    insufficient: number;
+    percent: Record<string, number>;
+    counts: { classification: string; isolates: Cell }[];
+    countsSuppression: Suppression;
+    byOrganism: { organism: string; classification: string; isolates: Cell }[];
+    byOrganismSuppression: Suppression;
+  }[];
+  deduplication: string;
+  definitions: Record<string, string>;
+}
+
+export interface RegionsData {
+  regions: {
+    region: string;
+    isolates: Cell;
+    organisms: number;
+    laboratories: number;
+    observations?: number;
+    percent_non_susceptible: number | null;
+    ci_low: number | null;
+    ci_high: number | null;
+  }[];
+  suppression: Suppression;
+  bySector: { region: string; sector: string; isolates: Cell }[];
+  bySectorSuppression: Suppression;
+  centroids: Record<string, { lat: number; lon: number }>;
+  deduplication: string;
+  palette: Record<string, string>;
+}
+
+export interface PriorityEntry {
+  tier: string;
+  organism: string;
+  resistance: string;
+  isolates: number | null;
+  matched: string[];
+  underSurveillance: boolean;
+}
+
+export interface PriorityData {
+  who: PriorityEntry[];
+  ghana: PriorityEntry[];
+  tierOrder: string[];
+}
+
+export const getTrends = () => read<TrendsData>("trends.json");
+export const getMdr = () => read<MdrData>("mdr.json");
+export const getRegions = () => read<RegionsData>("regions.json");
+export const getPriority = () => read<PriorityData>("priority.json");

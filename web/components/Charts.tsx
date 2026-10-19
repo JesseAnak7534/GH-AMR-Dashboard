@@ -336,8 +336,8 @@ export function IntervalChart({
         })}
       </svg>
       <figcaption className="mt-1 text-[0.74rem] text-ink-faint">
-        {unit}. The bar through each point is the 95% confidence interval: a long
-        bar means few isolates, not a disputed figure.
+        {unit}. The bar is the 95% confidence interval — a long bar means few
+        isolates, not a disputed figure.
       </figcaption>
     </figure>
   );

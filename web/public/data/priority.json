@@ -1,0 +1,267 @@
+{
+ "who": [
+  {
+   "tier": "CRITICAL",
+   "organism": "Acinetobacter baumannii",
+   "resistance": "Carbapenem-resistant",
+   "isolates": 82,
+   "matched": [
+    "Acinetobacter baumannii"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Pseudomonas aeruginosa",
+   "resistance": "Carbapenem-resistant",
+   "isolates": 211,
+   "matched": [
+    "Pseudomonas aeruginosa"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Enterobacterales",
+   "resistance": "3rd-gen cephalosporin-resistant, Carbapenem-resistant",
+   "isolates": 1505,
+   "matched": [
+    "Escherichia coli",
+    "Klebsiella pneumoniae",
+    "Proteus mirabilis",
+    "Salmonella enterica",
+    "Shigella flexneri"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Mycobacterium tuberculosis",
+   "resistance": "Rifampicin-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Salmonella Typhi",
+   "resistance": "Fluoroquinolone-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Shigella spp.",
+   "resistance": "Fluoroquinolone-resistant",
+   "isolates": 54,
+   "matched": [
+    "Shigella flexneri"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Enterococcus faecium",
+   "resistance": "Vancomycin-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Staphylococcus aureus",
+   "resistance": "Methicillin-resistant, Vancomycin-resistant",
+   "isolates": 342,
+   "matched": [
+    "Staphylococcus aureus"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Helicobacter pylori",
+   "resistance": "Clarithromycin-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Campylobacter spp.",
+   "resistance": "Fluoroquinolone-resistant",
+   "isolates": 180,
+   "matched": [
+    "Campylobacter jejuni"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Neisseria gonorrhoeae",
+   "resistance": "3rd-gen cephalosporin-resistant, Fluoroquinolone-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Streptococcus pneumoniae",
+   "resistance": "Penicillin-non-susceptible",
+   "isolates": 81,
+   "matched": [
+    "Streptococcus pneumoniae"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Haemophilus influenzae",
+   "resistance": "Ampicillin-resistant",
+   "isolates": 11,
+   "matched": [
+    "Haemophilus influenzae"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Group A Streptococcus",
+   "resistance": "Macrolide-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Group B Streptococcus",
+   "resistance": "Penicillin-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  }
+ ],
+ "ghana": [
+  {
+   "tier": "CRITICAL",
+   "organism": "Klebsiella pneumoniae",
+   "resistance": "ESBL-producing, Carbapenem-resistant",
+   "isolates": 332,
+   "matched": [
+    "Klebsiella pneumoniae"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Escherichia coli",
+   "resistance": "ESBL-producing, Carbapenem-resistant",
+   "isolates": 759,
+   "matched": [
+    "Escherichia coli"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Acinetobacter baumannii",
+   "resistance": "Carbapenem-resistant",
+   "isolates": 82,
+   "matched": [
+    "Acinetobacter baumannii"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "CRITICAL",
+   "organism": "Pseudomonas aeruginosa",
+   "resistance": "Carbapenem-resistant",
+   "isolates": 211,
+   "matched": [
+    "Pseudomonas aeruginosa"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Staphylococcus aureus",
+   "resistance": "Methicillin-resistant (MRSA)",
+   "isolates": 342,
+   "matched": [
+    "Staphylococcus aureus"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Salmonella spp.",
+   "resistance": "Fluoroquinolone-resistant, 3rd-gen cephalosporin-resistant",
+   "isolates": 301,
+   "matched": [
+    "Salmonella enterica"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Enterococcus spp.",
+   "resistance": "Vancomycin-resistant",
+   "isolates": 77,
+   "matched": [
+    "Enterococcus faecalis"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "HIGH",
+   "organism": "Neisseria gonorrhoeae",
+   "resistance": "Cephalosporin-resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Streptococcus pneumoniae",
+   "resistance": "Penicillin-non-susceptible",
+   "isolates": 81,
+   "matched": [
+    "Streptococcus pneumoniae"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Haemophilus influenzae",
+   "resistance": "Ampicillin-resistant",
+   "isolates": 11,
+   "matched": [
+    "Haemophilus influenzae"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Shigella spp.",
+   "resistance": "Fluoroquinolone-resistant",
+   "isolates": 54,
+   "matched": [
+    "Shigella flexneri"
+   ],
+   "underSurveillance": true
+  },
+  {
+   "tier": "MEDIUM",
+   "organism": "Non-typhoidal Salmonella",
+   "resistance": "Multi-drug resistant",
+   "isolates": null,
+   "matched": [],
+   "underSurveillance": false
+  }
+ ],
+ "tierOrder": [
+  "CRITICAL",
+  "HIGH",
+  "MEDIUM"
+ ]
+}

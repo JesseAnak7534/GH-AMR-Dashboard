@@ -92,16 +92,23 @@ back and says so.
 ```
 app/
   layout.tsx          masthead, section navigation, footer
-  page.tsx            the landing page: six cards, each one a link
-  resistance/         antibiogram, by sector, with intervals drawn
+  page.tsx            the landing page: nine cards, each one a link
+  resistance/         antibiogram by sector, as intervals or as a matrix,
+                      with the WHO and Ghana priority lists as a lens
+  trends/             resistance by quarter, with confidence bands
+  mdr/                MDR and XDR to the Magiorakos definitions
   organisms/          what is being isolated, counted as isolates
   one-health/         sectors side by side; the cross-sector grid
-  genomics/           determinants, concordance, clusters
+  regions/            proportional-symbol map and the region table
+  genomics/           determinants, concordance, clusters, STs, plasmids
   antimicrobial-use/  pooled AMU and AMC rates, prescribing
   about/              method, what is withheld, field completeness
 components/
   Chrome.tsx          page header, sections, stat strips, notes
   Charts.tsx          SVG charts: bars, point-with-interval, proportion
+  TrendChart.tsx      time series with its confidence band
+  HeatGrid.tsx        the antibiogram as a matrix
+  RegionMap.tsx       regions as proportional symbols
   DataTable.tsx       sortable, searchable, withheld-aware table
   Segmented.tsx       the control that switches between published slices
 lib/
@@ -116,6 +123,11 @@ HTML: a reader on a slow connection sees numbers in the first paint rather than
 a spinner.
 
 ## Rules the code keeps
+
+**Copy stays short.** One line of intro per section, one method line per page,
+and a limitation note only where a reader would otherwise draw a wrong
+conclusion. The longer reasoning belongs in these docs and in the module
+docstrings, not on screen.
 
 **Withheld is never rendered as blank or zero.** A blank reads as "nothing
 here" and a zero reads as "we looked and found none". Both are wrong, and
@@ -133,6 +145,25 @@ distinction on the platform.
 **Axes are not scaled to the data.** The susceptibility chart runs 0–100%. An
 axis from 70 to 95 makes a five-point difference look like a collapse, and these
 are figures people will quote.
+
+**Trends deduplicate inside each period, not across the series.** A patient's
+isolate a year later is next year's data point, not a repeat, and dropping it
+would bend the line.
+
+**MDR is only counted where enough categories were tested.** An isolate tested
+against two categories cannot answer a question about three, so it is reported
+as "insufficient testing" rather than as "not MDR" — otherwise a laboratory
+with a small panel looks like one with little resistance.
+
+**The region map uses symbols, not shading.** No specimen carries coordinates
+and the repository holds no boundary polygons, so each region is a circle at
+its centroid with area proportional to isolates. A circle at a point claims
+less than a filled district, and the map is of where specimens were collected,
+not of where resistance is.
+
+**Hospital identity is not published.** Laboratories are named — attribution is
+the point of sentinel surveillance — but facility names are not, which is why
+the consumption page offers no split by facility.
 
 **Sectors are not pooled.** There is no "all sectors" option on the resistance
 page, because a percentage mixing hospital isolates with river water describes

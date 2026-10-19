@@ -2014,22 +2014,43 @@ _pp_filter_path = os.path.join("data", "lookups", "priority_pathogens.json")
 if os.path.exists(_pp_filter_path):
     with open(_pp_filter_path, "r") as _pf:
         _pp_lookup = json.load(_pf)
-    _who_pp = _pp_lookup.get("WHO_2024_PRIORITY_PATHOGENS", {})
-    _ghana_pp = _pp_lookup.get("GHANA_PRIORITY_PATHOGENS", {})
-    _all_pp_names = sorted(set(
-        p for pp_dict in [_who_pp, _ghana_pp]
+    # The keys in data/lookups/priority_pathogens.json are WHO_2024 and
+    # GHANA_PRIORITY. Reading the longer names returned {} every time, so this
+    # filter silently offered nothing and the expander never drew.
+    _who_pp = _pp_lookup.get("WHO_2024", {})
+    _ghana_pp = _pp_lookup.get("GHANA_PRIORITY", {})
+    def _pp_organisms(tier_list):
+        """Organism names out of a tier.
+
+        Each entry is {"organism": ..., "resistance": ...}, not a bare string.
+        Treating it as a string put dicts into a set and raised; the older key
+        bug hid that by always returning nothing to iterate over.
+        """
+        names = []
+        for entry in tier_list or []:
+            if isinstance(entry, dict):
+                name = str(entry.get("organism", "")).strip()
+            else:
+                name = str(entry).strip()
+            if name:
+                names.append(name)
+        return names
+
+    _all_pp_names = sorted({
+        name for pp_dict in (_who_pp, _ghana_pp)
         for tier_list in pp_dict.values()
-        for p in tier_list
-    ))
+        for name in _pp_organisms(tier_list)
+    })
     if _all_pp_names:
         with st.sidebar.expander("Priority Pathogen Filter", expanded=False):
             pp_source = st.selectbox("List", ["WHO 2024", "Ghana"], key="pp_source")
             pp_dict = _who_pp if pp_source == "WHO 2024" else _ghana_pp
             pp_tier = st.selectbox("Tier", ["All"] + list(pp_dict.keys()), key="pp_tier")
             if pp_tier == "All":
-                pp_names = sorted(set(p for lst in pp_dict.values() for p in lst))
+                pp_names = sorted({name for lst in pp_dict.values()
+                                   for name in _pp_organisms(lst)})
             else:
-                pp_names = pp_dict.get(pp_tier, [])
+                pp_names = _pp_organisms(pp_dict.get(pp_tier, []))
             st.session_state['priority_pathogen_filter'] = pp_names
             st.caption(f"{len(pp_names)} pathogens selected")
 

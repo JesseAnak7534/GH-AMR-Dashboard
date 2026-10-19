@@ -48,6 +48,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from scripts import export_sections as sections  # noqa: E402
 from src import consumption, db, disclosure, genomics as gx, palette  # noqa: E402
 from src import surveillance as sv  # noqa: E402
 
@@ -61,6 +62,8 @@ STRATA = [
     ("age_band_at_collection", "Age band"),
     ("patient_type", "Patient type"),
     ("region", "Region"),
+    ("sex", "Sex"),
+    ("sampling_purpose", "Sampling purpose"),
 ]
 
 
@@ -354,6 +357,8 @@ def export_use(threshold: int) -> Dict[str, object]:
 
     amu_blocks = []
     if amu is not None and not amu.empty:
+        # No split by facility. A facility-level consumption rate names the
+        # hospital, and hospital identity is not published here.
         for column in ("region", "antibiotic_name", "report_period"):
             if column in amu.columns:
                 block = pooled(consumption.pooled_ddd(amu, by=column), column,
@@ -449,6 +454,16 @@ def export_about(frame: pd.DataFrame) -> Dict[str, object]:
 # Entry point
 # ---------------------------------------------------------------------------
 
+def _priority_lookup() -> Dict[str, object]:
+    """The WHO and Ghana priority pathogen lists, if the lookup is present."""
+    path = os.path.join("data", "lookups", "priority_pathogens.json")
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except Exception:                                 # noqa: BLE001
+        return {}
+
+
 def _use_record_total() -> int:
     """Consumption and prescribing records, counted together.
 
@@ -502,6 +517,20 @@ def main() -> int:
     use = export_use(threshold)
     _write(args.out, "use.json", use)
     _write(args.out, "about.json", export_about(frame))
+
+    _write(args.out, "trends.json",
+           sections.export_trends(frame, threshold, _rows, _suppress))
+    _write(args.out, "mdr.json",
+           sections.export_mdr(frame, threshold, _rows, _suppress))
+    _write(args.out, "regions.json",
+           sections.export_regions(frame, threshold, _rows, _suppress))
+    _write(args.out, "priority.json",
+           sections.export_priority(frame, _priority_lookup(), threshold,
+                                    _rows, _suppress))
+    extras = sections.export_genomic_extras(threshold, _rows, _suppress)
+    if extras:
+        genomics.update(extras)
+        _write(args.out, "genomics.json", genomics)
 
     # The landing page needs one figure per section and should not have to read
     # every section file to find them, so they are repeated in the manifest.

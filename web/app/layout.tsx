@@ -95,18 +95,16 @@ export default function RootLayout({
               <p className="eyebrow mb-2">Published by</p>
               <p className="text-[0.92rem] font-semibold">{OWNER}</p>
               <p className="mt-1 text-[0.85rem] leading-relaxed text-ink-soft">
-                University of Ghana. Laboratories are named throughout, because
-                a rate nobody can attribute is a rate nobody can act on.
+                University of Ghana. Laboratories are named throughout.
               </p>
             </div>
 
             <div>
               <p className="eyebrow mb-2">How to read it</p>
               <p className="text-[0.82rem] leading-relaxed text-ink-soft">
-                No percentage is published on fewer than{" "}
-                {manifest.minIsolatesForReporting} isolates. Counts resting on
-                fewer than {manifest.threshold} records are withheld, and
-                withheld means too few to publish, not none found.
+                No percentage below {manifest.minIsolatesForReporting}{" "}
+                isolates. Counts below {manifest.threshold} records are withheld
+                — withheld is not zero.
               </p>
             </div>
 
@@ -129,10 +127,9 @@ export default function RootLayout({
 
           <div className="border-t border-rule">
             <div className="mx-auto max-w-[1180px] px-5 py-4 text-[0.76rem] text-ink-faint">
-              Figures generated {monthYear(manifest.generatedAt)} from{" "}
+              Generated {monthYear(manifest.generatedAt)} from{" "}
               {manifest.counts.results.toLocaleString("en-GB")} susceptibility
-              results. Every figure on this site is an aggregate: no patient,
-              specimen or individual result is published.
+              results. Aggregate figures only.
             </div>
           </div>
         </footer>

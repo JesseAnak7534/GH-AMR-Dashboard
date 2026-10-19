@@ -775,6 +775,58 @@
       "threshold": 5,
       "summary": "No cell was withheld. Every value shown rests on at least 5 records."
      }
+    },
+    {
+     "key": "sex",
+     "label": "Sex",
+     "rows": [
+      {
+       "stratum": "Not recorded",
+       "isolates": 244,
+       "observations": 1828,
+       "susceptible": 1131,
+       "non_susceptible": 697,
+       "percent_non_susceptible": 38.12910284463895,
+       "ci_low": 35.929608213208226,
+       "ci_high": 40.37838697589547,
+       "distinct_pairs": 42,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sampling_purpose",
+     "label": "Sampling purpose",
+     "rows": [
+      {
+       "stratum": "Surveillance",
+       "isolates": 244,
+       "observations": 1828,
+       "susceptible": 1131,
+       "non_susceptible": 697,
+       "percent_non_susceptible": 38.12910284463895,
+       "ci_low": 35.929608213208226,
+       "ci_high": 40.37838697589547,
+       "distinct_pairs": 42,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
     }
    ],
    "method": {
@@ -1108,6 +1160,58 @@
       "cellsTotal": 16,
       "threshold": 5,
       "summary": "7 of 16 values (43.8%) are withheld because fewer than 5 records stand behind them. Withheld is not zero."
+     }
+    },
+    {
+     "key": "sex",
+     "label": "Sex",
+     "rows": [
+      {
+       "stratum": "Not recorded",
+       "isolates": 89,
+       "observations": 670,
+       "susceptible": 419,
+       "non_susceptible": 251,
+       "percent_non_susceptible": 37.46268656716418,
+       "ci_low": 33.87880975445394,
+       "ci_high": 41.18951490819676,
+       "distinct_pairs": 34,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sampling_purpose",
+     "label": "Sampling purpose",
+     "rows": [
+      {
+       "stratum": "Surveillance",
+       "isolates": 89,
+       "observations": 670,
+       "susceptible": 419,
+       "non_susceptible": 251,
+       "percent_non_susceptible": 37.46268656716418,
+       "ci_low": 33.87880975445394,
+       "ci_high": 41.18951490819676,
+       "distinct_pairs": 34,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
      }
     }
    ],
@@ -1791,6 +1895,58 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 16,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sex",
+     "label": "Sex",
+     "rows": [
+      {
+       "stratum": "Not recorded",
+       "isolates": 195,
+       "observations": 1783,
+       "susceptible": 1005,
+       "non_susceptible": 778,
+       "percent_non_susceptible": 43.634324172742566,
+       "ci_low": 41.348463349650885,
+       "ci_high": 45.947556622125006,
+       "distinct_pairs": 52,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sampling_purpose",
+     "label": "Sampling purpose",
+     "rows": [
+      {
+       "stratum": "Surveillance",
+       "isolates": 195,
+       "observations": 1783,
+       "susceptible": 1005,
+       "non_susceptible": 778,
+       "percent_non_susceptible": 43.634324172742566,
+       "ci_low": 41.348463349650885,
+       "ci_high": 45.947556622125006,
+       "distinct_pairs": 52,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
       "threshold": 5,
       "summary": "No cell was withheld. Every value shown rests on at least 5 records."
      }
@@ -2532,6 +2688,58 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 16,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sex",
+     "label": "Sex",
+     "rows": [
+      {
+       "stratum": "Not recorded",
+       "isolates": 299,
+       "observations": 2168,
+       "susceptible": 1338,
+       "non_susceptible": 830,
+       "percent_non_susceptible": 38.284132841328415,
+       "ci_low": 36.26042663604457,
+       "ci_high": 40.34928560079627,
+       "distinct_pairs": 41,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sampling_purpose",
+     "label": "Sampling purpose",
+     "rows": [
+      {
+       "stratum": "Surveillance",
+       "isolates": 299,
+       "observations": 2168,
+       "susceptible": 1338,
+       "non_susceptible": 830,
+       "percent_non_susceptible": 38.284132841328415,
+       "ci_low": 36.26042663604457,
+       "ci_high": 40.34928560079627,
+       "distinct_pairs": 41,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 1,
       "threshold": 5,
       "summary": "No cell was withheld. Every value shown rests on at least 5 records."
      }
@@ -4571,6 +4779,118 @@
       "primary": 0,
       "secondary": 0,
       "cellsTotal": 16,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sex",
+     "label": "Sex",
+     "rows": [
+      {
+       "stratum": "F",
+       "isolates": 902,
+       "observations": 6959,
+       "susceptible": 4150,
+       "non_susceptible": 2809,
+       "percent_non_susceptible": 40.364994970541744,
+       "ci_low": 39.217865064140675,
+       "ci_high": 41.52275669580286,
+       "distinct_pairs": 114,
+       "status": "reported"
+      },
+      {
+       "stratum": "M",
+       "isolates": 749,
+       "observations": 5789,
+       "susceptible": 3381,
+       "non_susceptible": 2408,
+       "percent_non_susceptible": 41.59613059250302,
+       "ci_low": 40.3324112470804,
+       "ci_high": 42.8709962136035,
+       "distinct_pairs": 113,
+       "status": "reported"
+      },
+      {
+       "stratum": "Not recorded",
+       "isolates": 24,
+       "observations": 197,
+       "susceptible": 103,
+       "non_susceptible": 94,
+       "percent_non_susceptible": 47.71573604060914,
+       "ci_low": 40.85139800694169,
+       "ci_high": 54.66745864427002,
+       "distinct_pairs": 72,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 3,
+      "threshold": 5,
+      "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+     }
+    },
+    {
+     "key": "sampling_purpose",
+     "label": "Sampling purpose",
+     "rows": [
+      {
+       "stratum": "Routine diagnostic",
+       "isolates": 1427,
+       "observations": 11012,
+       "susceptible": 6600,
+       "non_susceptible": 4412,
+       "percent_non_susceptible": 40.0653832183073,
+       "ci_low": 39.15373658187431,
+       "ci_high": 40.98395893473514,
+       "distinct_pairs": 115,
+       "status": "reported"
+      },
+      {
+       "stratum": "Surveillance",
+       "isolates": 131,
+       "observations": 1016,
+       "susceptible": 626,
+       "non_susceptible": 390,
+       "percent_non_susceptible": 38.38582677165354,
+       "ci_low": 35.44445350645322,
+       "ci_high": 41.41469795393042,
+       "distinct_pairs": 108,
+       "status": "reported"
+      },
+      {
+       "stratum": "Screening",
+       "isolates": 81,
+       "observations": 629,
+       "susceptible": 372,
+       "non_susceptible": 257,
+       "percent_non_susceptible": 40.85850556438792,
+       "ci_low": 37.08362099967762,
+       "ci_high": 44.744375137112364,
+       "distinct_pairs": 107,
+       "status": "reported"
+      },
+      {
+       "stratum": "Outbreak investigation",
+       "isolates": 36,
+       "observations": 288,
+       "susceptible": 36,
+       "non_susceptible": 252,
+       "percent_non_susceptible": 87.5,
+       "ci_low": 83.18001624252543,
+       "ci_high": 90.83273588054408,
+       "distinct_pairs": 8,
+       "status": "reported"
+      }
+     ],
+     "suppression": {
+      "withheld": 0,
+      "primary": 0,
+      "secondary": 0,
+      "cellsTotal": 4,
       "threshold": 5,
       "summary": "No cell was withheld. Every value shown rests on at least 5 records."
      }

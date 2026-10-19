@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { IntervalChart } from "@/components/Charts";
+import { HeatGrid } from "@/components/HeatGrid";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -14,6 +15,7 @@ import {
 import { Segmented } from "@/components/Segmented";
 import type {
   AntibiogramRow,
+  PriorityData,
   ResistanceData,
   StratumRow,
 } from "@/lib/data";
@@ -32,13 +34,30 @@ import { count, humanise, interval, percent, titleCase } from "@/lib/format";
  * organism counts, where adding an animal isolate to a human one does give two
  * isolates.
  */
-export function ResistanceView({ data }: { data: ResistanceData }) {
+export function ResistanceView({
+  data,
+  priority,
+}: {
+  data: ResistanceData;
+  priority: PriorityData;
+}) {
   const sectors = data.slices.map((slice) => slice.sector);
   const [sector, setSector] = useState(
     sectors.includes("human") ? "human" : (sectors[0] ?? ""),
   );
   const slice = data.slices.find((s) => s.sector === sector) ?? data.slices[0];
   const [stratum, setStratum] = useState(slice?.strata[0]?.key ?? "");
+  const [view, setView] = useState<"chart" | "matrix">("chart");
+  const [listName, setListName] = useState<"none" | "who" | "ghana">("who");
+
+  // Organisms on the chosen priority list, matched by the export rather than
+  // re-derived here: an order such as Enterobacterales covers several genera,
+  // and that mapping belongs beside the list it interprets.
+  const priorityOrganisms = useMemo(() => {
+    if (listName === "none") return new Set<string>();
+    const entries = listName === "who" ? priority.who : priority.ghana;
+    return new Set(entries.flatMap((entry) => entry.matched));
+  }, [priority, listName]);
 
   const colours = Object.fromEntries(
     data.slices.map((s) => [s.sector, s.colour]),
@@ -152,24 +171,51 @@ export function ResistanceView({ data }: { data: ResistanceData }) {
 
       {slice.pairsReported === 0 ? (
         <Note tone="limit">
-          No organism–antibiotic combination in the {slice.sector} sector
-          reaches {data.minIsolatesForReporting} isolates, which is the minimum
-          this platform will put a percentage on. A percentage over a handful of
-          results is not a measurement, so none is shown. The counts are in the
-          organisms section, where they are large enough to publish.
+          No combination in the {slice.sector} sector reaches{" "}
+          {data.minIsolatesForReporting} isolates, so no percentage is shown.
+          The counts are in the organisms section.
         </Note>
       ) : (
         <>
-          <Section
-            title="Where susceptibility is lowest"
-            intro="The combinations in this sector with the smallest proportion of susceptible isolates. The axis is fixed from 0 to 100% rather than scaled to the data, because a chart running from 70 to 95 makes a five-point difference look like a collapse."
-          >
-            <IntervalChart rows={lowest} colour={slice.colour} />
+          <Section title="Susceptibility">
+            <div className="flex flex-wrap gap-x-8 gap-y-3">
+              <Segmented
+                label="View"
+                options={["chart", "matrix"]}
+                value={view}
+                onChange={(next) => setView(next as "chart" | "matrix")}
+              />
+              <Segmented
+                label="Priority list"
+                options={["who", "ghana", "none"]}
+                value={listName}
+                onChange={(next) =>
+                  setListName(next as "none" | "who" | "ghana")
+                }
+              />
+            </div>
+            <div className="mt-4">
+              {view === "chart" ? (
+                <IntervalChart rows={lowest} colour={slice.colour} />
+              ) : (
+                <HeatGrid
+                  cells={slice.rows.map((row) => ({
+                    organism: row.organism,
+                    antibiotic: row.antibiotic,
+                    percent: row.percent_susceptible,
+                    tested: row.tested,
+                    low: row.ci_low,
+                    high: row.ci_high,
+                  }))}
+                  highlightOrganisms={priorityOrganisms}
+                />
+              )}
+            </div>
           </Section>
 
           <Section
             title="Every published combination"
-            intro="Search by organism or antibiotic, and sort any column. Every row here was published by the export, so narrowing the view cannot reveal anything that was withheld."
+            intro="Search and sort. Every row shown has already passed disclosure control."
           >
             <DataTable
               columns={antibiogramColumns}
@@ -186,7 +232,7 @@ export function ResistanceView({ data }: { data: ResistanceData }) {
       {activeStratum ? (
         <Section
           title="Resistance by setting"
-          intro="The same results split by where the specimen came from. The unit here is one isolate against one agent, not the isolate: an isolate tested against twelve agents cannot be the denominator for twelve results."
+          intro="The unit is one isolate against one agent, not the isolate."
         >
           <Segmented
             label="Split by"
@@ -204,21 +250,17 @@ export function ResistanceView({ data }: { data: ResistanceData }) {
             />
           </div>
           <Caption>
-            Two settings are only comparable when similar panels were tested,
-            which is why the number of distinct organism–antibiotic pairs is
-            shown beside each. A ward that tests four agents and one that tests
-            fourteen will differ for that reason alone.
+            Comparable only where similar panels were tested — the
+            distinct-pair count beside each says how similar.
           </Caption>
           <SuppressionNote suppression={activeStratum.suppression} />
         </Section>
       ) : null}
 
       <Note>
-        <strong>Method.</strong> {slice.method.deduplication} Percentages are
-        not published below {slice.method.minIsolates} isolates, following CLSI
-        M39. Intervals are Wilson intervals, which stay inside 0–100% near the
-        extremes where the ordinary normal approximation does not.
-        Quality-control failures excluded: {count(slice.method.qcExcluded)}.
+        <strong>Method.</strong> {slice.method.deduplication} No percentage
+        below {slice.method.minIsolates} isolates (CLSI M39); Wilson intervals.
+        QC failures excluded: {count(slice.method.qcExcluded)}.
       </Note>
     </>
   );

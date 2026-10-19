@@ -1,0 +1,736 @@
+{
+ "regions": [
+  {
+   "region": "Greater Accra",
+   "isolates": 215,
+   "organisms": 13,
+   "laboratories": 19,
+   "isolates_strat": 215,
+   "observations": 1611,
+   "susceptible": 832,
+   "non_susceptible": 779,
+   "percent_non_susceptible": 48.35505896958411,
+   "ci_low": 45.921573793501366,
+   "ci_high": 50.796370554724504,
+   "distinct_pairs": 112,
+   "status": "reported"
+  },
+  {
+   "region": "Upper West",
+   "isolates": 168,
+   "organisms": 13,
+   "laboratories": 19,
+   "isolates_strat": 168,
+   "observations": 1258,
+   "susceptible": 740,
+   "non_susceptible": 518,
+   "percent_non_susceptible": 41.1764705882353,
+   "ci_low": 38.4876757731839,
+   "ci_high": 43.918990800496985,
+   "distinct_pairs": 110,
+   "status": "reported"
+  },
+  {
+   "region": "Oti",
+   "isolates": 166,
+   "organisms": 13,
+   "laboratories": 19,
+   "isolates_strat": 166,
+   "observations": 1326,
+   "susceptible": 802,
+   "non_susceptible": 524,
+   "percent_non_susceptible": 39.51734539969834,
+   "ci_low": 36.91981554446615,
+   "ci_high": 42.175439108418836,
+   "distinct_pairs": 112,
+   "status": "reported"
+  },
+  {
+   "region": "Savannah",
+   "isolates": 164,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 164,
+   "observations": 1293,
+   "susceptible": 781,
+   "non_susceptible": 512,
+   "percent_non_susceptible": 39.59783449342614,
+   "ci_low": 36.96667537403737,
+   "ci_high": 42.29062173919528,
+   "distinct_pairs": 105,
+   "status": "reported"
+  },
+  {
+   "region": "Upper East",
+   "isolates": 159,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 159,
+   "observations": 1213,
+   "susceptible": 739,
+   "non_susceptible": 474,
+   "percent_non_susceptible": 39.07666941467436,
+   "ci_low": 36.36942901357755,
+   "ci_high": 41.852880282883056,
+   "distinct_pairs": 108,
+   "status": "reported"
+  },
+  {
+   "region": "Western",
+   "isolates": 159,
+   "organisms": 11,
+   "laboratories": 19,
+   "isolates_strat": 159,
+   "observations": 1245,
+   "susceptible": 748,
+   "non_susceptible": 497,
+   "percent_non_susceptible": 39.91967871485944,
+   "ci_low": 37.234308296658384,
+   "ci_high": 42.66706590484162,
+   "distinct_pairs": 101,
+   "status": "reported"
+  },
+  {
+   "region": "Bono East",
+   "isolates": 157,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 157,
+   "observations": 1196,
+   "susceptible": 705,
+   "non_susceptible": 491,
+   "percent_non_susceptible": 41.05351170568562,
+   "ci_low": 38.29846384890212,
+   "ci_high": 43.86584850699553,
+   "distinct_pairs": 108,
+   "status": "reported"
+  },
+  {
+   "region": "Eastern",
+   "isolates": 155,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 155,
+   "observations": 1189,
+   "susceptible": 702,
+   "non_susceptible": 487,
+   "percent_non_susceptible": 40.95878889823381,
+   "ci_low": 38.19703719470601,
+   "ci_high": 43.77877585540894,
+   "distinct_pairs": 106,
+   "status": "reported"
+  },
+  {
+   "region": "Volta",
+   "isolates": 153,
+   "organisms": 11,
+   "laboratories": 19,
+   "isolates_strat": 153,
+   "observations": 1249,
+   "susceptible": 735,
+   "non_susceptible": 514,
+   "percent_non_susceptible": 41.152922337870294,
+   "ci_low": 38.454888379458815,
+   "ci_high": 43.905212051433644,
+   "distinct_pairs": 102,
+   "status": "reported"
+  },
+  {
+   "region": "Ashanti",
+   "isolates": 151,
+   "organisms": 11,
+   "laboratories": 19,
+   "isolates_strat": 151,
+   "observations": 1166,
+   "susceptible": 738,
+   "non_susceptible": 428,
+   "percent_non_susceptible": 36.706689536878216,
+   "ci_low": 33.98786839412248,
+   "ci_high": 39.51281751070431,
+   "distinct_pairs": 102,
+   "status": "reported"
+  },
+  {
+   "region": "Northern",
+   "isolates": 148,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 148,
+   "observations": 1100,
+   "susceptible": 682,
+   "non_susceptible": 418,
+   "percent_non_susceptible": 38.0,
+   "ci_low": 35.1780031591869,
+   "ci_high": 40.90552186831704,
+   "distinct_pairs": 101,
+   "status": "reported"
+  },
+  {
+   "region": "Central",
+   "isolates": 145,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 145,
+   "observations": 1107,
+   "susceptible": 672,
+   "non_susceptible": 435,
+   "percent_non_susceptible": 39.295392953929536,
+   "ci_low": 36.4599939467341,
+   "ci_high": 42.20483099320333,
+   "distinct_pairs": 106,
+   "status": "reported"
+  },
+  {
+   "region": "Ahafo",
+   "isolates": 145,
+   "organisms": 11,
+   "laboratories": 19,
+   "isolates_strat": 145,
+   "observations": 1148,
+   "susceptible": 675,
+   "non_susceptible": 473,
+   "percent_non_susceptible": 41.20209059233449,
+   "ci_low": 38.38878315989106,
+   "ci_high": 44.07408326201972,
+   "distinct_pairs": 101,
+   "status": "reported"
+  },
+  {
+   "region": "Western North",
+   "isolates": 144,
+   "organisms": 11,
+   "laboratories": 19,
+   "isolates_strat": 144,
+   "observations": 1087,
+   "susceptible": 664,
+   "non_susceptible": 423,
+   "percent_non_susceptible": 38.91444342226311,
+   "ci_low": 36.059876996458264,
+   "ci_high": 41.84708951453655,
+   "distinct_pairs": 103,
+   "status": "reported"
+  },
+  {
+   "region": "North East",
+   "isolates": 141,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 141,
+   "observations": 1119,
+   "susceptible": 663,
+   "non_susceptible": 456,
+   "percent_non_susceptible": 40.75067024128686,
+   "ci_low": 37.908014157989506,
+   "ci_high": 43.65661615139696,
+   "distinct_pairs": 101,
+   "status": "reported"
+  },
+  {
+   "region": "Bono",
+   "isolates": 132,
+   "organisms": 12,
+   "laboratories": 19,
+   "isolates_strat": 132,
+   "observations": 1087,
+   "susceptible": 649,
+   "non_susceptible": 438,
+   "percent_non_susceptible": 40.29438822447102,
+   "ci_low": 37.41761645156705,
+   "ci_high": 43.23952020328733,
+   "distinct_pairs": 108,
+   "status": "reported"
+  }
+ ],
+ "suppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 16,
+  "threshold": 5,
+  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+ },
+ "bySector": [
+  {
+   "region": "Ahafo",
+   "sector": "animal",
+   "isolates": 16
+  },
+  {
+   "region": "Ahafo",
+   "sector": "aquaculture",
+   "isolates": 8
+  },
+  {
+   "region": "Ahafo",
+   "sector": "environment",
+   "isolates": 17
+  },
+  {
+   "region": "Ahafo",
+   "sector": "food",
+   "isolates": 19
+  },
+  {
+   "region": "Ahafo",
+   "sector": "human",
+   "isolates": 85
+  },
+  {
+   "region": "Ashanti",
+   "sector": "animal",
+   "isolates": 16
+  },
+  {
+   "region": "Ashanti",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Ashanti",
+   "sector": "environment",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Ashanti",
+   "sector": "food",
+   "isolates": 16
+  },
+  {
+   "region": "Ashanti",
+   "sector": "human",
+   "isolates": 106
+  },
+  {
+   "region": "Bono",
+   "sector": "animal",
+   "isolates": 20
+  },
+  {
+   "region": "Bono",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Bono",
+   "sector": "environment",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Bono",
+   "sector": "food",
+   "isolates": 20
+  },
+  {
+   "region": "Bono",
+   "sector": "human",
+   "isolates": 81
+  },
+  {
+   "region": "Bono East",
+   "sector": "animal",
+   "isolates": 15
+  },
+  {
+   "region": "Bono East",
+   "sector": "aquaculture",
+   "isolates": 6
+  },
+  {
+   "region": "Bono East",
+   "sector": "environment",
+   "isolates": 10
+  },
+  {
+   "region": "Bono East",
+   "sector": "food",
+   "isolates": 15
+  },
+  {
+   "region": "Bono East",
+   "sector": "human",
+   "isolates": 111
+  },
+  {
+   "region": "Central",
+   "sector": "animal",
+   "isolates": 15
+  },
+  {
+   "region": "Central",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Central",
+   "sector": "environment",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Central",
+   "sector": "food",
+   "isolates": 17
+  },
+  {
+   "region": "Central",
+   "sector": "human",
+   "isolates": 96
+  },
+  {
+   "region": "Eastern",
+   "sector": "animal",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Eastern",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Eastern",
+   "sector": "environment",
+   "isolates": 14
+  },
+  {
+   "region": "Eastern",
+   "sector": "food",
+   "isolates": 19
+  },
+  {
+   "region": "Eastern",
+   "sector": "human",
+   "isolates": 107
+  },
+  {
+   "region": "Greater Accra",
+   "sector": "animal",
+   "isolates": 12
+  },
+  {
+   "region": "Greater Accra",
+   "sector": "aquaculture",
+   "isolates": 6
+  },
+  {
+   "region": "Greater Accra",
+   "sector": "environment",
+   "isolates": 17
+  },
+  {
+   "region": "Greater Accra",
+   "sector": "food",
+   "isolates": 19
+  },
+  {
+   "region": "Greater Accra",
+   "sector": "human",
+   "isolates": 161
+  },
+  {
+   "region": "North East",
+   "sector": "animal",
+   "isolates": 16
+  },
+  {
+   "region": "North East",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "North East",
+   "sector": "environment",
+   "isolates": 13
+  },
+  {
+   "region": "North East",
+   "sector": "food",
+   "isolates": "withheld"
+  },
+  {
+   "region": "North East",
+   "sector": "human",
+   "isolates": 96
+  },
+  {
+   "region": "Northern",
+   "sector": "animal",
+   "isolates": 20
+  },
+  {
+   "region": "Northern",
+   "sector": "aquaculture",
+   "isolates": 6
+  },
+  {
+   "region": "Northern",
+   "sector": "environment",
+   "isolates": 9
+  },
+  {
+   "region": "Northern",
+   "sector": "food",
+   "isolates": 25
+  },
+  {
+   "region": "Northern",
+   "sector": "human",
+   "isolates": 88
+  },
+  {
+   "region": "Oti",
+   "sector": "animal",
+   "isolates": 16
+  },
+  {
+   "region": "Oti",
+   "sector": "aquaculture",
+   "isolates": 10
+  },
+  {
+   "region": "Oti",
+   "sector": "environment",
+   "isolates": 10
+  },
+  {
+   "region": "Oti",
+   "sector": "food",
+   "isolates": 24
+  },
+  {
+   "region": "Oti",
+   "sector": "human",
+   "isolates": 106
+  },
+  {
+   "region": "Savannah",
+   "sector": "animal",
+   "isolates": 16
+  },
+  {
+   "region": "Savannah",
+   "sector": "aquaculture",
+   "isolates": 5
+  },
+  {
+   "region": "Savannah",
+   "sector": "environment",
+   "isolates": 7
+  },
+  {
+   "region": "Savannah",
+   "sector": "food",
+   "isolates": 21
+  },
+  {
+   "region": "Savannah",
+   "sector": "human",
+   "isolates": 115
+  },
+  {
+   "region": "Upper East",
+   "sector": "animal",
+   "isolates": 13
+  },
+  {
+   "region": "Upper East",
+   "sector": "aquaculture",
+   "isolates": 6
+  },
+  {
+   "region": "Upper East",
+   "sector": "environment",
+   "isolates": 17
+  },
+  {
+   "region": "Upper East",
+   "sector": "food",
+   "isolates": 20
+  },
+  {
+   "region": "Upper East",
+   "sector": "human",
+   "isolates": 103
+  },
+  {
+   "region": "Upper West",
+   "sector": "animal",
+   "isolates": 12
+  },
+  {
+   "region": "Upper West",
+   "sector": "aquaculture",
+   "isolates": 9
+  },
+  {
+   "region": "Upper West",
+   "sector": "environment",
+   "isolates": 17
+  },
+  {
+   "region": "Upper West",
+   "sector": "food",
+   "isolates": 21
+  },
+  {
+   "region": "Upper West",
+   "sector": "human",
+   "isolates": 109
+  },
+  {
+   "region": "Volta",
+   "sector": "animal",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Volta",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Volta",
+   "sector": "environment",
+   "isolates": 16
+  },
+  {
+   "region": "Volta",
+   "sector": "food",
+   "isolates": 14
+  },
+  {
+   "region": "Volta",
+   "sector": "human",
+   "isolates": 107
+  },
+  {
+   "region": "Western",
+   "sector": "animal",
+   "isolates": 14
+  },
+  {
+   "region": "Western",
+   "sector": "aquaculture",
+   "isolates": 7
+  },
+  {
+   "region": "Western",
+   "sector": "environment",
+   "isolates": 13
+  },
+  {
+   "region": "Western",
+   "sector": "food",
+   "isolates": 21
+  },
+  {
+   "region": "Western",
+   "sector": "human",
+   "isolates": 104
+  },
+  {
+   "region": "Western North",
+   "sector": "animal",
+   "isolates": 18
+  },
+  {
+   "region": "Western North",
+   "sector": "aquaculture",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Western North",
+   "sector": "environment",
+   "isolates": "withheld"
+  },
+  {
+   "region": "Western North",
+   "sector": "food",
+   "isolates": 16
+  },
+  {
+   "region": "Western North",
+   "sector": "human",
+   "isolates": 100
+  }
+ ],
+ "bySectorSuppression": {
+  "withheld": 14,
+  "primary": 7,
+  "secondary": 7,
+  "cellsTotal": 80,
+  "threshold": 5,
+  "summary": "14 of 80 values (17.5%) are withheld because fewer than 5 records stand behind them. 7 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+ },
+ "centroids": {
+  "Ahafo": {
+   "lat": 6.8,
+   "lon": -2.2
+  },
+  "Ashanti": {
+   "lat": 6.5,
+   "lon": -1.5
+  },
+  "Bono": {
+   "lat": 7.2,
+   "lon": -2.5
+  },
+  "Bono East": {
+   "lat": 7.5,
+   "lon": -0.8
+  },
+  "Central": {
+   "lat": 5.2,
+   "lon": -1.2
+  },
+  "Eastern": {
+   "lat": 6.0,
+   "lon": -0.5
+  },
+  "Greater Accra": {
+   "lat": 5.5,
+   "lon": -0.2
+  },
+  "Northern": {
+   "lat": 9.3,
+   "lon": -1.0
+  },
+  "North East": {
+   "lat": 10.2,
+   "lon": -1.0
+  },
+  "Oti": {
+   "lat": 8.5,
+   "lon": 0.5
+  },
+  "Savannah": {
+   "lat": 10.0,
+   "lon": -2.0
+  },
+  "Upper East": {
+   "lat": 10.8,
+   "lon": -1.2
+  },
+  "Upper West": {
+   "lat": 10.5,
+   "lon": -2.5
+  },
+  "Volta": {
+   "lat": 6.5,
+   "lon": 0.8
+  },
+  "Western": {
+   "lat": 5.0,
+   "lon": -2.5
+  },
+  "Western North": {
+   "lat": 5.5,
+   "lon": -3.0
+  }
+ },
+ "deduplication": "First isolate per subject per organism per period (CLSI M39). Kept 2,502 of 2,667 isolates between 2024-03-02 and 2026-09-01 (6.2% removed as repeats) across 1,769 subject(s). 311 of them (11.7%) carried no subject identifier and were kept as distinct, since repeat sampling cannot be detected without one.",
+ "palette": {
+  "human": "#0072B2",
+  "animal": "#E69F00",
+  "food": "#009E73",
+  "environment": "#CC79A7",
+  "aquaculture": "#56B4E9"
+ }
+}

@@ -991,5 +991,250 @@
   "susceptibleNoGene": "no determinant, susceptible",
   "geneNotExpressed": "determinant found, tested susceptible",
   "unexplained": "resistance with no determinant identified"
+ },
+ "sequenceTypes": [
+  {
+   "sequence_type": "ST167",
+   "genomes": 118
+  },
+  {
+   "sequence_type": "ST10",
+   "genomes": 116
+  },
+  {
+   "sequence_type": "ST131",
+   "genomes": 113
+  },
+  {
+   "sequence_type": "ST410",
+   "genomes": 113
+  },
+  {
+   "sequence_type": "ST648",
+   "genomes": 107
+  },
+  {
+   "sequence_type": "ST19",
+   "genomes": 82
+  },
+  {
+   "sequence_type": "ST147",
+   "genomes": 73
+  },
+  {
+   "sequence_type": "ST45",
+   "genomes": 72
+  },
+  {
+   "sequence_type": "ST313",
+   "genomes": 72
+  },
+  {
+   "sequence_type": "ST8",
+   "genomes": 70
+  },
+  {
+   "sequence_type": "ST11",
+   "genomes": 68
+  },
+  {
+   "sequence_type": "ST5",
+   "genomes": 63
+  },
+  {
+   "sequence_type": "ST307",
+   "genomes": 60
+  },
+  {
+   "sequence_type": "ST258",
+   "genomes": 58
+  },
+  {
+   "sequence_type": "ST21",
+   "genomes": 55
+  },
+  {
+   "sequence_type": "ST15",
+   "genomes": 53
+  },
+  {
+   "sequence_type": "ST88",
+   "genomes": 52
+  },
+  {
+   "sequence_type": "ST111",
+   "genomes": 51
+  },
+  {
+   "sequence_type": "ST152",
+   "genomes": 49
+  },
+  {
+   "sequence_type": "ST235",
+   "genomes": 48
+  },
+  {
+   "sequence_type": "ST101",
+   "genomes": 47
+  },
+  {
+   "sequence_type": "ST244",
+   "genomes": 42
+  },
+  {
+   "sequence_type": "ST245",
+   "genomes": 38
+  },
+  {
+   "sequence_type": "ST135",
+   "genomes": 37
+  },
+  {
+   "sequence_type": "ST320",
+   "genomes": 29
+  },
+  {
+   "sequence_type": "ST16",
+   "genomes": 29
+  },
+  {
+   "sequence_type": "ST85",
+   "genomes": 26
+  },
+  {
+   "sequence_type": "ST156",
+   "genomes": 25
+  },
+  {
+   "sequence_type": "ST6",
+   "genomes": 24
+  },
+  {
+   "sequence_type": "ST1",
+   "genomes": 20
+  },
+  {
+   "sequence_type": "ST39",
+   "genomes": 19
+  },
+  {
+   "sequence_type": "ST0",
+   "genomes": 18
+  },
+  {
+   "sequence_type": "ST2",
+   "genomes": 13
+  }
+ ],
+ "sequenceTypeSuppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 33,
+  "threshold": 5,
+  "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+ },
+ "plasmids": {
+  "label": "Plasmid replicons",
+  "rows": [
+   {
+    "name": "IncFII",
+    "genomes": 417,
+    "percent": 22.4
+   },
+   {
+    "name": "IncF",
+    "genomes": 386,
+    "percent": 20.8
+   },
+   {
+    "name": "IncHI2",
+    "genomes": 378,
+    "percent": 20.3
+   },
+   {
+    "name": "ColpVC",
+    "genomes": 376,
+    "percent": 20.2
+   },
+   {
+    "name": "IncX3",
+    "genomes": 367,
+    "percent": 19.7
+   },
+   {
+    "name": "IncN",
+    "genomes": 361,
+    "percent": 19.4
+   },
+   {
+    "name": "IncI1",
+    "genomes": 358,
+    "percent": 19.2
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 7,
+   "threshold": 5,
+   "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  },
+  "examined": 1860
+ },
+ "virulence": {
+  "label": "Virulence genes",
+  "rows": [
+   {
+    "name": "hlyA",
+    "genomes": 486,
+    "percent": 26.1
+   },
+   {
+    "name": "traT",
+    "genomes": 453,
+    "percent": 24.4
+   },
+   {
+    "name": "ybtS",
+    "genomes": 449,
+    "percent": 24.1
+   },
+   {
+    "name": "papC",
+    "genomes": 448,
+    "percent": 24.1
+   },
+   {
+    "name": "ompT",
+    "genomes": 429,
+    "percent": 23.1
+   },
+   {
+    "name": "fimH",
+    "genomes": 418,
+    "percent": 22.5
+   },
+   {
+    "name": "iutA",
+    "genomes": 407,
+    "percent": 21.9
+   },
+   {
+    "name": "sitABCD",
+    "genomes": 402,
+    "percent": 21.6
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 8,
+   "threshold": 5,
+   "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+  },
+  "examined": 1860
  }
 }

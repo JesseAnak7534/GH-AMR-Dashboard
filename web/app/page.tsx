@@ -38,11 +38,9 @@ export default function HomePage() {
             food, environmental and aquaculture sources, and reported together.
           </p>
           <p className="mt-5 max-w-[78ch] text-[0.87rem] leading-relaxed text-white/70">
-            Published by the Institute for Clinical Biochemistry and
-            Biotechnology, University of Ghana. Everything on this site is an
-            aggregate: no patient, specimen or individual result is shown, and
-            any figure resting on fewer than {manifest.threshold} records is
-            withheld rather than published.
+            Institute for Clinical Biochemistry and Biotechnology, University
+            of Ghana. Aggregate figures only — nothing resting on fewer than{" "}
+            {manifest.threshold} records is published.
           </p>
         </div>
       </section>
@@ -78,9 +76,8 @@ export default function HomePage() {
             <strong className="font-semibold text-ink-soft">
               {monthYear(manifest.period.last)}
             </strong>
-            , across {manifest.counts.sectors} sectors. Each patient&rsquo;s
-            first isolate of an organism is counted once, following CLSI M39, so
-            repeat sampling of one patient does not weight any figure.
+            , across {manifest.counts.sectors} sectors. First isolate per
+            patient per organism, following CLSI M39.
           </p>
         </div>
       </section>
@@ -149,31 +146,26 @@ export default function HomePage() {
               How to read anything on this site
             </h2>
             <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              A percentage is never published on fewer than{" "}
-              {manifest.minIsolatesForReporting} isolates. Every percentage
-              carries a 95% confidence interval. Rates are pooled rather than
-              averaged across facilities, and sectors are never combined into
-              one national figure unless the page says so.
+              No percentage below {manifest.minIsolatesForReporting} isolates.
+              Every percentage carries a 95% confidence interval. Rates are
+              pooled, not averaged. Sectors are never combined into one figure.
             </p>
           </div>
           <div>
             <h2 className="text-[1.06rem] font-bold">What is withheld</h2>
             <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              Counts resting on fewer than {manifest.threshold} records are
-              withheld, and so is any percentage over them. Where withholding
-              one value would let it be recovered by subtraction, a second goes
-              too. <strong className="font-semibold">Withheld is not zero</strong>
-              : it means too few records to publish, not none found.
+              Counts below {manifest.threshold} records are withheld, and so is
+              any percentage over them.{" "}
+              <strong className="font-semibold">Withheld is not zero</strong> —
+              it means too few to publish, not none found.
             </p>
           </div>
           <div>
             <h2 className="text-[1.06rem] font-bold">What this is and is not</h2>
             <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              Laboratory-based sentinel surveillance. It describes the isolates
-              that reached a participating laboratory, which is not a random
-              sample of infections: specimens arrive more often from severe
-              infections and from facilities with a laboratory on site. It is
-              not a measure of resistance in the general population.
+              Laboratory-based sentinel surveillance: the isolates that reached
+              a participating laboratory. Not a random sample of infections, and
+              not a measure of resistance in the population.
             </p>
           </div>
         </div>

@@ -100,7 +100,7 @@ export function OrganismsView({ data }: { data: OrganismData }) {
             ? "Most frequently isolated"
             : `Most frequently isolated — ${titleCase(sector)}`
         }
-        intro="Each patient's first isolate of an organism is counted once, following CLSI M39, so repeat sampling of one patient does not weight the ranking."
+        intro="First isolate per patient per organism, so repeat sampling does not weight the ranking."
       >
         <BarChart rows={chartRows} unit="Isolates" colour={slice.colour} />
       </Section>
@@ -130,19 +130,16 @@ export function OrganismsView({ data }: { data: OrganismData }) {
         <SuppressionNote suppression={slice.specimenTypeSuppression} />
         {slice.sterileSitePercent !== null ? (
           <Caption>
-            {percent(slice.sterileSitePercent)} of these isolates came from a
-            normally sterile site. That share matters when reading any
-            resistance figure: an isolate from blood or cerebrospinal fluid is
-            almost certainly causing disease, while one from a wound swab may be
-            colonising it.
+            {percent(slice.sterileSitePercent)} came from a normally sterile
+            site. Blood or CSF is almost certainly disease; a wound swab may be
+            colonisation.
           </Caption>
         ) : null}
       </Section>
 
       <Note>
         <strong>Method.</strong> {data.deduplication} Counts are isolates, not
-        susceptibility results, so an organism tested against more agents does
-        not outrank one tested against fewer.
+        susceptibility results.
       </Note>
     </>
   );

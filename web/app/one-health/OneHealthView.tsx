@@ -66,10 +66,8 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
   return (
     <>
       <Note>
-        Nothing on this page pools sectors into a single national percentage. A
-        rate mixing hospital isolates with river water describes neither, and
-        the platform refuses to compute one: each sector is counted on its own
-        and compared side by side.
+        Sectors are never pooled into one percentage. A rate mixing hospital
+        isolates with river water describes neither.
       </Note>
 
       <StatStrip
@@ -87,7 +85,7 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
 
       <Section
         title="Isolates by sector"
-        intro="Counted separately. The colours are fixed across every page on this site, so a sector keeps the same colour wherever it appears."
+        intro="Counted separately. Sector colours are fixed across the site."
       >
         <BarChart rows={sectorRows} unit="Isolates" labelWidth={140} />
         <SuppressionNote suppression={data.sectorSuppression} />
@@ -95,7 +93,7 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
 
       <Section
         title="Organisms found in more than one sector"
-        intro="An organism appearing in people, animals and food is not evidence that it moved between them — that needs sequencing, and the genomics section is where it is attempted. It is the reason to look."
+        intro="Shared presence is a reason to look, not evidence of transmission."
       >
         {grid.organisms.length === 0 ? (
           <Empty>
@@ -148,29 +146,21 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
           </div>
         )}
         <Caption>
-          Three states, kept apart deliberately. A count is a count.
-          &ldquo;Withheld&rdquo; means the organism was found in that sector but
-          by too few isolates to publish. &ldquo;None found&rdquo; means it was
-          not isolated there at all. Reading the second as the third is the
-          error this site works hardest to avoid.
+          Three states kept apart: a count, &ldquo;withheld&rdquo; (found but
+          too few to publish) and &ldquo;none found&rdquo; (not isolated there).
         </Caption>
         <SuppressionNote suppression={data.sharedSuppression} />
       </Section>
 
       <Note tone="limit">
-        <strong>What this cannot show.</strong> Shared presence is not shared
-        transmission. Two sectors can carry the same species for entirely
-        separate reasons, and establishing a link needs related genomes, dated
-        sampling and a plausible route. The genomics section reports cluster
-        membership where sequencing supports it, and says what that does and
-        does not mean.
+        <strong>What this cannot show.</strong> Establishing a link between
+        sectors needs related genomes, dated sampling and a plausible route —
+        see the genomics section.
       </Note>
 
       <Note>
         <strong>Method.</strong> {data.deduplication} Sector counts are
-        isolates. Where withholding one sector&rsquo;s count would let it be
-        recovered by subtracting the others from an organism&rsquo;s total, a
-        second count is withheld too.
+        isolates, with secondary suppression across each organism&rsquo;s row.
       </Note>
     </>
   );

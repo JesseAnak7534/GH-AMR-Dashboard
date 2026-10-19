@@ -111,14 +111,13 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
       />
 
       <Note tone="limit">
-        Sequencing coverage is the ceiling on every statement here. A gene
-        frequency drawn from a tenth of the collection is a statement about that
-        tenth, and the proportion belongs beside it rather than in a footnote.
+        Sequencing coverage is the ceiling on every statement here: a gene
+        frequency from a tenth of the collection describes that tenth.
       </Note>
 
       <Section
         title="Resistance determinants found"
-        intro="The denominator is genomes examined, not determinants counted, so each figure reads as the proportion of sequenced isolates that carried it — rather than a share of all gene calls, which would rise simply because some isolates carry more genes than others."
+        intro="The denominator is genomes examined, so each figure is the proportion of sequenced isolates carrying it."
       >
         <BarChart
           rows={determinantChart}
@@ -134,11 +133,8 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
           initialSort={{ key: "isolates", direction: "desc" }}
         />
         <Caption>
-          Every row names the database and version behind the call. A gene
-          result without them cannot be reproduced, for the same reason an S/I/R
-          without its breakpoint edition cannot. Where a determinant is not in
-          the platform&rsquo;s rule set, the mechanism column says so rather
-          than the row being dropped.
+          Every row names the database and version behind the call. A
+          determinant outside the rule set is labelled, not dropped.
         </Caption>
         <SuppressionNote suppression={data.determinantSuppression} />
       </Section>
@@ -188,12 +184,9 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
 
           <Note tone="limit">
             <strong>Absence of a gene is not absence of a mechanism.</strong>{" "}
-            Efflux, porin loss, a promoter change or a determinant outside the
-            panel all produce resistance with nothing to find, which is why
-            unexplained resistance is its own category rather than a sequencing
-            error. A gene present on an isolate that tested susceptible is the
-            mirror image: it may not be expressed, or the breakpoint may sit
-            above what it confers.
+            Efflux, porin loss or a determinant outside the panel all produce
+            resistance with nothing to find. A gene on a susceptible isolate is
+            the mirror image: not expressed, or below the breakpoint.
           </Note>
 
           <DataTable
@@ -214,6 +207,56 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
           </Empty>
         </Section>
       )}
+
+      <Section
+        title="Sequence types, plasmids and virulence"
+        intro="A plasmid replicon says how a gene may be moving; a virulence gene says what the organism may do. Neither is a resistance determinant, so they are counted apart from one."
+      >
+        <div className="grid gap-6 lg:grid-cols-3">
+          {data.sequenceTypes?.length ? (
+            <div>
+              <h3 className="mb-2 text-[0.95rem] font-semibold">
+                Sequence types
+              </h3>
+              <DataTable
+                columns={[
+                  { key: "sequence_type", header: "ST", format: "text" },
+                  { key: "genomes", header: "Genomes", align: "right" },
+                ]}
+                rows={data.sequenceTypes}
+                initialSort={{ key: "genomes", direction: "desc" }}
+                pageSize={8}
+              />
+              <SuppressionNote suppression={data.sequenceTypeSuppression} />
+            </div>
+          ) : null}
+          {[data.plasmids, data.virulence].map((block) =>
+            block?.rows?.length ? (
+              <div key={block.label}>
+                <h3 className="mb-2 text-[0.95rem] font-semibold">
+                  {block.label}
+                </h3>
+                <DataTable
+                  columns={[
+                    { key: "name", header: block.label, format: "text" },
+                    { key: "genomes", header: "Genomes", align: "right" },
+                    {
+                      key: "percent",
+                      header: "%",
+                      align: "right",
+                      format: "percent",
+                    },
+                  ]}
+                  rows={block.rows}
+                  initialSort={{ key: "genomes", direction: "desc" }}
+                  pageSize={8}
+                />
+                <SuppressionNote suppression={block.suppression} />
+              </div>
+            ) : null,
+          )}
+        </div>
+      </Section>
 
       <Section
         title="Genomes that look alike"
@@ -251,25 +294,27 @@ export function GenomicsView({ data }: { data: GenomicsData }) {
               />
             </div>
             <Caption>
-              A cluster below the minimum cell is dropped from this table
-              altogether rather than shown with its size withheld: the rest of
-              the row — organism, sector, sequence type, laboratories spanned —
-              describes those few specimens whether or not the count is on it,
-              so the count was never the disclosive part.{" "}
+              A cluster below the minimum cell is dropped whole rather than
+              shown with its size withheld — the rest of the row describes
+              those few specimens either way.{" "}
               {data.clustersWithheld > 0
-                ? `${count(data.clustersWithheld)} were dropped for that reason. `
+                ? `${count(data.clustersWithheld)} dropped for that reason. `
                 : ""}
-              Withheld is not zero: those clusters exist and are counted above.
             </Caption>
           </>
         )}
         <Note tone="limit">
-          A cluster spanning two sectors is the strongest signal this platform
-          produces, and still not proof of transmission. Cluster membership is
-          symmetric: it says these genomes are closely related, not which way
-          anything moved. Direction needs dated sampling and a phylogeny.
+          A cross-sector cluster is the strongest signal here and still not
+          proof of transmission: membership is symmetric, so it shows
+          relatedness, not direction.
         </Note>
       </Section>
+
+      <Note>
+        <strong>Method.</strong> Determinant calls come from the sequencing
+        pipeline, interpreted against a documented rule set. Genomes failing QC
+        are excluded from frequencies and counted separately above.
+      </Note>
     </>
   );
 }

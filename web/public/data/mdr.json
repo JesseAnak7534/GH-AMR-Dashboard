@@ -1,0 +1,680 @@
+{
+ "slices": [
+  {
+   "name": "all",
+   "colour": "#999999",
+   "isolates": 2502,
+   "classifiable": 2291,
+   "insufficient": 211,
+   "percent": {
+    "MDR": 49.585333915320824,
+    "Not MDR": 49.49803579223047,
+    "XDR": 0.9166302924487123
+   },
+   "counts": [
+    {
+     "classification": "MDR",
+     "isolates": 1136
+    },
+    {
+     "classification": "Not MDR",
+     "isolates": 1134
+    },
+    {
+     "classification": "Insufficient testing",
+     "isolates": 211
+    },
+    {
+     "classification": "XDR",
+     "isolates": 21
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 4,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "Insufficient testing",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "MDR",
+     "isolates": 61
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "classification": "Insufficient testing",
+     "isolates": 180
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "classification": "MDR",
+     "isolates": 9
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "classification": "Not MDR",
+     "isolates": 68
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Insufficient testing",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 502
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Haemophilus influenzae",
+     "classification": "Insufficient testing",
+     "isolates": 11
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "MDR",
+     "isolates": 254
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "Not MDR",
+     "isolates": 78
+    },
+    {
+     "organism": "Neisseria meningitidis",
+     "classification": "Insufficient testing",
+     "isolates": 13
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "classification": "MDR",
+     "isolates": 23
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "classification": "Not MDR",
+     "isolates": 36
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "MDR",
+     "isolates": 50
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "Not MDR",
+     "isolates": 140
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "XDR",
+     "isolates": 21
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "MDR",
+     "isolates": 59
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "Not MDR",
+     "isolates": 242
+    },
+    {
+     "organism": "Shigella flexneri",
+     "classification": "MDR",
+     "isolates": 9
+    },
+    {
+     "organism": "Shigella flexneri",
+     "classification": "Not MDR",
+     "isolates": 45
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "MDR",
+     "isolates": 144
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "Not MDR",
+     "isolates": 198
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "classification": "MDR",
+     "isolates": 25
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "classification": "Not MDR",
+     "isolates": 56
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 4,
+    "primary": 2,
+    "secondary": 2,
+    "cellsTotal": 26,
+    "threshold": 5,
+    "summary": "4 of 26 values (15.4%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+   }
+  },
+  {
+   "name": "animal",
+   "colour": "#E69F00",
+   "isolates": 244,
+   "classifiable": 197,
+   "insufficient": 47,
+   "percent": {
+    "MDR": 54.82233502538071,
+    "Not MDR": 45.17766497461929
+   },
+   "counts": [
+    {
+     "classification": "MDR",
+     "isolates": 108
+    },
+    {
+     "classification": "Not MDR",
+     "isolates": 89
+    },
+    {
+     "classification": "Insufficient testing",
+     "isolates": 47
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Campylobacter jejuni",
+     "classification": "Insufficient testing",
+     "isolates": 47
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 67
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": 22
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "MDR",
+     "isolates": 20
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "Not MDR",
+     "isolates": 47
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "MDR",
+     "isolates": 21
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "Not MDR",
+     "isolates": 20
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 7,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   }
+  },
+  {
+   "name": "aquaculture",
+   "colour": "#56B4E9",
+   "isolates": 89,
+   "classifiable": 89,
+   "insufficient": 0,
+   "percent": {
+    "Not MDR": 60.674157303370784,
+    "MDR": 39.325842696629216
+   },
+   "counts": [
+    {
+     "classification": "Not MDR",
+     "isolates": 54
+    },
+    {
+     "classification": "MDR",
+     "isolates": 35
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 2,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 28
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": 12
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 4,
+    "primary": 2,
+    "secondary": 2,
+    "cellsTotal": 6,
+    "threshold": 5,
+    "summary": "4 of 6 values (66.7%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+   }
+  },
+  {
+   "name": "environment",
+   "colour": "#CC79A7",
+   "isolates": 195,
+   "classifiable": 195,
+   "insufficient": 0,
+   "percent": {
+    "MDR": 62.05128205128205,
+    "Not MDR": 34.87179487179487,
+    "XDR": 3.076923076923077
+   },
+   "counts": [
+    {
+     "classification": "MDR",
+     "isolates": 121
+    },
+    {
+     "classification": "Not MDR",
+     "isolates": 68
+    },
+    {
+     "classification": "XDR",
+     "isolates": 6
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 59
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": 33
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "MDR",
+     "isolates": 37
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "Not MDR",
+     "isolates": 10
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "MDR",
+     "isolates": 6
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "Not MDR",
+     "isolates": 21
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "XDR",
+     "isolates": 6
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 2,
+    "primary": 1,
+    "secondary": 1,
+    "cellsTotal": 9,
+    "threshold": 5,
+    "summary": "2 of 9 values (22.2%) are withheld because fewer than 5 records stand behind them. 1 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+   }
+  },
+  {
+   "name": "food",
+   "colour": "#009E73",
+   "isolates": 299,
+   "classifiable": 231,
+   "insufficient": 68,
+   "percent": {
+    "Not MDR": 51.082251082251084,
+    "MDR": 48.917748917748916
+   },
+   "counts": [
+    {
+     "classification": "Not MDR",
+     "isolates": 118
+    },
+    {
+     "classification": "MDR",
+     "isolates": 113
+    },
+    {
+     "classification": "Insufficient testing",
+     "isolates": 68
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Campylobacter jejuni",
+     "classification": "Insufficient testing",
+     "isolates": 68
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 78
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": 26
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "MDR",
+     "isolates": 18
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "Not MDR",
+     "isolates": 69
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "MDR",
+     "isolates": 17
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "Not MDR",
+     "isolates": 23
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 7,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   }
+  },
+  {
+   "name": "human",
+   "colour": "#0072B2",
+   "isolates": 1675,
+   "classifiable": 1579,
+   "insufficient": 96,
+   "percent": {
+    "Not MDR": 50.98163394553515,
+    "MDR": 48.068397720076,
+    "XDR": 0.9499683343888538
+   },
+   "counts": [
+    {
+     "classification": "Not MDR",
+     "isolates": 805
+    },
+    {
+     "classification": "MDR",
+     "isolates": 759
+    },
+    {
+     "classification": "Insufficient testing",
+     "isolates": 96
+    },
+    {
+     "classification": "XDR",
+     "isolates": 15
+    }
+   ],
+   "countsSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 4,
+    "threshold": 5,
+    "summary": "No cell was withheld. Every value shown rests on at least 5 records."
+   },
+   "byOrganism": [
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "Insufficient testing",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "MDR",
+     "isolates": 42
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "classification": "Insufficient testing",
+     "isolates": 65
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "classification": "MDR",
+     "isolates": 9
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "classification": "Not MDR",
+     "isolates": 68
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Insufficient testing",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "MDR",
+     "isolates": 270
+    },
+    {
+     "organism": "Escherichia coli",
+     "classification": "Not MDR",
+     "isolates": "withheld"
+    },
+    {
+     "organism": "Haemophilus influenzae",
+     "classification": "Insufficient testing",
+     "isolates": 11
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "MDR",
+     "isolates": 217
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "classification": "Not MDR",
+     "isolates": 68
+    },
+    {
+     "organism": "Neisseria meningitidis",
+     "classification": "Insufficient testing",
+     "isolates": 13
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "classification": "MDR",
+     "isolates": 23
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "classification": "Not MDR",
+     "isolates": 36
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "MDR",
+     "isolates": 40
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "Not MDR",
+     "isolates": 95
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "classification": "XDR",
+     "isolates": 15
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "MDR",
+     "isolates": 18
+    },
+    {
+     "organism": "Salmonella enterica",
+     "classification": "Not MDR",
+     "isolates": 108
+    },
+    {
+     "organism": "Shigella flexneri",
+     "classification": "MDR",
+     "isolates": 9
+    },
+    {
+     "organism": "Shigella flexneri",
+     "classification": "Not MDR",
+     "isolates": 45
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "MDR",
+     "isolates": 106
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "classification": "Not MDR",
+     "isolates": 155
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "classification": "MDR",
+     "isolates": 25
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "classification": "Not MDR",
+     "isolates": 56
+    }
+   ],
+   "byOrganismSuppression": {
+    "withheld": 4,
+    "primary": 2,
+    "secondary": 2,
+    "cellsTotal": 26,
+    "threshold": 5,
+    "summary": "4 of 26 values (15.4%) are withheld because fewer than 5 records stand behind them. 2 of those are withheld not for being small themselves but because they would otherwise be recoverable by subtracting the rest from the total. Withheld is not zero."
+   }
+  }
+ ],
+ "deduplication": "First isolate per subject per organism per period (CLSI M39). Kept 2,502 of 2,667 isolates between 2024-03-02 and 2026-09-01 (6.2% removed as repeats) across 1,769 subject(s). 311 of them (11.7%) carried no subject identifier and were kept as distinct, since repeat sampling cannot be detected without one.",
+ "definitions": {
+  "MDR": "Non-susceptible to at least one agent in three or more antimicrobial categories.",
+  "XDR": "Non-susceptible to at least one agent in all but two or fewer categories.",
+  "Insufficient testing": "Too few categories tested to answer the question. Not the same as not resistant."
+ }
+}

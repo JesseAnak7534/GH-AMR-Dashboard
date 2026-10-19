@@ -141,11 +141,9 @@ export function UseView({ data }: { data: UseData }) {
   return (
     <>
       <Note>
-        Every rate on this page is <strong>pooled</strong>: the numerators are
-        added, the denominators are added, and one is divided by the other.
-        Averaging each facility&rsquo;s own rate instead would give a small
-        facility the same weight as a large one, and is the most common way a
-        consumption figure goes wrong.
+        Every rate here is <strong>pooled</strong>: numerators summed,
+        denominators summed. Averaging facility rates would weight a clinic
+        like a teaching hospital.
       </Note>
 
       <PooledSection
@@ -155,7 +153,7 @@ export function UseView({ data }: { data: UseData }) {
         valueKey="ddd_per_1000_patient_days"
         unit="DDD per 1,000 patient-days"
         colour={OKABE_ITO.blue}
-        note="A defined daily dose is an assumed average adult maintenance dose, not a dose anyone was given. It makes volumes comparable between agents and facilities; it does not describe the treatment of any individual patient."
+        note="A defined daily dose is an assumed average adult dose, not one anyone was given. It makes volumes comparable; it does not describe any patient."
       />
 
       <PooledSection
@@ -165,7 +163,7 @@ export function UseView({ data }: { data: UseData }) {
         valueKey="mg_per_kg_biomass"
         unit="mg per kg biomass"
         colour={OKABE_ITO.orange}
-        note="Biomass is the denominator because animal populations differ enormously in weight: the same tonnage of antibiotic means something different across poultry than across cattle."
+        note="Biomass is the denominator: the same tonnage means something different across poultry than across cattle."
       />
 
       <Section
@@ -221,19 +219,16 @@ export function UseView({ data }: { data: UseData }) {
             ) : null}
 
             <Caption>
-              Prevalence is pooled across surveys rather than averaged over
-              them, so a 400-bed hospital does not count the same as a 40-bed
-              one.
+              Prevalence is pooled across surveys, not averaged over them.
             </Caption>
           </>
         )}
       </Section>
 
       <Note>
-        <strong>Method.</strong> Rates are pooled, never averaged over
-        facilities. A record carrying no usable denominator is excluded from the
-        rate and reported as excluded, rather than counted as zero use — zero
-        use and unmeasured use are different claims.
+        <strong>Method.</strong> Rates are pooled, never averaged. A record
+        with no usable denominator is excluded and reported as excluded, not
+        counted as zero — zero use and unmeasured use are different claims.
       </Note>
     </>
   );
