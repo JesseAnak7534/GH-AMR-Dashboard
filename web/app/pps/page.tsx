@@ -17,7 +17,7 @@ export default function PpsPage() {
       <PageHeader
         badge="PPS"
         colour="#8a6a22"
-        title="Point prevalence (PPS)"
+        title="PPS"
         lede="How many of the patients present on the survey day were on an antibiotic, and what was prescribed."
       />
       <Container>

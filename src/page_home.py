@@ -284,8 +284,7 @@ def _hero() -> str:
   environmental and aquaculture sources, and reported together.</p>
   <div class="amr-fineprint">Published by the {escape(OWNER)}, University of
   Ghana. Everything on these pages is an aggregate: no patient, specimen or
-  individual result is shown, and any figure resting on too few records is
-  withheld rather than published.</div>
+  individual result is shown.</div>
 </div>
 """
 
@@ -359,9 +358,7 @@ def _notes() -> str:
     <p>A percentage is never published on fewer than thirty isolates, every
     percentage carries a 95% confidence interval, rates are pooled rather than
     averaged across facilities, and sectors are never combined into one
-    national figure unless a page says so. Counts resting on fewer than five
-    records are withheld &mdash; and withheld means too few to publish, not
-    none found.</p>
+    national figure unless a page says so.</p>
   </div>
   <div>
     <h4>What this is and is not</h4>

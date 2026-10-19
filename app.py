@@ -76,6 +76,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── Something on screen before the slow part ──────────────────────────────
+# A cold start opens a connection to a hosted database, checks the schema and
+# the administrator account, and only then renders. Until this placeholder
+# existed the browser showed an empty page for the whole of it, which reads as
+# a broken application rather than a loading one. It is replaced by the real
+# content further down, so it costs one element and no requests.
+_boot_notice = st.empty()
+_boot_notice.markdown(
+    """
+    <div style="padding:3rem 0 1rem 0;font-family:Calibri,Carlito,'Segoe UI',
+                system-ui,sans-serif;color:#194238">
+      <div style="font-size:0.78rem;letter-spacing:0.16em;text-transform:uppercase;
+                  color:rgba(25,66,56,.6);margin-bottom:.4rem">ICBB-AMRSS</div>
+      <div style="font-size:1.35rem;font-weight:700">Starting the surveillance
+        system…</div>
+      <div style="font-size:.9rem;color:rgba(25,66,56,.7);margin-top:.35rem">
+        Connecting to the database. This takes a few seconds on first load.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Initialize database (cached: runs once per process, not on every rerun --
 # critical for hosted Postgres where ~50 DDL round-trips would otherwise
 # happen on every interaction and lock the UI for many seconds)
@@ -418,6 +440,24 @@ def _bootstrap_admin_once():
         return False
     try:
         admin_user = db.get_user_by_email(ADMIN_EMAIL)
+
+        # Nothing to do is the normal case, and it used to cost three round
+        # trips and a bcrypt hash on every cold start: the password was
+        # rewritten whether or not it had changed. Checking it instead means
+        # one query on the happy path, and a changed ADMIN_PASSWORD still
+        # takes effect because the check fails when it no longer matches.
+        if admin_user:
+            try:
+                unchanged = bcrypt.checkpw(
+                    ADMIN_PASSWORD.encode("utf-8"),
+                    str(admin_user.get("password_hash", "")).encode("utf-8"))
+            except (ValueError, TypeError):
+                unchanged = False
+            if (unchanged and admin_user.get("is_admin")
+                    and admin_user.get("is_active")
+                    and admin_user.get("is_verified")):
+                return True
+
         password_hash = bcrypt.hashpw(ADMIN_PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         if not admin_user:
             db.create_user(ADMIN_EMAIL, password_hash, is_admin=True)
@@ -437,6 +477,11 @@ def _bootstrap_admin_once():
         return False
 
 _bootstrap_admin_once()
+
+# The slow part is over, so the boot notice has done its job. This has to
+# happen here rather than further down: the sign-in screen calls st.stop()
+# before the shell renders, and the notice would stay above the form.
+_boot_notice.empty()
 
 
 # The per-lab account bootstrap was removed here. It read bcrypt hashes from

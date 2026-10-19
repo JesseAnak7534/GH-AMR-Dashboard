@@ -18,7 +18,7 @@ export default function AmuPage() {
       <PageHeader
         badge="AMU"
         colour="#E69F00"
-        title="Antimicrobial use (AMU)"
+        title="AMU"
         lede="Human consumption, as defined daily doses per 1,000 patient-days."
       />
       <Container>

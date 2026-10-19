@@ -380,8 +380,68 @@ def _safe_add_column(cur, table: str, column: str, ddl: str):
 # Schema bootstrap
 # ---------------------------------------------------------------------------
 
-def init_database():
-    """Initialize database schema (idempotent)."""
+#: Tables that only exist once the schema has been created. If every one of
+#: them is present, the ``CREATE TABLE IF NOT EXISTS`` run would do nothing but
+#: cost round trips, so it is skipped.
+_SCHEMA_SENTINELS = (
+    "users", "datasets", "samples", "ast_results",
+    "subjects", "specimens", "isolates", "phenotypes",
+    "amu_records", "amc_records", "pps_surveys", "pps_prescriptions",
+)
+
+
+def schema_exists(conn=None) -> bool:
+    """Whether the schema has already been created.
+
+    One query against ``to_regclass`` rather than sixty-nine DDL statements:
+    0.09 seconds instead of 3.4 against a hosted database. The DDL is
+    idempotent, so running it was harmless -- it was simply the largest single
+    cost in starting the application, paid on every cold start, during which
+    the browser shows nothing at all.
+    """
+    own = conn is None
+    conn = conn or get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT count(*) FROM unnest(%s::text[]) AS t(name) "
+            "WHERE to_regclass('public.' || quote_ident(t.name)) IS NOT NULL",
+            (list(_SCHEMA_SENTINELS),))
+        row = cur.fetchone()
+        found = int(row[0] if not isinstance(row, dict) else list(row.values())[0])
+        return found == len(_SCHEMA_SENTINELS)
+    except Exception:                                 # noqa: BLE001
+        # A probe that cannot run is not evidence the schema is there.
+        logger.exception("schema probe failed; running the full migration")
+        return False
+    finally:
+        if own:
+            try:
+                conn.close()
+            except Exception:                         # noqa: BLE001
+                pass
+
+
+def init_database(force: bool = False):
+    """Initialize database schema (idempotent).
+
+    Skips the whole run when every expected table is already present, unless
+    ``force`` is set or ``AMRSS_FORCE_MIGRATE`` is in the environment -- which
+    is what to use after changing any of the DDL below, since a schema that
+    exists but is out of date passes the probe.
+    """
+    if not force and not os.environ.get("AMRSS_FORCE_MIGRATE"):
+        probe = get_connection()
+        try:
+            if schema_exists(probe):
+                logger.info("schema already present; skipping migration")
+                return
+        finally:
+            try:
+                probe.close()
+            except Exception:                         # noqa: BLE001
+                pass
+
     conn = get_connection()
     cur = conn.cursor()
 

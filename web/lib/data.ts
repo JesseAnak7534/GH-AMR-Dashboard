@@ -339,24 +339,27 @@ export const SECTIONS: SectionMeta[] = [
   {
     href: "/amu",
     badge: "AMU",
-    title: "Antimicrobial use",
-    blurb: "Human consumption, as defined daily doses per 1,000 patient-days.",
+    title: "AMU",
+    blurb:
+      "Human antimicrobial use: defined daily doses per 1,000 patient-days.",
     colour: "#E69F00",
     stat: (m) => ({ value: m.counts.amu, unit: "consumption records" }),
   },
   {
     href: "/amc",
     badge: "AMC",
-    title: "Veterinary consumption",
-    blurb: "Animal-sector consumption, as milligrams per kilogram of biomass.",
+    title: "AMC",
+    blurb:
+      "Veterinary antimicrobial consumption: milligrams per kilogram of biomass.",
     colour: "#999999",
     stat: (m) => ({ value: m.counts.amc, unit: "veterinary records" }),
   },
   {
     href: "/pps",
     badge: "PPS",
-    title: "Point prevalence",
-    blurb: "How many hospital patients were on an antibiotic, and what was prescribed.",
+    title: "PPS",
+    blurb:
+      "Point prevalence surveys: how many patients were on an antibiotic, and what.",
     colour: "#8a6a22",
     stat: (m) => ({ value: m.counts.pps, unit: "prevalence surveys" }),
   },

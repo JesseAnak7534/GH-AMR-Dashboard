@@ -18,7 +18,7 @@ export default function AmcPage() {
       <PageHeader
         badge="AMC"
         colour="#999999"
-        title="Antimicrobial consumption (AMC)"
+        title="AMC"
         lede="Veterinary consumption, as milligrams of active ingredient per kilogram of biomass."
       />
       <Container>
