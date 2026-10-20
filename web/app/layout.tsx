@@ -62,7 +62,7 @@ export default function RootLayout({
                 </span>
               </Link>
               <span className="text-[0.72rem] text-white/60">
-                Data to {monthYear(manifest.period.last)} · aggregate figures only
+                Data to {monthYear(manifest.period.last)}
               </span>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function RootLayout({
                 <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/45">
                   Sections
                 </p>
-                <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <ul className="grid grid-flow-col grid-rows-5 gap-x-6 gap-y-1.5">
                   {SECTIONS.map((section) => (
                     <li key={section.href}>
                       <Link

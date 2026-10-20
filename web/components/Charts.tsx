@@ -99,12 +99,33 @@ export function BarChart({
       ),
     );
   const rowHeight = 26;
-  const chartWidth = 560;
-  const barArea = chartWidth - labelWidth - 72;
+  const chartWidth = 620;
+  // The printed value sits past the end of its bar, so the gutter has to fit
+  // the longest one. A fixed gutter clipped "249.7 (113,774)" off the frame.
+  const widest = Math.max(
+    ...rows.map((row) => {
+      const value = numeric(row.value);
+      if (value === null) return 12;
+      const shown = places > 0 ? value.toFixed(places) : String(Math.round(value));
+      const extra =
+        row.denominator !== undefined && row.denominator !== null
+          ? `  (${count(row.denominator)})`.length
+          : 0;
+      return shown.length + suffix.length + extra;
+    }),
+    8,
+  );
+  const barArea = chartWidth - labelWidth - (widest * 5.9 + 14);
   const height = rows.length * rowHeight + 26;
   const scale = (value: number) => (value / max) * barArea;
 
-  const step = Math.pow(10, Math.floor(Math.log10(max))) * (max / Math.pow(10, Math.floor(Math.log10(max))) > 5 ? 2 : 1);
+  // Four or five ticks that land on round numbers and cover the maximum. The
+  // old step could stop short, leaving the longest bar past the last tick.
+  const rough = max / 4;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rough)));
+  const step =
+    magnitude *
+    ([1, 2, 2.5, 5, 10].find((candidate) => candidate * magnitude >= rough) ?? 10);
 
   return (
     <figure className="overflow-x-auto">
@@ -217,7 +238,12 @@ export function BarChart({
                     {show(value)}
                     {suffix}
                     {row.denominator !== undefined && row.denominator !== null
-                      ? `  (${count(row.denominator)})`
+                      ? `  (${count(
+                          typeof row.denominator === "number" &&
+                            Math.abs(row.denominator) >= 100
+                            ? Math.round(row.denominator)
+                            : row.denominator,
+                        )})`
                       : ""}
                   </text>
                 </>

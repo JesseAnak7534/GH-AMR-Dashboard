@@ -39,8 +39,7 @@ export default function HomePage() {
           </p>
           <p className="mt-5 max-w-[78ch] text-[0.87rem] leading-relaxed text-white/70">
             Institute of Computational Biology and Bioinformatics, University
-            of Ghana. Every figure is an aggregate: no patient, specimen or
-            individual result is shown.
+            of Ghana. No patient, specimen or individual result is shown.
           </p>
         </div>
       </section>
