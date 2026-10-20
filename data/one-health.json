@@ -1,0 +1,175 @@
+{
+ "sectors": [
+  {
+   "sector": "human",
+   "isolates": 1675,
+   "colour": "#0072B2"
+  },
+  {
+   "sector": "food",
+   "isolates": 299,
+   "colour": "#009E73"
+  },
+  {
+   "sector": "animal",
+   "isolates": 244,
+   "colour": "#E69F00"
+  },
+  {
+   "sector": "environment",
+   "isolates": 195,
+   "colour": "#CC79A7"
+  },
+  {
+   "sector": "aquaculture",
+   "isolates": 89,
+   "colour": "#56B4E9"
+  }
+ ],
+ "sectorSuppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 5,
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+ },
+ "sharedOrganisms": [
+  {
+   "organism": "Acinetobacter baumannii",
+   "sector": "environment",
+   "isolates": 23
+  },
+  {
+   "organism": "Acinetobacter baumannii",
+   "sector": "human",
+   "isolates": 59
+  },
+  {
+   "organism": "Campylobacter jejuni",
+   "sector": "animal",
+   "isolates": 47
+  },
+  {
+   "organism": "Campylobacter jejuni",
+   "sector": "food",
+   "isolates": 68
+  },
+  {
+   "organism": "Campylobacter jejuni",
+   "sector": "human",
+   "isolates": 65
+  },
+  {
+   "organism": "Escherichia coli",
+   "sector": "animal",
+   "isolates": 89
+  },
+  {
+   "organism": "Escherichia coli",
+   "sector": "aquaculture",
+   "isolates": 40
+  },
+  {
+   "organism": "Escherichia coli",
+   "sector": "environment",
+   "isolates": 92
+  },
+  {
+   "organism": "Escherichia coli",
+   "sector": "food",
+   "isolates": 104
+  },
+  {
+   "organism": "Escherichia coli",
+   "sector": "human",
+   "isolates": 434
+  },
+  {
+   "organism": "Klebsiella pneumoniae",
+   "sector": "environment",
+   "isolates": 47
+  },
+  {
+   "organism": "Klebsiella pneumoniae",
+   "sector": "human",
+   "isolates": 285
+  },
+  {
+   "organism": "Pseudomonas aeruginosa",
+   "sector": "aquaculture",
+   "isolates": 28
+  },
+  {
+   "organism": "Pseudomonas aeruginosa",
+   "sector": "environment",
+   "isolates": 33
+  },
+  {
+   "organism": "Pseudomonas aeruginosa",
+   "sector": "human",
+   "isolates": 150
+  },
+  {
+   "organism": "Salmonella enterica",
+   "sector": "animal",
+   "isolates": 67
+  },
+  {
+   "organism": "Salmonella enterica",
+   "sector": "aquaculture",
+   "isolates": 21
+  },
+  {
+   "organism": "Salmonella enterica",
+   "sector": "food",
+   "isolates": 87
+  },
+  {
+   "organism": "Salmonella enterica",
+   "sector": "human",
+   "isolates": 126
+  },
+  {
+   "organism": "Staphylococcus aureus",
+   "sector": "animal",
+   "isolates": 41
+  },
+  {
+   "organism": "Staphylococcus aureus",
+   "sector": "food",
+   "isolates": 40
+  },
+  {
+   "organism": "Staphylococcus aureus",
+   "sector": "human",
+   "isolates": 261
+  }
+ ],
+ "sharedSuppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 22,
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+ },
+ "organismsTotal": 13,
+ "organismsShared": 7,
+ "isolates": 2502,
+ "sectorsPresent": [
+  "animal",
+  "aquaculture",
+  "environment",
+  "food",
+  "human"
+ ],
+ "deduplication": "First isolate per subject per organism per period (CLSI M39). Kept 2,502 of 2,667 isolates between 2024-03-02 and 2026-09-01 (6.2% removed as repeats) across 1,769 subject(s). 311 of them (11.7%) carried no subject identifier and were kept as distinct, since repeat sampling cannot be detected without one.",
+ "palette": {
+  "human": "#0072B2",
+  "animal": "#E69F00",
+  "food": "#009E73",
+  "environment": "#CC79A7",
+  "aquaculture": "#56B4E9"
+ }
+}

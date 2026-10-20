@@ -1,0 +1,1177 @@
+{
+ "resistance": {
+  "dimensions": [
+   {
+    "key": "period",
+    "label": "Period",
+    "note": "Deduplicated within the year, following CLSI M39."
+   },
+   {
+    "key": "region",
+    "label": "Region",
+    "note": "A single region rarely holds enough isolates for a published percentage. The counts are shown either way."
+   },
+   {
+    "key": "lab_name",
+    "label": "Laboratory",
+    "note": "Laboratories are named deliberately: attribution is the point of sentinel surveillance."
+   }
+  ],
+  "available": {
+   "animal": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "animal__period__2024",
+      "isolates": 103,
+      "pairsReported": 3
+     },
+     {
+      "value": "2025",
+      "slug": "animal__period__2025",
+      "isolates": 131,
+      "pairsReported": 5
+     },
+     {
+      "value": "2026",
+      "slug": "animal__period__2026",
+      "isolates": 95,
+      "pairsReported": 0
+     }
+    ],
+    "region": [
+     {
+      "value": "Ahafo",
+      "slug": "animal__region__ahafo",
+      "isolates": 22,
+      "pairsReported": 0
+     },
+     {
+      "value": "Ashanti",
+      "slug": "animal__region__ashanti",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Bono",
+      "slug": "animal__region__bono",
+      "isolates": 28,
+      "pairsReported": 0
+     },
+     {
+      "value": "Bono East",
+      "slug": "animal__region__bono-east",
+      "isolates": 23,
+      "pairsReported": 0
+     },
+     {
+      "value": "Eastern",
+      "slug": "animal__region__eastern",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Northern",
+      "slug": "animal__region__northern",
+      "isolates": 27,
+      "pairsReported": 0
+     },
+     {
+      "value": "Oti",
+      "slug": "animal__region__oti",
+      "isolates": 24,
+      "pairsReported": 0
+     },
+     {
+      "value": "Savannah",
+      "slug": "animal__region__savannah",
+      "isolates": 22,
+      "pairsReported": 0
+     },
+     {
+      "value": "Western North",
+      "slug": "animal__region__western-north",
+      "isolates": 22,
+      "pairsReported": 0
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "animal__lab-name__ho-teaching-hospital",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Komfo Anokye Teaching Hospital",
+      "slug": "animal__lab-name__komfo-anokye-teaching-hospital",
+      "isolates": 23,
+      "pairsReported": 0
+     },
+     {
+      "value": "Metropolis Health Care Limited",
+      "slug": "animal__lab-name__metropolis-health-care-limited",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "National Food Safety Laboratory",
+      "slug": "animal__lab-name__national-food-safety-laboratory",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Pong Tamale School",
+      "slug": "animal__lab-name__pong-tamale-school",
+      "isolates": 20,
+      "pairsReported": 0
+     }
+    ]
+   },
+   "aquaculture": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "aquaculture__period__2024",
+      "isolates": 33,
+      "pairsReported": 0
+     },
+     {
+      "value": "2025",
+      "slug": "aquaculture__period__2025",
+      "isolates": 43,
+      "pairsReported": 0
+     },
+     {
+      "value": "2026",
+      "slug": "aquaculture__period__2026",
+      "isolates": 31,
+      "pairsReported": 0
+     }
+    ]
+   },
+   "environment": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "environment__period__2024",
+      "isolates": 70,
+      "pairsReported": 0
+     },
+     {
+      "value": "2025",
+      "slug": "environment__period__2025",
+      "isolates": 95,
+      "pairsReported": 0
+     },
+     {
+      "value": "2026",
+      "slug": "environment__period__2026",
+      "isolates": 73,
+      "pairsReported": 0
+     }
+    ],
+    "region": [
+     {
+      "value": "Greater Accra",
+      "slug": "environment__region__greater-accra",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper East",
+      "slug": "environment__region__upper-east",
+      "isolates": 22,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper West",
+      "slug": "environment__region__upper-west",
+      "isolates": 21,
+      "pairsReported": 0
+     },
+     {
+      "value": "Volta",
+      "slug": "environment__region__volta",
+      "isolates": 20,
+      "pairsReported": 0
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "environment__lab-name__ho-teaching-hospital",
+      "isolates": 22,
+      "pairsReported": 0
+     }
+    ]
+   },
+   "food": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "food__period__2024",
+      "isolates": 98,
+      "pairsReported": 0
+     },
+     {
+      "value": "2025",
+      "slug": "food__period__2025",
+      "isolates": 124,
+      "pairsReported": 5
+     },
+     {
+      "value": "2026",
+      "slug": "food__period__2026",
+      "isolates": 77,
+      "pairsReported": 0
+     }
+    ],
+    "region": [
+     {
+      "value": "Bono",
+      "slug": "food__region__bono",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Northern",
+      "slug": "food__region__northern",
+      "isolates": 25,
+      "pairsReported": 0
+     },
+     {
+      "value": "Oti",
+      "slug": "food__region__oti",
+      "isolates": 24,
+      "pairsReported": 0
+     },
+     {
+      "value": "Savannah",
+      "slug": "food__region__savannah",
+      "isolates": 21,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper East",
+      "slug": "food__region__upper-east",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper West",
+      "slug": "food__region__upper-west",
+      "isolates": 21,
+      "pairsReported": 0
+     },
+     {
+      "value": "Western",
+      "slug": "food__region__western",
+      "isolates": 21,
+      "pairsReported": 0
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Accra Veterinary Laboratory",
+      "slug": "food__lab-name__accra-veterinary-laboratory",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "food__lab-name__ho-teaching-hospital",
+      "isolates": 20,
+      "pairsReported": 0
+     },
+     {
+      "value": "St. Martin De Porres Hospital Eikwe",
+      "slug": "food__lab-name__st-martin-de-porres-hospital-eikwe",
+      "isolates": 23,
+      "pairsReported": 0
+     }
+    ]
+   },
+   "human": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "human__period__2024",
+      "isolates": 493,
+      "pairsReported": 43
+     },
+     {
+      "value": "2025",
+      "slug": "human__period__2025",
+      "isolates": 661,
+      "pairsReported": 59
+     },
+     {
+      "value": "2026",
+      "slug": "human__period__2026",
+      "isolates": 540,
+      "pairsReported": 57
+     }
+    ],
+    "region": [
+     {
+      "value": "Ahafo",
+      "slug": "human__region__ahafo",
+      "isolates": 85,
+      "pairsReported": 0
+     },
+     {
+      "value": "Ashanti",
+      "slug": "human__region__ashanti",
+      "isolates": 106,
+      "pairsReported": 0
+     },
+     {
+      "value": "Bono",
+      "slug": "human__region__bono",
+      "isolates": 81,
+      "pairsReported": 0
+     },
+     {
+      "value": "Bono East",
+      "slug": "human__region__bono-east",
+      "isolates": 111,
+      "pairsReported": 0
+     },
+     {
+      "value": "Central",
+      "slug": "human__region__central",
+      "isolates": 96,
+      "pairsReported": 0
+     },
+     {
+      "value": "Eastern",
+      "slug": "human__region__eastern",
+      "isolates": 109,
+      "pairsReported": 0
+     },
+     {
+      "value": "Greater Accra",
+      "slug": "human__region__greater-accra",
+      "isolates": 163,
+      "pairsReported": 8
+     },
+     {
+      "value": "North East",
+      "slug": "human__region__north-east",
+      "isolates": 98,
+      "pairsReported": 0
+     },
+     {
+      "value": "Northern",
+      "slug": "human__region__northern",
+      "isolates": 89,
+      "pairsReported": 0
+     },
+     {
+      "value": "Oti",
+      "slug": "human__region__oti",
+      "isolates": 107,
+      "pairsReported": 0
+     },
+     {
+      "value": "Savannah",
+      "slug": "human__region__savannah",
+      "isolates": 115,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper East",
+      "slug": "human__region__upper-east",
+      "isolates": 105,
+      "pairsReported": 0
+     },
+     {
+      "value": "Upper West",
+      "slug": "human__region__upper-west",
+      "isolates": 109,
+      "pairsReported": 0
+     },
+     {
+      "value": "Volta",
+      "slug": "human__region__volta",
+      "isolates": 111,
+      "pairsReported": 0
+     },
+     {
+      "value": "Western",
+      "slug": "human__region__western",
+      "isolates": 107,
+      "pairsReported": 0
+     },
+     {
+      "value": "Western North",
+      "slug": "human__region__western-north",
+      "isolates": 102,
+      "pairsReported": 0
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Accra Veterinary Laboratory",
+      "slug": "human__lab-name__accra-veterinary-laboratory",
+      "isolates": 118,
+      "pairsReported": 8
+     },
+     {
+      "value": "Alma Medical Laboratory Ltd",
+      "slug": "human__lab-name__alma-medical-laboratory-ltd",
+      "isolates": 76,
+      "pairsReported": 0
+     },
+     {
+      "value": "CSIR – Water Research Institute (Microbiology Laboratory)",
+      "slug": "human__lab-name__csir-water-research-institute-microbiology-laboratory",
+      "isolates": 91,
+      "pairsReported": 0
+     },
+     {
+      "value": "Cape Coast Teaching Hospital",
+      "slug": "human__lab-name__cape-coast-teaching-hospital",
+      "isolates": 90,
+      "pairsReported": 0
+     },
+     {
+      "value": "Central Veterinary Laboratory",
+      "slug": "human__lab-name__central-veterinary-laboratory",
+      "isolates": 77,
+      "pairsReported": 0
+     },
+     {
+      "value": "Eastern Regional Hospital",
+      "slug": "human__lab-name__eastern-regional-hospital",
+      "isolates": 82,
+      "pairsReported": 0
+     },
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "human__lab-name__ho-teaching-hospital",
+      "isolates": 80,
+      "pairsReported": 0
+     },
+     {
+      "value": "Komfo Anokye Teaching Hospital",
+      "slug": "human__lab-name__komfo-anokye-teaching-hospital",
+      "isolates": 73,
+      "pairsReported": 0
+     },
+     {
+      "value": "Korle-Bu Teaching Hospital",
+      "slug": "human__lab-name__korle-bu-teaching-hospital",
+      "isolates": 91,
+      "pairsReported": 0
+     },
+     {
+      "value": "Kumasi Veterinary Laboratory",
+      "slug": "human__lab-name__kumasi-veterinary-laboratory",
+      "isolates": 87,
+      "pairsReported": 0
+     },
+     {
+      "value": "Lekma Hospital",
+      "slug": "human__lab-name__lekma-hospital",
+      "isolates": 84,
+      "pairsReported": 0
+     },
+     {
+      "value": "Metropolis Health Care Limited",
+      "slug": "human__lab-name__metropolis-health-care-limited",
+      "isolates": 87,
+      "pairsReported": 0
+     },
+     {
+      "value": "National Food Safety Laboratory",
+      "slug": "human__lab-name__national-food-safety-laboratory",
+      "isolates": 96,
+      "pairsReported": 0
+     },
+     {
+      "value": "Pong Tamale School",
+      "slug": "human__lab-name__pong-tamale-school",
+      "isolates": 95,
+      "pairsReported": 0
+     },
+     {
+      "value": "Quadushah Medical Diagnostic Limited",
+      "slug": "human__lab-name__quadushah-medical-diagnostic-limited",
+      "isolates": 85,
+      "pairsReported": 0
+     },
+     {
+      "value": "Sekondi Public Health Reference Laboratory",
+      "slug": "human__lab-name__sekondi-public-health-reference-laboratory",
+      "isolates": 93,
+      "pairsReported": 0
+     },
+     {
+      "value": "St. Martin De Porres Hospital Eikwe",
+      "slug": "human__lab-name__st-martin-de-porres-hospital-eikwe",
+      "isolates": 105,
+      "pairsReported": 0
+     },
+     {
+      "value": "Sunyani Teaching Hospital",
+      "slug": "human__lab-name__sunyani-teaching-hospital",
+      "isolates": 91,
+      "pairsReported": 0
+     },
+     {
+      "value": "Tamale Teaching Hospital",
+      "slug": "human__lab-name__tamale-teaching-hospital",
+      "isolates": 93,
+      "pairsReported": 0
+     }
+    ]
+   }
+  },
+  "written": 79,
+  "skipped": 111,
+  "minSliceIsolates": 20
+ },
+ "organisms": {
+  "dimensions": [
+   {
+    "key": "period",
+    "label": "Period",
+    "note": "Deduplicated within the year, following CLSI M39."
+   },
+   {
+    "key": "region",
+    "label": "Region",
+    "note": "A single region rarely holds enough isolates for a published percentage. The counts are shown either way."
+   },
+   {
+    "key": "lab_name",
+    "label": "Laboratory",
+    "note": "Laboratories are named deliberately: attribution is the point of sentinel surveillance."
+   }
+  ],
+  "available": {
+   "all": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "all__period__2024",
+      "isolates": 771
+     },
+     {
+      "value": "2025",
+      "slug": "all__period__2025",
+      "isolates": 1026
+     },
+     {
+      "value": "2026",
+      "slug": "all__period__2026",
+      "isolates": 800
+     }
+    ],
+    "region": [
+     {
+      "value": "Ahafo",
+      "slug": "all__region__ahafo",
+      "isolates": 152
+     },
+     {
+      "value": "Ashanti",
+      "slug": "all__region__ashanti",
+      "isolates": 157
+     },
+     {
+      "value": "Bono",
+      "slug": "all__region__bono",
+      "isolates": 143
+     },
+     {
+      "value": "Bono East",
+      "slug": "all__region__bono-east",
+      "isolates": 166
+     },
+     {
+      "value": "Central",
+      "slug": "all__region__central",
+      "isolates": 150
+     },
+     {
+      "value": "Eastern",
+      "slug": "all__region__eastern",
+      "isolates": 168
+     },
+     {
+      "value": "Greater Accra",
+      "slug": "all__region__greater-accra",
+      "isolates": 222
+     },
+     {
+      "value": "North East",
+      "slug": "all__region__north-east",
+      "isolates": 147
+     },
+     {
+      "value": "Northern",
+      "slug": "all__region__northern",
+      "isolates": 156
+     },
+     {
+      "value": "Oti",
+      "slug": "all__region__oti",
+      "isolates": 180
+     },
+     {
+      "value": "Savannah",
+      "slug": "all__region__savannah",
+      "isolates": 171
+     },
+     {
+      "value": "Upper East",
+      "slug": "all__region__upper-east",
+      "isolates": 171
+     },
+     {
+      "value": "Upper West",
+      "slug": "all__region__upper-west",
+      "isolates": 176
+     },
+     {
+      "value": "Volta",
+      "slug": "all__region__volta",
+      "isolates": 170
+     },
+     {
+      "value": "Western",
+      "slug": "all__region__western",
+      "isolates": 171
+     },
+     {
+      "value": "Western North",
+      "slug": "all__region__western-north",
+      "isolates": 155
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Accra Veterinary Laboratory",
+      "slug": "all__lab-name__accra-veterinary-laboratory",
+      "isolates": 174
+     },
+     {
+      "value": "Alma Medical Laboratory Ltd",
+      "slug": "all__lab-name__alma-medical-laboratory-ltd",
+      "isolates": 125
+     },
+     {
+      "value": "CSIR – Water Research Institute (Microbiology Laboratory)",
+      "slug": "all__lab-name__csir-water-research-institute-microbiology-laboratory",
+      "isolates": 138
+     },
+     {
+      "value": "Cape Coast Teaching Hospital",
+      "slug": "all__lab-name__cape-coast-teaching-hospital",
+      "isolates": 139
+     },
+     {
+      "value": "Central Veterinary Laboratory",
+      "slug": "all__lab-name__central-veterinary-laboratory",
+      "isolates": 130
+     },
+     {
+      "value": "Eastern Regional Hospital",
+      "slug": "all__lab-name__eastern-regional-hospital",
+      "isolates": 121
+     },
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "all__lab-name__ho-teaching-hospital",
+      "isolates": 145
+     },
+     {
+      "value": "Komfo Anokye Teaching Hospital",
+      "slug": "all__lab-name__komfo-anokye-teaching-hospital",
+      "isolates": 132
+     },
+     {
+      "value": "Korle-Bu Teaching Hospital",
+      "slug": "all__lab-name__korle-bu-teaching-hospital",
+      "isolates": 129
+     },
+     {
+      "value": "Kumasi Veterinary Laboratory",
+      "slug": "all__lab-name__kumasi-veterinary-laboratory",
+      "isolates": 140
+     },
+     {
+      "value": "Lekma Hospital",
+      "slug": "all__lab-name__lekma-hospital",
+      "isolates": 138
+     },
+     {
+      "value": "Metropolis Health Care Limited",
+      "slug": "all__lab-name__metropolis-health-care-limited",
+      "isolates": 137
+     },
+     {
+      "value": "National Food Safety Laboratory",
+      "slug": "all__lab-name__national-food-safety-laboratory",
+      "isolates": 147
+     },
+     {
+      "value": "Pong Tamale School",
+      "slug": "all__lab-name__pong-tamale-school",
+      "isolates": 142
+     },
+     {
+      "value": "Quadushah Medical Diagnostic Limited",
+      "slug": "all__lab-name__quadushah-medical-diagnostic-limited",
+      "isolates": 140
+     },
+     {
+      "value": "Sekondi Public Health Reference Laboratory",
+      "slug": "all__lab-name__sekondi-public-health-reference-laboratory",
+      "isolates": 142
+     },
+     {
+      "value": "St. Martin De Porres Hospital Eikwe",
+      "slug": "all__lab-name__st-martin-de-porres-hospital-eikwe",
+      "isolates": 155
+     },
+     {
+      "value": "Sunyani Teaching Hospital",
+      "slug": "all__lab-name__sunyani-teaching-hospital",
+      "isolates": 137
+     },
+     {
+      "value": "Tamale Teaching Hospital",
+      "slug": "all__lab-name__tamale-teaching-hospital",
+      "isolates": 143
+     }
+    ]
+   },
+   "animal": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "animal__period__2024",
+      "isolates": 88
+     },
+     {
+      "value": "2025",
+      "slug": "animal__period__2025",
+      "isolates": 120
+     },
+     {
+      "value": "2026",
+      "slug": "animal__period__2026",
+      "isolates": 89
+     }
+    ],
+    "region": [
+     {
+      "value": "Ahafo",
+      "slug": "animal__region__ahafo",
+      "isolates": 21
+     },
+     {
+      "value": "Bono",
+      "slug": "animal__region__bono",
+      "isolates": 28
+     },
+     {
+      "value": "Bono East",
+      "slug": "animal__region__bono-east",
+      "isolates": 23
+     },
+     {
+      "value": "Eastern",
+      "slug": "animal__region__eastern",
+      "isolates": 20
+     },
+     {
+      "value": "Northern",
+      "slug": "animal__region__northern",
+      "isolates": 25
+     },
+     {
+      "value": "Oti",
+      "slug": "animal__region__oti",
+      "isolates": 23
+     },
+     {
+      "value": "Savannah",
+      "slug": "animal__region__savannah",
+      "isolates": 22
+     },
+     {
+      "value": "Western North",
+      "slug": "animal__region__western-north",
+      "isolates": 21
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "animal__lab-name__ho-teaching-hospital",
+      "isolates": 20
+     },
+     {
+      "value": "Komfo Anokye Teaching Hospital",
+      "slug": "animal__lab-name__komfo-anokye-teaching-hospital",
+      "isolates": 22
+     },
+     {
+      "value": "National Food Safety Laboratory",
+      "slug": "animal__lab-name__national-food-safety-laboratory",
+      "isolates": 20
+     },
+     {
+      "value": "Pong Tamale School",
+      "slug": "animal__lab-name__pong-tamale-school",
+      "isolates": 20
+     }
+    ]
+   },
+   "aquaculture": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "aquaculture__period__2024",
+      "isolates": 30
+     },
+     {
+      "value": "2025",
+      "slug": "aquaculture__period__2025",
+      "isolates": 39
+     },
+     {
+      "value": "2026",
+      "slug": "aquaculture__period__2026",
+      "isolates": 28
+     }
+    ]
+   },
+   "environment": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "environment__period__2024",
+      "isolates": 65
+     },
+     {
+      "value": "2025",
+      "slug": "environment__period__2025",
+      "isolates": 86
+     },
+     {
+      "value": "2026",
+      "slug": "environment__period__2026",
+      "isolates": 67
+     }
+    ],
+    "region": [
+     {
+      "value": "Greater Accra",
+      "slug": "environment__region__greater-accra",
+      "isolates": 20
+     },
+     {
+      "value": "Upper East",
+      "slug": "environment__region__upper-east",
+      "isolates": 21
+     },
+     {
+      "value": "Upper West",
+      "slug": "environment__region__upper-west",
+      "isolates": 21
+     },
+     {
+      "value": "Volta",
+      "slug": "environment__region__volta",
+      "isolates": 20
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "environment__lab-name__ho-teaching-hospital",
+      "isolates": 21
+     }
+    ]
+   },
+   "food": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "food__period__2024",
+      "isolates": 98
+     },
+     {
+      "value": "2025",
+      "slug": "food__period__2025",
+      "isolates": 124
+     },
+     {
+      "value": "2026",
+      "slug": "food__period__2026",
+      "isolates": 77
+     }
+    ],
+    "region": [
+     {
+      "value": "Bono",
+      "slug": "food__region__bono",
+      "isolates": 20
+     },
+     {
+      "value": "Northern",
+      "slug": "food__region__northern",
+      "isolates": 25
+     },
+     {
+      "value": "Oti",
+      "slug": "food__region__oti",
+      "isolates": 24
+     },
+     {
+      "value": "Savannah",
+      "slug": "food__region__savannah",
+      "isolates": 21
+     },
+     {
+      "value": "Upper East",
+      "slug": "food__region__upper-east",
+      "isolates": 20
+     },
+     {
+      "value": "Upper West",
+      "slug": "food__region__upper-west",
+      "isolates": 21
+     },
+     {
+      "value": "Western",
+      "slug": "food__region__western",
+      "isolates": 21
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Accra Veterinary Laboratory",
+      "slug": "food__lab-name__accra-veterinary-laboratory",
+      "isolates": 20
+     },
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "food__lab-name__ho-teaching-hospital",
+      "isolates": 20
+     },
+     {
+      "value": "St. Martin De Porres Hospital Eikwe",
+      "slug": "food__lab-name__st-martin-de-porres-hospital-eikwe",
+      "isolates": 23
+     }
+    ]
+   },
+   "human": {
+    "period": [
+     {
+      "value": "2024",
+      "slug": "human__period__2024",
+      "isolates": 490
+     },
+     {
+      "value": "2025",
+      "slug": "human__period__2025",
+      "isolates": 657
+     },
+     {
+      "value": "2026",
+      "slug": "human__period__2026",
+      "isolates": 539
+     }
+    ],
+    "region": [
+     {
+      "value": "Ahafo",
+      "slug": "human__region__ahafo",
+      "isolates": 85
+     },
+     {
+      "value": "Ashanti",
+      "slug": "human__region__ashanti",
+      "isolates": 106
+     },
+     {
+      "value": "Bono",
+      "slug": "human__region__bono",
+      "isolates": 81
+     },
+     {
+      "value": "Bono East",
+      "slug": "human__region__bono-east",
+      "isolates": 111
+     },
+     {
+      "value": "Central",
+      "slug": "human__region__central",
+      "isolates": 96
+     },
+     {
+      "value": "Eastern",
+      "slug": "human__region__eastern",
+      "isolates": 109
+     },
+     {
+      "value": "Greater Accra",
+      "slug": "human__region__greater-accra",
+      "isolates": 163
+     },
+     {
+      "value": "North East",
+      "slug": "human__region__north-east",
+      "isolates": 98
+     },
+     {
+      "value": "Northern",
+      "slug": "human__region__northern",
+      "isolates": 89
+     },
+     {
+      "value": "Oti",
+      "slug": "human__region__oti",
+      "isolates": 107
+     },
+     {
+      "value": "Savannah",
+      "slug": "human__region__savannah",
+      "isolates": 115
+     },
+     {
+      "value": "Upper East",
+      "slug": "human__region__upper-east",
+      "isolates": 105
+     },
+     {
+      "value": "Upper West",
+      "slug": "human__region__upper-west",
+      "isolates": 109
+     },
+     {
+      "value": "Volta",
+      "slug": "human__region__volta",
+      "isolates": 111
+     },
+     {
+      "value": "Western",
+      "slug": "human__region__western",
+      "isolates": 106
+     },
+     {
+      "value": "Western North",
+      "slug": "human__region__western-north",
+      "isolates": 102
+     }
+    ],
+    "lab_name": [
+     {
+      "value": "Accra Veterinary Laboratory",
+      "slug": "human__lab-name__accra-veterinary-laboratory",
+      "isolates": 117
+     },
+     {
+      "value": "Alma Medical Laboratory Ltd",
+      "slug": "human__lab-name__alma-medical-laboratory-ltd",
+      "isolates": 76
+     },
+     {
+      "value": "CSIR – Water Research Institute (Microbiology Laboratory)",
+      "slug": "human__lab-name__csir-water-research-institute-microbiology-laboratory",
+      "isolates": 91
+     },
+     {
+      "value": "Cape Coast Teaching Hospital",
+      "slug": "human__lab-name__cape-coast-teaching-hospital",
+      "isolates": 90
+     },
+     {
+      "value": "Central Veterinary Laboratory",
+      "slug": "human__lab-name__central-veterinary-laboratory",
+      "isolates": 77
+     },
+     {
+      "value": "Eastern Regional Hospital",
+      "slug": "human__lab-name__eastern-regional-hospital",
+      "isolates": 82
+     },
+     {
+      "value": "Ho Teaching Hospital",
+      "slug": "human__lab-name__ho-teaching-hospital",
+      "isolates": 80
+     },
+     {
+      "value": "Komfo Anokye Teaching Hospital",
+      "slug": "human__lab-name__komfo-anokye-teaching-hospital",
+      "isolates": 73
+     },
+     {
+      "value": "Korle-Bu Teaching Hospital",
+      "slug": "human__lab-name__korle-bu-teaching-hospital",
+      "isolates": 91
+     },
+     {
+      "value": "Kumasi Veterinary Laboratory",
+      "slug": "human__lab-name__kumasi-veterinary-laboratory",
+      "isolates": 87
+     },
+     {
+      "value": "Lekma Hospital",
+      "slug": "human__lab-name__lekma-hospital",
+      "isolates": 84
+     },
+     {
+      "value": "Metropolis Health Care Limited",
+      "slug": "human__lab-name__metropolis-health-care-limited",
+      "isolates": 87
+     },
+     {
+      "value": "National Food Safety Laboratory",
+      "slug": "human__lab-name__national-food-safety-laboratory",
+      "isolates": 96
+     },
+     {
+      "value": "Pong Tamale School",
+      "slug": "human__lab-name__pong-tamale-school",
+      "isolates": 95
+     },
+     {
+      "value": "Quadushah Medical Diagnostic Limited",
+      "slug": "human__lab-name__quadushah-medical-diagnostic-limited",
+      "isolates": 85
+     },
+     {
+      "value": "Sekondi Public Health Reference Laboratory",
+      "slug": "human__lab-name__sekondi-public-health-reference-laboratory",
+      "isolates": 93
+     },
+     {
+      "value": "St. Martin De Porres Hospital Eikwe",
+      "slug": "human__lab-name__st-martin-de-porres-hospital-eikwe",
+      "isolates": 105
+     },
+     {
+      "value": "Sunyani Teaching Hospital",
+      "slug": "human__lab-name__sunyani-teaching-hospital",
+      "isolates": 91
+     },
+     {
+      "value": "Tamale Teaching Hospital",
+      "slug": "human__lab-name__tamale-teaching-hospital",
+      "isolates": 93
+     }
+    ]
+   }
+  },
+  "written": 115
+ }
+}

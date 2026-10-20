@@ -1,0 +1,1421 @@
+{
+ "amu": [
+  {
+   "by": "region",
+   "rows": [
+    {
+     "group": "Western",
+     "records": 250,
+     "records_with_denominator": 226,
+     "ddd_total": 102594.01602000001,
+     "patient_days": 410900.0,
+     "ddd_per_1000_patient_days": 249.68122662448286,
+     "quantity_dispensed": 113774.59999999999
+    },
+    {
+     "group": "Eastern",
+     "records": 247,
+     "records_with_denominator": 218,
+     "ddd_total": 206435.82706,
+     "patient_days": 1547815.0,
+     "ddd_per_1000_patient_days": 133.37241663893943,
+     "quantity_dispensed": 231794.2
+    },
+    {
+     "group": "Bono",
+     "records": 227,
+     "records_with_denominator": 210,
+     "ddd_total": 235523.33297,
+     "patient_days": 1909840.0,
+     "ddd_per_1000_patient_days": 123.32097608700204,
+     "quantity_dispensed": 253388.8
+    },
+    {
+     "group": "Volta",
+     "records": 247,
+     "records_with_denominator": 221,
+     "ddd_total": 280766.37003,
+     "patient_days": 2984588.0,
+     "ddd_per_1000_patient_days": 94.07206958883437,
+     "quantity_dispensed": 314364.9
+    },
+    {
+     "group": "Central",
+     "records": 251,
+     "records_with_denominator": 231,
+     "ddd_total": 283666.0869,
+     "patient_days": 3042007.0,
+     "ddd_per_1000_patient_days": 93.2496496227655,
+     "quantity_dispensed": 309111.89999999997
+    },
+    {
+     "group": "Northern",
+     "records": 266,
+     "records_with_denominator": 251,
+     "ddd_total": 453051.89349000005,
+     "patient_days": 5318294.0,
+     "ddd_per_1000_patient_days": 85.18744798425962,
+     "quantity_dispensed": 477822.89999999997
+    },
+    {
+     "group": "Greater Accra",
+     "records": 466,
+     "records_with_denominator": 428,
+     "ddd_total": 719274.2565299999,
+     "patient_days": 8751674.0,
+     "ddd_per_1000_patient_days": 82.18704861835575,
+     "quantity_dispensed": 785275.6
+    },
+    {
+     "group": "Ashanti",
+     "records": 232,
+     "records_with_denominator": 209,
+     "ddd_total": 533239.62321,
+     "patient_days": 6752427.0,
+     "ddd_per_1000_patient_days": 78.97006857090051,
+     "quantity_dispensed": 591365.5
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 8,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
+  },
+  {
+   "by": "antibiotic_name",
+   "rows": [
+    {
+     "group": "Gentamicin",
+     "records": 255,
+     "records_with_denominator": 232,
+     "ddd_total": 480469.70239999995,
+     "patient_days": 3436975.0,
+     "ddd_per_1000_patient_days": 139.79435474508833,
+     "quantity_dispensed": 533894.9
+    },
+    {
+     "group": "Amoxicillin-Clavulanate",
+     "records": 45,
+     "records_with_denominator": 41,
+     "ddd_total": 86088.25548,
+     "patient_days": 623051.0,
+     "ddd_per_1000_patient_days": 138.17208459660608,
+     "quantity_dispensed": 100217.5
+    },
+    {
+     "group": "Amoxicillin",
+     "records": 241,
+     "records_with_denominator": 225,
+     "ddd_total": 485083.39596999995,
+     "patient_days": 3510857.0,
+     "ddd_per_1000_patient_days": 138.1666630027939,
+     "quantity_dispensed": 519696.5
+    },
+    {
+     "group": "Metronidazole",
+     "records": 256,
+     "records_with_denominator": 237,
+     "ddd_total": 512905.19603,
+     "patient_days": 3713120.0,
+     "ddd_per_1000_patient_days": 138.1332130472487,
+     "quantity_dispensed": 541635.1000000001
+    },
+    {
+     "group": "Amoxicillin/Clavulanate",
+     "records": 204,
+     "records_with_denominator": 181,
+     "ddd_total": 386398.99447000003,
+     "patient_days": 2817141.0,
+     "ddd_per_1000_patient_days": 137.1599768950152,
+     "quantity_dispensed": 432538.8
+    },
+    {
+     "group": "Azithromycin",
+     "records": 220,
+     "records_with_denominator": 200,
+     "ddd_total": 175020.96052999998,
+     "patient_days": 3023036.0,
+     "ddd_per_1000_patient_days": 57.89575794995494,
+     "quantity_dispensed": 191464.09999999998
+    },
+    {
+     "group": "Vancomycin",
+     "records": 211,
+     "records_with_denominator": 189,
+     "ddd_total": 161107.47739000001,
+     "patient_days": 2848431.0,
+     "ddd_per_1000_patient_days": 56.56007724603476,
+     "quantity_dispensed": 179945.2
+    },
+    {
+     "group": "Ceftriaxone",
+     "records": 229,
+     "records_with_denominator": 213,
+     "ddd_total": 181621.02701999998,
+     "patient_days": 3243245.0,
+     "ddd_per_1000_patient_days": 55.9997863312824,
+     "quantity_dispensed": 192892.8
+    },
+    {
+     "group": "Meropenem",
+     "records": 228,
+     "records_with_denominator": 205,
+     "ddd_total": 169918.33642,
+     "patient_days": 3064221.0,
+     "ddd_per_1000_patient_days": 55.45237645065418,
+     "quantity_dispensed": 187906.90000000002
+    },
+    {
+     "group": "Ciprofloxacin",
+     "records": 233,
+     "records_with_denominator": 213,
+     "ddd_total": 162565.57491999998,
+     "patient_days": 3073470.0,
+     "ddd_per_1000_patient_days": 52.893171210390854,
+     "quantity_dispensed": 182343.4
+    },
+    {
+     "group": "Colistin",
+     "records": 64,
+     "records_with_denominator": 58,
+     "ddd_total": 13372.48558,
+     "patient_days": 1363998.0,
+     "ddd_per_1000_patient_days": 9.803889433855476,
+     "quantity_dispensed": 14363.199999999999
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 11,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
+  },
+  {
+   "by": "report_period",
+   "rows": [
+    {
+     "group": "2026-05",
+     "records": 129,
+     "records_with_denominator": 108,
+     "ddd_total": 149340.67026,
+     "patient_days": 1435505.0,
+     "ddd_per_1000_patient_days": 104.03354238403907,
+     "quantity_dispensed": 182923.1
+    },
+    {
+     "group": "2025-02",
+     "records": 50,
+     "records_with_denominator": 49,
+     "ddd_total": 78065.36952,
+     "patient_days": 765761.0,
+     "ddd_per_1000_patient_days": 101.94482288860361,
+     "quantity_dispensed": 79001.7
+    },
+    {
+     "group": "2026-09",
+     "records": 93,
+     "records_with_denominator": 87,
+     "ddd_total": 117915.70735,
+     "patient_days": 1165100.0,
+     "ddd_per_1000_patient_days": 101.20651218779504,
+     "quantity_dispensed": 126528.70000000001
+    },
+    {
+     "group": "2025-05",
+     "records": 67,
+     "records_with_denominator": 59,
+     "ddd_total": 87879.92102000001,
+     "patient_days": 869945.0,
+     "ddd_per_1000_patient_days": 101.0177896533689,
+     "quantity_dispensed": 92560.4
+    },
+    {
+     "group": "2024-10",
+     "records": 63,
+     "records_with_denominator": 60,
+     "ddd_total": 89092.49685,
+     "patient_days": 887326.0,
+     "ddd_per_1000_patient_days": 100.4055970973464,
+     "quantity_dispensed": 93236.90000000001
+    },
+    {
+     "group": "2024-12",
+     "records": 56,
+     "records_with_denominator": 49,
+     "ddd_total": 63270.67676,
+     "patient_days": 643663.0,
+     "ddd_per_1000_patient_days": 98.29783094569675,
+     "quantity_dispensed": 80305.8
+    },
+    {
+     "group": "2025-04",
+     "records": 56,
+     "records_with_denominator": 53,
+     "ddd_total": 88521.13260000001,
+     "patient_days": 901801.0,
+     "ddd_per_1000_patient_days": 98.16038416457734,
+     "quantity_dispensed": 91115.20000000001
+    },
+    {
+     "group": "2026-02",
+     "records": 53,
+     "records_with_denominator": 48,
+     "ddd_total": 77502.26707999999,
+     "patient_days": 794842.0,
+     "ddd_per_1000_patient_days": 97.50650705423216,
+     "quantity_dispensed": 78365.79999999999
+    },
+    {
+     "group": "2024-11",
+     "records": 64,
+     "records_with_denominator": 60,
+     "ddd_total": 93105.6614,
+     "patient_days": 967687.0,
+     "ddd_per_1000_patient_days": 96.21464523136096,
+     "quantity_dispensed": 96729.80000000002
+    },
+    {
+     "group": "2026-08",
+     "records": 106,
+     "records_with_denominator": 98,
+     "ddd_total": 149367.40791,
+     "patient_days": 1560740.0,
+     "ddd_per_1000_patient_days": 95.70294085497906,
+     "quantity_dispensed": 160981.09999999998
+    },
+    {
+     "group": "2026-01",
+     "records": 56,
+     "records_with_denominator": 51,
+     "ddd_total": 67115.5651,
+     "patient_days": 718649.0,
+     "ddd_per_1000_patient_days": 93.39130103847637,
+     "quantity_dispensed": 72748.70000000001
+    },
+    {
+     "group": "2024-07",
+     "records": 63,
+     "records_with_denominator": 58,
+     "ddd_total": 85854.83095999999,
+     "patient_days": 920174.0,
+     "ddd_per_1000_patient_days": 93.30282203148533,
+     "quantity_dispensed": 90501.3
+    },
+    {
+     "group": "2024-04",
+     "records": 56,
+     "records_with_denominator": 47,
+     "ddd_total": 53139.77687999999,
+     "patient_days": 570674.0,
+     "ddd_per_1000_patient_days": 93.11757129289225,
+     "quantity_dispensed": 63171.899999999994
+    },
+    {
+     "group": "2024-03",
+     "records": 57,
+     "records_with_denominator": 54,
+     "ddd_total": 77874.17919,
+     "patient_days": 842604.0,
+     "ddd_per_1000_patient_days": 92.42085153880114,
+     "quantity_dispensed": 82180.4
+    },
+    {
+     "group": "2025-01",
+     "records": 58,
+     "records_with_denominator": 54,
+     "ddd_total": 65240.811480000004,
+     "patient_days": 723892.0,
+     "ddd_per_1000_patient_days": 90.12506213634079,
+     "quantity_dispensed": 69024.20000000001
+    },
+    {
+     "group": "2025-10",
+     "records": 66,
+     "records_with_denominator": 55,
+     "ddd_total": 77357.85533,
+     "patient_days": 859197.0,
+     "ddd_per_1000_patient_days": 90.0350621917907,
+     "quantity_dispensed": 91195.2
+    },
+    {
+     "group": "2025-06",
+     "records": 53,
+     "records_with_denominator": 49,
+     "ddd_total": 67630.2808,
+     "patient_days": 751522.0,
+     "ddd_per_1000_patient_days": 89.9910858231695,
+     "quantity_dispensed": 70026.8
+    },
+    {
+     "group": "2026-06",
+     "records": 115,
+     "records_with_denominator": 103,
+     "ddd_total": 149403.31996,
+     "patient_days": 1660368.0,
+     "ddd_per_1000_patient_days": 89.98205214747573,
+     "quantity_dispensed": 167665.4
+    },
+    {
+     "group": "2026-04",
+     "records": 118,
+     "records_with_denominator": 106,
+     "ddd_total": 136240.93324,
+     "patient_days": 1517540.0,
+     "ddd_per_1000_patient_days": 89.77749070205729,
+     "quantity_dispensed": 160679.69999999995
+    },
+    {
+     "group": "2025-08",
+     "records": 48,
+     "records_with_denominator": 47,
+     "ddd_total": 68987.96772999997,
+     "patient_days": 769594.0,
+     "ddd_per_1000_patient_days": 89.64202908286703,
+     "quantity_dispensed": 69615.9
+    },
+    {
+     "group": "2024-09",
+     "records": 61,
+     "records_with_denominator": 56,
+     "ddd_total": 79038.08145,
+     "patient_days": 903039.0,
+     "ddd_per_1000_patient_days": 87.52454927195835,
+     "quantity_dispensed": 85552.6
+    },
+    {
+     "group": "2025-03",
+     "records": 62,
+     "records_with_denominator": 60,
+     "ddd_total": 81445.91362,
+     "patient_days": 932796.0,
+     "ddd_per_1000_patient_days": 87.313746649857,
+     "quantity_dispensed": 83224.1
+    },
+    {
+     "group": "2026-07",
+     "records": 123,
+     "records_with_denominator": 116,
+     "ddd_total": 165581.52768,
+     "patient_days": 1901648.0,
+     "ddd_per_1000_patient_days": 87.0726483976004,
+     "quantity_dispensed": 177644.7
+    },
+    {
+     "group": "2025-07",
+     "records": 59,
+     "records_with_denominator": 52,
+     "ddd_total": 78373.66428000001,
+     "patient_days": 901757.0,
+     "ddd_per_1000_patient_days": 86.91217731606187,
+     "quantity_dispensed": 91105.6
+    },
+    {
+     "group": "2025-12",
+     "records": 58,
+     "records_with_denominator": 53,
+     "ddd_total": 75942.95610000001,
+     "patient_days": 881317.0,
+     "ddd_per_1000_patient_days": 86.16985273176395,
+     "quantity_dispensed": 80984.0
+    },
+    {
+     "group": "2024-06",
+     "records": 47,
+     "records_with_denominator": 40,
+     "ddd_total": 56451.26520000001,
+     "patient_days": 656013.0,
+     "ddd_per_1000_patient_days": 86.05205262700588,
+     "quantity_dispensed": 67316.1
+    },
+    {
+     "group": "2024-05",
+     "records": 62,
+     "records_with_denominator": 55,
+     "ddd_total": 70679.43379000001,
+     "patient_days": 823910.0,
+     "ddd_per_1000_patient_days": 85.78538164362614,
+     "quantity_dispensed": 84068.09999999999
+    },
+    {
+     "group": "2025-09",
+     "records": 53,
+     "records_with_denominator": 48,
+     "ddd_total": 69013.44628999999,
+     "patient_days": 807751.0,
+     "ddd_per_1000_patient_days": 85.43901064808337,
+     "quantity_dispensed": 76209.6
+    },
+    {
+     "group": "2026-03",
+     "records": 114,
+     "records_with_denominator": 109,
+     "ddd_total": 140949.52230999997,
+     "patient_days": 1682545.0,
+     "ddd_per_1000_patient_days": 83.77162115129163,
+     "quantity_dispensed": 145343.5
+    },
+    {
+     "group": "2025-11",
+     "records": 63,
+     "records_with_denominator": 59,
+     "ddd_total": 80730.87149,
+     "patient_days": 965850.0,
+     "ddd_per_1000_patient_days": 83.58530982036548,
+     "quantity_dispensed": 84644.0
+    },
+    {
+     "group": "2024-08",
+     "records": 57,
+     "records_with_denominator": 51,
+     "ddd_total": 73437.89258,
+     "patient_days": 934335.0,
+     "ddd_per_1000_patient_days": 78.59910265589964,
+     "quantity_dispensed": 82248.1
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 31,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from 1,994 of 2,186 records (91%). The remainder carry no usable denominator and are excluded from the rate rather than counted as zero."
+  }
+ ],
+ "amc": [
+  {
+   "by": "species",
+   "rows": [
+    {
+     "group": "Goat",
+     "records": 170,
+     "records_with_denominator": 170,
+     "active_ingredient_kg": 10793.059,
+     "biomass_kg": 12207882.899999999,
+     "mg_per_kg_biomass": 884.1057117282802
+    },
+    {
+     "group": "Catfish",
+     "records": 168,
+     "records_with_denominator": 168,
+     "active_ingredient_kg": 3514.9152,
+     "biomass_kg": 13434260.8,
+     "mg_per_kg_biomass": 261.63815429279146
+    },
+    {
+     "group": "Tilapia",
+     "records": 175,
+     "records_with_denominator": 175,
+     "active_ingredient_kg": 9504.1844,
+     "biomass_kg": 51806635.900000006,
+     "mg_per_kg_biomass": 183.454961606569
+    },
+    {
+     "group": "Pig",
+     "records": 179,
+     "records_with_denominator": 179,
+     "active_ingredient_kg": 15656.9106,
+     "biomass_kg": 108400560.69999999,
+     "mg_per_kg_biomass": 144.43569755446848
+    },
+    {
+     "group": "Sheep",
+     "records": 182,
+     "records_with_denominator": 182,
+     "active_ingredient_kg": 2222.8477,
+     "biomass_kg": 18435978.9,
+     "mg_per_kg_biomass": 120.57117834952611
+    },
+    {
+     "group": "Poultry (broiler)",
+     "records": 157,
+     "records_with_denominator": 157,
+     "active_ingredient_kg": 33423.7918,
+     "biomass_kg": 371860429.0,
+     "mg_per_kg_biomass": 89.88262582787479
+    },
+    {
+     "group": "Poultry (layer)",
+     "records": 158,
+     "records_with_denominator": 158,
+     "active_ingredient_kg": 13752.1656,
+     "biomass_kg": 177649957.60000002,
+     "mg_per_kg_biomass": 77.41158954264787
+    },
+    {
+     "group": "Cattle",
+     "records": 181,
+     "records_with_denominator": 181,
+     "active_ingredient_kg": 14287.5503,
+     "biomass_kg": 330366934.0,
+     "mg_per_kg_biomass": 43.24751913579826
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 8,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "region",
+   "rows": [
+    {
+     "group": "Ashanti",
+     "records": 89,
+     "records_with_denominator": 89,
+     "active_ingredient_kg": 7687.5219,
+     "biomass_kg": 60337093.0,
+     "mg_per_kg_biomass": 127.40955053966555
+    },
+    {
+     "group": "Western",
+     "records": 61,
+     "records_with_denominator": 61,
+     "active_ingredient_kg": 4918.731,
+     "biomass_kg": 42269138.80000001,
+     "mg_per_kg_biomass": 116.36695564755624
+    },
+    {
+     "group": "Northern",
+     "records": 112,
+     "records_with_denominator": 112,
+     "active_ingredient_kg": 7527.2208,
+     "biomass_kg": 66377217.0,
+     "mg_per_kg_biomass": 113.40066878670132
+    },
+    {
+     "group": "Upper East",
+     "records": 79,
+     "records_with_denominator": 79,
+     "active_ingredient_kg": 6340.5932,
+     "biomass_kg": 58827770.6,
+     "mg_per_kg_biomass": 107.7823132736565
+    },
+    {
+     "group": "Savannah",
+     "records": 100,
+     "records_with_denominator": 100,
+     "active_ingredient_kg": 7321.6425,
+     "biomass_kg": 68925003.0,
+     "mg_per_kg_biomass": 106.22621953313516
+    },
+    {
+     "group": "Oti",
+     "records": 107,
+     "records_with_denominator": 107,
+     "active_ingredient_kg": 7180.4419,
+     "biomass_kg": 67831865.7,
+     "mg_per_kg_biomass": 105.85647064105447
+    },
+    {
+     "group": "Bono East",
+     "records": 72,
+     "records_with_denominator": 72,
+     "active_ingredient_kg": 4918.2962,
+     "biomass_kg": 50773019.099999994,
+     "mg_per_kg_biomass": 96.86830303144215
+    },
+    {
+     "group": "Bono",
+     "records": 91,
+     "records_with_denominator": 91,
+     "active_ingredient_kg": 7852.1106,
+     "biomass_kg": 81273410.5,
+     "mg_per_kg_biomass": 96.61352405040269
+    },
+    {
+     "group": "Volta",
+     "records": 71,
+     "records_with_denominator": 71,
+     "active_ingredient_kg": 5369.2087,
+     "biomass_kg": 56640074.0,
+     "mg_per_kg_biomass": 94.79522749211097
+    },
+    {
+     "group": "Upper West",
+     "records": 109,
+     "records_with_denominator": 109,
+     "active_ingredient_kg": 8297.1409,
+     "biomass_kg": 89952695.6,
+     "mg_per_kg_biomass": 92.23893563896712
+    },
+    {
+     "group": "Greater Accra",
+     "records": 100,
+     "records_with_denominator": 100,
+     "active_ingredient_kg": 6615.7576,
+     "biomass_kg": 71860400.0,
+     "mg_per_kg_biomass": 92.0640241356853
+    },
+    {
+     "group": "Eastern",
+     "records": 106,
+     "records_with_denominator": 106,
+     "active_ingredient_kg": 11161.7297,
+     "biomass_kg": 128735036.09999998,
+     "mg_per_kg_biomass": 86.70312323779278
+    },
+    {
+     "group": "Western North",
+     "records": 52,
+     "records_with_denominator": 52,
+     "active_ingredient_kg": 2905.6167,
+     "biomass_kg": 34287474.1,
+     "mg_per_kg_biomass": 84.74280407841415
+    },
+    {
+     "group": "Ahafo",
+     "records": 74,
+     "records_with_denominator": 74,
+     "active_ingredient_kg": 5405.6875,
+     "biomass_kg": 68816732.8,
+     "mg_per_kg_biomass": 78.55193468295549
+    },
+    {
+     "group": "North East",
+     "records": 68,
+     "records_with_denominator": 68,
+     "active_ingredient_kg": 4966.3141,
+     "biomass_kg": 67774002.8,
+     "mg_per_kg_biomass": 73.2775680175703
+    },
+    {
+     "group": "Central",
+     "records": 79,
+     "records_with_denominator": 79,
+     "active_ingredient_kg": 4687.4113,
+     "biomass_kg": 69481706.7,
+     "mg_per_kg_biomass": 67.46252391638502
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 16,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "antibiotic_class",
+   "rows": [
+    {
+     "group": "Polymyxins",
+     "records": 177,
+     "records_with_denominator": 177,
+     "active_ingredient_kg": 14047.5829,
+     "biomass_kg": 141264065.2,
+     "mg_per_kg_biomass": 99.44201223511159
+    },
+    {
+     "group": "Macrolides",
+     "records": 159,
+     "records_with_denominator": 159,
+     "active_ingredient_kg": 12023.1179,
+     "biomass_kg": 121993557.9,
+     "mg_per_kg_biomass": 98.5553508477516
+    },
+    {
+     "group": "Sulfonamides",
+     "records": 166,
+     "records_with_denominator": 166,
+     "active_ingredient_kg": 12594.1962,
+     "biomass_kg": 131583973.39999999,
+     "mg_per_kg_biomass": 95.71223511935688
+    },
+    {
+     "group": "Tetracyclines",
+     "records": 354,
+     "records_with_denominator": 354,
+     "active_ingredient_kg": 26997.8164,
+     "biomass_kg": 283737994.7,
+     "mg_per_kg_biomass": 95.15051527922849
+    },
+    {
+     "group": "Penicillins",
+     "records": 167,
+     "records_with_denominator": 167,
+     "active_ingredient_kg": 11529.1714,
+     "biomass_kg": 124302500.2,
+     "mg_per_kg_biomass": 92.75092119184905
+    },
+    {
+     "group": "Fluoroquinolones",
+     "records": 168,
+     "records_with_denominator": 168,
+     "active_ingredient_kg": 13272.6776,
+     "biomass_kg": 143100863.8,
+     "mg_per_kg_biomass": 92.75050651371399
+    },
+    {
+     "group": "Amphenicols",
+     "records": 179,
+     "records_with_denominator": 179,
+     "active_ingredient_kg": 12690.8622,
+     "biomass_kg": 138179684.6,
+     "mg_per_kg_biomass": 91.84318401606774
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 7,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "sector",
+   "rows": [
+    {
+     "group": "AQUACULTURE",
+     "records": 343,
+     "records_with_denominator": 343,
+     "active_ingredient_kg": 13019.0996,
+     "biomass_kg": 65240896.7,
+     "mg_per_kg_biomass": 199.55427130111778
+    },
+    {
+     "group": "ANIMAL",
+     "records": 1027,
+     "records_with_denominator": 1027,
+     "active_ingredient_kg": 90136.325,
+     "biomass_kg": 1018921743.0999999,
+     "mg_per_kg_biomass": 88.46246103824066
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 2,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "purpose",
+   "rows": [
+    {
+     "group": "Growth promotion",
+     "records": 159,
+     "records_with_denominator": 159,
+     "active_ingredient_kg": 12023.1179,
+     "biomass_kg": 121993557.9,
+     "mg_per_kg_biomass": 98.5553508477516
+    },
+    {
+     "group": "Metaphylaxis",
+     "records": 344,
+     "records_with_denominator": 344,
+     "active_ingredient_kg": 25576.7543,
+     "biomass_kg": 265566565.4,
+     "mg_per_kg_biomass": 96.31014454502562
+    },
+    {
+     "group": "Therapeutic",
+     "records": 867,
+     "records_with_denominator": 867,
+     "active_ingredient_kg": 65555.5524,
+     "biomass_kg": 696602516.5,
+     "mg_per_kg_biomass": 94.10754461436115
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "route",
+   "rows": [
+    {
+     "group": "In water",
+     "records": 694,
+     "records_with_denominator": 694,
+     "active_ingredient_kg": 53894.6302,
+     "biomass_kg": 559652467.9,
+     "mg_per_kg_biomass": 96.30017428893036
+    },
+    {
+     "group": "In feed",
+     "records": 676,
+     "records_with_denominator": 676,
+     "active_ingredient_kg": 49260.7944,
+     "biomass_kg": 524510171.9,
+     "mg_per_kg_biomass": 93.91771034974661
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 2,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  },
+  {
+   "by": "report_period",
+   "rows": [
+    {
+     "group": "2024-08",
+     "records": 32,
+     "records_with_denominator": 32,
+     "active_ingredient_kg": 2485.7697,
+     "biomass_kg": 23639712.1,
+     "mg_per_kg_biomass": 105.15228313630773
+    },
+    {
+     "group": "2024-11",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2734.0063,
+     "biomass_kg": 26246911.500000004,
+     "mg_per_kg_biomass": 104.16487669415883
+    },
+    {
+     "group": "2024-05",
+     "records": 30,
+     "records_with_denominator": 30,
+     "active_ingredient_kg": 2504.8481,
+     "biomass_kg": 24062270.900000002,
+     "mg_per_kg_biomass": 104.098574503207
+    },
+    {
+     "group": "2026-05",
+     "records": 63,
+     "records_with_denominator": 63,
+     "active_ingredient_kg": 4509.1829,
+     "biomass_kg": 43362850.300000004,
+     "mg_per_kg_biomass": 103.98723489816349
+    },
+    {
+     "group": "2025-09",
+     "records": 35,
+     "records_with_denominator": 35,
+     "active_ingredient_kg": 2360.4972,
+     "biomass_kg": 22830934.599999998,
+     "mg_per_kg_biomass": 103.39030098224714
+    },
+    {
+     "group": "2024-03",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2811.9346,
+     "biomass_kg": 27835747.400000002,
+     "mg_per_kg_biomass": 101.01882875974079
+    },
+    {
+     "group": "2026-09",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5180.7516,
+     "biomass_kg": 51682093.3,
+     "mg_per_kg_biomass": 100.24268115316453
+    },
+    {
+     "group": "2025-02",
+     "records": 33,
+     "records_with_denominator": 33,
+     "active_ingredient_kg": 2141.8063,
+     "biomass_kg": 21588896.000000004,
+     "mg_per_kg_biomass": 99.2086996945096
+    },
+    {
+     "group": "2025-11",
+     "records": 35,
+     "records_with_denominator": 35,
+     "active_ingredient_kg": 2657.5728,
+     "biomass_kg": 26843489.2,
+     "mg_per_kg_biomass": 99.0025097035448
+    },
+    {
+     "group": "2026-08",
+     "records": 72,
+     "records_with_denominator": 72,
+     "active_ingredient_kg": 5602.6637,
+     "biomass_kg": 57277441.5,
+     "mg_per_kg_biomass": 97.81623538474567
+    },
+    {
+     "group": "2025-04",
+     "records": 47,
+     "records_with_denominator": 47,
+     "active_ingredient_kg": 3746.9132,
+     "biomass_kg": 38681690.1,
+     "mg_per_kg_biomass": 96.86529182963491
+    },
+    {
+     "group": "2024-10",
+     "records": 41,
+     "records_with_denominator": 41,
+     "active_ingredient_kg": 3253.2325,
+     "biomass_kg": 33949934.4,
+     "mg_per_kg_biomass": 95.82441196116126
+    },
+    {
+     "group": "2025-01",
+     "records": 39,
+     "records_with_denominator": 39,
+     "active_ingredient_kg": 2963.4596,
+     "biomass_kg": 31015106.9,
+     "mg_per_kg_biomass": 95.54890813547382
+    },
+    {
+     "group": "2026-03",
+     "records": 80,
+     "records_with_denominator": 80,
+     "active_ingredient_kg": 6332.3389,
+     "biomass_kg": 66356473.199999996,
+     "mg_per_kg_biomass": 95.42910577712863
+    },
+    {
+     "group": "2026-07",
+     "records": 72,
+     "records_with_denominator": 72,
+     "active_ingredient_kg": 5361.1937,
+     "biomass_kg": 56424491.6,
+     "mg_per_kg_biomass": 95.01536563246589
+    },
+    {
+     "group": "2025-08",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2821.4555,
+     "biomass_kg": 29715695.400000002,
+     "mg_per_kg_biomass": 94.94832485057711
+    },
+    {
+     "group": "2025-03",
+     "records": 33,
+     "records_with_denominator": 33,
+     "active_ingredient_kg": 2346.4021,
+     "biomass_kg": 24836155.5,
+     "mg_per_kg_biomass": 94.47525403035908
+    },
+    {
+     "group": "2024-06",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2664.0383,
+     "biomass_kg": 28245263.800000004,
+     "mg_per_kg_biomass": 94.3180534217563
+    },
+    {
+     "group": "2025-06",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2998.6886,
+     "biomass_kg": 31884295.1,
+     "mg_per_kg_biomass": 94.04907935380388
+    },
+    {
+     "group": "2026-01",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2642.2297,
+     "biomass_kg": 28142442.8,
+     "mg_per_kg_biomass": 93.8877168118469
+    },
+    {
+     "group": "2025-12",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2611.7794,
+     "biomass_kg": 27866413.5,
+     "mg_per_kg_biomass": 93.72499263315676
+    },
+    {
+     "group": "2026-02",
+     "records": 32,
+     "records_with_denominator": 32,
+     "active_ingredient_kg": 2480.3257,
+     "biomass_kg": 26569995.0,
+     "mg_per_kg_biomass": 93.35062727712219
+    },
+    {
+     "group": "2025-07",
+     "records": 39,
+     "records_with_denominator": 39,
+     "active_ingredient_kg": 2785.3575,
+     "biomass_kg": 30330414.7,
+     "mg_per_kg_biomass": 91.83380865544183
+    },
+    {
+     "group": "2024-04",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 3112.8471,
+     "biomass_kg": 34065746.199999996,
+     "mg_per_kg_biomass": 91.3776284753745
+    },
+    {
+     "group": "2024-07",
+     "records": 36,
+     "records_with_denominator": 36,
+     "active_ingredient_kg": 2631.3301,
+     "biomass_kg": 28808955.700000003,
+     "mg_per_kg_biomass": 91.33722608348485
+    },
+    {
+     "group": "2024-12",
+     "records": 31,
+     "records_with_denominator": 31,
+     "active_ingredient_kg": 2267.5922,
+     "biomass_kg": 24870391.4,
+     "mg_per_kg_biomass": 91.1763777067055
+    },
+    {
+     "group": "2025-05",
+     "records": 34,
+     "records_with_denominator": 34,
+     "active_ingredient_kg": 2821.4981,
+     "biomass_kg": 31149624.000000004,
+     "mg_per_kg_biomass": 90.57888146579232
+    },
+    {
+     "group": "2026-04",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5506.218,
+     "biomass_kg": 61966833.1,
+     "mg_per_kg_biomass": 88.8575020626639
+    },
+    {
+     "group": "2024-09",
+     "records": 37,
+     "records_with_denominator": 37,
+     "active_ingredient_kg": 2612.302,
+     "biomass_kg": 29571443.799999997,
+     "mg_per_kg_biomass": 88.33866948356442
+    },
+    {
+     "group": "2026-06",
+     "records": 73,
+     "records_with_denominator": 73,
+     "active_ingredient_kg": 5354.5849,
+     "biomass_kg": 60728100.7,
+     "mg_per_kg_biomass": 88.17310006864746
+    },
+    {
+     "group": "2025-10",
+     "records": 38,
+     "records_with_denominator": 38,
+     "active_ingredient_kg": 2852.6043,
+     "biomass_kg": 33612826.1,
+     "mg_per_kg_biomass": 84.86654146584836
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 31,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "caveat": "Computed from all 1,370 records."
+  }
+ ],
+ "pps": {
+  "surveys": 18,
+  "patients": 4332,
+  "onAntibiotics": 1986,
+  "prevalencePercent": 45.8,
+  "breakdowns": [
+   {
+    "key": "indication",
+    "label": "Indication",
+    "rows": [
+     {
+      "value": "Surgical prophylaxis",
+      "prescriptions": 475
+     },
+     {
+      "value": "Community-acquired pneumonia",
+      "prescriptions": 431
+     },
+     {
+      "value": "Urinary tract infection",
+      "prescriptions": 387
+     },
+     {
+      "value": "Skin and soft tissue infection",
+      "prescriptions": 282
+     },
+     {
+      "value": "Sepsis",
+      "prescriptions": 275
+     },
+     {
+      "value": "Hospital-acquired pneumonia",
+      "prescriptions": 235
+     },
+     {
+      "value": "Intra-abdominal infection",
+      "prescriptions": 222
+     },
+     {
+      "value": "Meningitis",
+      "prescriptions": 141
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 8,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   {
+    "key": "route",
+    "label": "Route",
+    "rows": [
+     {
+      "value": "IV",
+      "prescriptions": 1366
+     },
+     {
+      "value": "Oral",
+      "prescriptions": 881
+     },
+     {
+      "value": "IM",
+      "prescriptions": 201
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   {
+    "key": "antibiotic_name",
+    "label": "Agent",
+    "rows": [
+     {
+      "value": "Gentamicin",
+      "prescriptions": 251
+     },
+     {
+      "value": "Ciprofloxacin",
+      "prescriptions": 250
+     },
+     {
+      "value": "Vancomycin",
+      "prescriptions": 250
+     },
+     {
+      "value": "Metronidazole",
+      "prescriptions": 246
+     },
+     {
+      "value": "Ceftriaxone",
+      "prescriptions": 246
+     },
+     {
+      "value": "Amoxicillin",
+      "prescriptions": 238
+     },
+     {
+      "value": "Azithromycin",
+      "prescriptions": 232
+     },
+     {
+      "value": "Colistin",
+      "prescriptions": 232
+     },
+     {
+      "value": "Meropenem",
+      "prescriptions": 230
+     },
+     {
+      "value": "Amoxicillin/Clavulanate",
+      "prescriptions": 183
+     },
+     {
+      "value": "Amoxicillin-Clavulanate",
+      "prescriptions": 90
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 11,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   {
+    "key": "patient_age_group",
+    "label": "Age group",
+    "rows": [
+     {
+      "value": "15-44",
+      "prescriptions": 795
+     },
+     {
+      "value": "45-64",
+      "prescriptions": 608
+     },
+     {
+      "value": "65+",
+      "prescriptions": 366
+     },
+     {
+      "value": "1-4",
+      "prescriptions": 247
+     },
+     {
+      "value": "5-14",
+      "prescriptions": 224
+     },
+     {
+      "value": "<1",
+      "prescriptions": 208
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 6,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   }
+  ],
+  "indicationDocumentedPercent": 74.0,
+  "prescriptions": 2448,
+  "guidelineCompliantPercent": 58.4,
+  "durationMedianDays": 7.0,
+  "duration": [
+   {
+    "days": 1,
+    "prescriptions": 143
+   },
+   {
+    "days": 2,
+    "prescriptions": 57
+   },
+   {
+    "days": 3,
+    "prescriptions": 210
+   },
+   {
+    "days": 4,
+    "prescriptions": 225
+   },
+   {
+    "days": 5,
+    "prescriptions": 270
+   },
+   {
+    "days": 6,
+    "prescriptions": 136
+   },
+   {
+    "days": 7,
+    "prescriptions": 230
+   },
+   {
+    "days": 8,
+    "prescriptions": 169
+   },
+   {
+    "days": 9,
+    "prescriptions": 149
+   },
+   {
+    "days": 10,
+    "prescriptions": 175
+   },
+   {
+    "days": 11,
+    "prescriptions": 184
+   },
+   {
+    "days": 12,
+    "prescriptions": 154
+   },
+   {
+    "days": 13,
+    "prescriptions": 163
+   },
+   {
+    "days": 14,
+    "prescriptions": 183
+   }
+  ],
+  "wards": [
+   {
+    "ward": "Medical",
+    "prescriptions": 736,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "Surgical",
+    "prescriptions": 632,
+    "median_duration": 8.0
+   },
+   {
+    "ward": "Paediatric",
+    "prescriptions": 474,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "Obstetric/Gynaecology",
+    "prescriptions": 336,
+    "median_duration": 7.0
+   },
+   {
+    "ward": "ICU",
+    "prescriptions": 270,
+    "median_duration": 7.0
+   }
+  ],
+  "wardSuppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 5,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ }
+}

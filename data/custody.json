@@ -1,0 +1,90 @@
+{
+ "stages": [
+  {
+   "table": "subjects",
+   "label": "Patient or source",
+   "note": "Pseudonymised. No hospital number is ever stored.",
+   "records": 2306
+  },
+  {
+   "table": "encounters",
+   "label": "Encounter",
+   "note": "The admission or visit the specimen belongs to, where one is recorded.",
+   "records": 1764
+  },
+  {
+   "table": "specimens",
+   "label": "Specimen",
+   "note": "Collected, transported, received.",
+   "records": 2766
+  },
+  {
+   "table": "isolates",
+   "label": "Isolate",
+   "note": "What grew, and what it was identified as.",
+   "records": 2667
+  },
+  {
+   "table": "phenotypes",
+   "label": "Susceptibility result",
+   "note": "One row per isolate per agent tested.",
+   "records": 20826
+  },
+  {
+   "table": "genomic_results",
+   "label": "Genome",
+   "note": "Sequenced, analysed, reviewed.",
+   "records": 1860
+  }
+ ],
+ "linked": {
+  "specimens_to_subject": 2766,
+  "specimens_to_encounter": 1764,
+  "isolates_to_specimen": 2667,
+  "phenotypes_to_isolate": 20826,
+  "genomes_to_isolate": 1860,
+  "genomes_to_subject": 1860
+ },
+ "events": [
+  {
+   "event": "collected",
+   "events": 2766
+  },
+  {
+   "event": "received",
+   "events": 2736
+  },
+  {
+   "event": "ast_performed",
+   "events": 2667
+  },
+  {
+   "event": "identified",
+   "events": 2667
+  },
+  {
+   "event": "transferred",
+   "events": 2306
+  },
+  {
+   "event": "sequenced",
+   "events": 207
+  },
+  {
+   "event": "sequence_analysed",
+   "events": 107
+  },
+  {
+   "event": "sequence_reviewed",
+   "events": 107
+  },
+  {
+   "event": "rejected",
+   "events": 30
+  }
+ ],
+ "totalEvents": 13593,
+ "genomesTraceable": 1860,
+ "genomes": 1860,
+ "percentGenomesTraceable": 100.0
+}

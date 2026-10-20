@@ -1,0 +1,1254 @@
+{
+ "coverage": {
+  "sequenced": 1860,
+  "total_isolates": 2667,
+  "passed_qc": 1718,
+  "failed_qc": 142,
+  "not_assessable": 0,
+  "typed": 1860,
+  "clustered": 1603,
+  "percent_sequenced": 69.7
+ },
+ "determinants": [
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaOXA-1",
+   "mechanism": "Oxacillinase",
+   "isolates": 570,
+   "genomes_examined": 1718,
+   "percent": 33.2,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "intI1",
+   "mechanism": "not a resistance determinant",
+   "isolates": 530,
+   "genomes_examined": 1718,
+   "percent": 30.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "qacE",
+   "mechanism": "not a resistance determinant",
+   "isolates": 499,
+   "genomes_examined": 1718,
+   "percent": 29.0,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "IS26",
+   "mechanism": "not a resistance determinant",
+   "isolates": 477,
+   "genomes_examined": 1718,
+   "percent": 27.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaZ",
+   "mechanism": "Staphylococcal penicillinase",
+   "isolates": 451,
+   "genomes_examined": 1718,
+   "percent": 26.3,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "tet(M)",
+   "mechanism": "Ribosomal protection",
+   "isolates": 354,
+   "genomes_examined": 1718,
+   "percent": 20.6,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "aph(3'')-Ib",
+   "mechanism": "Aminoglycoside phosphotransferase",
+   "isolates": 340,
+   "genomes_examined": 1718,
+   "percent": 19.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "gyrA_S83L",
+   "mechanism": "Target-site mutation",
+   "isolates": 338,
+   "genomes_examined": 1718,
+   "percent": 19.7,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "floR",
+   "mechanism": "Phenicol efflux",
+   "isolates": 308,
+   "genomes_examined": 1718,
+   "percent": 17.9,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "mph(A)",
+   "mechanism": "Macrolide phosphotransferase",
+   "isolates": 305,
+   "genomes_examined": 1718,
+   "percent": 17.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "aph(6)-Id",
+   "mechanism": "Aminoglycoside phosphotransferase",
+   "isolates": 293,
+   "genomes_examined": 1718,
+   "percent": 17.1,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "ermC",
+   "mechanism": "rRNA methylase",
+   "isolates": 272,
+   "genomes_examined": 1718,
+   "percent": 15.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "sul1",
+   "mechanism": "Sulfonamide target",
+   "isolates": 209,
+   "genomes_examined": 1718,
+   "percent": 12.2,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "aac(3)-IIa",
+   "mechanism": "Enzymatic modification",
+   "isolates": 186,
+   "genomes_examined": 1718,
+   "percent": 10.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "dfrA17",
+   "mechanism": "Trimethoprim target",
+   "isolates": 182,
+   "genomes_examined": 1718,
+   "percent": 10.6,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "sul2",
+   "mechanism": "Sulfonamide target",
+   "isolates": 178,
+   "genomes_examined": 1718,
+   "percent": 10.4,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaCMY-2",
+   "mechanism": "Plasmid-mediated AmpC",
+   "isolates": 175,
+   "genomes_examined": 1718,
+   "percent": 10.2,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaCTX-M-15",
+   "mechanism": "ESBL",
+   "isolates": 134,
+   "genomes_examined": 1718,
+   "percent": 7.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "qnrS1",
+   "mechanism": "Target protection",
+   "isolates": 125,
+   "genomes_examined": 1718,
+   "percent": 7.3,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "armA",
+   "mechanism": "16S rRNA methylase",
+   "isolates": 121,
+   "genomes_examined": 1718,
+   "percent": 7.0,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaCTX-M-14",
+   "mechanism": "ESBL",
+   "isolates": 120,
+   "genomes_examined": 1718,
+   "percent": 7.0,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaSHV-1",
+   "mechanism": "Penicillinase",
+   "isolates": 118,
+   "genomes_examined": 1718,
+   "percent": 6.9,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "parC_S80I",
+   "mechanism": "Target-site mutation",
+   "isolates": 117,
+   "genomes_examined": 1718,
+   "percent": 6.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaSHV-12",
+   "mechanism": "ESBL",
+   "isolates": 115,
+   "genomes_examined": 1718,
+   "percent": 6.7,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "qnrB1",
+   "mechanism": "Target protection",
+   "isolates": 114,
+   "genomes_examined": 1718,
+   "percent": 6.6,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaNDM-1",
+   "mechanism": "Metallo-carbapenemase",
+   "isolates": 113,
+   "genomes_examined": 1718,
+   "percent": 6.6,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "rmtB",
+   "mechanism": "16S rRNA methylase",
+   "isolates": 112,
+   "genomes_examined": 1718,
+   "percent": 6.5,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "aac(6')-Ib-cr",
+   "mechanism": "Enzymatic modification",
+   "isolates": 111,
+   "genomes_examined": 1718,
+   "percent": 6.5,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaCTX-M-27",
+   "mechanism": "ESBL",
+   "isolates": 100,
+   "genomes_examined": 1718,
+   "percent": 5.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaTEM-1",
+   "mechanism": "Penicillinase",
+   "isolates": 99,
+   "genomes_examined": 1718,
+   "percent": 5.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaNDM-5",
+   "mechanism": "Metallo-carbapenemase",
+   "isolates": 80,
+   "genomes_examined": 1718,
+   "percent": 4.7,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaVIM-1",
+   "mechanism": "Metallo-carbapenemase",
+   "isolates": 74,
+   "genomes_examined": 1718,
+   "percent": 4.3,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "ermB",
+   "mechanism": "rRNA methylase",
+   "isolates": 68,
+   "genomes_examined": 1718,
+   "percent": 4.0,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "tet(A)",
+   "mechanism": "Efflux",
+   "isolates": 67,
+   "genomes_examined": 1718,
+   "percent": 3.9,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaOXA-48",
+   "mechanism": "OXA-48-like carbapenemase",
+   "isolates": 66,
+   "genomes_examined": 1718,
+   "percent": 3.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaKPC-2",
+   "mechanism": "KPC carbapenemase",
+   "isolates": 59,
+   "genomes_examined": 1718,
+   "percent": 3.4,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "mcr-1",
+   "mechanism": "Phosphoethanolamine transferase",
+   "isolates": 57,
+   "genomes_examined": 1718,
+   "percent": 3.3,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "mecA",
+   "mechanism": "Altered PBP2a",
+   "isolates": 50,
+   "genomes_examined": 1718,
+   "percent": 2.9,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "mecC",
+   "mechanism": "Altered PBP2a",
+   "isolates": 50,
+   "genomes_examined": 1718,
+   "percent": 2.9,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaOXA-23",
+   "mechanism": "OXA-23-like carbapenemase",
+   "isolates": 48,
+   "genomes_examined": 1718,
+   "percent": 2.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "blaOXA-51",
+   "mechanism": "Intrinsic oxacillinase",
+   "isolates": 40,
+   "genomes_examined": 1718,
+   "percent": 2.3,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "tet(B)",
+   "mechanism": "Efflux",
+   "isolates": 38,
+   "genomes_examined": 1718,
+   "percent": 2.2,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "catA1",
+   "mechanism": "Acetyltransferase",
+   "isolates": 26,
+   "genomes_examined": 1718,
+   "percent": 1.5,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "sitABCD",
+   "mechanism": "not a resistance determinant",
+   "isolates": 24,
+   "genomes_examined": 1718,
+   "percent": 1.4,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "vanA",
+   "mechanism": "D-Ala-D-Lac ligase",
+   "isolates": 13,
+   "genomes_examined": 1718,
+   "percent": 0.8,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  },
+  {
+   "group": "All sequenced isolates",
+   "determinant": "vanB",
+   "mechanism": "D-Ala-D-Lac ligase",
+   "isolates": 10,
+   "genomes_examined": 1718,
+   "percent": 0.6,
+   "database": "ResFinder 2025-06-01; ResFinder 2026-03-14"
+  }
+ ],
+ "determinantSuppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 46,
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+ },
+ "concordance": {
+  "summary": {
+   "pairs": 12266,
+   "isolates": 1658,
+   "agents": 24,
+   "agreement_percent": 88.0,
+   "explained_resistance": 4605,
+   "no_determinant_susceptible": 6195,
+   "determinant_but_susceptible": 734,
+   "resistance_unexplained": 732,
+   "notable_contradictions": 678
+  },
+  "verdicts": [
+   {
+    "verdict": "no determinant, susceptible",
+    "pairs": 6195
+   },
+   {
+    "verdict": "explained resistance",
+    "pairs": 4605
+   },
+   {
+    "verdict": "determinant found, tested susceptible",
+    "pairs": 734
+   },
+   {
+    "verdict": "resistance with no determinant identified",
+    "pairs": 732
+   }
+  ],
+  "agents": [
+   {
+    "antibiotic": "Ciprofloxacin",
+    "pairs": 1170
+   },
+   {
+    "antibiotic": "Gentamicin",
+    "pairs": 947
+   },
+   {
+    "antibiotic": "Trimethoprim-Sulfamethoxazole",
+    "pairs": 942
+   },
+   {
+    "antibiotic": "Meropenem",
+    "pairs": 845
+   },
+   {
+    "antibiotic": "Ceftriaxone",
+    "pairs": 771
+   },
+   {
+    "antibiotic": "Levofloxacin",
+    "pairs": 671
+   },
+   {
+    "antibiotic": "Amikacin",
+    "pairs": 651
+   },
+   {
+    "antibiotic": "Colistin",
+    "pairs": 640
+   },
+   {
+    "antibiotic": "Piperacillin-Tazobactam",
+    "pairs": 626
+   },
+   {
+    "antibiotic": "Ampicillin",
+    "pairs": 622
+   },
+   {
+    "antibiotic": "Ceftazidime",
+    "pairs": 605
+   },
+   {
+    "antibiotic": "Cefepime",
+    "pairs": 574
+   },
+   {
+    "antibiotic": "Ertapenem",
+    "pairs": 523
+   },
+   {
+    "antibiotic": "Amoxicillin-Clavulanate",
+    "pairs": 514
+   },
+   {
+    "antibiotic": "Azithromycin",
+    "pairs": 324
+   },
+   {
+    "antibiotic": "Tetracycline",
+    "pairs": 323
+   },
+   {
+    "antibiotic": "Erythromycin",
+    "pairs": 276
+   },
+   {
+    "antibiotic": "Vancomycin",
+    "pairs": 237
+   },
+   {
+    "antibiotic": "Penicillin",
+    "pairs": 222
+   },
+   {
+    "antibiotic": "Clindamycin",
+    "pairs": 181
+   },
+   {
+    "antibiotic": "Chloramphenicol",
+    "pairs": 177
+   },
+   {
+    "antibiotic": "Oxacillin",
+    "pairs": 145
+   },
+   {
+    "antibiotic": "Cefoxitin",
+    "pairs": 140
+   },
+   {
+    "antibiotic": "Imipenem",
+    "pairs": 140
+   }
+  ],
+  "agentSuppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 24,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "clusters": [
+  {
+   "cluster_id": "CL-008",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 111,
+   "organisms": 2,
+   "organism": "Escherichia coli; Klebsiella pneumoniae",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST147; ST167; ST258",
+   "labs": 19,
+   "first_collected": "2024-03-08T00:00:00+00:00",
+   "last_collected": "2026-08-18T00:00:00+00:00",
+   "span_days": 893
+  },
+  {
+   "cluster_id": "CL-006",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 110,
+   "organisms": 3,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Salmonella enterica",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST10; ST167; ST258; ST307",
+   "labs": 19,
+   "first_collected": "2024-03-14T00:00:00+00:00",
+   "last_collected": "2026-08-29T00:00:00+00:00",
+   "span_days": 898
+  },
+  {
+   "cluster_id": "CL-009",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 106,
+   "organisms": 4,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Salmonella enterica; Staphylococcus aureus",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST15; ST258; ST39; ST410",
+   "labs": 19,
+   "first_collected": "2024-03-10T08:00:00+00:00",
+   "last_collected": "2026-08-30T14:45:00+00:00",
+   "span_days": 903
+  },
+  {
+   "cluster_id": "CL-010",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 104,
+   "organisms": 2,
+   "organism": "Escherichia coli; Klebsiella pneumoniae",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST147; ST258; ST307; ST39; ST648",
+   "labs": 18,
+   "first_collected": "2024-03-11T00:00:00+00:00",
+   "last_collected": "2026-08-22T08:15:00+00:00",
+   "span_days": 894
+  },
+  {
+   "cluster_id": "CL-007",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 100,
+   "organisms": 6,
+   "organism": "Acinetobacter baumannii; Campylobacter jejuni; Escherichia coli; Klebsiella pneumoniae; Salmonella enterica; Staphylococcus aureus",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST101; ST131; ST147; ST15; ST307; ST39",
+   "labs": 19,
+   "first_collected": "2024-03-08T16:30:00+00:00",
+   "last_collected": "2026-08-18T15:00:00+00:00",
+   "span_days": 892
+  },
+  {
+   "cluster_id": "CL-021",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 75,
+   "organisms": 4,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Salmonella enterica; Streptococcus pneumoniae",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST19; ST307; ST320; ST39",
+   "labs": 18,
+   "first_collected": "2024-03-09T00:00:00+00:00",
+   "last_collected": "2026-08-29T00:00:00+00:00",
+   "span_days": 903
+  },
+  {
+   "cluster_id": "CL-004",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 74,
+   "organisms": 4,
+   "organism": "Campylobacter jejuni; Escherichia coli; Klebsiella pneumoniae; Streptococcus pneumoniae",
+   "sectors": 4,
+   "sector_mix": "animal; aquaculture; food; human",
+   "sequence_types": "ST10; ST131; ST258; ST307; ST39; ST45",
+   "labs": 19,
+   "first_collected": "2024-03-04T00:00:00+00:00",
+   "last_collected": "2026-09-01T00:00:00+00:00",
+   "span_days": 911
+  },
+  {
+   "cluster_id": "CL-024",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 63,
+   "organisms": 3,
+   "organism": "Klebsiella pneumoniae; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 4,
+   "sector_mix": "animal; environment; food; human",
+   "sequence_types": "ST147; ST39; ST8",
+   "labs": 19,
+   "first_collected": "2024-03-13T10:15:00+00:00",
+   "last_collected": "2026-08-29T06:30:00+00:00",
+   "span_days": 898
+  },
+  {
+   "cluster_id": "CL-023",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 56,
+   "organisms": 3,
+   "organism": "Escherichia coli; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 3,
+   "sector_mix": "animal; food; human",
+   "sequence_types": "ST147; ST5",
+   "labs": 19,
+   "first_collected": "2024-03-18T11:45:00+00:00",
+   "last_collected": "2026-08-28T16:00:00+00:00",
+   "span_days": 893
+  },
+  {
+   "cluster_id": "CL-003",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 55,
+   "organisms": 5,
+   "organism": "Acinetobacter baumannii; Campylobacter jejuni; Klebsiella pneumoniae; Salmonella enterica; Staphylococcus aureus",
+   "sectors": 3,
+   "sector_mix": "animal; food; human",
+   "sequence_types": "ST147; ST15; ST21; ST258; ST307; ST45",
+   "labs": 18,
+   "first_collected": "2024-03-02T00:00:00+00:00",
+   "last_collected": "2026-08-23T00:00:00+00:00",
+   "span_days": 904
+  },
+  {
+   "cluster_id": "CL-018",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 53,
+   "organisms": 5,
+   "organism": "Campylobacter jejuni; Escherichia coli; Pseudomonas aeruginosa; Shigella flexneri; Staphylococcus aureus",
+   "sectors": 4,
+   "sector_mix": "aquaculture; environment; food; human",
+   "sequence_types": "ST111; ST131; ST245; ST258; ST307",
+   "labs": 17,
+   "first_collected": "2024-03-21T00:00:00+00:00",
+   "last_collected": "2026-08-16T00:00:00+00:00",
+   "span_days": 878
+  },
+  {
+   "cluster_id": "CL-012",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 50,
+   "organisms": 5,
+   "organism": "Campylobacter jejuni; Escherichia coli; Klebsiella pneumoniae; Proteus mirabilis; Salmonella enterica",
+   "sectors": 4,
+   "sector_mix": "animal; environment; food; human",
+   "sequence_types": "ST101; ST135; ST147; ST15; ST258; ST307; ST39",
+   "labs": 18,
+   "first_collected": "2024-03-07T14:30:00+00:00",
+   "last_collected": "2026-08-18T15:00:00+00:00",
+   "span_days": 894
+  },
+  {
+   "cluster_id": "CL-022",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 50,
+   "organisms": 4,
+   "organism": "Campylobacter jejuni; Escherichia coli; Klebsiella pneumoniae; Staphylococcus aureus",
+   "sectors": 3,
+   "sector_mix": "animal; food; human",
+   "sequence_types": "ST131; ST147; ST152; ST307",
+   "labs": 18,
+   "first_collected": "2024-03-08T16:30:00+00:00",
+   "last_collected": "2026-08-22T07:45:00+00:00",
+   "span_days": 896
+  },
+  {
+   "cluster_id": "CL-025",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 49,
+   "organisms": 3,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Staphylococcus aureus",
+   "sectors": 3,
+   "sector_mix": "animal; food; human",
+   "sequence_types": "ST131; ST258; ST307; ST39; ST88",
+   "labs": 18,
+   "first_collected": "2024-03-15T06:00:00+00:00",
+   "last_collected": "2026-08-04T14:30:00+00:00",
+   "span_days": 872
+  },
+  {
+   "cluster_id": "CL-013",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 48,
+   "organisms": 3,
+   "organism": "Klebsiella pneumoniae; Pseudomonas aeruginosa; Salmonella enterica",
+   "sectors": 4,
+   "sector_mix": "animal; aquaculture; environment; human",
+   "sequence_types": "ST111; ST147; ST15; ST258; ST307",
+   "labs": 17,
+   "first_collected": "2024-05-12T14:45:00+00:00",
+   "last_collected": "2026-08-14T00:00:00+00:00",
+   "span_days": 823
+  },
+  {
+   "cluster_id": "CL-019",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 48,
+   "organisms": 4,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 4,
+   "sector_mix": "aquaculture; environment; food; human",
+   "sequence_types": "ST147; ST15; ST235; ST307; ST39; ST5",
+   "labs": 18,
+   "first_collected": "2024-04-09T00:00:00+00:00",
+   "last_collected": "2026-07-26T17:15:00+00:00",
+   "span_days": 838
+  },
+  {
+   "cluster_id": "CL-014",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 46,
+   "organisms": 5,
+   "organism": "Campylobacter jejuni; Escherichia coli; Klebsiella pneumoniae; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 4,
+   "sector_mix": "animal; aquaculture; environment; human",
+   "sequence_types": "ST15; ST235; ST258; ST307; ST39",
+   "labs": 17,
+   "first_collected": "2024-03-02T12:00:00+00:00",
+   "last_collected": "2026-08-28T16:00:00+00:00",
+   "span_days": 909
+  },
+  {
+   "cluster_id": "CL-020",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 44,
+   "organisms": 5,
+   "organism": "Escherichia coli; Pseudomonas aeruginosa; Salmonella enterica; Staphylococcus aureus; Streptococcus pneumoniae",
+   "sectors": 5,
+   "sector_mix": "animal; aquaculture; environment; food; human",
+   "sequence_types": "ST131; ST147; ST15; ST244; ST307; ST8",
+   "labs": 19,
+   "first_collected": "2024-04-04T09:45:00+00:00",
+   "last_collected": "2026-08-10T00:00:00+00:00",
+   "span_days": 857
+  },
+  {
+   "cluster_id": "CL-017",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 38,
+   "organisms": 3,
+   "organism": "Proteus mirabilis; Salmonella enterica; Staphylococcus aureus",
+   "sectors": 2,
+   "sector_mix": "animal; human",
+   "sequence_types": "ST135; ST307; ST313",
+   "labs": 16,
+   "first_collected": "2024-04-09T00:00:00+00:00",
+   "last_collected": "2026-08-17T00:00:00+00:00",
+   "span_days": 860
+  },
+  {
+   "cluster_id": "CL-005",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 36,
+   "organisms": 6,
+   "organism": "Enterococcus faecalis; Escherichia coli; Haemophilus influenzae; Klebsiella pneumoniae; Salmonella enterica; Streptococcus pneumoniae",
+   "sectors": 4,
+   "sector_mix": "animal; environment; food; human",
+   "sequence_types": "ST131; ST147; ST15; ST16; ST39",
+   "labs": 16,
+   "first_collected": "2024-04-09T00:00:00+00:00",
+   "last_collected": "2026-07-27T12:00:00+00:00",
+   "span_days": 839
+  },
+  {
+   "cluster_id": "CL-015",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 34,
+   "organisms": 3,
+   "organism": "Escherichia coli; Klebsiella pneumoniae; Pseudomonas aeruginosa",
+   "sectors": 2,
+   "sector_mix": "environment; human",
+   "sequence_types": "ST147; ST244; ST307",
+   "labs": 15,
+   "first_collected": "2024-04-21T13:45:00+00:00",
+   "last_collected": "2026-07-07T00:00:00+00:00",
+   "span_days": 806
+  },
+  {
+   "cluster_id": "CL-002",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 26,
+   "organisms": 4,
+   "organism": "Acinetobacter baumannii; Escherichia coli; Proteus mirabilis; Pseudomonas aeruginosa",
+   "sectors": 3,
+   "sector_mix": "aquaculture; environment; human",
+   "sequence_types": "ST147; ST258; ST85",
+   "labs": 14,
+   "first_collected": "2024-05-16T15:00:00+00:00",
+   "last_collected": "2026-08-01T14:00:00+00:00",
+   "span_days": 806
+  },
+  {
+   "cluster_id": "CL-027",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 25,
+   "organisms": 3,
+   "organism": "Shigella flexneri; Staphylococcus aureus; Streptococcus pneumoniae",
+   "sectors": 1,
+   "sector_mix": "human",
+   "sequence_types": "ST147; ST15; ST320; ST39",
+   "labs": 16,
+   "first_collected": "2024-03-03T12:30:00+00:00",
+   "last_collected": "2026-08-29T09:00:00+00:00",
+   "span_days": 908
+  },
+  {
+   "cluster_id": "CL-001",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 22,
+   "organisms": 3,
+   "organism": "Acinetobacter baumannii; Klebsiella pneumoniae; Salmonella enterica",
+   "sectors": 2,
+   "sector_mix": "environment; human",
+   "sequence_types": "ST1; ST15; ST2",
+   "labs": 14,
+   "first_collected": "2024-03-14T00:00:00+00:00",
+   "last_collected": "2026-06-27T09:30:00+00:00",
+   "span_days": 835
+  },
+  {
+   "cluster_id": "CL-026",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 22,
+   "organisms": 2,
+   "organism": "Klebsiella pneumoniae; Streptococcus pneumoniae",
+   "sectors": 1,
+   "sector_mix": "human",
+   "sequence_types": "ST156; ST39",
+   "labs": 12,
+   "first_collected": "2024-05-26T18:00:00+00:00",
+   "last_collected": "2026-07-27T19:00:00+00:00",
+   "span_days": 792
+  },
+  {
+   "cluster_id": "CL-011",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 18,
+   "organisms": 3,
+   "organism": "Escherichia coli; Haemophilus influenzae; Klebsiella pneumoniae",
+   "sectors": 1,
+   "sector_mix": "human",
+   "sequence_types": "ST0; ST258; ST307; ST39",
+   "labs": 10,
+   "first_collected": "2024-07-02T00:00:00+00:00",
+   "last_collected": "2026-07-31T00:00:00+00:00",
+   "span_days": 759
+  },
+  {
+   "cluster_id": "CL-016",
+   "method": "MLST + core-genome SNP (<=15 SNPs); cgMLST",
+   "isolates": 11,
+   "organisms": 4,
+   "organism": "Enterococcus faecalis; Escherichia coli; Neisseria meningitidis; Salmonella enterica",
+   "sectors": 3,
+   "sector_mix": "animal; food; human",
+   "sequence_types": "ST0; ST147; ST15; ST19",
+   "labs": 7,
+   "first_collected": "2024-03-03T13:30:00+00:00",
+   "last_collected": "2026-07-13T07:15:00+00:00",
+   "span_days": 861
+  },
+  {
+   "cluster_id": "CL-028",
+   "method": "cgMLST",
+   "isolates": 6,
+   "organisms": 3,
+   "organism": "Campylobacter jejuni; Escherichia coli; Proteus mirabilis",
+   "sectors": 2,
+   "sector_mix": "animal; human",
+   "sequence_types": "ST15; ST258; ST307; ST39",
+   "labs": 5,
+   "first_collected": "2024-10-06T06:00:00+00:00",
+   "last_collected": "2026-03-26T17:45:00+00:00",
+   "span_days": 536
+  },
+  {
+   "cluster_id": "CL-029",
+   "method": "cgMLST",
+   "isolates": 5,
+   "organisms": 3,
+   "organism": "Pseudomonas aeruginosa; Salmonella enterica; Staphylococcus aureus",
+   "sectors": 3,
+   "sector_mix": "animal; aquaculture; human",
+   "sequence_types": "ST147; ST258; ST307; ST39",
+   "labs": 5,
+   "first_collected": "2024-09-12T15:15:00+00:00",
+   "last_collected": "2025-10-20T00:00:00+00:00",
+   "span_days": 402
+  },
+  {
+   "cluster_id": "CL-030",
+   "method": "cgMLST",
+   "isolates": 3,
+   "organisms": 3,
+   "organism": "Klebsiella pneumoniae; Pseudomonas aeruginosa; Staphylococcus aureus",
+   "sectors": 1,
+   "sector_mix": "human",
+   "sequence_types": "ST307",
+   "labs": 3,
+   "first_collected": "2025-03-03T16:15:00+00:00",
+   "last_collected": "2026-06-30T00:00:00+00:00",
+   "span_days": 483
+  }
+ ],
+ "clustersTotal": 30,
+ "clustersWithheld": 0,
+ "clustersUnassigned": 230,
+ "clusterMethods": [
+  "MLST + core-genome SNP (<=15 SNPs)",
+  "cgMLST"
+ ],
+ "clusterSummary": "30 cluster(s) hold more than one isolate, out of 30 assigned, by MLST + core-genome SNP (<=15 SNPs), cgMLST. 230 sequenced isolate(s) carry no cluster. 26 cluster(s) span more than one sector, which is the pattern a One Health transmission question is asking about -- though shared cluster membership shows relatedness, not direction.",
+ "verdictLabels": {
+  "explained": "explained resistance",
+  "susceptibleNoGene": "no determinant, susceptible",
+  "geneNotExpressed": "determinant found, tested susceptible",
+  "unexplained": "resistance with no determinant identified"
+ },
+ "sequenceTypes": [
+  {
+   "sequence_type": "ST167",
+   "genomes": 118
+  },
+  {
+   "sequence_type": "ST10",
+   "genomes": 116
+  },
+  {
+   "sequence_type": "ST131",
+   "genomes": 113
+  },
+  {
+   "sequence_type": "ST410",
+   "genomes": 113
+  },
+  {
+   "sequence_type": "ST648",
+   "genomes": 107
+  },
+  {
+   "sequence_type": "ST19",
+   "genomes": 82
+  },
+  {
+   "sequence_type": "ST147",
+   "genomes": 73
+  },
+  {
+   "sequence_type": "ST45",
+   "genomes": 72
+  },
+  {
+   "sequence_type": "ST313",
+   "genomes": 72
+  },
+  {
+   "sequence_type": "ST8",
+   "genomes": 70
+  },
+  {
+   "sequence_type": "ST11",
+   "genomes": 68
+  },
+  {
+   "sequence_type": "ST5",
+   "genomes": 63
+  },
+  {
+   "sequence_type": "ST307",
+   "genomes": 60
+  },
+  {
+   "sequence_type": "ST258",
+   "genomes": 58
+  },
+  {
+   "sequence_type": "ST21",
+   "genomes": 55
+  },
+  {
+   "sequence_type": "ST15",
+   "genomes": 53
+  },
+  {
+   "sequence_type": "ST88",
+   "genomes": 52
+  },
+  {
+   "sequence_type": "ST111",
+   "genomes": 51
+  },
+  {
+   "sequence_type": "ST152",
+   "genomes": 49
+  },
+  {
+   "sequence_type": "ST235",
+   "genomes": 48
+  },
+  {
+   "sequence_type": "ST101",
+   "genomes": 47
+  },
+  {
+   "sequence_type": "ST244",
+   "genomes": 42
+  },
+  {
+   "sequence_type": "ST245",
+   "genomes": 38
+  },
+  {
+   "sequence_type": "ST135",
+   "genomes": 37
+  },
+  {
+   "sequence_type": "ST320",
+   "genomes": 29
+  },
+  {
+   "sequence_type": "ST16",
+   "genomes": 29
+  },
+  {
+   "sequence_type": "ST85",
+   "genomes": 26
+  },
+  {
+   "sequence_type": "ST156",
+   "genomes": 25
+  },
+  {
+   "sequence_type": "ST6",
+   "genomes": 24
+  },
+  {
+   "sequence_type": "ST1",
+   "genomes": 20
+  },
+  {
+   "sequence_type": "ST39",
+   "genomes": 19
+  },
+  {
+   "sequence_type": "ST0",
+   "genomes": 18
+  },
+  {
+   "sequence_type": "ST2",
+   "genomes": 13
+  }
+ ],
+ "sequenceTypeSuppression": {
+  "withheld": 0,
+  "primary": 0,
+  "secondary": 0,
+  "cellsTotal": 33,
+  "threshold": 1,
+  "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+ },
+ "plasmids": {
+  "label": "Plasmid replicons",
+  "rows": [
+   {
+    "name": "IncFII",
+    "genomes": 417,
+    "percent": 22.4
+   },
+   {
+    "name": "IncF",
+    "genomes": 386,
+    "percent": 20.8
+   },
+   {
+    "name": "IncHI2",
+    "genomes": 378,
+    "percent": 20.3
+   },
+   {
+    "name": "ColpVC",
+    "genomes": 376,
+    "percent": 20.2
+   },
+   {
+    "name": "IncX3",
+    "genomes": 367,
+    "percent": 19.7
+   },
+   {
+    "name": "IncN",
+    "genomes": 361,
+    "percent": 19.4
+   },
+   {
+    "name": "IncI1",
+    "genomes": 358,
+    "percent": 19.2
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 7,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  },
+  "examined": 1860
+ },
+ "virulence": {
+  "label": "Virulence genes",
+  "rows": [
+   {
+    "name": "hlyA",
+    "genomes": 486,
+    "percent": 26.1
+   },
+   {
+    "name": "traT",
+    "genomes": 453,
+    "percent": 24.4
+   },
+   {
+    "name": "ybtS",
+    "genomes": 449,
+    "percent": 24.1
+   },
+   {
+    "name": "papC",
+    "genomes": 448,
+    "percent": 24.1
+   },
+   {
+    "name": "ompT",
+    "genomes": 429,
+    "percent": 23.1
+   },
+   {
+    "name": "fimH",
+    "genomes": 418,
+    "percent": 22.5
+   },
+   {
+    "name": "iutA",
+    "genomes": 407,
+    "percent": 21.9
+   },
+   {
+    "name": "sitABCD",
+    "genomes": 402,
+    "percent": 21.6
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 8,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  },
+  "examined": 1860
+ }
+}

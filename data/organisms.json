@@ -1,0 +1,462 @@
+{
+ "slices": [
+  {
+   "sector": "all",
+   "colour": "#0072B2",
+   "organisms": 13,
+   "isolates": 2502,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 759,
+     "percent": 30.335731414868107
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "isolates": 342,
+     "percent": 13.66906474820144
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "isolates": 332,
+     "percent": 13.269384492406076
+    },
+    {
+     "organism": "Salmonella enterica",
+     "isolates": 301,
+     "percent": 12.030375699440448
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "isolates": 211,
+     "percent": 8.433253397282174
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "isolates": 180,
+     "percent": 7.194244604316546
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "isolates": 82,
+     "percent": 3.2773780975219826
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "isolates": 81,
+     "percent": 3.237410071942446
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "isolates": 77,
+     "percent": 3.0775379696243004
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "isolates": 59,
+     "percent": 2.3581135091926457
+    },
+    {
+     "organism": "Shigella flexneri",
+     "isolates": 54,
+     "percent": 2.158273381294964
+    },
+    {
+     "organism": "Neisseria meningitidis",
+     "isolates": 13,
+     "percent": 0.5195843325339728
+    },
+    {
+     "organism": "Haemophilus influenzae",
+     "isolates": 11,
+     "percent": 0.4396482813749001
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 13,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Other",
+     "isolates": 827
+    },
+    {
+     "specimenType": "Urine",
+     "isolates": 535
+    },
+    {
+     "specimenType": "Blood",
+     "isolates": 377
+    },
+    {
+     "specimenType": "Stool",
+     "isolates": 244
+    },
+    {
+     "specimenType": "Wound/Pus",
+     "isolates": 240
+    },
+    {
+     "specimenType": "Respiratory",
+     "isolates": 162
+    },
+    {
+     "specimenType": "Sterile fluid",
+     "isolates": 46
+    },
+    {
+     "specimenType": "CSF",
+     "isolates": 39
+    },
+    {
+     "specimenType": "Device tip",
+     "isolates": 32
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 9,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 18.465227817745802
+  },
+  {
+   "sector": "animal",
+   "colour": "#E69F00",
+   "organisms": 4,
+   "isolates": 244,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 89,
+     "percent": 36.47540983606557
+    },
+    {
+     "organism": "Salmonella enterica",
+     "isolates": 67,
+     "percent": 27.459016393442624
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "isolates": 47,
+     "percent": 19.262295081967213
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "isolates": 41,
+     "percent": 16.80327868852459
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 4,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Other",
+     "isolates": 244
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 1,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 0.0
+  },
+  {
+   "sector": "aquaculture",
+   "colour": "#56B4E9",
+   "organisms": 3,
+   "isolates": 89,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 40,
+     "percent": 44.943820224719104
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "isolates": 28,
+     "percent": 31.46067415730337
+    },
+    {
+     "organism": "Salmonella enterica",
+     "isolates": 21,
+     "percent": 23.59550561797753
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 3,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Other",
+     "isolates": 89
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 1,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 0.0
+  },
+  {
+   "sector": "environment",
+   "colour": "#CC79A7",
+   "organisms": 4,
+   "isolates": 195,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 92,
+     "percent": 47.17948717948718
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "isolates": 47,
+     "percent": 24.102564102564102
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "isolates": 33,
+     "percent": 16.923076923076923
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "isolates": 23,
+     "percent": 11.794871794871796
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 4,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Other",
+     "isolates": 195
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 1,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 0.0
+  },
+  {
+   "sector": "food",
+   "colour": "#009E73",
+   "organisms": 4,
+   "isolates": 299,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 104,
+     "percent": 34.78260869565217
+    },
+    {
+     "organism": "Salmonella enterica",
+     "isolates": 87,
+     "percent": 29.096989966555185
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "isolates": 68,
+     "percent": 22.74247491638796
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "isolates": 40,
+     "percent": 13.377926421404682
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 4,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Other",
+     "isolates": 299
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 1,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 0.0
+  },
+  {
+   "sector": "human",
+   "colour": "#0072B2",
+   "organisms": 13,
+   "isolates": 1675,
+   "laboratories": 19,
+   "rows": [
+    {
+     "organism": "Escherichia coli",
+     "isolates": 434,
+     "percent": 25.91044776119403
+    },
+    {
+     "organism": "Klebsiella pneumoniae",
+     "isolates": 285,
+     "percent": 17.01492537313433
+    },
+    {
+     "organism": "Staphylococcus aureus",
+     "isolates": 261,
+     "percent": 15.582089552238806
+    },
+    {
+     "organism": "Pseudomonas aeruginosa",
+     "isolates": 150,
+     "percent": 8.955223880597014
+    },
+    {
+     "organism": "Salmonella enterica",
+     "isolates": 126,
+     "percent": 7.522388059701493
+    },
+    {
+     "organism": "Streptococcus pneumoniae",
+     "isolates": 81,
+     "percent": 4.835820895522388
+    },
+    {
+     "organism": "Enterococcus faecalis",
+     "isolates": 77,
+     "percent": 4.597014925373134
+    },
+    {
+     "organism": "Campylobacter jejuni",
+     "isolates": 65,
+     "percent": 3.8805970149253732
+    },
+    {
+     "organism": "Acinetobacter baumannii",
+     "isolates": 59,
+     "percent": 3.5223880597014925
+    },
+    {
+     "organism": "Proteus mirabilis",
+     "isolates": 59,
+     "percent": 3.5223880597014925
+    },
+    {
+     "organism": "Shigella flexneri",
+     "isolates": 54,
+     "percent": 3.2238805970149254
+    },
+    {
+     "organism": "Neisseria meningitidis",
+     "isolates": 13,
+     "percent": 0.7761194029850746
+    },
+    {
+     "organism": "Haemophilus influenzae",
+     "isolates": 11,
+     "percent": 0.6567164179104478
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 13,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "specimenTypes": [
+    {
+     "specimenType": "Urine",
+     "isolates": 535
+    },
+    {
+     "specimenType": "Blood",
+     "isolates": 377
+    },
+    {
+     "specimenType": "Stool",
+     "isolates": 244
+    },
+    {
+     "specimenType": "Wound/Pus",
+     "isolates": 240
+    },
+    {
+     "specimenType": "Respiratory",
+     "isolates": 162
+    },
+    {
+     "specimenType": "Sterile fluid",
+     "isolates": 46
+    },
+    {
+     "specimenType": "CSF",
+     "isolates": 39
+    },
+    {
+     "specimenType": "Device tip",
+     "isolates": 32
+    }
+   ],
+   "specimenTypeSuppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 8,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   },
+   "sterileSitePercent": 27.582089552238806
+  }
+ ],
+ "deduplication": "First isolate per subject per organism per period (CLSI M39). Kept 2,502 of 2,667 isolates between 2024-03-02 and 2026-09-01 (6.2% removed as repeats) across 1,769 subject(s). 311 of them (11.7%) carried no subject identifier and were kept as distinct, since repeat sampling cannot be detected without one."
+}
