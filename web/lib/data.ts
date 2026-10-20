@@ -372,7 +372,87 @@ export const SECTIONS: SectionMeta[] = [
     colour: "#8a6a22",
     stat: (m) => ({ value: m.counts.pps, unit: "prevalence surveys" }),
   },
+  {
+    href: "/mechanisms",
+    badge: "MECH",
+    title: "Mechanisms",
+    blurb:
+      "The resistance patterns behind the result: ESBL, carbapenemase, MRSA and AmpC phenotypes, cross-resistance within a class, and how many agents an isolate defeats.",
+    colour: "#7a1f6b",
+    stat: (m) => ({ value: m.counts.isolates, unit: "isolates screened" }),
+  },
+  {
+    href: "/hai",
+    badge: "HAI",
+    title: "Hospital infection",
+    blurb:
+      "Healthcare-associated infection: the ESKAPE organisms, the hospital resistance profile, multidrug resistance in hospital, and how each sentinel laboratory compares.",
+    colour: "#3b4e8c",
+    stat: (m) => ({ value: m.counts.laboratories, unit: "sentinel laboratories" }),
+  },
+  {
+    href: "/comparison",
+    badge: "CMP",
+    title: "Comparison",
+    blurb:
+      "Resistance between laboratories, regions, wards, specimens and periods, on one denominator, with the interval beside every figure.",
+    colour: "#0b6e6e",
+    stat: (m) => ({ value: m.counts.sectors, unit: "sectors compared apart" }),
+  },
+  {
+    href: "/risk",
+    badge: "RISK",
+    title: "Risk",
+    blurb:
+      "Which organisms carry the most resistance, where the burden sits, what is emerging, and where the trend is heading.",
+    colour: "#8c1d18",
+    stat: (m) => ({ value: m.counts.organisms, unit: "organisms scored" }),
+  },
+  {
+    href: "/quality",
+    badge: "DQ",
+    title: "Data quality",
+    blurb:
+      "Whether the data can support the figures drawn from it: field completeness, coverage, timeliness, chain linkage, result provenance and implausible results.",
+    colour: "#4a5568",
+    stat: (m) => ({ value: m.counts.specimens, unit: "specimens assessed" }),
+  },
 ];
+
+/**
+ * The navigation, grouped.
+ *
+ * Fifteen destinations in one row is a horizontal scrollbar, and a reader
+ * scrolling a nav bar cannot see what the site holds. Grouped under four
+ * headings they fit, and each heading says what kind of question its pages
+ * answer. The groups are stated here rather than derived, because the order
+ * within each one is editorial: a reader meets the antibiogram before the
+ * mechanisms inferred from it.
+ */
+export interface NavGroup {
+  label: string;
+  hrefs: string[];
+}
+
+export const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "Resistance",
+    hrefs: ["/resistance", "/trends", "/mdr", "/mechanisms", "/hai"],
+  },
+  {
+    label: "Organisms & sources",
+    hrefs: ["/organisms", "/one-health", "/regions", "/genomics"],
+  },
+  { label: "Antimicrobial use", hrefs: ["/amu", "/amc", "/pps"] },
+  { label: "Analysis", hrefs: ["/comparison", "/risk", "/quality"] },
+];
+
+/** The sections of one navigation group, in the order the group lists them. */
+export function groupSections(group: NavGroup): SectionMeta[] {
+  return group.hrefs
+    .map((href) => SECTIONS.find((section) => section.href === href))
+    .filter((section): section is SectionMeta => Boolean(section));
+}
 
 // ---------------------------------------------------------------------------
 // Sections added after the first release

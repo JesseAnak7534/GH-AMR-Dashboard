@@ -1,0 +1,657 @@
+{
+ "available": true,
+ "headline": {
+  "isolates": 1675,
+  "observations": 12945,
+  "nosocomialIsolates": 1325,
+  "nosocomialPercent": 79.1044776119403,
+  "mdrIsolates": 774,
+  "mdrPercent": 46.208955223880594,
+  "resistancePercent": 34.28350714561607,
+  "organisms": 13,
+  "laboratories": 19,
+  "classifiable": 1579
+ },
+ "eskape": {
+  "rows": [
+   {
+    "organism": "Acinetobacter baumannii",
+    "isolates": 59,
+    "observations": 411,
+    "resistancePercent": 61.31386861313869,
+    "mdrIsolates": 42,
+    "mdrPercent": 71.1864406779661
+   },
+   {
+    "organism": "Klebsiella pneumoniae",
+    "isolates": 285,
+    "observations": 2554,
+    "resistancePercent": 46.94596711041503,
+    "mdrIsolates": 217,
+    "mdrPercent": 76.14035087719299
+   },
+   {
+    "organism": "Staphylococcus aureus",
+    "isolates": 261,
+    "observations": 2059,
+    "resistancePercent": 32.63720252549781,
+    "mdrIsolates": 106,
+    "mdrPercent": 40.61302681992337
+   },
+   {
+    "organism": "Pseudomonas aeruginosa",
+    "isolates": 150,
+    "observations": 1033,
+    "resistancePercent": 29.428848015488867,
+    "mdrIsolates": 55,
+    "mdrPercent": 36.666666666666664
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 12,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "profile": {
+  "rows": [
+   {
+    "organism": "Escherichia coli",
+    "observations": 4357,
+    "isolates": 434,
+    "resistancePercent": 31.26004131282993,
+    "nosocomial": true
+   },
+   {
+    "organism": "Klebsiella pneumoniae",
+    "observations": 2554,
+    "isolates": 285,
+    "resistancePercent": 46.94596711041503,
+    "nosocomial": true
+   },
+   {
+    "organism": "Staphylococcus aureus",
+    "observations": 2059,
+    "isolates": 261,
+    "resistancePercent": 32.63720252549781,
+    "nosocomial": true
+   },
+   {
+    "organism": "Pseudomonas aeruginosa",
+    "observations": 1033,
+    "isolates": 150,
+    "resistancePercent": 29.428848015488867,
+    "nosocomial": true
+   },
+   {
+    "organism": "Salmonella enterica",
+    "observations": 695,
+    "isolates": 126,
+    "resistancePercent": 23.741007194244606,
+    "nosocomial": false
+   },
+   {
+    "organism": "Streptococcus pneumoniae",
+    "observations": 473,
+    "isolates": 81,
+    "resistancePercent": 27.061310782241016,
+    "nosocomial": false
+   },
+   {
+    "organism": "Acinetobacter baumannii",
+    "observations": 411,
+    "isolates": 59,
+    "resistancePercent": 61.31386861313869,
+    "nosocomial": true
+   },
+   {
+    "organism": "Enterococcus faecalis",
+    "observations": 402,
+    "isolates": 77,
+    "resistancePercent": 22.885572139303484,
+    "nosocomial": true
+   },
+   {
+    "organism": "Proteus mirabilis",
+    "observations": 323,
+    "isolates": 59,
+    "resistancePercent": 33.126934984520126,
+    "nosocomial": true
+   },
+   {
+    "organism": "Campylobacter jejuni",
+    "observations": 294,
+    "isolates": 65,
+    "resistancePercent": 21.428571428571427,
+    "nosocomial": false
+   },
+   {
+    "organism": "Shigella flexneri",
+    "observations": 243,
+    "isolates": 54,
+    "resistancePercent": 32.098765432098766,
+    "nosocomial": false
+   },
+   {
+    "organism": "Neisseria meningitidis",
+    "observations": 52,
+    "isolates": 13,
+    "resistancePercent": 7.6923076923076925,
+    "nosocomial": false
+   },
+   {
+    "organism": "Haemophilus influenzae",
+    "observations": 49,
+    "isolates": 11,
+    "resistancePercent": 24.489795918367346,
+    "nosocomial": false
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 26,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "split": {
+  "rows": [
+   {
+    "group": "Nosocomial organisms",
+    "isolates": 1325,
+    "observations": 11139,
+    "resistancePercent": 35.80213663704103
+   },
+   {
+    "group": "Other organisms",
+    "isolates": 350,
+    "observations": 1806,
+    "resistancePercent": 24.916943521594686
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 4,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "mdr": {
+  "rows": [
+   {
+    "organism": "Escherichia coli",
+    "isolates": 270
+   },
+   {
+    "organism": "Klebsiella pneumoniae",
+    "isolates": 217
+   },
+   {
+    "organism": "Staphylococcus aureus",
+    "isolates": 106
+   },
+   {
+    "organism": "Pseudomonas aeruginosa",
+    "isolates": 55
+   },
+   {
+    "organism": "Acinetobacter baumannii",
+    "isolates": 42
+   },
+   {
+    "organism": "Streptococcus pneumoniae",
+    "isolates": 25
+   },
+   {
+    "organism": "Proteus mirabilis",
+    "isolates": 23
+   },
+   {
+    "organism": "Salmonella enterica",
+    "isolates": 18
+   },
+   {
+    "organism": "Enterococcus faecalis",
+    "isolates": 9
+   },
+   {
+    "organism": "Shigella flexneri",
+    "isolates": 9
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 10,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  },
+  "topOrganism": "Escherichia coli",
+  "classes": {
+   "rows": [
+    {
+     "antibioticClass": "Penicillins",
+     "observations": 203,
+     "resistancePercent": 83.74384236453201
+    },
+    {
+     "antibioticClass": "Folate pathway inhibitors",
+     "observations": 205,
+     "resistancePercent": 75.1219512195122
+    },
+    {
+     "antibioticClass": "Penicillins + BLI",
+     "observations": 207,
+     "resistancePercent": 58.93719806763285
+    },
+    {
+     "antibioticClass": "Fluoroquinolones",
+     "observations": 390,
+     "resistancePercent": 58.46153846153846
+    },
+    {
+     "antibioticClass": "Extended-spectrum cephalosporins",
+     "observations": 590,
+     "resistancePercent": 45.932203389830505
+    },
+    {
+     "antibioticClass": "Antipseudomonal penicillins + BLI",
+     "observations": 202,
+     "resistancePercent": 26.237623762376238
+    },
+    {
+     "antibioticClass": "Aminoglycosides",
+     "observations": 394,
+     "resistancePercent": 21.31979695431472
+    },
+    {
+     "antibioticClass": "Other",
+     "observations": 190,
+     "resistancePercent": 10.526315789473685
+    },
+    {
+     "antibioticClass": "Carbapenems",
+     "observations": 394,
+     "resistancePercent": 8.883248730964468
+    },
+    {
+     "antibioticClass": "Glycylcyclines",
+     "observations": 191,
+     "resistancePercent": 4.18848167539267
+    },
+    {
+     "antibioticClass": "Polymyxins",
+     "observations": 191,
+     "resistancePercent": 3.141361256544503
+    }
+   ],
+   "suppression": {
+    "withheld": 0,
+    "primary": 0,
+    "secondary": 0,
+    "cellsTotal": 11,
+    "threshold": 1,
+    "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+   }
+  }
+ },
+ "laboratories": {
+  "rows": [
+   {
+    "group": "Accra Veterinary Laboratory",
+    "observations": 931,
+    "isolates": 116,
+    "resistancePercent": 49.194414607948445,
+    "mdrIsolates": 75
+   },
+   {
+    "group": "Sunyani Teaching Hospital",
+    "observations": 631,
+    "isolates": 91,
+    "resistancePercent": 37.08399366085578,
+    "mdrIsolates": 39
+   },
+   {
+    "group": "Ho Teaching Hospital",
+    "observations": 631,
+    "isolates": 78,
+    "resistancePercent": 36.608557844690964,
+    "mdrIsolates": 40
+   },
+   {
+    "group": "CSIR – Water Research Institute (Microbiology Laboratory)",
+    "observations": 700,
+    "isolates": 89,
+    "resistancePercent": 36.42857142857143,
+    "mdrIsolates": 42
+   },
+   {
+    "group": "Tamale Teaching Hospital",
+    "observations": 677,
+    "isolates": 91,
+    "resistancePercent": 36.33677991137371,
+    "mdrIsolates": 45
+   },
+   {
+    "group": "Pong Tamale School",
+    "observations": 733,
+    "isolates": 94,
+    "resistancePercent": 35.60709413369713,
+    "mdrIsolates": 47
+   },
+   {
+    "group": "Kumasi Veterinary Laboratory",
+    "observations": 668,
+    "isolates": 87,
+    "resistancePercent": 34.73053892215569,
+    "mdrIsolates": 37
+   },
+   {
+    "group": "Eastern Regional Hospital",
+    "observations": 590,
+    "isolates": 80,
+    "resistancePercent": 34.067796610169495,
+    "mdrIsolates": 33
+   },
+   {
+    "group": "Korle-Bu Teaching Hospital",
+    "observations": 732,
+    "isolates": 91,
+    "resistancePercent": 33.87978142076503,
+    "mdrIsolates": 42
+   },
+   {
+    "group": "Quadushah Medical Diagnostic Limited",
+    "observations": 592,
+    "isolates": 84,
+    "resistancePercent": 33.61486486486486,
+    "mdrIsolates": 32
+   },
+   {
+    "group": "Alma Medical Laboratory Ltd",
+    "observations": 623,
+    "isolates": 76,
+    "resistancePercent": 33.547351524879616,
+    "mdrIsolates": 40
+   },
+   {
+    "group": "Central Veterinary Laboratory",
+    "observations": 574,
+    "isolates": 77,
+    "resistancePercent": 32.22996515679443,
+    "mdrIsolates": 38
+   },
+   {
+    "group": "National Food Safety Laboratory",
+    "observations": 747,
+    "isolates": 94,
+    "resistancePercent": 31.45917001338688,
+    "mdrIsolates": 47
+   },
+   {
+    "group": "Cape Coast Teaching Hospital",
+    "observations": 730,
+    "isolates": 89,
+    "resistancePercent": 31.36986301369863,
+    "mdrIsolates": 44
+   },
+   {
+    "group": "St. Martin De Porres Hospital Eikwe",
+    "observations": 815,
+    "isolates": 105,
+    "resistancePercent": 31.165644171779142,
+    "mdrIsolates": 41
+   },
+   {
+    "group": "Lekma Hospital",
+    "observations": 637,
+    "isolates": 83,
+    "resistancePercent": 31.08320251177394,
+    "mdrIsolates": 32
+   },
+   {
+    "group": "Komfo Anokye Teaching Hospital",
+    "observations": 533,
+    "isolates": 71,
+    "resistancePercent": 30.0187617260788,
+    "mdrIsolates": 29
+   },
+   {
+    "group": "Metropolis Health Care Limited",
+    "observations": 648,
+    "isolates": 86,
+    "resistancePercent": 29.62962962962963,
+    "mdrIsolates": 35
+   },
+   {
+    "group": "Sekondi Public Health Reference Laboratory",
+    "observations": 753,
+    "isolates": 93,
+    "resistancePercent": 28.02124833997344,
+    "mdrIsolates": 36
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 57,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "regions": {
+  "rows": [
+   {
+    "group": "Greater Accra",
+    "observations": 1229,
+    "isolates": 161,
+    "resistancePercent": 44.83319772172498,
+    "mdrIsolates": 78
+   },
+   {
+    "group": "Volta",
+    "observations": 853,
+    "isolates": 107,
+    "resistancePercent": 35.756154747948415,
+    "mdrIsolates": 58
+   },
+   {
+    "group": "North East",
+    "observations": 770,
+    "isolates": 96,
+    "resistancePercent": 35.58441558441559,
+    "mdrIsolates": 51
+   },
+   {
+    "group": "Upper East",
+    "observations": 795,
+    "isolates": 103,
+    "resistancePercent": 35.094339622641506,
+    "mdrIsolates": 49
+   },
+   {
+    "group": "Bono East",
+    "observations": 851,
+    "isolates": 111,
+    "resistancePercent": 34.430082256169214,
+    "mdrIsolates": 55
+   },
+   {
+    "group": "Upper West",
+    "observations": 834,
+    "isolates": 109,
+    "resistancePercent": 34.172661870503596,
+    "mdrIsolates": 54
+   },
+   {
+    "group": "Bono",
+    "observations": 675,
+    "isolates": 81,
+    "resistancePercent": 33.77777777777778,
+    "mdrIsolates": 41
+   },
+   {
+    "group": "Ahafo",
+    "observations": 659,
+    "isolates": 85,
+    "resistancePercent": 33.68740515933232,
+    "mdrIsolates": 35
+   },
+   {
+    "group": "Savannah",
+    "observations": 903,
+    "isolates": 115,
+    "resistancePercent": 33.665559246954594,
+    "mdrIsolates": 52
+   },
+   {
+    "group": "Eastern",
+    "observations": 787,
+    "isolates": 107,
+    "resistancePercent": 33.54510800508259,
+    "mdrIsolates": 49
+   },
+   {
+    "group": "Central",
+    "observations": 703,
+    "isolates": 96,
+    "resistancePercent": 32.574679943100996,
+    "mdrIsolates": 39
+   },
+   {
+    "group": "Oti",
+    "observations": 852,
+    "isolates": 106,
+    "resistancePercent": 32.159624413145536,
+    "mdrIsolates": 45
+   },
+   {
+    "group": "Western",
+    "observations": 800,
+    "isolates": 104,
+    "resistancePercent": 31.875,
+    "mdrIsolates": 48
+   },
+   {
+    "group": "Northern",
+    "observations": 659,
+    "isolates": 88,
+    "resistancePercent": 31.86646433990895,
+    "mdrIsolates": 34
+   },
+   {
+    "group": "Western North",
+    "observations": 765,
+    "isolates": 100,
+    "resistancePercent": 31.764705882352942,
+    "mdrIsolates": 45
+   },
+   {
+    "group": "Ashanti",
+    "observations": 810,
+    "isolates": 106,
+    "resistancePercent": 27.40740740740741,
+    "mdrIsolates": 41
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 48,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  }
+ },
+ "trend": {
+  "points": [
+   {
+    "period": "2024Q1",
+    "observations": 415,
+    "resistancePercent": 30.120481927710845,
+    "mdrPercent": 52.0,
+    "nosocomialPercent": 84.0
+   },
+   {
+    "period": "2024Q2",
+    "observations": 1100,
+    "resistancePercent": 36.90909090909091,
+    "mdrPercent": 52.985074626865675,
+    "nosocomialPercent": 86.56716417910448
+   },
+   {
+    "period": "2024Q3",
+    "observations": 1296,
+    "resistancePercent": 31.01851851851852,
+    "mdrPercent": 44.18604651162791,
+    "nosocomialPercent": 73.83720930232558
+   },
+   {
+    "period": "2024Q4",
+    "observations": 1046,
+    "resistancePercent": 28.202676864244744,
+    "mdrPercent": 44.776119402985074,
+    "nosocomialPercent": 78.35820895522389
+   },
+   {
+    "period": "2025Q1",
+    "observations": 1113,
+    "resistancePercent": 32.075471698113205,
+    "mdrPercent": 48.25174825174825,
+    "nosocomialPercent": 79.72027972027972
+   },
+   {
+    "period": "2025Q2",
+    "observations": 1253,
+    "resistancePercent": 35.594573024740626,
+    "mdrPercent": 48.717948717948715,
+    "nosocomialPercent": 76.28205128205128
+   },
+   {
+    "period": "2025Q3",
+    "observations": 1243,
+    "resistancePercent": 35.55913113435237,
+    "mdrPercent": 41.76470588235294,
+    "nosocomialPercent": 75.88235294117646
+   },
+   {
+    "period": "2025Q4",
+    "observations": 1428,
+    "resistancePercent": 33.05322128851541,
+    "mdrPercent": 40.98360655737705,
+    "nosocomialPercent": 80.32786885245902
+   },
+   {
+    "period": "2026Q1",
+    "observations": 1516,
+    "resistancePercent": 32.519788918205805,
+    "mdrPercent": 43.43434343434343,
+    "nosocomialPercent": 78.78787878787878
+   },
+   {
+    "period": "2026Q2",
+    "observations": 1469,
+    "resistancePercent": 35.39823008849557,
+    "mdrPercent": 46.96969696969697,
+    "nosocomialPercent": 80.8080808080808
+   },
+   {
+    "period": "2026Q3",
+    "observations": 1066,
+    "resistancePercent": 45.0281425891182,
+    "mdrPercent": 51.824817518248175,
+    "nosocomialPercent": 80.2919708029197
+   }
+  ],
+  "minObservations": 30
+ }
+}

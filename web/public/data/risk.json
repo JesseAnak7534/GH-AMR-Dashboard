@@ -1,0 +1,6471 @@
+{
+ "slices": [
+  {
+   "sector": "animal",
+   "colour": "#E69F00",
+   "statistics": {
+    "observations": 2524,
+    "resistant": 796,
+    "intermediate": 181,
+    "susceptible": 1547,
+    "resistancePercent": 31.537242472266243,
+    "intermediatePercent": 7.171156893819335,
+    "susceptiblePercent": 61.29160063391442,
+    "organisms": 4,
+    "antibiotics": 27,
+    "isolates": 329
+   },
+   "trend": {
+    "direction": "stable",
+    "firstHalfPercent": 30.9,
+    "secondHalfPercent": 32.17,
+    "changePoints": 1.27,
+    "band": "MEDIUM"
+   },
+   "scores": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 33.38,
+      "observations": 1393,
+      "antibioticDiversity": 17,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 34.42,
+      "observations": 398,
+      "antibioticDiversity": 13,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 26.23,
+      "observations": 469,
+      "antibioticDiversity": 7,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "riskScore": 35,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 26.89,
+      "observations": 264,
+      "antibioticDiversity": 5,
+      "factors": "Significant data volume (>100 tests)"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "burden": {
+    "observations": 2524,
+    "resistantObservations": 796,
+    "resistancePercent": 31.537242472266243,
+    "band": "Upper band on this indicator.",
+    "rows": [
+     {
+      "group": "Other",
+      "observations": 2524,
+      "resistantObservations": 796,
+      "resistancePercent": 31.537242472266243
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 2,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "emerging": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "resistancePercent": 100.0,
+      "observations": 11,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "resistancePercent": 71.43,
+      "observations": 14,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 61.54,
+      "observations": 13,
+      "severity": "HIGH"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "windowDays": 90
+   },
+   "forecast": {
+    "points": [
+     {
+      "monthsAhead": 1,
+      "percent": 31.74
+     },
+     {
+      "monthsAhead": 2,
+      "percent": 31.77
+     },
+     {
+      "monthsAhead": 3,
+      "percent": 31.81
+     },
+     {
+      "monthsAhead": 4,
+      "percent": 31.84
+     },
+     {
+      "monthsAhead": 5,
+      "percent": 31.87
+     },
+     {
+      "monthsAhead": 6,
+      "percent": 31.9
+     }
+    ],
+    "history": [
+     {
+      "period": "2024-03",
+      "observations": 48,
+      "resistancePercent": 29.166666666666668
+     },
+     {
+      "period": "2024-04",
+      "observations": 103,
+      "resistancePercent": 29.12621359223301
+     },
+     {
+      "period": "2024-05",
+      "observations": 62,
+      "resistancePercent": 37.096774193548384
+     },
+     {
+      "period": "2024-06",
+      "observations": 171,
+      "resistancePercent": 32.748538011695906
+     },
+     {
+      "period": "2024-07",
+      "observations": 65,
+      "resistancePercent": 32.30769230769231
+     },
+     {
+      "period": "2024-08",
+      "observations": 37,
+      "resistancePercent": 21.62162162162162
+     },
+     {
+      "period": "2024-09",
+      "observations": 78,
+      "resistancePercent": 24.358974358974358
+     },
+     {
+      "period": "2024-10",
+      "observations": 59,
+      "resistancePercent": 25.423728813559322
+     },
+     {
+      "period": "2024-11",
+      "observations": 125,
+      "resistancePercent": 32.0
+     },
+     {
+      "period": "2024-12",
+      "observations": 86,
+      "resistancePercent": 38.372093023255815
+     },
+     {
+      "period": "2025-01",
+      "observations": 45,
+      "resistancePercent": 24.444444444444443
+     },
+     {
+      "period": "2025-02",
+      "observations": 118,
+      "resistancePercent": 35.59322033898305
+     },
+     {
+      "period": "2025-03",
+      "observations": 73,
+      "resistancePercent": 28.767123287671232
+     },
+     {
+      "period": "2025-04",
+      "observations": 107,
+      "resistancePercent": 27.102803738317757
+     },
+     {
+      "period": "2025-05",
+      "observations": 26,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-06",
+      "observations": 78,
+      "resistancePercent": 41.02564102564103
+     },
+     {
+      "period": "2025-07",
+      "observations": 126,
+      "resistancePercent": 34.92063492063492
+     },
+     {
+      "period": "2025-08",
+      "observations": 116,
+      "resistancePercent": 33.62068965517241
+     },
+     {
+      "period": "2025-09",
+      "observations": 109,
+      "resistancePercent": 29.357798165137616
+     },
+     {
+      "period": "2025-10",
+      "observations": 24,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-11",
+      "observations": 83,
+      "resistancePercent": 37.34939759036145
+     },
+     {
+      "period": "2025-12",
+      "observations": 87,
+      "resistancePercent": 27.586206896551722
+     },
+     {
+      "period": "2026-01",
+      "observations": 100,
+      "resistancePercent": 29.0
+     },
+     {
+      "period": "2026-02",
+      "observations": 76,
+      "resistancePercent": 28.94736842105263
+     },
+     {
+      "period": "2026-03",
+      "observations": 69,
+      "resistancePercent": 33.333333333333336
+     },
+     {
+      "period": "2026-04",
+      "observations": 84,
+      "resistancePercent": 26.19047619047619
+     },
+     {
+      "period": "2026-05",
+      "observations": 85,
+      "resistancePercent": 30.58823529411765
+     },
+     {
+      "period": "2026-06",
+      "observations": 84,
+      "resistancePercent": 38.095238095238095
+     },
+     {
+      "period": "2026-07",
+      "observations": 102,
+      "resistancePercent": 39.21568627450981
+     },
+     {
+      "period": "2026-08",
+      "observations": 78,
+      "resistancePercent": 21.794871794871796
+     },
+     {
+      "period": "2026-09",
+      "observations": 20,
+      "resistancePercent": null
+     }
+    ],
+    "slope": 0.0318,
+    "confidence": "moderate",
+    "error": null
+   },
+   "organismComparison": {
+    "rows": [
+     {
+      "organism": "Staphylococcus aureus",
+      "resistant": 137,
+      "intermediate": 24,
+      "susceptible": 237,
+      "observations": 398,
+      "resistancePercent": 34.42
+     },
+     {
+      "organism": "Escherichia coli",
+      "resistant": 465,
+      "intermediate": 95,
+      "susceptible": 833,
+      "observations": 1393,
+      "resistancePercent": 33.38
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "resistant": 71,
+      "intermediate": 19,
+      "susceptible": 174,
+      "observations": 264,
+      "resistancePercent": 26.89
+     },
+     {
+      "organism": "Salmonella enterica",
+      "resistant": 123,
+      "intermediate": 43,
+      "susceptible": 303,
+      "observations": 469,
+      "resistancePercent": 26.23
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 16,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "antibioticComparison": {
+    "rows": [
+     {
+      "antibiotic": "Vancomycin",
+      "resistant": 0,
+      "intermediate": 0,
+      "susceptible": 35,
+      "observations": 35,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 100.0
+     },
+     {
+      "antibiotic": "Tigecycline",
+      "resistant": 4,
+      "intermediate": 2,
+      "susceptible": 74,
+      "observations": 80,
+      "resistancePercent": 5.0,
+      "susceptibilityPercent": 92.5
+     },
+     {
+      "antibiotic": "Ertapenem",
+      "resistant": 1,
+      "intermediate": 8,
+      "susceptible": 88,
+      "observations": 97,
+      "resistancePercent": 1.03,
+      "susceptibilityPercent": 90.72
+     },
+     {
+      "antibiotic": "Meropenem",
+      "resistant": 6,
+      "intermediate": 9,
+      "susceptible": 139,
+      "observations": 154,
+      "resistancePercent": 3.9,
+      "susceptibilityPercent": 90.26
+     },
+     {
+      "antibiotic": "Colistin",
+      "resistant": 2,
+      "intermediate": 8,
+      "susceptible": 74,
+      "observations": 84,
+      "resistancePercent": 2.38,
+      "susceptibilityPercent": 88.1
+     },
+     {
+      "antibiotic": "Nitrofurantoin",
+      "resistant": 8,
+      "intermediate": 7,
+      "susceptible": 84,
+      "observations": 99,
+      "resistancePercent": 8.08,
+      "susceptibilityPercent": 84.85
+     },
+     {
+      "antibiotic": "Linezolid",
+      "resistant": 0,
+      "intermediate": 6,
+      "susceptible": 32,
+      "observations": 38,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 84.21
+     },
+     {
+      "antibiotic": "Azithromycin",
+      "resistant": 11,
+      "intermediate": 10,
+      "susceptible": 92,
+      "observations": 113,
+      "resistancePercent": 9.73,
+      "susceptibilityPercent": 81.42
+     },
+     {
+      "antibiotic": "Amikacin",
+      "resistant": 7,
+      "intermediate": 11,
+      "susceptible": 70,
+      "observations": 88,
+      "resistancePercent": 7.95,
+      "susceptibilityPercent": 79.55
+     },
+     {
+      "antibiotic": "Rifampicin",
+      "resistant": 6,
+      "intermediate": 1,
+      "susceptible": 25,
+      "observations": 32,
+      "resistancePercent": 18.75,
+      "susceptibilityPercent": 78.12
+     },
+     {
+      "antibiotic": "Erythromycin",
+      "resistant": 23,
+      "intermediate": 4,
+      "susceptible": 58,
+      "observations": 85,
+      "resistancePercent": 27.06,
+      "susceptibilityPercent": 68.24
+     },
+     {
+      "antibiotic": "Gentamicin",
+      "resistant": 41,
+      "intermediate": 14,
+      "susceptible": 113,
+      "observations": 168,
+      "resistancePercent": 24.4,
+      "susceptibilityPercent": 67.26
+     },
+     {
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistant": 23,
+      "intermediate": 8,
+      "susceptible": 52,
+      "observations": 83,
+      "resistancePercent": 27.71,
+      "susceptibilityPercent": 62.65
+     },
+     {
+      "antibiotic": "Cefoxitin",
+      "resistant": 13,
+      "intermediate": 1,
+      "susceptible": 20,
+      "observations": 34,
+      "resistancePercent": 38.24,
+      "susceptibilityPercent": 58.82
+     },
+     {
+      "antibiotic": "Cefepime",
+      "resistant": 33,
+      "intermediate": 6,
+      "susceptible": 50,
+      "observations": 89,
+      "resistancePercent": 37.08,
+      "susceptibilityPercent": 56.18
+     },
+     {
+      "antibiotic": "Oxacillin",
+      "resistant": 10,
+      "intermediate": 4,
+      "susceptible": 17,
+      "observations": 31,
+      "resistancePercent": 32.26,
+      "susceptibilityPercent": 54.84
+     },
+     {
+      "antibiotic": "Ceftriaxone",
+      "resistant": 61,
+      "intermediate": 12,
+      "susceptible": 86,
+      "observations": 159,
+      "resistancePercent": 38.36,
+      "susceptibilityPercent": 54.09
+     },
+     {
+      "antibiotic": "Ceftazidime",
+      "resistant": 33,
+      "intermediate": 4,
+      "susceptible": 43,
+      "observations": 80,
+      "resistancePercent": 41.25,
+      "susceptibilityPercent": 53.75
+     },
+     {
+      "antibiotic": "Chloramphenicol",
+      "resistant": 20,
+      "intermediate": 11,
+      "susceptible": 36,
+      "observations": 67,
+      "resistancePercent": 29.85,
+      "susceptibilityPercent": 53.73
+     },
+     {
+      "antibiotic": "Tetracycline",
+      "resistant": 32,
+      "intermediate": 6,
+      "susceptible": 44,
+      "observations": 82,
+      "resistancePercent": 39.02,
+      "susceptibilityPercent": 53.66
+     },
+     {
+      "antibiotic": "Clindamycin",
+      "resistant": 14,
+      "intermediate": 1,
+      "susceptible": 16,
+      "observations": 31,
+      "resistancePercent": 45.16,
+      "susceptibilityPercent": 51.61
+     },
+     {
+      "antibiotic": "Levofloxacin",
+      "resistant": 42,
+      "intermediate": 2,
+      "susceptible": 43,
+      "observations": 87,
+      "resistancePercent": 48.28,
+      "susceptibilityPercent": 49.43
+     },
+     {
+      "antibiotic": "Ciprofloxacin",
+      "resistant": 109,
+      "intermediate": 20,
+      "susceptible": 123,
+      "observations": 252,
+      "resistancePercent": 43.25,
+      "susceptibilityPercent": 48.81
+     },
+     {
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistant": 37,
+      "intermediate": 4,
+      "susceptible": 34,
+      "observations": 75,
+      "resistancePercent": 49.33,
+      "susceptibilityPercent": 45.33
+     },
+     {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistant": 109,
+      "intermediate": 13,
+      "susceptible": 69,
+      "observations": 191,
+      "resistancePercent": 57.07,
+      "susceptibilityPercent": 36.13
+     },
+     {
+      "antibiotic": "Ampicillin",
+      "resistant": 122,
+      "intermediate": 8,
+      "susceptible": 30,
+      "observations": 160,
+      "resistancePercent": 76.25,
+      "susceptibilityPercent": 18.75
+     },
+     {
+      "antibiotic": "Penicillin",
+      "resistant": 29,
+      "intermediate": 1,
+      "susceptible": 0,
+      "observations": 30,
+      "resistancePercent": 96.67,
+      "susceptibilityPercent": 0.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 108,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "susceptibilitySummary": {
+    "rows": [
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Azithromycin",
+      "tested": 56,
+      "susceptible": 44,
+      "susceptibilityPercent": 78.6,
+      "ciLow": 66.2,
+      "ciHigh": 87.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Erythromycin",
+      "tested": 54,
+      "susceptible": 45,
+      "susceptibilityPercent": 83.3,
+      "ciLow": 71.3,
+      "ciHigh": 91.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 53,
+      "susceptible": 17,
+      "susceptibilityPercent": 32.1,
+      "ciLow": 21.1,
+      "ciHigh": 45.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Gentamicin",
+      "tested": 51,
+      "susceptible": 45,
+      "susceptibilityPercent": 88.2,
+      "ciLow": 76.6,
+      "ciHigh": 94.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Tetracycline",
+      "tested": 50,
+      "susceptible": 23,
+      "susceptibilityPercent": 46.0,
+      "ciLow": 33.0,
+      "ciHigh": 59.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Nitrofurantoin",
+      "tested": 99,
+      "susceptible": 84,
+      "susceptibilityPercent": 84.8,
+      "ciLow": 76.5,
+      "ciHigh": 90.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "tested": 97,
+      "susceptible": 88,
+      "susceptibilityPercent": 90.7,
+      "ciLow": 83.3,
+      "ciHigh": 95.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 94,
+      "susceptible": 36,
+      "susceptibilityPercent": 38.3,
+      "ciLow": 29.1,
+      "ciHigh": 48.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "tested": 91,
+      "susceptible": 36,
+      "susceptibilityPercent": 39.6,
+      "ciLow": 30.1,
+      "ciHigh": 49.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "tested": 89,
+      "susceptible": 50,
+      "susceptibilityPercent": 56.2,
+      "ciLow": 45.8,
+      "ciHigh": 66.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amikacin",
+      "tested": 88,
+      "susceptible": 70,
+      "susceptibilityPercent": 79.5,
+      "ciLow": 70.0,
+      "ciHigh": 86.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "tested": 88,
+      "susceptible": 6,
+      "susceptibilityPercent": 6.8,
+      "ciLow": 3.2,
+      "ciHigh": 14.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "tested": 87,
+      "susceptible": 43,
+      "susceptibilityPercent": 49.4,
+      "ciLow": 39.2,
+      "ciHigh": 59.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "tested": 87,
+      "susceptible": 78,
+      "susceptibilityPercent": 89.7,
+      "ciLow": 81.5,
+      "ciHigh": 94.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 85,
+      "susceptible": 12,
+      "susceptibilityPercent": 14.1,
+      "ciLow": 8.3,
+      "ciHigh": 23.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "tested": 84,
+      "susceptible": 51,
+      "susceptibilityPercent": 60.7,
+      "ciLow": 50.0,
+      "ciHigh": 70.5,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Colistin",
+      "tested": 83,
+      "susceptible": 73,
+      "susceptibilityPercent": 88.0,
+      "ciLow": 79.2,
+      "ciHigh": 93.3,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 83,
+      "susceptible": 52,
+      "susceptibilityPercent": 62.7,
+      "ciLow": 51.9,
+      "ciHigh": 72.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "tested": 80,
+      "susceptible": 43,
+      "susceptibilityPercent": 53.8,
+      "ciLow": 42.9,
+      "ciHigh": 64.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Tigecycline",
+      "tested": 80,
+      "susceptible": 74,
+      "susceptibilityPercent": 92.5,
+      "ciLow": 84.6,
+      "ciHigh": 96.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 75,
+      "susceptible": 34,
+      "susceptibilityPercent": 45.3,
+      "ciLow": 34.6,
+      "ciHigh": 56.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Vancomycin",
+      "tested": 3,
+      "susceptible": 3,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 43.8,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "tested": 72,
+      "susceptible": 24,
+      "susceptibilityPercent": 33.3,
+      "ciLow": 23.5,
+      "ciHigh": 44.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 70,
+      "susceptible": 34,
+      "susceptibilityPercent": 48.6,
+      "ciLow": 37.2,
+      "ciHigh": 60.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ceftriaxone",
+      "tested": 68,
+      "susceptible": 50,
+      "susceptibilityPercent": 73.5,
+      "ciLow": 62.0,
+      "ciHigh": 82.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 68,
+      "susceptible": 50,
+      "susceptibilityPercent": 73.5,
+      "ciLow": 62.0,
+      "ciHigh": 82.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Chloramphenicol",
+      "tested": 67,
+      "susceptible": 36,
+      "susceptibilityPercent": 53.7,
+      "ciLow": 41.9,
+      "ciHigh": 65.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Meropenem",
+      "tested": 67,
+      "susceptible": 61,
+      "susceptibilityPercent": 91.0,
+      "ciLow": 81.8,
+      "ciHigh": 95.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Azithromycin",
+      "tested": 57,
+      "susceptible": 48,
+      "susceptibilityPercent": 84.2,
+      "ciLow": 72.6,
+      "ciHigh": 91.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Linezolid",
+      "tested": 38,
+      "susceptible": 32,
+      "susceptibilityPercent": 84.2,
+      "ciLow": 69.6,
+      "ciHigh": 92.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 37,
+      "susceptible": 20,
+      "susceptibilityPercent": 54.1,
+      "ciLow": 38.4,
+      "ciHigh": 69.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 36,
+      "susceptible": 23,
+      "susceptibilityPercent": 63.9,
+      "ciLow": 47.6,
+      "ciHigh": 77.5,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Cefoxitin",
+      "tested": 34,
+      "susceptible": 20,
+      "susceptibilityPercent": 58.8,
+      "ciLow": 42.2,
+      "ciHigh": 73.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Gentamicin",
+      "tested": 33,
+      "susceptible": 17,
+      "susceptibilityPercent": 51.5,
+      "ciLow": 35.2,
+      "ciHigh": 67.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Rifampicin",
+      "tested": 32,
+      "susceptible": 25,
+      "susceptibilityPercent": 78.1,
+      "ciLow": 61.2,
+      "ciHigh": 89.0,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Tetracycline",
+      "tested": 32,
+      "susceptible": 21,
+      "susceptibilityPercent": 65.6,
+      "ciLow": 48.3,
+      "ciHigh": 79.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Vancomycin",
+      "tested": 32,
+      "susceptible": 32,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 89.3,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Clindamycin",
+      "tested": 31,
+      "susceptible": 16,
+      "susceptibilityPercent": 51.6,
+      "ciLow": 34.8,
+      "ciHigh": 68.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Erythromycin",
+      "tested": 31,
+      "susceptible": 13,
+      "susceptibilityPercent": 41.9,
+      "ciLow": 26.4,
+      "ciHigh": 59.2,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Oxacillin",
+      "tested": 31,
+      "susceptible": 17,
+      "susceptibilityPercent": 54.8,
+      "ciLow": 37.8,
+      "ciHigh": 70.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Penicillin",
+      "tested": 30,
+      "susceptible": 0,
+      "susceptibilityPercent": 0.0,
+      "ciLow": 0.0,
+      "ciHigh": 11.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Colistin",
+      "tested": 1,
+      "susceptible": 1,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 20.7,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 84,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "pairs": 42,
+    "reportable": 40,
+    "provisional": 2
+   }
+  },
+  {
+   "sector": "aquaculture",
+   "colour": "#56B4E9",
+   "statistics": {
+    "observations": 830,
+    "resistant": 263,
+    "intermediate": 58,
+    "susceptible": 509,
+    "resistancePercent": 31.686746987951807,
+    "intermediatePercent": 6.987951807228916,
+    "susceptiblePercent": 61.32530120481928,
+    "organisms": 3,
+    "antibiotics": 19,
+    "isolates": 107
+   },
+   "trend": {
+    "direction": "stable",
+    "firstHalfPercent": 30.36,
+    "secondHalfPercent": 33.01,
+    "changePoints": 2.65,
+    "band": "MEDIUM"
+   },
+   "scores": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 36.57,
+      "observations": 495,
+      "antibioticDiversity": 16,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "riskScore": 60,
+      "riskLevel": "HIGH",
+      "resistancePercent": 23.79,
+      "observations": 206,
+      "antibioticDiversity": 11,
+      "factors": "Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 25.58,
+      "observations": 129,
+      "antibioticDiversity": 7,
+      "factors": "Significant data volume (>100 tests)"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "burden": {
+    "observations": 830,
+    "resistantObservations": 263,
+    "resistancePercent": 31.686746987951807,
+    "band": "Upper band on this indicator.",
+    "rows": [
+     {
+      "group": "Other",
+      "observations": 830,
+      "resistantObservations": 263,
+      "resistancePercent": 31.686746987951807
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 2,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "emerging": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "resistancePercent": 66.67,
+      "observations": 6,
+      "severity": "HIGH"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 1,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "windowDays": 90
+   },
+   "forecast": {
+    "points": [
+     {
+      "monthsAhead": 1,
+      "percent": 33.8
+     },
+     {
+      "monthsAhead": 2,
+      "percent": 33.9
+     },
+     {
+      "monthsAhead": 3,
+      "percent": 34.0
+     },
+     {
+      "monthsAhead": 4,
+      "percent": 34.1
+     },
+     {
+      "monthsAhead": 5,
+      "percent": 34.19
+     },
+     {
+      "monthsAhead": 6,
+      "percent": 34.29
+     }
+    ],
+    "history": [
+     {
+      "period": "2024-03",
+      "observations": 24,
+      "resistancePercent": null
+     },
+     {
+      "period": "2024-04",
+      "observations": 49,
+      "resistancePercent": 32.6530612244898
+     },
+     {
+      "period": "2024-05",
+      "observations": 26,
+      "resistancePercent": null
+     },
+     {
+      "period": "2024-06",
+      "observations": 46,
+      "resistancePercent": 39.130434782608695
+     },
+     {
+      "period": "2024-07",
+      "observations": 16,
+      "resistancePercent": null
+     },
+     {
+      "period": "2024-08",
+      "observations": 7,
+      "resistancePercent": null
+     },
+     {
+      "period": "2024-09",
+      "observations": 36,
+      "resistancePercent": 22.22222222222222
+     },
+     {
+      "period": "2024-10",
+      "observations": 31,
+      "resistancePercent": 45.16129032258065
+     },
+     {
+      "period": "2024-11",
+      "observations": 12,
+      "resistancePercent": null
+     },
+     {
+      "period": "2024-12",
+      "observations": 14,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-01",
+      "observations": 25,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-02",
+      "observations": 4,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-03",
+      "observations": 67,
+      "resistancePercent": 34.32835820895522
+     },
+     {
+      "period": "2025-04",
+      "observations": 64,
+      "resistancePercent": 37.5
+     },
+     {
+      "period": "2025-05",
+      "observations": 19,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-06",
+      "observations": 9,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-07",
+      "observations": 16,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-08",
+      "observations": 7,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-09",
+      "observations": 47,
+      "resistancePercent": 17.02127659574468
+     },
+     {
+      "period": "2025-10",
+      "observations": 22,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-11",
+      "observations": 24,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-12",
+      "observations": 19,
+      "resistancePercent": null
+     },
+     {
+      "period": "2026-01",
+      "observations": 14,
+      "resistancePercent": null
+     },
+     {
+      "period": "2026-02",
+      "observations": 37,
+      "resistancePercent": 32.432432432432435
+     },
+     {
+      "period": "2026-03",
+      "observations": 20,
+      "resistancePercent": null
+     },
+     {
+      "period": "2026-04",
+      "observations": 25,
+      "resistancePercent": null
+     },
+     {
+      "period": "2026-05",
+      "observations": 40,
+      "resistancePercent": 27.5
+     },
+     {
+      "period": "2026-06",
+      "observations": 17,
+      "resistancePercent": null
+     },
+     {
+      "period": "2026-07",
+      "observations": 49,
+      "resistancePercent": 22.448979591836736
+     },
+     {
+      "period": "2026-08",
+      "observations": 44,
+      "resistancePercent": 36.36363636363637
+     }
+    ],
+    "slope": 0.0969,
+    "confidence": "moderate",
+    "error": null
+   },
+   "organismComparison": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "resistant": 181,
+      "intermediate": 39,
+      "susceptible": 275,
+      "observations": 495,
+      "resistancePercent": 36.57
+     },
+     {
+      "organism": "Salmonella enterica",
+      "resistant": 33,
+      "intermediate": 8,
+      "susceptible": 88,
+      "observations": 129,
+      "resistancePercent": 25.58
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "resistant": 49,
+      "intermediate": 11,
+      "susceptible": 146,
+      "observations": 206,
+      "resistancePercent": 23.79
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 12,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "antibioticComparison": {
+    "rows": [
+     {
+      "antibiotic": "Colistin",
+      "resistant": 2,
+      "intermediate": 1,
+      "susceptible": 48,
+      "observations": 51,
+      "resistancePercent": 3.92,
+      "susceptibilityPercent": 94.12
+     },
+     {
+      "antibiotic": "Azithromycin",
+      "resistant": 0,
+      "intermediate": 2,
+      "susceptible": 14,
+      "observations": 16,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 87.5
+     },
+     {
+      "antibiotic": "Ertapenem",
+      "resistant": 1,
+      "intermediate": 4,
+      "susceptible": 22,
+      "observations": 27,
+      "resistancePercent": 3.7,
+      "susceptibilityPercent": 81.48
+     },
+     {
+      "antibiotic": "Tigecycline",
+      "resistant": 3,
+      "intermediate": 3,
+      "susceptible": 25,
+      "observations": 31,
+      "resistancePercent": 9.68,
+      "susceptibilityPercent": 80.65
+     },
+     {
+      "antibiotic": "Amikacin",
+      "resistant": 7,
+      "intermediate": 3,
+      "susceptible": 41,
+      "observations": 51,
+      "resistancePercent": 13.73,
+      "susceptibilityPercent": 80.39
+     },
+     {
+      "antibiotic": "Meropenem",
+      "resistant": 8,
+      "intermediate": 5,
+      "susceptible": 52,
+      "observations": 65,
+      "resistancePercent": 12.31,
+      "susceptibilityPercent": 80.0
+     },
+     {
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistant": 9,
+      "intermediate": 2,
+      "susceptible": 42,
+      "observations": 53,
+      "resistancePercent": 16.98,
+      "susceptibilityPercent": 79.25
+     },
+     {
+      "antibiotic": "Nitrofurantoin",
+      "resistant": 5,
+      "intermediate": 2,
+      "susceptible": 21,
+      "observations": 28,
+      "resistancePercent": 17.86,
+      "susceptibilityPercent": 75.0
+     },
+     {
+      "antibiotic": "Ceftazidime",
+      "resistant": 17,
+      "intermediate": 2,
+      "susceptible": 37,
+      "observations": 56,
+      "resistancePercent": 30.36,
+      "susceptibilityPercent": 66.07
+     },
+     {
+      "antibiotic": "Imipenem",
+      "resistant": 6,
+      "intermediate": 1,
+      "susceptible": 12,
+      "observations": 19,
+      "resistancePercent": 31.58,
+      "susceptibilityPercent": 63.16
+     },
+     {
+      "antibiotic": "Chloramphenicol",
+      "resistant": 6,
+      "intermediate": 1,
+      "susceptible": 12,
+      "observations": 19,
+      "resistancePercent": 31.58,
+      "susceptibilityPercent": 63.16
+     },
+     {
+      "antibiotic": "Cefepime",
+      "resistant": 17,
+      "intermediate": 2,
+      "susceptible": 31,
+      "observations": 50,
+      "resistancePercent": 34.0,
+      "susceptibilityPercent": 62.0
+     },
+     {
+      "antibiotic": "Ceftriaxone",
+      "resistant": 18,
+      "intermediate": 5,
+      "susceptible": 26,
+      "observations": 49,
+      "resistancePercent": 36.73,
+      "susceptibilityPercent": 53.06
+     },
+     {
+      "antibiotic": "Gentamicin",
+      "resistant": 19,
+      "intermediate": 11,
+      "susceptible": 30,
+      "observations": 60,
+      "resistancePercent": 31.67,
+      "susceptibilityPercent": 50.0
+     },
+     {
+      "antibiotic": "Levofloxacin",
+      "resistant": 26,
+      "intermediate": 0,
+      "susceptible": 25,
+      "observations": 51,
+      "resistancePercent": 50.98,
+      "susceptibilityPercent": 49.02
+     },
+     {
+      "antibiotic": "Ciprofloxacin",
+      "resistant": 38,
+      "intermediate": 5,
+      "susceptible": 34,
+      "observations": 77,
+      "resistancePercent": 49.35,
+      "susceptibilityPercent": 44.16
+     },
+     {
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistant": 17,
+      "intermediate": 3,
+      "susceptible": 14,
+      "observations": 34,
+      "resistancePercent": 50.0,
+      "susceptibilityPercent": 41.18
+     },
+     {
+      "antibiotic": "Ampicillin",
+      "resistant": 31,
+      "intermediate": 3,
+      "susceptible": 12,
+      "observations": 46,
+      "resistancePercent": 67.39,
+      "susceptibilityPercent": 26.09
+     },
+     {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistant": 33,
+      "intermediate": 3,
+      "susceptible": 11,
+      "observations": 47,
+      "resistancePercent": 70.21,
+      "susceptibilityPercent": 23.4
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 76,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "susceptibilitySummary": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 36,
+      "susceptible": 28,
+      "susceptibilityPercent": 77.8,
+      "ciLow": 61.9,
+      "ciHigh": 88.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 34,
+      "susceptible": 14,
+      "susceptibilityPercent": 41.2,
+      "ciLow": 26.4,
+      "ciHigh": 57.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "tested": 34,
+      "susceptible": 18,
+      "susceptibilityPercent": 52.9,
+      "ciLow": 36.7,
+      "ciHigh": 68.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 34,
+      "susceptible": 6,
+      "susceptibilityPercent": 17.6,
+      "ciLow": 8.3,
+      "ciHigh": 33.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "tested": 34,
+      "susceptible": 14,
+      "susceptibilityPercent": 41.2,
+      "ciLow": 26.4,
+      "ciHigh": 57.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amikacin",
+      "tested": 33,
+      "susceptible": 26,
+      "susceptibilityPercent": 78.8,
+      "ciLow": 62.2,
+      "ciHigh": 89.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Colistin",
+      "tested": 33,
+      "susceptible": 31,
+      "susceptibilityPercent": 93.9,
+      "ciLow": 80.4,
+      "ciHigh": 98.3,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "tested": 32,
+      "susceptible": 18,
+      "susceptibilityPercent": 56.2,
+      "ciLow": 39.3,
+      "ciHigh": 71.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Tigecycline",
+      "tested": 31,
+      "susceptible": 25,
+      "susceptibilityPercent": 80.6,
+      "ciLow": 63.7,
+      "ciHigh": 90.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "tested": 29,
+      "susceptible": 25,
+      "susceptibilityPercent": 86.2,
+      "ciLow": 69.4,
+      "ciHigh": 94.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "tested": 28,
+      "susceptible": 9,
+      "susceptibilityPercent": 32.1,
+      "ciLow": 17.9,
+      "ciHigh": 50.7,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Nitrofurantoin",
+      "tested": 28,
+      "susceptible": 21,
+      "susceptibilityPercent": 75.0,
+      "ciLow": 56.6,
+      "ciHigh": 87.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 28,
+      "susceptible": 4,
+      "susceptibilityPercent": 14.3,
+      "ciLow": 5.7,
+      "ciHigh": 31.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "tested": 27,
+      "susceptible": 1,
+      "susceptibilityPercent": 3.7,
+      "ciLow": 0.7,
+      "ciHigh": 18.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "tested": 27,
+      "susceptible": 22,
+      "susceptibilityPercent": 81.5,
+      "ciLow": 63.3,
+      "ciHigh": 91.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "tested": 27,
+      "susceptible": 13,
+      "susceptibilityPercent": 48.1,
+      "ciLow": 30.7,
+      "ciHigh": 66.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Gentamicin",
+      "tested": 26,
+      "susceptible": 16,
+      "susceptibilityPercent": 61.5,
+      "ciLow": 42.5,
+      "ciHigh": 77.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ceftazidime",
+      "tested": 24,
+      "susceptible": 19,
+      "susceptibilityPercent": 79.2,
+      "ciLow": 59.5,
+      "ciHigh": 90.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Levofloxacin",
+      "tested": 24,
+      "susceptible": 12,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 31.4,
+      "ciHigh": 68.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 23,
+      "susceptible": 15,
+      "susceptibilityPercent": 65.2,
+      "ciLow": 44.9,
+      "ciHigh": 81.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Meropenem",
+      "tested": 20,
+      "susceptible": 12,
+      "susceptibilityPercent": 60.0,
+      "ciLow": 38.7,
+      "ciHigh": 78.1,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Imipenem",
+      "tested": 19,
+      "susceptible": 12,
+      "susceptibilityPercent": 63.2,
+      "ciLow": 41.0,
+      "ciHigh": 80.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Amikacin",
+      "tested": 18,
+      "susceptible": 15,
+      "susceptibilityPercent": 83.3,
+      "ciLow": 60.8,
+      "ciHigh": 94.2,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Colistin",
+      "tested": 18,
+      "susceptible": 17,
+      "susceptibilityPercent": 94.4,
+      "ciLow": 74.2,
+      "ciHigh": 99.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 17,
+      "susceptible": 14,
+      "susceptibilityPercent": 82.4,
+      "ciLow": 59.0,
+      "ciHigh": 93.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Cefepime",
+      "tested": 16,
+      "susceptible": 13,
+      "susceptibilityPercent": 81.2,
+      "ciLow": 57.0,
+      "ciHigh": 93.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ampicillin",
+      "tested": 1,
+      "susceptible": 1,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 20.7,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ceftriaxone",
+      "tested": 21,
+      "susceptible": 17,
+      "susceptibilityPercent": 81.0,
+      "ciLow": 60.0,
+      "ciHigh": 92.3,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 20,
+      "susceptible": 13,
+      "susceptibilityPercent": 65.0,
+      "ciLow": 43.3,
+      "ciHigh": 81.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Chloramphenicol",
+      "tested": 19,
+      "susceptible": 12,
+      "susceptibilityPercent": 63.2,
+      "ciLow": 41.0,
+      "ciHigh": 80.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 19,
+      "susceptible": 7,
+      "susceptibilityPercent": 36.8,
+      "ciLow": 19.1,
+      "ciHigh": 59.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "tested": 18,
+      "susceptible": 10,
+      "susceptibilityPercent": 55.6,
+      "ciLow": 33.7,
+      "ciHigh": 75.4,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Azithromycin",
+      "tested": 16,
+      "susceptible": 14,
+      "susceptibilityPercent": 87.5,
+      "ciLow": 64.0,
+      "ciHigh": 96.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Meropenem",
+      "tested": 16,
+      "susceptible": 15,
+      "susceptibilityPercent": 93.8,
+      "ciLow": 71.7,
+      "ciHigh": 98.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 68,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "pairs": 34,
+    "reportable": 9,
+    "provisional": 25
+   }
+  },
+  {
+   "sector": "environment",
+   "colour": "#CC79A7",
+   "statistics": {
+    "observations": 2193,
+    "resistant": 820,
+    "intermediate": 144,
+    "susceptible": 1229,
+    "resistancePercent": 37.391700866393066,
+    "intermediatePercent": 6.566347469220246,
+    "susceptiblePercent": 56.04195166438668,
+    "organisms": 4,
+    "antibiotics": 18,
+    "isolates": 238
+   },
+   "trend": {
+    "direction": "stable",
+    "firstHalfPercent": 36.41,
+    "secondHalfPercent": 38.38,
+    "changePoints": 1.97,
+    "band": "MEDIUM"
+   },
+   "scores": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "riskScore": 90,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 58.21,
+      "observations": 201,
+      "antibioticDiversity": 11,
+      "factors": "High resistance rate (>50%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Escherichia coli",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 34.92,
+      "observations": 1237,
+      "antibioticDiversity": 17,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 41.03,
+      "observations": 468,
+      "antibioticDiversity": 14,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 27.53,
+      "observations": 287,
+      "antibioticDiversity": 10,
+      "factors": "Significant data volume (>100 tests)"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "burden": {
+    "observations": 2193,
+    "resistantObservations": 820,
+    "resistancePercent": 37.391700866393066,
+    "band": "Upper band on this indicator.",
+    "rows": [
+     {
+      "group": "Other",
+      "observations": 2193,
+      "resistantObservations": 820,
+      "resistancePercent": 37.391700866393066
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 2,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "emerging": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "resistancePercent": 83.33,
+      "observations": 12,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 80.0,
+      "observations": 10,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "resistancePercent": 64.29,
+      "observations": 14,
+      "severity": "HIGH"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "windowDays": 90
+   },
+   "forecast": {
+    "points": [
+     {
+      "monthsAhead": 1,
+      "percent": 37.45
+     },
+     {
+      "monthsAhead": 2,
+      "percent": 37.46
+     },
+     {
+      "monthsAhead": 3,
+      "percent": 37.48
+     },
+     {
+      "monthsAhead": 4,
+      "percent": 37.49
+     },
+     {
+      "monthsAhead": 5,
+      "percent": 37.5
+     },
+     {
+      "monthsAhead": 6,
+      "percent": 37.52
+     }
+    ],
+    "history": [
+     {
+      "period": "2024-03",
+      "observations": 97,
+      "resistancePercent": 35.05154639175258
+     },
+     {
+      "period": "2024-04",
+      "observations": 55,
+      "resistancePercent": 38.18181818181818
+     },
+     {
+      "period": "2024-05",
+      "observations": 62,
+      "resistancePercent": 27.419354838709676
+     },
+     {
+      "period": "2024-06",
+      "observations": 55,
+      "resistancePercent": 40.0
+     },
+     {
+      "period": "2024-07",
+      "observations": 49,
+      "resistancePercent": 40.816326530612244
+     },
+     {
+      "period": "2024-08",
+      "observations": 54,
+      "resistancePercent": 40.74074074074074
+     },
+     {
+      "period": "2024-09",
+      "observations": 103,
+      "resistancePercent": 32.03883495145631
+     },
+     {
+      "period": "2024-10",
+      "observations": 85,
+      "resistancePercent": 43.529411764705884
+     },
+     {
+      "period": "2024-11",
+      "observations": 48,
+      "resistancePercent": 41.666666666666664
+     },
+     {
+      "period": "2024-12",
+      "observations": 69,
+      "resistancePercent": 28.985507246376812
+     },
+     {
+      "period": "2025-01",
+      "observations": 69,
+      "resistancePercent": 30.434782608695652
+     },
+     {
+      "period": "2025-02",
+      "observations": 74,
+      "resistancePercent": 40.54054054054054
+     },
+     {
+      "period": "2025-03",
+      "observations": 69,
+      "resistancePercent": 42.028985507246375
+     },
+     {
+      "period": "2025-04",
+      "observations": 59,
+      "resistancePercent": 32.20338983050848
+     },
+     {
+      "period": "2025-05",
+      "observations": 50,
+      "resistancePercent": 32.0
+     },
+     {
+      "period": "2025-06",
+      "observations": 91,
+      "resistancePercent": 48.35164835164835
+     },
+     {
+      "period": "2025-07",
+      "observations": 66,
+      "resistancePercent": 34.84848484848485
+     },
+     {
+      "period": "2025-08",
+      "observations": 59,
+      "resistancePercent": 61.016949152542374
+     },
+     {
+      "period": "2025-09",
+      "observations": 31,
+      "resistancePercent": 22.580645161290324
+     },
+     {
+      "period": "2025-10",
+      "observations": 29,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-11",
+      "observations": 109,
+      "resistancePercent": 43.11926605504587
+     },
+     {
+      "period": "2025-12",
+      "observations": 86,
+      "resistancePercent": 37.2093023255814
+     },
+     {
+      "period": "2026-01",
+      "observations": 105,
+      "resistancePercent": 35.23809523809524
+     },
+     {
+      "period": "2026-02",
+      "observations": 83,
+      "resistancePercent": 44.57831325301205
+     },
+     {
+      "period": "2026-03",
+      "observations": 84,
+      "resistancePercent": 41.666666666666664
+     },
+     {
+      "period": "2026-04",
+      "observations": 56,
+      "resistancePercent": 35.714285714285715
+     },
+     {
+      "period": "2026-05",
+      "observations": 86,
+      "resistancePercent": 30.232558139534884
+     },
+     {
+      "period": "2026-06",
+      "observations": 123,
+      "resistancePercent": 30.89430894308943
+     },
+     {
+      "period": "2026-07",
+      "observations": 66,
+      "resistancePercent": 30.303030303030305
+     },
+     {
+      "period": "2026-08",
+      "observations": 114,
+      "resistancePercent": 36.8421052631579
+     },
+     {
+      "period": "2026-09",
+      "observations": 7,
+      "resistancePercent": null
+     }
+    ],
+    "slope": 0.0137,
+    "confidence": "moderate",
+    "error": null
+   },
+   "organismComparison": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "resistant": 117,
+      "intermediate": 13,
+      "susceptible": 71,
+      "observations": 201,
+      "resistancePercent": 58.21
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "resistant": 192,
+      "intermediate": 34,
+      "susceptible": 242,
+      "observations": 468,
+      "resistancePercent": 41.03
+     },
+     {
+      "organism": "Escherichia coli",
+      "resistant": 432,
+      "intermediate": 80,
+      "susceptible": 725,
+      "observations": 1237,
+      "resistancePercent": 34.92
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "resistant": 79,
+      "intermediate": 17,
+      "susceptible": 191,
+      "observations": 287,
+      "resistancePercent": 27.53
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 16,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "antibioticComparison": {
+    "rows": [
+     {
+      "antibiotic": "Vancomycin",
+      "resistant": 0,
+      "intermediate": 0,
+      "susceptible": 1,
+      "observations": 1,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 100.0
+     },
+     {
+      "antibiotic": "Colistin",
+      "resistant": 6,
+      "intermediate": 9,
+      "susceptible": 143,
+      "observations": 158,
+      "resistancePercent": 3.8,
+      "susceptibilityPercent": 90.51
+     },
+     {
+      "antibiotic": "Tigecycline",
+      "resistant": 12,
+      "intermediate": 8,
+      "susceptible": 105,
+      "observations": 125,
+      "resistancePercent": 9.6,
+      "susceptibilityPercent": 84.0
+     },
+     {
+      "antibiotic": "Ertapenem",
+      "resistant": 12,
+      "intermediate": 9,
+      "susceptible": 94,
+      "observations": 115,
+      "resistancePercent": 10.43,
+      "susceptibilityPercent": 81.74
+     },
+     {
+      "antibiotic": "Nitrofurantoin",
+      "resistant": 15,
+      "intermediate": 3,
+      "susceptible": 64,
+      "observations": 82,
+      "resistancePercent": 18.29,
+      "susceptibilityPercent": 78.05
+     },
+     {
+      "antibiotic": "Amikacin",
+      "resistant": 29,
+      "intermediate": 9,
+      "susceptible": 118,
+      "observations": 156,
+      "resistancePercent": 18.59,
+      "susceptibilityPercent": 75.64
+     },
+     {
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistant": 33,
+      "intermediate": 13,
+      "susceptible": 106,
+      "observations": 152,
+      "resistancePercent": 21.71,
+      "susceptibilityPercent": 69.74
+     },
+     {
+      "antibiotic": "Meropenem",
+      "resistant": 37,
+      "intermediate": 14,
+      "susceptible": 104,
+      "observations": 155,
+      "resistancePercent": 23.87,
+      "susceptibilityPercent": 67.1
+     },
+     {
+      "antibiotic": "Gentamicin",
+      "resistant": 60,
+      "intermediate": 9,
+      "susceptible": 93,
+      "observations": 162,
+      "resistancePercent": 37.04,
+      "susceptibilityPercent": 57.41
+     },
+     {
+      "antibiotic": "Imipenem",
+      "resistant": 20,
+      "intermediate": 3,
+      "susceptible": 23,
+      "observations": 46,
+      "resistancePercent": 43.48,
+      "susceptibilityPercent": 50.0
+     },
+     {
+      "antibiotic": "Cefepime",
+      "resistant": 70,
+      "intermediate": 7,
+      "susceptible": 72,
+      "observations": 149,
+      "resistancePercent": 46.98,
+      "susceptibilityPercent": 48.32
+     },
+     {
+      "antibiotic": "Ceftazidime",
+      "resistant": 75,
+      "intermediate": 9,
+      "susceptible": 73,
+      "observations": 157,
+      "resistancePercent": 47.77,
+      "susceptibilityPercent": 46.5
+     },
+     {
+      "antibiotic": "Levofloxacin",
+      "resistant": 80,
+      "intermediate": 12,
+      "susceptible": 67,
+      "observations": 159,
+      "resistancePercent": 50.31,
+      "susceptibilityPercent": 42.14
+     },
+     {
+      "antibiotic": "Ceftriaxone",
+      "resistant": 53,
+      "intermediate": 6,
+      "susceptible": 41,
+      "observations": 100,
+      "resistancePercent": 53.0,
+      "susceptibilityPercent": 41.0
+     },
+     {
+      "antibiotic": "Ciprofloxacin",
+      "resistant": 81,
+      "intermediate": 13,
+      "susceptible": 63,
+      "observations": 157,
+      "resistancePercent": 51.59,
+      "susceptibilityPercent": 40.13
+     },
+     {
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistant": 61,
+      "intermediate": 9,
+      "susceptible": 38,
+      "observations": 108,
+      "resistancePercent": 56.48,
+      "susceptibilityPercent": 35.19
+     },
+     {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistant": 109,
+      "intermediate": 5,
+      "susceptible": 22,
+      "observations": 136,
+      "resistancePercent": 80.15,
+      "susceptibilityPercent": 16.18
+     },
+     {
+      "antibiotic": "Ampicillin",
+      "resistant": 67,
+      "intermediate": 6,
+      "susceptible": 2,
+      "observations": 75,
+      "resistancePercent": 89.33,
+      "susceptibilityPercent": 2.67
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 72,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "susceptibilitySummary": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Amikacin",
+      "tested": 21,
+      "susceptible": 8,
+      "susceptibilityPercent": 38.1,
+      "ciLow": 20.8,
+      "ciHigh": 59.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 20,
+      "susceptible": 3,
+      "susceptibilityPercent": 15.0,
+      "ciLow": 5.2,
+      "ciHigh": 36.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Gentamicin",
+      "tested": 20,
+      "susceptible": 9,
+      "susceptibilityPercent": 45.0,
+      "ciLow": 25.8,
+      "ciHigh": 65.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Levofloxacin",
+      "tested": 20,
+      "susceptible": 3,
+      "susceptibilityPercent": 15.0,
+      "ciLow": 5.2,
+      "ciHigh": 36.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 20,
+      "susceptible": 6,
+      "susceptibilityPercent": 30.0,
+      "ciLow": 14.5,
+      "ciHigh": 51.9,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Meropenem",
+      "tested": 19,
+      "susceptible": 3,
+      "susceptibilityPercent": 15.8,
+      "ciLow": 5.5,
+      "ciHigh": 37.6,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Imipenem",
+      "tested": 18,
+      "susceptible": 2,
+      "susceptibilityPercent": 11.1,
+      "ciLow": 3.1,
+      "ciHigh": 32.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ceftazidime",
+      "tested": 17,
+      "susceptible": 5,
+      "susceptibilityPercent": 29.4,
+      "ciLow": 13.3,
+      "ciHigh": 53.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Tigecycline",
+      "tested": 16,
+      "susceptible": 13,
+      "susceptibilityPercent": 81.2,
+      "ciLow": 57.0,
+      "ciHigh": 93.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Cefepime",
+      "tested": 15,
+      "susceptible": 5,
+      "susceptibilityPercent": 33.3,
+      "ciLow": 15.2,
+      "ciHigh": 58.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Colistin",
+      "tested": 15,
+      "susceptible": 14,
+      "susceptibilityPercent": 93.3,
+      "ciLow": 70.2,
+      "ciHigh": 98.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Colistin",
+      "tested": 82,
+      "susceptible": 75,
+      "susceptibilityPercent": 91.5,
+      "ciLow": 83.4,
+      "ciHigh": 95.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "tested": 82,
+      "susceptible": 70,
+      "susceptibilityPercent": 85.4,
+      "ciLow": 76.1,
+      "ciHigh": 91.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Nitrofurantoin",
+      "tested": 82,
+      "susceptible": 64,
+      "susceptibilityPercent": 78.0,
+      "ciLow": 67.9,
+      "ciHigh": 85.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 81,
+      "susceptible": 64,
+      "susceptibilityPercent": 79.0,
+      "ciLow": 68.9,
+      "ciHigh": 86.5,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Tigecycline",
+      "tested": 80,
+      "susceptible": 69,
+      "susceptibilityPercent": 86.2,
+      "ciLow": 77.0,
+      "ciHigh": 92.1,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 80,
+      "susceptible": 12,
+      "susceptibilityPercent": 15.0,
+      "ciLow": 8.8,
+      "ciHigh": 24.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 77,
+      "susceptible": 31,
+      "susceptibilityPercent": 40.3,
+      "ciLow": 30.0,
+      "ciHigh": 51.4,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "tested": 77,
+      "susceptible": 34,
+      "susceptibilityPercent": 44.2,
+      "ciLow": 33.6,
+      "ciHigh": 55.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "tested": 77,
+      "susceptible": 47,
+      "susceptibilityPercent": 61.0,
+      "ciLow": 49.9,
+      "ciHigh": 71.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "tested": 77,
+      "susceptible": 30,
+      "susceptibilityPercent": 39.0,
+      "ciLow": 28.8,
+      "ciHigh": 50.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "tested": 75,
+      "susceptible": 2,
+      "susceptibilityPercent": 2.7,
+      "ciLow": 0.7,
+      "ciHigh": 9.2,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "tested": 75,
+      "susceptible": 42,
+      "susceptibilityPercent": 56.0,
+      "ciLow": 44.7,
+      "ciHigh": 66.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "tested": 75,
+      "susceptible": 66,
+      "susceptibilityPercent": 88.0,
+      "ciLow": 78.7,
+      "ciHigh": 93.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amikacin",
+      "tested": 74,
+      "susceptible": 62,
+      "susceptibilityPercent": 83.8,
+      "ciLow": 73.8,
+      "ciHigh": 90.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 74,
+      "susceptible": 26,
+      "susceptibilityPercent": 35.1,
+      "ciLow": 25.2,
+      "ciHigh": 46.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "tested": 68,
+      "susceptible": 30,
+      "susceptibilityPercent": 44.1,
+      "ciLow": 32.9,
+      "ciHigh": 55.9,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Vancomycin",
+      "tested": 1,
+      "susceptible": 1,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 20.7,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 39,
+      "susceptible": 23,
+      "susceptibilityPercent": 59.0,
+      "ciLow": 43.4,
+      "ciHigh": 72.9,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftazidime",
+      "tested": 36,
+      "susceptible": 18,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 34.5,
+      "ciHigh": 65.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 36,
+      "susceptible": 14,
+      "susceptibilityPercent": 38.9,
+      "ciLow": 24.8,
+      "ciHigh": 55.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 36,
+      "susceptible": 4,
+      "susceptibilityPercent": 11.1,
+      "ciLow": 4.4,
+      "ciHigh": 25.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amikacin",
+      "tested": 35,
+      "susceptible": 29,
+      "susceptibilityPercent": 82.9,
+      "ciLow": 67.3,
+      "ciHigh": 91.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Colistin",
+      "tested": 35,
+      "susceptible": 30,
+      "susceptibilityPercent": 85.7,
+      "ciLow": 70.6,
+      "ciHigh": 93.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Gentamicin",
+      "tested": 34,
+      "susceptible": 19,
+      "susceptibilityPercent": 55.9,
+      "ciLow": 39.5,
+      "ciHigh": 71.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Cefepime",
+      "tested": 33,
+      "susceptible": 11,
+      "susceptibilityPercent": 33.3,
+      "ciLow": 19.8,
+      "ciHigh": 50.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ertapenem",
+      "tested": 33,
+      "susceptible": 24,
+      "susceptibilityPercent": 72.7,
+      "ciLow": 55.8,
+      "ciHigh": 84.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftriaxone",
+      "tested": 32,
+      "susceptible": 11,
+      "susceptibilityPercent": 34.4,
+      "ciLow": 20.4,
+      "ciHigh": 51.7,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 31,
+      "susceptible": 7,
+      "susceptibilityPercent": 22.6,
+      "ciLow": 11.4,
+      "ciHigh": 39.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Meropenem",
+      "tested": 30,
+      "susceptible": 16,
+      "susceptibilityPercent": 53.3,
+      "ciLow": 36.1,
+      "ciHigh": 69.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Levofloxacin",
+      "tested": 29,
+      "susceptible": 13,
+      "susceptibilityPercent": 44.8,
+      "ciLow": 28.4,
+      "ciHigh": 62.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Tigecycline",
+      "tested": 29,
+      "susceptible": 23,
+      "susceptibilityPercent": 79.3,
+      "ciLow": 61.6,
+      "ciHigh": 90.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Levofloxacin",
+      "tested": 33,
+      "susceptible": 21,
+      "susceptibilityPercent": 63.6,
+      "ciLow": 46.6,
+      "ciHigh": 77.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 32,
+      "susceptible": 19,
+      "susceptibilityPercent": 59.4,
+      "ciLow": 42.3,
+      "ciHigh": 74.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Gentamicin",
+      "tested": 31,
+      "susceptible": 18,
+      "susceptibilityPercent": 58.1,
+      "ciLow": 40.8,
+      "ciHigh": 73.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Meropenem",
+      "tested": 31,
+      "susceptible": 19,
+      "susceptibilityPercent": 61.3,
+      "ciLow": 43.8,
+      "ciHigh": 76.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Imipenem",
+      "tested": 28,
+      "susceptible": 21,
+      "susceptibilityPercent": 75.0,
+      "ciLow": 56.6,
+      "ciHigh": 87.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ceftazidime",
+      "tested": 27,
+      "susceptible": 16,
+      "susceptibilityPercent": 59.3,
+      "ciLow": 40.7,
+      "ciHigh": 75.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 27,
+      "susceptible": 20,
+      "susceptibilityPercent": 74.1,
+      "ciLow": 55.3,
+      "ciHigh": 86.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Amikacin",
+      "tested": 26,
+      "susceptible": 19,
+      "susceptibilityPercent": 73.1,
+      "ciLow": 53.9,
+      "ciHigh": 86.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Cefepime",
+      "tested": 26,
+      "susceptible": 14,
+      "susceptibilityPercent": 53.8,
+      "ciLow": 35.5,
+      "ciHigh": 71.2,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Colistin",
+      "tested": 26,
+      "susceptible": 24,
+      "susceptibilityPercent": 92.3,
+      "ciLow": 75.9,
+      "ciHigh": 97.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 104,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "pairs": 52,
+    "reportable": 32,
+    "provisional": 20
+   }
+  },
+  {
+   "sector": "food",
+   "colour": "#009E73",
+   "statistics": {
+    "observations": 2168,
+    "resistant": 666,
+    "intermediate": 164,
+    "susceptible": 1338,
+    "resistancePercent": 30.719557195571955,
+    "intermediatePercent": 7.564575645756458,
+    "susceptiblePercent": 61.715867158671585,
+    "organisms": 4,
+    "antibiotics": 27,
+    "isolates": 299
+   },
+   "trend": {
+    "direction": "stable",
+    "firstHalfPercent": 30.17,
+    "secondHalfPercent": 31.27,
+    "changePoints": 1.11,
+    "band": "MEDIUM"
+   },
+   "scores": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 34.33,
+      "observations": 1069,
+      "antibioticDiversity": 17,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 30.62,
+      "observations": 307,
+      "antibioticDiversity": 12,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 25.57,
+      "observations": 485,
+      "antibioticDiversity": 7,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "riskScore": 35,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 26.38,
+      "observations": 307,
+      "antibioticDiversity": 5,
+      "factors": "Significant data volume (>100 tests)"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "burden": {
+    "observations": 2168,
+    "resistantObservations": 666,
+    "resistancePercent": 30.719557195571955,
+    "band": "Upper band on this indicator.",
+    "rows": [
+     {
+      "group": "Other",
+      "observations": 2168,
+      "resistantObservations": 666,
+      "resistancePercent": 30.719557195571955
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 2,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "emerging": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "resistancePercent": 100.0,
+      "observations": 6,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "resistancePercent": 83.33,
+      "observations": 6,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "resistancePercent": 77.78,
+      "observations": 9,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 77.78,
+      "observations": 9,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 66.67,
+      "observations": 9,
+      "severity": "HIGH"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 5,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "windowDays": 90
+   },
+   "forecast": {
+    "points": [
+     {
+      "monthsAhead": 1,
+      "percent": 32.48
+     },
+     {
+      "monthsAhead": 2,
+      "percent": 32.56
+     },
+     {
+      "monthsAhead": 3,
+      "percent": 32.65
+     },
+     {
+      "monthsAhead": 4,
+      "percent": 32.73
+     },
+     {
+      "monthsAhead": 5,
+      "percent": 32.82
+     },
+     {
+      "monthsAhead": 6,
+      "percent": 32.9
+     }
+    ],
+    "history": [
+     {
+      "period": "2024-03",
+      "observations": 117,
+      "resistancePercent": 25.641025641025642
+     },
+     {
+      "period": "2024-04",
+      "observations": 103,
+      "resistancePercent": 24.271844660194176
+     },
+     {
+      "period": "2024-05",
+      "observations": 44,
+      "resistancePercent": 22.727272727272727
+     },
+     {
+      "period": "2024-06",
+      "observations": 53,
+      "resistancePercent": 32.075471698113205
+     },
+     {
+      "period": "2024-07",
+      "observations": 77,
+      "resistancePercent": 31.16883116883117
+     },
+     {
+      "period": "2024-08",
+      "observations": 46,
+      "resistancePercent": 39.130434782608695
+     },
+     {
+      "period": "2024-09",
+      "observations": 36,
+      "resistancePercent": 33.333333333333336
+     },
+     {
+      "period": "2024-10",
+      "observations": 83,
+      "resistancePercent": 28.91566265060241
+     },
+     {
+      "period": "2024-11",
+      "observations": 88,
+      "resistancePercent": 37.5
+     },
+     {
+      "period": "2024-12",
+      "observations": 60,
+      "resistancePercent": 35.0
+     },
+     {
+      "period": "2025-01",
+      "observations": 55,
+      "resistancePercent": 30.90909090909091
+     },
+     {
+      "period": "2025-02",
+      "observations": 93,
+      "resistancePercent": 39.784946236559136
+     },
+     {
+      "period": "2025-03",
+      "observations": 46,
+      "resistancePercent": 30.434782608695652
+     },
+     {
+      "period": "2025-04",
+      "observations": 142,
+      "resistancePercent": 33.098591549295776
+     },
+     {
+      "period": "2025-05",
+      "observations": 12,
+      "resistancePercent": null
+     },
+     {
+      "period": "2025-06",
+      "observations": 89,
+      "resistancePercent": 28.089887640449437
+     },
+     {
+      "period": "2025-07",
+      "observations": 69,
+      "resistancePercent": 27.536231884057973
+     },
+     {
+      "period": "2025-08",
+      "observations": 65,
+      "resistancePercent": 27.692307692307693
+     },
+     {
+      "period": "2025-09",
+      "observations": 67,
+      "resistancePercent": 34.32835820895522
+     },
+     {
+      "period": "2025-10",
+      "observations": 89,
+      "resistancePercent": 26.96629213483146
+     },
+     {
+      "period": "2025-11",
+      "observations": 68,
+      "resistancePercent": 23.529411764705884
+     },
+     {
+      "period": "2025-12",
+      "observations": 97,
+      "resistancePercent": 25.77319587628866
+     },
+     {
+      "period": "2026-01",
+      "observations": 75,
+      "resistancePercent": 38.666666666666664
+     },
+     {
+      "period": "2026-02",
+      "observations": 50,
+      "resistancePercent": 34.0
+     },
+     {
+      "period": "2026-03",
+      "observations": 55,
+      "resistancePercent": 29.09090909090909
+     },
+     {
+      "period": "2026-04",
+      "observations": 85,
+      "resistancePercent": 30.58823529411765
+     },
+     {
+      "period": "2026-05",
+      "observations": 94,
+      "resistancePercent": 35.1063829787234
+     },
+     {
+      "period": "2026-06",
+      "observations": 49,
+      "resistancePercent": 18.367346938775512
+     },
+     {
+      "period": "2026-07",
+      "observations": 39,
+      "resistancePercent": 51.282051282051285
+     },
+     {
+      "period": "2026-08",
+      "observations": 122,
+      "resistancePercent": 27.049180327868854
+     }
+    ],
+    "slope": 0.0852,
+    "confidence": "moderate",
+    "error": null
+   },
+   "organismComparison": {
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "resistant": 367,
+      "intermediate": 77,
+      "susceptible": 625,
+      "observations": 1069,
+      "resistancePercent": 34.33
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "resistant": 94,
+      "intermediate": 37,
+      "susceptible": 176,
+      "observations": 307,
+      "resistancePercent": 30.62
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "resistant": 81,
+      "intermediate": 21,
+      "susceptible": 205,
+      "observations": 307,
+      "resistancePercent": 26.38
+     },
+     {
+      "organism": "Salmonella enterica",
+      "resistant": 124,
+      "intermediate": 29,
+      "susceptible": 332,
+      "observations": 485,
+      "resistancePercent": 25.57
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 16,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "antibioticComparison": {
+    "rows": [
+     {
+      "antibiotic": "Tigecycline",
+      "resistant": 2,
+      "intermediate": 3,
+      "susceptible": 64,
+      "observations": 69,
+      "resistancePercent": 2.9,
+      "susceptibilityPercent": 92.75
+     },
+     {
+      "antibiotic": "Amikacin",
+      "resistant": 1,
+      "intermediate": 4,
+      "susceptible": 60,
+      "observations": 65,
+      "resistancePercent": 1.54,
+      "susceptibilityPercent": 92.31
+     },
+     {
+      "antibiotic": "Linezolid",
+      "resistant": 0,
+      "intermediate": 2,
+      "susceptible": 22,
+      "observations": 24,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 91.67
+     },
+     {
+      "antibiotic": "Meropenem",
+      "resistant": 1,
+      "intermediate": 10,
+      "susceptible": 115,
+      "observations": 126,
+      "resistancePercent": 0.79,
+      "susceptibilityPercent": 91.27
+     },
+     {
+      "antibiotic": "Colistin",
+      "resistant": 2,
+      "intermediate": 5,
+      "susceptible": 64,
+      "observations": 71,
+      "resistancePercent": 2.82,
+      "susceptibilityPercent": 90.14
+     },
+     {
+      "antibiotic": "Rifampicin",
+      "resistant": 1,
+      "intermediate": 2,
+      "susceptible": 22,
+      "observations": 25,
+      "resistancePercent": 4.0,
+      "susceptibilityPercent": 88.0
+     },
+     {
+      "antibiotic": "Azithromycin",
+      "resistant": 10,
+      "intermediate": 8,
+      "susceptible": 115,
+      "observations": 133,
+      "resistancePercent": 7.52,
+      "susceptibilityPercent": 86.47
+     },
+     {
+      "antibiotic": "Vancomycin",
+      "resistant": 0,
+      "intermediate": 6,
+      "susceptible": 22,
+      "observations": 28,
+      "resistancePercent": 0.0,
+      "susceptibilityPercent": 78.57
+     },
+     {
+      "antibiotic": "Ertapenem",
+      "resistant": 4,
+      "intermediate": 10,
+      "susceptible": 51,
+      "observations": 65,
+      "resistancePercent": 6.15,
+      "susceptibilityPercent": 78.46
+     },
+     {
+      "antibiotic": "Gentamicin",
+      "resistant": 25,
+      "intermediate": 15,
+      "susceptible": 119,
+      "observations": 159,
+      "resistancePercent": 15.72,
+      "susceptibilityPercent": 74.84
+     },
+     {
+      "antibiotic": "Nitrofurantoin",
+      "resistant": 9,
+      "intermediate": 6,
+      "susceptible": 43,
+      "observations": 58,
+      "resistancePercent": 15.52,
+      "susceptibilityPercent": 74.14
+     },
+     {
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistant": 18,
+      "intermediate": 3,
+      "susceptible": 47,
+      "observations": 68,
+      "resistancePercent": 26.47,
+      "susceptibilityPercent": 69.12
+     },
+     {
+      "antibiotic": "Erythromycin",
+      "resistant": 21,
+      "intermediate": 7,
+      "susceptible": 58,
+      "observations": 86,
+      "resistancePercent": 24.42,
+      "susceptibilityPercent": 67.44
+     },
+     {
+      "antibiotic": "Chloramphenicol",
+      "resistant": 16,
+      "intermediate": 5,
+      "susceptible": 43,
+      "observations": 64,
+      "resistancePercent": 25.0,
+      "susceptibilityPercent": 67.19
+     },
+     {
+      "antibiotic": "Ceftriaxone",
+      "resistant": 45,
+      "intermediate": 11,
+      "susceptible": 79,
+      "observations": 135,
+      "resistancePercent": 33.33,
+      "susceptibilityPercent": 58.52
+     },
+     {
+      "antibiotic": "Clindamycin",
+      "resistant": 9,
+      "intermediate": 2,
+      "susceptible": 14,
+      "observations": 25,
+      "resistancePercent": 36.0,
+      "susceptibilityPercent": 56.0
+     },
+     {
+      "antibiotic": "Ceftazidime",
+      "resistant": 31,
+      "intermediate": 1,
+      "susceptible": 37,
+      "observations": 69,
+      "resistancePercent": 44.93,
+      "susceptibilityPercent": 53.62
+     },
+     {
+      "antibiotic": "Oxacillin",
+      "resistant": 9,
+      "intermediate": 3,
+      "susceptible": 13,
+      "observations": 25,
+      "resistancePercent": 36.0,
+      "susceptibilityPercent": 52.0
+     },
+     {
+      "antibiotic": "Cefoxitin",
+      "resistant": 9,
+      "intermediate": 3,
+      "susceptible": 12,
+      "observations": 24,
+      "resistancePercent": 37.5,
+      "susceptibilityPercent": 50.0
+     },
+     {
+      "antibiotic": "Cefepime",
+      "resistant": 28,
+      "intermediate": 6,
+      "susceptible": 31,
+      "observations": 65,
+      "resistancePercent": 43.08,
+      "susceptibilityPercent": 47.69
+     },
+     {
+      "antibiotic": "Levofloxacin",
+      "resistant": 31,
+      "intermediate": 5,
+      "susceptible": 32,
+      "observations": 68,
+      "resistancePercent": 45.59,
+      "susceptibilityPercent": 47.06
+     },
+     {
+      "antibiotic": "Tetracycline",
+      "resistant": 42,
+      "intermediate": 6,
+      "susceptible": 41,
+      "observations": 89,
+      "resistancePercent": 47.19,
+      "susceptibilityPercent": 46.07
+     },
+     {
+      "antibiotic": "Ciprofloxacin",
+      "resistant": 108,
+      "intermediate": 18,
+      "susceptible": 101,
+      "observations": 227,
+      "resistancePercent": 47.58,
+      "susceptibilityPercent": 44.49
+     },
+     {
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistant": 34,
+      "intermediate": 3,
+      "susceptible": 26,
+      "observations": 63,
+      "resistancePercent": 53.97,
+      "susceptibilityPercent": 41.27
+     },
+     {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistant": 93,
+      "intermediate": 10,
+      "susceptible": 67,
+      "observations": 170,
+      "resistancePercent": 54.71,
+      "susceptibilityPercent": 39.41
+     },
+     {
+      "antibiotic": "Ampicillin",
+      "resistant": 96,
+      "intermediate": 6,
+      "susceptible": 40,
+      "observations": 142,
+      "resistancePercent": 67.61,
+      "susceptibilityPercent": 28.17
+     },
+     {
+      "antibiotic": "Penicillin",
+      "resistant": 21,
+      "intermediate": 4,
+      "susceptible": 0,
+      "observations": 25,
+      "resistancePercent": 84.0,
+      "susceptibilityPercent": 0.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 108,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "susceptibilitySummary": {
+    "rows": [
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Gentamicin",
+      "tested": 64,
+      "susceptible": 55,
+      "susceptibilityPercent": 85.9,
+      "ciLow": 75.4,
+      "ciHigh": 92.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 63,
+      "susceptible": 23,
+      "susceptibilityPercent": 36.5,
+      "ciLow": 25.7,
+      "ciHigh": 48.9,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Azithromycin",
+      "tested": 61,
+      "susceptible": 51,
+      "susceptibilityPercent": 83.6,
+      "ciLow": 72.4,
+      "ciHigh": 90.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Erythromycin",
+      "tested": 60,
+      "susceptible": 50,
+      "susceptibilityPercent": 83.3,
+      "ciLow": 72.0,
+      "ciHigh": 90.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Tetracycline",
+      "tested": 59,
+      "susceptible": 26,
+      "susceptibilityPercent": 44.1,
+      "ciLow": 32.2,
+      "ciHigh": 56.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Colistin",
+      "tested": 71,
+      "susceptible": 64,
+      "susceptibilityPercent": 90.1,
+      "ciLow": 81.0,
+      "ciHigh": 95.1,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "tested": 69,
+      "susceptible": 7,
+      "susceptibilityPercent": 10.1,
+      "ciLow": 5.0,
+      "ciHigh": 19.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "tested": 69,
+      "susceptible": 37,
+      "susceptibilityPercent": 53.6,
+      "ciLow": 42.0,
+      "ciHigh": 64.9,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "tested": 69,
+      "susceptible": 32,
+      "susceptibilityPercent": 46.4,
+      "ciLow": 35.1,
+      "ciHigh": 58.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 69,
+      "susceptible": 16,
+      "susceptibilityPercent": 23.2,
+      "ciLow": 14.8,
+      "ciHigh": 34.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Tigecycline",
+      "tested": 69,
+      "susceptible": 64,
+      "susceptibilityPercent": 92.8,
+      "ciLow": 84.1,
+      "ciHigh": 96.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "tested": 68,
+      "susceptible": 44,
+      "susceptibilityPercent": 64.7,
+      "ciLow": 52.8,
+      "ciHigh": 75.0,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "tested": 68,
+      "susceptible": 32,
+      "susceptibilityPercent": 47.1,
+      "ciLow": 35.7,
+      "ciHigh": 58.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 68,
+      "susceptible": 47,
+      "susceptibilityPercent": 69.1,
+      "ciLow": 57.4,
+      "ciHigh": 78.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 66,
+      "susceptible": 11,
+      "susceptibilityPercent": 16.7,
+      "ciLow": 9.6,
+      "ciHigh": 27.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amikacin",
+      "tested": 65,
+      "susceptible": 60,
+      "susceptibilityPercent": 92.3,
+      "ciLow": 83.2,
+      "ciHigh": 96.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "tested": 65,
+      "susceptible": 31,
+      "susceptibilityPercent": 47.7,
+      "ciLow": 36.0,
+      "ciHigh": 59.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "tested": 65,
+      "susceptible": 51,
+      "susceptibilityPercent": 78.5,
+      "ciLow": 67.0,
+      "ciHigh": 86.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "tested": 64,
+      "susceptible": 57,
+      "susceptibilityPercent": 89.1,
+      "ciLow": 79.1,
+      "ciHigh": 94.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 63,
+      "susceptible": 26,
+      "susceptibilityPercent": 41.3,
+      "ciLow": 30.0,
+      "ciHigh": 53.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Nitrofurantoin",
+      "tested": 58,
+      "susceptible": 43,
+      "susceptibilityPercent": 74.1,
+      "ciLow": 61.6,
+      "ciHigh": 83.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Vancomycin",
+      "tested": 3,
+      "susceptible": 3,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 43.8,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 77,
+      "susceptible": 38,
+      "susceptibilityPercent": 49.4,
+      "ciLow": 38.5,
+      "ciHigh": 60.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "tested": 73,
+      "susceptible": 33,
+      "susceptibilityPercent": 45.2,
+      "ciLow": 34.3,
+      "ciHigh": 56.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Azithromycin",
+      "tested": 72,
+      "susceptible": 64,
+      "susceptibilityPercent": 88.9,
+      "ciLow": 79.6,
+      "ciHigh": 94.3,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 71,
+      "susceptible": 49,
+      "susceptibilityPercent": 69.0,
+      "ciLow": 57.5,
+      "ciHigh": 78.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ceftriaxone",
+      "tested": 66,
+      "susceptible": 47,
+      "susceptibilityPercent": 71.2,
+      "ciLow": 59.4,
+      "ciHigh": 80.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Chloramphenicol",
+      "tested": 64,
+      "susceptible": 43,
+      "susceptibilityPercent": 67.2,
+      "ciLow": 55.0,
+      "ciHigh": 77.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Meropenem",
+      "tested": 62,
+      "susceptible": 58,
+      "susceptibilityPercent": 93.5,
+      "ciLow": 84.6,
+      "ciHigh": 97.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Tetracycline",
+      "tested": 30,
+      "susceptible": 15,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 33.2,
+      "ciHigh": 66.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Gentamicin",
+      "tested": 27,
+      "susceptible": 20,
+      "susceptibilityPercent": 74.1,
+      "ciLow": 55.3,
+      "ciHigh": 86.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 27,
+      "susceptible": 18,
+      "susceptibilityPercent": 66.7,
+      "ciLow": 47.8,
+      "ciHigh": 81.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Erythromycin",
+      "tested": 26,
+      "susceptible": 8,
+      "susceptibilityPercent": 30.8,
+      "ciLow": 16.5,
+      "ciHigh": 50.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Clindamycin",
+      "tested": 25,
+      "susceptible": 14,
+      "susceptibilityPercent": 56.0,
+      "ciLow": 37.1,
+      "ciHigh": 73.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Oxacillin",
+      "tested": 25,
+      "susceptible": 13,
+      "susceptibilityPercent": 52.0,
+      "ciLow": 33.5,
+      "ciHigh": 70.0,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Penicillin",
+      "tested": 25,
+      "susceptible": 0,
+      "susceptibilityPercent": 0.0,
+      "ciLow": 0.0,
+      "ciHigh": 13.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Rifampicin",
+      "tested": 25,
+      "susceptible": 22,
+      "susceptibilityPercent": 88.0,
+      "ciLow": 70.0,
+      "ciHigh": 95.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Vancomycin",
+      "tested": 25,
+      "susceptible": 19,
+      "susceptibilityPercent": 76.0,
+      "ciLow": 56.6,
+      "ciHigh": 88.5,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Cefoxitin",
+      "tested": 24,
+      "susceptible": 12,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 31.4,
+      "ciHigh": 68.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 24,
+      "susceptible": 13,
+      "susceptibilityPercent": 54.2,
+      "ciLow": 35.1,
+      "ciHigh": 72.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Linezolid",
+      "tested": 24,
+      "susceptible": 22,
+      "susceptibilityPercent": 91.7,
+      "ciLow": 74.2,
+      "ciHigh": 97.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 82,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "pairs": 41,
+    "reportable": 29,
+    "provisional": 12
+   }
+  },
+  {
+   "sector": "human",
+   "colour": "#0072B2",
+   "statistics": {
+    "observations": 13111,
+    "resistant": 4496,
+    "intermediate": 885,
+    "susceptible": 7730,
+    "resistancePercent": 34.291816032339256,
+    "intermediatePercent": 6.750057203874609,
+    "susceptiblePercent": 58.95812676378613,
+    "organisms": 13,
+    "antibiotics": 28,
+    "isolates": 1694
+   },
+   "trend": {
+    "direction": "stable",
+    "firstHalfPercent": 34.95,
+    "secondHalfPercent": 33.63,
+    "changePoints": -1.32,
+    "band": "LOW"
+   },
+   "scores": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "riskScore": 90,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 61.31,
+      "observations": 411,
+      "antibioticDiversity": 12,
+      "factors": "High resistance rate (>50%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Escherichia coli",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 31.26,
+      "observations": 4453,
+      "antibioticDiversity": 17,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 46.99,
+      "observations": 2592,
+      "antibioticDiversity": 14,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "riskScore": 80,
+      "riskLevel": "CRITICAL",
+      "resistancePercent": 32.76,
+      "observations": 2076,
+      "antibioticDiversity": 13,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "riskScore": 65,
+      "riskLevel": "HIGH",
+      "resistancePercent": 33.13,
+      "observations": 323,
+      "antibioticDiversity": 7,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "riskScore": 60,
+      "riskLevel": "HIGH",
+      "resistancePercent": 29.17,
+      "observations": 1042,
+      "antibioticDiversity": 11,
+      "factors": "Significant data volume (>100 tests); High antibiotic diversity"
+     },
+     {
+      "organism": "Shigella flexneri",
+      "riskScore": 55,
+      "riskLevel": "HIGH",
+      "resistancePercent": 32.1,
+      "observations": 243,
+      "antibioticDiversity": 5,
+      "factors": "Moderate resistance rate (>30%); Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 22.89,
+      "observations": 402,
+      "antibioticDiversity": 7,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Salmonella enterica",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 23.74,
+      "observations": 695,
+      "antibioticDiversity": 7,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "riskScore": 45,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 26.93,
+      "observations": 479,
+      "antibioticDiversity": 8,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "riskScore": 35,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 21.43,
+      "observations": 294,
+      "antibioticDiversity": 5,
+      "factors": "Significant data volume (>100 tests)"
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "riskScore": 30,
+      "riskLevel": "MODERATE",
+      "resistancePercent": 7.69,
+      "observations": 52,
+      "antibioticDiversity": 4,
+      "factors": ""
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "riskScore": 25,
+      "riskLevel": "LOW",
+      "resistancePercent": 24.49,
+      "observations": 49,
+      "antibioticDiversity": 5,
+      "factors": ""
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 13,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "burden": {
+    "observations": 13111,
+    "resistantObservations": 4496,
+    "resistancePercent": 34.291816032339256,
+    "band": "Upper band on this indicator.",
+    "rows": [
+     {
+      "group": "Device tip",
+      "observations": 226,
+      "resistantObservations": 129,
+      "resistancePercent": 57.07964601769911
+     },
+     {
+      "group": "Blood",
+      "observations": 3043,
+      "resistantObservations": 1353,
+      "resistancePercent": 44.46270128162997
+     },
+     {
+      "group": "Sterile fluid",
+      "observations": 429,
+      "resistantObservations": 180,
+      "resistancePercent": 41.95804195804196
+     },
+     {
+      "group": "Respiratory",
+      "observations": 1235,
+      "resistantObservations": 515,
+      "resistancePercent": 41.70040485829959
+     },
+     {
+      "group": "Wound/Pus",
+      "observations": 1874,
+      "resistantObservations": 617,
+      "resistancePercent": 32.924226254002136
+     },
+     {
+      "group": "CSF",
+      "observations": 247,
+      "resistantObservations": 72,
+      "resistancePercent": 29.149797570850204
+     },
+     {
+      "group": "Urine",
+      "observations": 4615,
+      "resistantObservations": 1290,
+      "resistancePercent": 27.952329360780066
+     },
+     {
+      "group": "Stool",
+      "observations": 1442,
+      "resistantObservations": 340,
+      "resistancePercent": 23.578363384188627
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 16,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "emerging": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ciprofloxacin",
+      "resistancePercent": 100.0,
+      "observations": 5,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ciprofloxacin",
+      "resistancePercent": 93.48,
+      "observations": 46,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftriaxone",
+      "resistancePercent": 88.46,
+      "observations": 52,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 85.71,
+      "observations": 7,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Meropenem",
+      "resistancePercent": 84.62,
+      "observations": 52,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Cefepime",
+      "resistancePercent": 83.33,
+      "observations": 6,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ceftazidime",
+      "resistancePercent": 83.33,
+      "observations": 6,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistancePercent": 82.0,
+      "observations": 50,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amikacin",
+      "resistancePercent": 81.25,
+      "observations": 48,
+      "severity": "CRITICAL"
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 80.0,
+      "observations": 5,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Gentamicin",
+      "resistancePercent": 78.0,
+      "observations": 50,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ertapenem",
+      "resistancePercent": 75.51,
+      "observations": 49,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "resistancePercent": 75.0,
+      "observations": 24,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Erythromycin",
+      "resistancePercent": 69.23,
+      "observations": 13,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Penicillin",
+      "resistancePercent": 68.75,
+      "observations": 16,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Levofloxacin",
+      "resistancePercent": 66.67,
+      "observations": 6,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Oxacillin",
+      "resistancePercent": 64.71,
+      "observations": 17,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftazidime",
+      "resistancePercent": 63.16,
+      "observations": 19,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistancePercent": 62.96,
+      "observations": 27,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ceftazidime",
+      "resistancePercent": 62.5,
+      "observations": 8,
+      "severity": "HIGH"
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistancePercent": 61.54,
+      "observations": 13,
+      "severity": "HIGH"
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 21,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "windowDays": 90
+   },
+   "forecast": {
+    "points": [
+     {
+      "monthsAhead": 1,
+      "percent": 35.54
+     },
+     {
+      "monthsAhead": 2,
+      "percent": 35.65
+     },
+     {
+      "monthsAhead": 3,
+      "percent": 35.77
+     },
+     {
+      "monthsAhead": 4,
+      "percent": 35.89
+     },
+     {
+      "monthsAhead": 5,
+      "percent": 36.01
+     },
+     {
+      "monthsAhead": 6,
+      "percent": 36.13
+     }
+    ],
+    "history": [
+     {
+      "period": "2024-03",
+      "observations": 415,
+      "resistancePercent": 30.120481927710845
+     },
+     {
+      "period": "2024-04",
+      "observations": 320,
+      "resistancePercent": 35.0
+     },
+     {
+      "period": "2024-05",
+      "observations": 413,
+      "resistancePercent": 33.41404358353511
+     },
+     {
+      "period": "2024-06",
+      "observations": 377,
+      "resistancePercent": 42.97082228116711
+     },
+     {
+      "period": "2024-07",
+      "observations": 463,
+      "resistancePercent": 31.101511879049674
+     },
+     {
+      "period": "2024-08",
+      "observations": 523,
+      "resistancePercent": 31.739961759082217
+     },
+     {
+      "period": "2024-09",
+      "observations": 310,
+      "resistancePercent": 29.677419354838708
+     },
+     {
+      "period": "2024-10",
+      "observations": 348,
+      "resistancePercent": 27.873563218390803
+     },
+     {
+      "period": "2024-11",
+      "observations": 364,
+      "resistancePercent": 29.395604395604394
+     },
+     {
+      "period": "2024-12",
+      "observations": 352,
+      "resistancePercent": 27.84090909090909
+     },
+     {
+      "period": "2025-01",
+      "observations": 376,
+      "resistancePercent": 33.776595744680854
+     },
+     {
+      "period": "2025-02",
+      "observations": 380,
+      "resistancePercent": 32.36842105263158
+     },
+     {
+      "period": "2025-03",
+      "observations": 388,
+      "resistancePercent": 29.896907216494846
+     },
+     {
+      "period": "2025-04",
+      "observations": 383,
+      "resistancePercent": 38.38120104438642
+     },
+     {
+      "period": "2025-05",
+      "observations": 428,
+      "resistancePercent": 38.08411214953271
+     },
+     {
+      "period": "2025-06",
+      "observations": 478,
+      "resistancePercent": 31.171548117154813
+     },
+     {
+      "period": "2025-07",
+      "observations": 391,
+      "resistancePercent": 38.36317135549872
+     },
+     {
+      "period": "2025-08",
+      "observations": 339,
+      "resistancePercent": 33.6283185840708
+     },
+     {
+      "period": "2025-09",
+      "observations": 513,
+      "resistancePercent": 34.69785575048733
+     },
+     {
+      "period": "2025-10",
+      "observations": 472,
+      "resistancePercent": 33.05084745762712
+     },
+     {
+      "period": "2025-11",
+      "observations": 415,
+      "resistancePercent": 29.156626506024097
+     },
+     {
+      "period": "2025-12",
+      "observations": 563,
+      "resistancePercent": 35.16873889875666
+     },
+     {
+      "period": "2026-01",
+      "observations": 555,
+      "resistancePercent": 32.252252252252255
+     },
+     {
+      "period": "2026-02",
+      "observations": 451,
+      "resistancePercent": 32.150776053215075
+     },
+     {
+      "period": "2026-03",
+      "observations": 533,
+      "resistancePercent": 33.771106941838646
+     },
+     {
+      "period": "2026-04",
+      "observations": 481,
+      "resistancePercent": 32.432432432432435
+     },
+     {
+      "period": "2026-05",
+      "observations": 579,
+      "resistancePercent": 32.81519861830743
+     },
+     {
+      "period": "2026-06",
+      "observations": 429,
+      "resistancePercent": 41.72494172494172
+     },
+     {
+      "period": "2026-07",
+      "observations": 635,
+      "resistancePercent": 53.7007874015748
+     },
+     {
+      "period": "2026-08",
+      "observations": 432,
+      "resistancePercent": 32.870370370370374
+     },
+     {
+      "period": "2026-09",
+      "observations": 5,
+      "resistancePercent": null
+     }
+    ],
+    "slope": 0.1177,
+    "confidence": "moderate",
+    "error": null
+   },
+   "organismComparison": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "resistant": 252,
+      "intermediate": 25,
+      "susceptible": 134,
+      "observations": 411,
+      "resistancePercent": 61.31
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "resistant": 1218,
+      "intermediate": 159,
+      "susceptible": 1215,
+      "observations": 2592,
+      "resistancePercent": 46.99
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "resistant": 107,
+      "intermediate": 24,
+      "susceptible": 192,
+      "observations": 323,
+      "resistancePercent": 33.13
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "resistant": 680,
+      "intermediate": 130,
+      "susceptible": 1266,
+      "observations": 2076,
+      "resistancePercent": 32.76
+     },
+     {
+      "organism": "Shigella flexneri",
+      "resistant": 78,
+      "intermediate": 22,
+      "susceptible": 143,
+      "observations": 243,
+      "resistancePercent": 32.1
+     },
+     {
+      "organism": "Escherichia coli",
+      "resistant": 1392,
+      "intermediate": 318,
+      "susceptible": 2743,
+      "observations": 4453,
+      "resistancePercent": 31.26
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "resistant": 304,
+      "intermediate": 71,
+      "susceptible": 667,
+      "observations": 1042,
+      "resistancePercent": 29.17
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "resistant": 129,
+      "intermediate": 32,
+      "susceptible": 318,
+      "observations": 479,
+      "resistancePercent": 26.93
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "resistant": 12,
+      "intermediate": 5,
+      "susceptible": 32,
+      "observations": 49,
+      "resistancePercent": 24.49
+     },
+     {
+      "organism": "Salmonella enterica",
+      "resistant": 165,
+      "intermediate": 50,
+      "susceptible": 480,
+      "observations": 695,
+      "resistancePercent": 23.74
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "resistant": 92,
+      "intermediate": 26,
+      "susceptible": 284,
+      "observations": 402,
+      "resistancePercent": 22.89
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "resistant": 63,
+      "intermediate": 21,
+      "susceptible": 210,
+      "observations": 294,
+      "resistancePercent": 21.43
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "resistant": 4,
+      "intermediate": 2,
+      "susceptible": 46,
+      "observations": 52,
+      "resistancePercent": 7.69
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 52,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "antibioticComparison": {
+    "rows": [
+     {
+      "antibiotic": "Linezolid",
+      "resistant": 2,
+      "intermediate": 9,
+      "susceptible": 224,
+      "observations": 235,
+      "resistancePercent": 0.85,
+      "susceptibilityPercent": 95.32
+     },
+     {
+      "antibiotic": "Vancomycin",
+      "resistant": 5,
+      "intermediate": 19,
+      "susceptible": 280,
+      "observations": 304,
+      "resistancePercent": 1.64,
+      "susceptibilityPercent": 92.11
+     },
+     {
+      "antibiotic": "Colistin",
+      "resistant": 24,
+      "intermediate": 37,
+      "susceptible": 569,
+      "observations": 630,
+      "resistancePercent": 3.81,
+      "susceptibilityPercent": 90.32
+     },
+     {
+      "antibiotic": "Rifampicin",
+      "resistant": 16,
+      "intermediate": 11,
+      "susceptible": 149,
+      "observations": 176,
+      "resistancePercent": 9.09,
+      "susceptibilityPercent": 84.66
+     },
+     {
+      "antibiotic": "Tigecycline",
+      "resistant": 35,
+      "intermediate": 41,
+      "susceptible": 391,
+      "observations": 467,
+      "resistancePercent": 7.49,
+      "susceptibilityPercent": 83.73
+     },
+     {
+      "antibiotic": "Nitrofurantoin",
+      "resistant": 33,
+      "intermediate": 19,
+      "susceptible": 221,
+      "observations": 273,
+      "resistancePercent": 12.09,
+      "susceptibilityPercent": 80.95
+     },
+     {
+      "antibiotic": "Azithromycin",
+      "resistant": 27,
+      "intermediate": 19,
+      "susceptible": 179,
+      "observations": 225,
+      "resistancePercent": 12.0,
+      "susceptibilityPercent": 79.56
+     },
+     {
+      "antibiotic": "Ertapenem",
+      "resistant": 89,
+      "intermediate": 22,
+      "susceptible": 376,
+      "observations": 487,
+      "resistancePercent": 18.28,
+      "susceptibilityPercent": 77.21
+     },
+     {
+      "antibiotic": "Chloramphenicol",
+      "resistant": 21,
+      "intermediate": 7,
+      "susceptible": 83,
+      "observations": 111,
+      "resistancePercent": 18.92,
+      "susceptibilityPercent": 74.77
+     },
+     {
+      "antibiotic": "Amikacin",
+      "resistant": 115,
+      "intermediate": 47,
+      "susceptible": 464,
+      "observations": 626,
+      "resistancePercent": 18.37,
+      "susceptibilityPercent": 74.12
+     },
+     {
+      "antibiotic": "Meropenem",
+      "resistant": 164,
+      "intermediate": 53,
+      "susceptible": 553,
+      "observations": 770,
+      "resistancePercent": 21.3,
+      "susceptibilityPercent": 71.82
+     },
+     {
+      "antibiotic": "Clindamycin",
+      "resistant": 78,
+      "intermediate": 11,
+      "susceptible": 151,
+      "observations": 240,
+      "resistancePercent": 32.5,
+      "susceptibilityPercent": 62.92
+     },
+     {
+      "antibiotic": "Cefoxitin",
+      "resistant": 53,
+      "intermediate": 13,
+      "susceptible": 94,
+      "observations": 160,
+      "resistancePercent": 33.12,
+      "susceptibilityPercent": 58.75
+     },
+     {
+      "antibiotic": "Imipenem",
+      "resistant": 53,
+      "intermediate": 9,
+      "susceptible": 87,
+      "observations": 149,
+      "resistancePercent": 35.57,
+      "susceptibilityPercent": 58.39
+     },
+     {
+      "antibiotic": "Gentamicin",
+      "resistant": 307,
+      "intermediate": 71,
+      "susceptible": 518,
+      "observations": 896,
+      "resistancePercent": 34.26,
+      "susceptibilityPercent": 57.81
+     },
+     {
+      "antibiotic": "Piperacillin-Tazobactam",
+      "resistant": 206,
+      "intermediate": 48,
+      "susceptible": 342,
+      "observations": 596,
+      "resistancePercent": 34.56,
+      "susceptibilityPercent": 57.38
+     },
+     {
+      "antibiotic": "Erythromycin",
+      "resistant": 108,
+      "intermediate": 21,
+      "susceptible": 152,
+      "observations": 281,
+      "resistancePercent": 38.43,
+      "susceptibilityPercent": 54.09
+     },
+     {
+      "antibiotic": "Tetracycline",
+      "resistant": 140,
+      "intermediate": 19,
+      "susceptible": 185,
+      "observations": 344,
+      "resistancePercent": 40.7,
+      "susceptibilityPercent": 53.78
+     },
+     {
+      "antibiotic": "Ceftriaxone",
+      "resistant": 296,
+      "intermediate": 53,
+      "susceptible": 392,
+      "observations": 741,
+      "resistancePercent": 39.95,
+      "susceptibilityPercent": 52.9
+     },
+     {
+      "antibiotic": "Oxacillin",
+      "resistant": 76,
+      "intermediate": 11,
+      "susceptible": 90,
+      "observations": 177,
+      "resistancePercent": 42.94,
+      "susceptibilityPercent": 50.85
+     },
+     {
+      "antibiotic": "Cefepime",
+      "resistant": 253,
+      "intermediate": 39,
+      "susceptible": 292,
+      "observations": 584,
+      "resistancePercent": 43.32,
+      "susceptibilityPercent": 50.0
+     },
+     {
+      "antibiotic": "Levofloxacin",
+      "resistant": 297,
+      "intermediate": 51,
+      "susceptible": 345,
+      "observations": 693,
+      "resistancePercent": 42.86,
+      "susceptibilityPercent": 49.78
+     },
+     {
+      "antibiotic": "Ciprofloxacin",
+      "resistant": 507,
+      "intermediate": 65,
+      "susceptible": 525,
+      "observations": 1097,
+      "resistancePercent": 46.22,
+      "susceptibilityPercent": 47.86
+     },
+     {
+      "antibiotic": "Ceftazidime",
+      "resistant": 285,
+      "intermediate": 42,
+      "susceptible": 252,
+      "observations": 579,
+      "resistancePercent": 49.22,
+      "susceptibilityPercent": 43.52
+     },
+     {
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "resistant": 284,
+      "intermediate": 28,
+      "susceptible": 200,
+      "observations": 512,
+      "resistancePercent": 55.47,
+      "susceptibilityPercent": 39.06
+     },
+     {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "resistant": 532,
+      "intermediate": 54,
+      "susceptible": 335,
+      "observations": 921,
+      "resistancePercent": 57.76,
+      "susceptibilityPercent": 36.37
+     },
+     {
+      "antibiotic": "Ampicillin",
+      "resistant": 311,
+      "intermediate": 41,
+      "susceptible": 187,
+      "observations": 539,
+      "resistancePercent": 57.7,
+      "susceptibilityPercent": 34.69
+     },
+     {
+      "antibiotic": "Penicillin",
+      "resistant": 179,
+      "intermediate": 25,
+      "susceptible": 94,
+      "observations": 298,
+      "resistancePercent": 60.07,
+      "susceptibilityPercent": 31.54
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 112,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "susceptibilitySummary": {
+    "rows": [
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 42,
+      "susceptible": 6,
+      "susceptibilityPercent": 14.3,
+      "ciLow": 6.7,
+      "ciHigh": 27.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Colistin",
+      "tested": 40,
+      "susceptible": 34,
+      "susceptibilityPercent": 85.0,
+      "ciLow": 70.9,
+      "ciHigh": 92.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Cefepime",
+      "tested": 39,
+      "susceptible": 4,
+      "susceptibilityPercent": 10.3,
+      "ciLow": 4.1,
+      "ciHigh": 23.6,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Levofloxacin",
+      "tested": 39,
+      "susceptible": 13,
+      "susceptibilityPercent": 33.3,
+      "ciLow": 20.6,
+      "ciHigh": 49.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Meropenem",
+      "tested": 39,
+      "susceptible": 7,
+      "susceptibilityPercent": 17.9,
+      "ciLow": 9.0,
+      "ciHigh": 32.7,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Tigecycline",
+      "tested": 38,
+      "susceptible": 22,
+      "susceptibilityPercent": 57.9,
+      "ciLow": 42.2,
+      "ciHigh": 72.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 36,
+      "susceptible": 9,
+      "susceptibilityPercent": 25.0,
+      "ciLow": 13.8,
+      "ciHigh": 41.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Ceftazidime",
+      "tested": 35,
+      "susceptible": 5,
+      "susceptibilityPercent": 14.3,
+      "ciLow": 6.3,
+      "ciHigh": 29.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Gentamicin",
+      "tested": 35,
+      "susceptible": 10,
+      "susceptibilityPercent": 28.6,
+      "ciLow": 16.3,
+      "ciHigh": 45.1,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Imipenem",
+      "tested": 35,
+      "susceptible": 8,
+      "susceptibilityPercent": 22.9,
+      "ciLow": 12.1,
+      "ciHigh": 39.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Amikacin",
+      "tested": 32,
+      "susceptible": 15,
+      "susceptibilityPercent": 46.9,
+      "ciLow": 30.9,
+      "ciHigh": 63.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Vancomycin",
+      "tested": 1,
+      "susceptible": 1,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 20.7,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Gentamicin",
+      "tested": 63,
+      "susceptible": 59,
+      "susceptibilityPercent": 93.7,
+      "ciLow": 84.8,
+      "ciHigh": 97.5,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 60,
+      "susceptible": 29,
+      "susceptibilityPercent": 48.3,
+      "ciLow": 36.2,
+      "ciHigh": 60.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Azithromycin",
+      "tested": 59,
+      "susceptible": 47,
+      "susceptibilityPercent": 79.7,
+      "ciLow": 67.7,
+      "ciHigh": 88.0,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Tetracycline",
+      "tested": 58,
+      "susceptible": 32,
+      "susceptibilityPercent": 55.2,
+      "ciLow": 42.5,
+      "ciHigh": 67.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "antibiotic": "Erythromycin",
+      "tested": 54,
+      "susceptible": 43,
+      "susceptibilityPercent": 79.6,
+      "ciLow": 67.1,
+      "ciHigh": 88.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Linezolid",
+      "tested": 64,
+      "susceptible": 62,
+      "susceptibilityPercent": 96.9,
+      "ciLow": 89.3,
+      "ciHigh": 99.1,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Ampicillin",
+      "tested": 60,
+      "susceptible": 51,
+      "susceptibilityPercent": 85.0,
+      "ciLow": 73.9,
+      "ciHigh": 91.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Levofloxacin",
+      "tested": 59,
+      "susceptible": 30,
+      "susceptibilityPercent": 50.8,
+      "ciLow": 38.4,
+      "ciHigh": 63.2,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Vancomycin",
+      "tested": 57,
+      "susceptible": 53,
+      "susceptibilityPercent": 93.0,
+      "ciLow": 83.3,
+      "ciHigh": 97.2,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 55,
+      "susceptible": 28,
+      "susceptibilityPercent": 50.9,
+      "ciLow": 38.1,
+      "ciHigh": 63.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Penicillin",
+      "tested": 54,
+      "susceptible": 36,
+      "susceptibilityPercent": 66.7,
+      "ciLow": 53.4,
+      "ciHigh": 77.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "antibiotic": "Tetracycline",
+      "tested": 53,
+      "susceptible": 24,
+      "susceptibilityPercent": 45.3,
+      "ciLow": 32.7,
+      "ciHigh": 58.5,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 294,
+      "susceptible": 205,
+      "susceptibilityPercent": 69.7,
+      "ciLow": 64.2,
+      "ciHigh": 74.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "tested": 290,
+      "susceptible": 252,
+      "susceptibilityPercent": 86.9,
+      "ciLow": 82.5,
+      "ciHigh": 90.3,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amikacin",
+      "tested": 286,
+      "susceptible": 239,
+      "susceptibilityPercent": 83.6,
+      "ciLow": 78.8,
+      "ciHigh": 87.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 280,
+      "susceptible": 124,
+      "susceptibilityPercent": 44.3,
+      "ciLow": 38.6,
+      "ciHigh": 50.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "tested": 280,
+      "susceptible": 141,
+      "susceptibilityPercent": 50.4,
+      "ciLow": 44.5,
+      "ciHigh": 56.2,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "tested": 279,
+      "susceptible": 138,
+      "susceptibilityPercent": 49.5,
+      "ciLow": 43.6,
+      "ciHigh": 55.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 279,
+      "susceptible": 80,
+      "susceptibilityPercent": 28.7,
+      "ciLow": 23.7,
+      "ciHigh": 34.2,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Tigecycline",
+      "tested": 277,
+      "susceptible": 236,
+      "susceptibilityPercent": 85.2,
+      "ciLow": 80.5,
+      "ciHigh": 88.9,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Colistin",
+      "tested": 276,
+      "susceptible": 254,
+      "susceptibilityPercent": 92.0,
+      "ciLow": 88.2,
+      "ciHigh": 94.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "tested": 274,
+      "susceptible": 161,
+      "susceptibilityPercent": 58.8,
+      "ciLow": 52.8,
+      "ciHigh": 64.4,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 274,
+      "susceptible": 108,
+      "susceptibilityPercent": 39.4,
+      "ciLow": 33.8,
+      "ciHigh": 45.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Ampicillin",
+      "tested": 273,
+      "susceptible": 50,
+      "susceptibilityPercent": 18.3,
+      "ciLow": 14.2,
+      "ciHigh": 23.3,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "tested": 273,
+      "susceptible": 171,
+      "susceptibilityPercent": 62.6,
+      "ciLow": 56.8,
+      "ciHigh": 68.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Nitrofurantoin",
+      "tested": 273,
+      "susceptible": 221,
+      "susceptibilityPercent": 81.0,
+      "ciLow": 75.9,
+      "ciHigh": 85.2,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "tested": 272,
+      "susceptible": 125,
+      "susceptibilityPercent": 46.0,
+      "ciLow": 40.1,
+      "ciHigh": 51.9,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "tested": 271,
+      "susceptible": 236,
+      "susceptibilityPercent": 87.1,
+      "ciLow": 82.6,
+      "ciHigh": 90.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Escherichia coli",
+      "antibiotic": "Vancomycin",
+      "tested": 2,
+      "susceptible": 2,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 34.2,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "antibiotic": "Ceftriaxone",
+      "tested": 11,
+      "susceptible": 10,
+      "susceptibilityPercent": 90.9,
+      "ciLow": 62.3,
+      "ciHigh": 98.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 11,
+      "susceptible": 6,
+      "susceptibilityPercent": 54.5,
+      "ciLow": 28.0,
+      "ciHigh": 78.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "antibiotic": "Ampicillin",
+      "tested": 10,
+      "susceptible": 5,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 23.7,
+      "ciHigh": 76.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "antibiotic": "Azithromycin",
+      "tested": 10,
+      "susceptible": 6,
+      "susceptibilityPercent": 60.0,
+      "ciLow": 31.3,
+      "ciHigh": 83.2,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 7,
+      "susceptible": 5,
+      "susceptibilityPercent": 71.4,
+      "ciLow": 35.9,
+      "ciHigh": 91.8,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Gentamicin",
+      "tested": 207,
+      "susceptible": 77,
+      "susceptibilityPercent": 37.2,
+      "ciLow": 30.9,
+      "ciHigh": 44.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 205,
+      "susceptible": 83,
+      "susceptibilityPercent": 40.5,
+      "ciLow": 34.0,
+      "ciHigh": 47.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Meropenem",
+      "tested": 204,
+      "susceptible": 103,
+      "susceptibilityPercent": 50.5,
+      "ciLow": 43.7,
+      "ciHigh": 57.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amikacin",
+      "tested": 202,
+      "susceptible": 140,
+      "susceptibilityPercent": 69.3,
+      "ciLow": 62.6,
+      "ciHigh": 75.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Colistin",
+      "tested": 200,
+      "susceptible": 179,
+      "susceptibilityPercent": 89.5,
+      "ciLow": 84.5,
+      "ciHigh": 93.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftriaxone",
+      "tested": 199,
+      "susceptible": 58,
+      "susceptibilityPercent": 29.1,
+      "ciLow": 23.3,
+      "ciHigh": 35.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ertapenem",
+      "tested": 197,
+      "susceptible": 124,
+      "susceptibilityPercent": 62.9,
+      "ciLow": 56.0,
+      "ciHigh": 69.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 181,
+      "susceptible": 46,
+      "susceptibilityPercent": 25.4,
+      "ciLow": 19.6,
+      "ciHigh": 32.2,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 175,
+      "susceptible": 43,
+      "susceptibilityPercent": 24.6,
+      "ciLow": 18.8,
+      "ciHigh": 31.5,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 171,
+      "susceptible": 37,
+      "susceptibilityPercent": 21.6,
+      "ciLow": 16.1,
+      "ciHigh": 28.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftazidime",
+      "tested": 169,
+      "susceptible": 60,
+      "susceptibilityPercent": 35.5,
+      "ciLow": 28.7,
+      "ciHigh": 43.0,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Cefepime",
+      "tested": 165,
+      "susceptible": 68,
+      "susceptibilityPercent": 41.2,
+      "ciLow": 34.0,
+      "ciHigh": 48.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Levofloxacin",
+      "tested": 165,
+      "susceptible": 64,
+      "susceptibilityPercent": 38.8,
+      "ciLow": 31.7,
+      "ciHigh": 46.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Tigecycline",
+      "tested": 152,
+      "susceptible": 133,
+      "susceptibilityPercent": 87.5,
+      "ciLow": 81.3,
+      "ciHigh": 91.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "antibiotic": "Ceftriaxone",
+      "tested": 13,
+      "susceptible": 11,
+      "susceptibilityPercent": 84.6,
+      "ciLow": 57.8,
+      "ciHigh": 95.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "antibiotic": "Chloramphenicol",
+      "tested": 13,
+      "susceptible": 12,
+      "susceptibilityPercent": 92.3,
+      "ciLow": 66.7,
+      "ciHigh": 98.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 13,
+      "susceptible": 12,
+      "susceptibilityPercent": 92.3,
+      "ciLow": 66.7,
+      "ciHigh": 98.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Neisseria meningitidis",
+      "antibiotic": "Penicillin",
+      "tested": 13,
+      "susceptible": 11,
+      "susceptibilityPercent": 84.6,
+      "ciLow": 57.8,
+      "ciHigh": 95.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Amoxicillin-Clavulanate",
+      "tested": 50,
+      "susceptible": 28,
+      "susceptibilityPercent": 56.0,
+      "ciLow": 42.3,
+      "ciHigh": 68.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Ampicillin",
+      "tested": 50,
+      "susceptible": 21,
+      "susceptibilityPercent": 42.0,
+      "ciLow": 29.4,
+      "ciHigh": 55.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Gentamicin",
+      "tested": 50,
+      "susceptible": 32,
+      "susceptibilityPercent": 64.0,
+      "ciLow": 50.1,
+      "ciHigh": 75.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 47,
+      "susceptible": 18,
+      "susceptibilityPercent": 38.3,
+      "ciLow": 25.8,
+      "ciHigh": 52.6,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Meropenem",
+      "tested": 44,
+      "susceptible": 38,
+      "susceptibilityPercent": 86.4,
+      "ciLow": 73.3,
+      "ciHigh": 93.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Ceftriaxone",
+      "tested": 41,
+      "susceptible": 28,
+      "susceptibilityPercent": 68.3,
+      "ciLow": 53.0,
+      "ciHigh": 80.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 41,
+      "susceptible": 27,
+      "susceptibilityPercent": 65.9,
+      "ciLow": 50.5,
+      "ciHigh": 78.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Imipenem",
+      "tested": 114,
+      "susceptible": 79,
+      "susceptibilityPercent": 69.3,
+      "ciLow": 60.3,
+      "ciHigh": 77.0,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Colistin",
+      "tested": 110,
+      "susceptible": 98,
+      "susceptibilityPercent": 89.1,
+      "ciLow": 81.9,
+      "ciHigh": 93.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 108,
+      "susceptible": 67,
+      "susceptibilityPercent": 62.0,
+      "ciLow": 52.6,
+      "ciHigh": 70.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Amikacin",
+      "tested": 106,
+      "susceptible": 70,
+      "susceptibilityPercent": 66.0,
+      "ciLow": 56.6,
+      "ciHigh": 74.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Cefepime",
+      "tested": 106,
+      "susceptible": 59,
+      "susceptibilityPercent": 55.7,
+      "ciLow": 46.2,
+      "ciHigh": 64.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Levofloxacin",
+      "tested": 102,
+      "susceptible": 63,
+      "susceptibilityPercent": 61.8,
+      "ciLow": 52.1,
+      "ciHigh": 70.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Meropenem",
+      "tested": 102,
+      "susceptible": 68,
+      "susceptibilityPercent": 66.7,
+      "ciLow": 57.1,
+      "ciHigh": 75.1,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Gentamicin",
+      "tested": 101,
+      "susceptible": 62,
+      "susceptibilityPercent": 61.4,
+      "ciLow": 51.6,
+      "ciHigh": 70.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Piperacillin-Tazobactam",
+      "tested": 97,
+      "susceptible": 54,
+      "susceptibilityPercent": 55.7,
+      "ciLow": 45.8,
+      "ciHigh": 65.2,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ceftazidime",
+      "tested": 95,
+      "susceptible": 46,
+      "susceptibilityPercent": 48.4,
+      "ciLow": 38.6,
+      "ciHigh": 58.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "antibiotic": "Ampicillin",
+      "tested": 1,
+      "susceptible": 1,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 20.7,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Meropenem",
+      "tested": 110,
+      "susceptible": 101,
+      "susceptibilityPercent": 91.8,
+      "ciLow": 85.2,
+      "ciHigh": 95.6,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Azithromycin",
+      "tested": 105,
+      "susceptible": 83,
+      "susceptibilityPercent": 79.0,
+      "ciLow": 70.3,
+      "ciHigh": 85.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Chloramphenicol",
+      "tested": 98,
+      "susceptible": 71,
+      "susceptibilityPercent": 72.4,
+      "ciLow": 62.9,
+      "ciHigh": 80.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "tested": 97,
+      "susceptible": 47,
+      "susceptibilityPercent": 48.5,
+      "ciLow": 38.8,
+      "ciHigh": 58.3,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 96,
+      "susceptible": 66,
+      "susceptibilityPercent": 68.8,
+      "ciLow": 58.9,
+      "ciHigh": 77.1,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ceftriaxone",
+      "tested": 95,
+      "susceptible": 69,
+      "susceptibilityPercent": 72.6,
+      "ciLow": 62.9,
+      "ciHigh": 80.6,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Salmonella enterica",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 94,
+      "susceptible": 43,
+      "susceptibilityPercent": 45.7,
+      "ciLow": 36.0,
+      "ciHigh": 55.8,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Shigella flexneri",
+      "antibiotic": "Azithromycin",
+      "tested": 51,
+      "susceptible": 43,
+      "susceptibilityPercent": 84.3,
+      "ciLow": 72.0,
+      "ciHigh": 91.8,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Shigella flexneri",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 49,
+      "susceptible": 37,
+      "susceptibilityPercent": 75.5,
+      "ciLow": 61.9,
+      "ciHigh": 85.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Shigella flexneri",
+      "antibiotic": "Ampicillin",
+      "tested": 48,
+      "susceptible": 12,
+      "susceptibilityPercent": 25.0,
+      "ciLow": 14.9,
+      "ciHigh": 38.8,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Shigella flexneri",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 48,
+      "susceptible": 18,
+      "susceptibilityPercent": 37.5,
+      "ciLow": 25.2,
+      "ciHigh": 51.6,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Shigella flexneri",
+      "antibiotic": "Ceftriaxone",
+      "tested": 47,
+      "susceptible": 33,
+      "susceptibilityPercent": 70.2,
+      "ciLow": 56.0,
+      "ciHigh": 81.3,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Vancomycin",
+      "tested": 183,
+      "susceptible": 168,
+      "susceptibilityPercent": 91.8,
+      "ciLow": 86.9,
+      "ciHigh": 95.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Ciprofloxacin",
+      "tested": 178,
+      "susceptible": 99,
+      "susceptibilityPercent": 55.6,
+      "ciLow": 48.3,
+      "ciHigh": 62.7,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Oxacillin",
+      "tested": 177,
+      "susceptible": 90,
+      "susceptibilityPercent": 50.8,
+      "ciLow": 43.5,
+      "ciHigh": 58.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Penicillin",
+      "tested": 176,
+      "susceptible": 13,
+      "susceptibilityPercent": 7.4,
+      "ciLow": 4.4,
+      "ciHigh": 12.2,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Rifampicin",
+      "tested": 176,
+      "susceptible": 149,
+      "susceptibilityPercent": 84.7,
+      "ciLow": 78.6,
+      "ciHigh": 89.2,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Clindamycin",
+      "tested": 175,
+      "susceptible": 104,
+      "susceptibilityPercent": 59.4,
+      "ciLow": 52.0,
+      "ciHigh": 66.4,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 174,
+      "susceptible": 108,
+      "susceptibilityPercent": 62.1,
+      "ciLow": 54.7,
+      "ciHigh": 68.9,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Linezolid",
+      "tested": 171,
+      "susceptible": 162,
+      "susceptibilityPercent": 94.7,
+      "ciLow": 90.3,
+      "ciHigh": 97.2,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Tetracycline",
+      "tested": 169,
+      "susceptible": 97,
+      "susceptibilityPercent": 57.4,
+      "ciLow": 49.9,
+      "ciHigh": 64.6,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Gentamicin",
+      "tested": 167,
+      "susceptible": 107,
+      "susceptibilityPercent": 64.1,
+      "ciLow": 56.6,
+      "ciHigh": 71.0,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Erythromycin",
+      "tested": 166,
+      "susceptible": 71,
+      "susceptibilityPercent": 42.8,
+      "ciLow": 35.5,
+      "ciHigh": 50.4,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Cefoxitin",
+      "tested": 160,
+      "susceptible": 94,
+      "susceptibilityPercent": 58.8,
+      "ciLow": 51.0,
+      "ciHigh": 66.1,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "antibiotic": "Colistin",
+      "tested": 4,
+      "susceptible": 4,
+      "susceptibilityPercent": 100.0,
+      "ciLow": 51.0,
+      "ciHigh": 100.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": false
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Clindamycin",
+      "tested": 65,
+      "susceptible": 47,
+      "susceptibilityPercent": 72.3,
+      "ciLow": 60.4,
+      "ciHigh": 81.7,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Tetracycline",
+      "tested": 64,
+      "susceptible": 32,
+      "susceptibilityPercent": 50.0,
+      "ciLow": 38.1,
+      "ciHigh": 61.9,
+      "observation": "Low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Erythromycin",
+      "tested": 61,
+      "susceptible": 38,
+      "susceptibilityPercent": 62.3,
+      "ciLow": 49.7,
+      "ciHigh": 73.4,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "tested": 61,
+      "susceptible": 16,
+      "susceptibilityPercent": 26.2,
+      "ciLow": 16.8,
+      "ciHigh": 38.4,
+      "observation": "Very low susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Vancomycin",
+      "tested": 61,
+      "susceptible": 56,
+      "susceptibilityPercent": 91.8,
+      "ciLow": 82.2,
+      "ciHigh": 96.4,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Ceftriaxone",
+      "tested": 56,
+      "susceptible": 45,
+      "susceptibilityPercent": 80.4,
+      "ciLow": 68.2,
+      "ciHigh": 88.7,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Levofloxacin",
+      "tested": 56,
+      "susceptible": 50,
+      "susceptibilityPercent": 89.3,
+      "ciLow": 78.5,
+      "ciHigh": 95.0,
+      "observation": "High susceptibility observed",
+      "meetsThreshold": true
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "antibiotic": "Penicillin",
+      "tested": 55,
+      "susceptible": 34,
+      "susceptibilityPercent": 61.8,
+      "ciLow": 48.6,
+      "ciHigh": 73.5,
+      "observation": "Moderate susceptibility observed",
+      "meetsThreshold": true
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 230,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "pairs": 115,
+    "reportable": 102,
+    "provisional": 13
+   }
+  }
+ ],
+ "scoringRule": [
+  {
+   "component": "Resistance level",
+   "condition": "over 70%",
+   "points": "40"
+  },
+  {
+   "component": "Resistance level",
+   "condition": "over 50%",
+   "points": "30"
+  },
+  {
+   "component": "Resistance level",
+   "condition": "over 30%",
+   "points": "20"
+  },
+  {
+   "component": "Evidence volume",
+   "condition": "over 100 results",
+   "points": "20"
+  },
+  {
+   "component": "Evidence volume",
+   "condition": "over 50 results",
+   "points": "15"
+  },
+  {
+   "component": "Evidence volume",
+   "condition": "over 20 results",
+   "points": "10"
+  },
+  {
+   "component": "Panel breadth",
+   "condition": "over 10 agents tested",
+   "points": "40"
+  },
+  {
+   "component": "Panel breadth",
+   "condition": "over 5 agents tested",
+   "points": "25"
+  },
+  {
+   "component": "Panel breadth",
+   "condition": "over 2 agents tested",
+   "points": "15"
+  }
+ ],
+ "minIsolates": 30
+}

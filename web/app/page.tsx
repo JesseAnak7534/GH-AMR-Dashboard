@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SECTIONS, getManifest } from "@/lib/data";
+import { NAV_GROUPS, groupSections, getManifest } from "@/lib/data";
 import { count, monthYear } from "@/lib/format";
 
 /**
@@ -82,10 +82,14 @@ export default function HomePage() {
       </section>
 
       {/* ── The sections ───────────────────────────────────────────── */}
-      <section className="mx-auto max-w-[1180px] px-5 py-12">
-        <p className="eyebrow mb-4">Explore the surveillance</p>
+      <section className="mx-auto max-w-[1180px] space-y-10 px-5 py-12">
+        {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+        <h2 className="mb-4 text-[1.3rem] font-bold leading-snug">
+          {group.label}
+        </h2>
         <ul className="grid gap-4 sm:grid-cols-2">
-          {SECTIONS.map((section) => {
+          {groupSections(group).map((section) => {
             const stat = section.stat(manifest);
             return (
               <li key={section.href}>
@@ -135,6 +139,8 @@ export default function HomePage() {
             );
           })}
         </ul>
+        </div>
+        ))}
       </section>
 
     </>

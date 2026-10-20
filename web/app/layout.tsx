@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { SECTIONS, getManifest } from "@/lib/data";
+import { NAV_GROUPS, groupSections, getManifest } from "@/lib/data";
 import { monthYear } from "@/lib/format";
+import { NavMenu } from "@/components/NavMenu";
 
 export const metadata: Metadata = {
   title: {
@@ -29,8 +30,11 @@ const OWNER = "Institute of Computational Biology and Bioinformatics";
  * The shell.
  *
  * One masthead, one navigation row, one footer, on every page. The navigation
- * is plain links rather than a client-side menu: six destinations do not need
- * JavaScript, and a link works before any of it has loaded.
+ * row groups fifteen sections under four headings that open on hover or on
+ * click -- a flat row of fifteen was a horizontal scrollbar, and a reader who
+ * has to scroll a navigation bar cannot see what the site holds. The footer
+ * keeps the flat list, so every section is one plain link away even with no
+ * JavaScript running.
  *
  * `skip to content` is first in the DOM. A reader using a screen reader or a
  * keyboard should not have to walk the navigation on every page.
@@ -67,22 +71,16 @@ export default function RootLayout({
             </div>
           </div>
 
-          <nav
-            aria-label="Sections"
-            className="border-b border-rule bg-paper/95 backdrop-blur"
-          >
-            <div className="mx-auto flex max-w-[1180px] gap-1 overflow-x-auto px-5">
-              {SECTIONS.map((section) => (
-                <Link
-                  key={section.href}
-                  href={section.href}
-                  className="shrink-0 border-b-[3px] border-transparent px-3 py-2.5 text-[0.86rem] font-medium text-ink-soft transition-colors hover:border-brand hover:text-brand"
-                >
-                  {section.title}
-                </Link>
-              ))}
-            </div>
-          </nav>
+          <NavMenu
+            groups={NAV_GROUPS.map((group) => ({
+              label: group.label,
+              entries: groupSections(group).map((section) => ({
+                href: section.href,
+                title: section.title,
+                colour: section.colour,
+              })),
+            }))}
+          />
         </header>
 
         <main id="content" className="flex-1">
@@ -94,7 +92,7 @@ export default function RootLayout({
             it, where to go, and when it was generated. */}
         <footer className="no-print bg-[#0d1b2a] text-white/85">
           <div className="mx-auto max-w-[1180px] px-5 py-12">
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1fr_1.9fr_1fr]">
               <div>
                 <p className="text-[1.05rem] font-bold tracking-tight text-white">
                   ICBB-AMRSS
@@ -106,22 +104,28 @@ export default function RootLayout({
                 </p>
               </div>
 
-              <nav aria-label="Sections">
-                <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/45">
-                  Sections
-                </p>
-                <ul className="grid grid-flow-col grid-rows-5 gap-x-6 gap-y-1.5">
-                  {SECTIONS.map((section) => (
-                    <li key={section.href}>
-                      <Link
-                        href={section.href}
-                        className="text-[0.85rem] text-white/75 transition-colors hover:text-white"
-                      >
-                        {section.title}
-                      </Link>
-                    </li>
+              <nav aria-label="Sections" className="sm:col-span-2 lg:col-span-1">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {NAV_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/45">
+                        {group.label}
+                      </p>
+                      <ul className="space-y-1.5">
+                        {groupSections(group).map((section) => (
+                          <li key={section.href}>
+                            <Link
+                              href={section.href}
+                              className="text-[0.85rem] text-white/75 transition-colors hover:text-white"
+                            >
+                              {section.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </nav>
 
               <div>

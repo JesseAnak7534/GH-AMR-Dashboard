@@ -48,6 +48,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from scripts import export_clinical as clinical  # noqa: E402
 from scripts import export_sections as sections  # noqa: E402
 from scripts import export_map  # noqa: E402
 from scripts import export_slices as slices  # noqa: E402
@@ -600,6 +601,17 @@ def main() -> int:
     _write(args.out, "priority.json",
            sections.export_priority(frame, _priority_lookup(), threshold,
                                     _rows, _suppress))
+    _write(args.out, "mechanisms.json",
+           clinical.export_mechanisms(frame, threshold, _rows, _suppress))
+    _write(args.out, "hai.json",
+           clinical.export_hai(frame, threshold, _rows, _suppress))
+    _write(args.out, "quality.json",
+           clinical.export_quality(frame, threshold, _rows, _suppress))
+    _write(args.out, "comparison.json",
+           clinical.export_comparison(frame, args.out, threshold,
+                                      _rows, _suppress))
+    _write(args.out, "risk.json",
+           clinical.export_risk(frame, threshold, _rows, _suppress))
     _write(args.out, "filters.json", {
         "resistance": slices.export_resistance_slices(
             frame, args.out, threshold, _rows, _suppress),

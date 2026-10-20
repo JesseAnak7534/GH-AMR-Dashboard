@@ -1,0 +1,297 @@
+{
+ "headline": "2,766 specimens, 2,667 isolates and 20,826 susceptibility results from 19 laboratories.",
+ "coverage": {
+  "specimens": 2766,
+  "isolates": 2667,
+  "observations": 20826,
+  "patients": 1647,
+  "laboratories": 19,
+  "sectors": [
+   {
+    "sector": "human",
+    "specimens": 1764,
+    "colour": "#0072B2"
+   },
+   {
+    "sector": "animal",
+    "specimens": 341,
+    "colour": "#E69F00"
+   },
+   {
+    "sector": "food",
+    "specimens": 303,
+    "colour": "#009E73"
+   },
+   {
+    "sector": "environment",
+    "specimens": 254,
+    "colour": "#CC79A7"
+   },
+   {
+    "sector": "aquaculture",
+    "specimens": 104,
+    "colour": "#56B4E9"
+   }
+  ]
+ },
+ "completeness": {
+  "rows": [
+   {
+    "field": "Sex (human)",
+    "column": "sex",
+    "scope": "human records",
+    "recorded": 12914,
+    "of": 13111,
+    "percent": 98.4974448936008,
+    "status": "complete"
+   },
+   {
+    "field": "Collection date",
+    "column": "collection_datetime",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Region",
+    "column": "region",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Reporting laboratory",
+    "column": "lab_name",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Organism",
+    "column": "organism",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Interpreted result",
+    "column": "result",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Breakpoint standard",
+    "column": "breakpoint_standard",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Specimen type",
+    "column": "specimen_type",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Breakpoint edition",
+    "column": "breakpoint_version",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Ward type (human)",
+    "column": "ward_type_at_collection",
+    "scope": "human records",
+    "recorded": 13111,
+    "of": 13111,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Age band (human)",
+    "column": "age_band_at_collection",
+    "scope": "human records",
+    "recorded": 13111,
+    "of": 13111,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "Patient key (human)",
+    "column": "patient_pseudonym",
+    "scope": "human records",
+    "recorded": 13111,
+    "of": 13111,
+    "percent": 100.0,
+    "status": "complete"
+   },
+   {
+    "field": "AST quality control",
+    "column": "qc_status",
+    "scope": "all records",
+    "recorded": 20826,
+    "of": 20826,
+    "percent": 100.0,
+    "status": "complete"
+   }
+  ],
+  "notCollected": []
+ },
+ "timeliness": {
+  "latest": "2026-09-01",
+  "daysSinceLatest": 49,
+  "status": "lagging",
+  "note": "The most recent specimen is over a month old. Submissions are behind.",
+  "turnaroundMedianDays": 0.3645833333333333,
+  "turnaroundMeasurable": 2521
+ },
+ "linkage": {
+  "culturePositivityPercent": 89.587852494577,
+  "specimensTotal": 2766,
+  "specimensWithIsolate": 2478,
+  "specimensWithWard": 1764,
+  "specimensWithWardPercent": 63.77440347071583,
+  "isolatesTotal": 2667,
+  "isolatesWithResult": 2667,
+  "isolatesWithResultPercent": 100.0,
+  "genomicResults": 1860,
+  "isolatesSequenced": 1795,
+  "percentIsolatesSequenced": 67.30408698912636
+ },
+ "resultQuality": {
+  "qcRecorded": 20826,
+  "qcTotal": 20826,
+  "qcRecordedPercent": 100.0,
+  "qcPass": 20526,
+  "qcFail": 300,
+  "resultsWithoutEdition": 0,
+  "sources": [
+   {
+    "source": "Imported",
+    "results": 20826
+   }
+  ]
+ },
+ "plausibility": {
+  "rows": [
+   {
+    "organism": "Escherichia coli",
+    "antibiotic": "Vancomycin",
+    "kind": "error",
+    "results": 9,
+    "recordedSusceptible": 9,
+    "reason": "Glycopeptides cannot cross the Gram-negative outer membrane. A susceptible result is not possible and indicates a testing or data-entry error."
+   },
+   {
+    "organism": "Staphylococcus aureus",
+    "antibiotic": "Colistin",
+    "kind": "error",
+    "results": 5,
+    "recordedSusceptible": 5,
+    "reason": "Polymyxins act on the Gram-negative outer-membrane lipopolysaccharide, which Gram-positive organisms do not have."
+   },
+   {
+    "organism": "Pseudomonas aeruginosa",
+    "antibiotic": "Ampicillin",
+    "kind": "error",
+    "results": 2,
+    "recordedSusceptible": 2,
+    "reason": "Pseudomonas aeruginosa is intrinsically resistant to aminopenicillins."
+   },
+   {
+    "organism": "Acinetobacter baumannii",
+    "antibiotic": "Vancomycin",
+    "kind": "error",
+    "results": 1,
+    "recordedSusceptible": 1,
+    "reason": "Glycopeptides cannot cross the Gram-negative outer membrane. A susceptible result is not possible and indicates a testing or data-entry error."
+   }
+  ],
+  "suppression": {
+   "withheld": 0,
+   "primary": 0,
+   "secondary": 0,
+   "cellsTotal": 4,
+   "threshold": 1,
+   "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+  },
+  "impossiblePairs": 4,
+  "suppressPairs": 0,
+  "observationsAffected": 17,
+  "percentAffected": 0.08162873331412657,
+  "recordedSusceptible": 17,
+  "resultsTotal": 20826
+ },
+ "denominators": {
+  "available": true,
+  "rows": [
+   {
+    "dataset": "Antimicrobial use (human)",
+    "records": 2186,
+    "withDenominator": 1994,
+    "percent": 91.21683440073193,
+    "denominator": "Patient-days",
+    "consequence": "Use can be reported as a volume only, and volumes cannot be compared between facilities or regions."
+   },
+   {
+    "dataset": "Antimicrobial consumption (animal)",
+    "records": 1370,
+    "withDenominator": 1370,
+    "percent": 100.0,
+    "denominator": "Biomass at risk, kg",
+    "consequence": "Consumption can be reported as a mass only, which reflects herd size as much as prescribing."
+   }
+  ],
+  "metrics": [
+   {
+    "Metric": "DDD per 1,000 patient-days",
+    "Unit": "defined daily doses per 1,000 patient-days",
+    "Numerator": "Total defined daily doses dispensed in the group",
+    "Denominator": "Total patient-days reported by the same facilities over the same periods",
+    "Conversion": "Where DDD is not reported directly it is recovered as ddd_per_1000 x patient_days / 1000, so a record contributes only when it carries both",
+    "Calculation": "sum(DDD) / sum(patient-days) x 1000. Pooled, not the mean of each record's rate: averaging rates weights a clinic reporting three prescriptions equally with a hospital reporting thirty thousand",
+    "Intended use": "Comparing antimicrobial use between facilities, regions or periods on a common denominator",
+    "Not to be used for": "Comparing against a facility that did not report patient-days, or inferring appropriateness -- volume is not quality"
+   },
+   {
+    "Metric": "Quantity dispensed",
+    "Unit": "as reported by the facility",
+    "Numerator": "Sum of quantity_dispensed",
+    "Denominator": "None. This is a volume, not a rate",
+    "Conversion": "None. Units are as submitted and may differ between facilities",
+    "Calculation": "sum(quantity_dispensed)",
+    "Intended use": "Describing procurement and workload within one facility or one unit of measure",
+    "Not to be used for": "Comparing regions or facilities. A region with more hospitals dispenses more without using more per patient, and the units may not even be the same"
+   },
+   {
+    "Metric": "Milligrams of active ingredient per kilogram of biomass",
+    "Unit": "mg active ingredient / kg biomass",
+    "Numerator": "Total active-ingredient mass, in milligrams",
+    "Denominator": "Total biomass of the population at risk, in kilograms",
+    "Conversion": "quantity_kg is taken to be active-ingredient mass and converted at 1,000,000 mg per kg. Where a submission reports product mass rather than active ingredient, the figure overstates use and the submission must be corrected at source",
+    "Calculation": "sum(active ingredient mg) / sum(biomass kg). Pooled, not the mean of each record's ratio",
+    "Intended use": "Comparing veterinary antimicrobial consumption between species, production systems or periods",
+    "Not to be used for": "Comparing against human DDD figures, which use an entirely different denominator"
+   }
+  ]
+ }
+}

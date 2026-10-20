@@ -1,0 +1,1423 @@
+{
+ "slices": [
+  {
+   "sector": "animal",
+   "colour": "#E69F00",
+   "isolatesScreened": 244,
+   "observations": 1828,
+   "sentinel": {
+    "rows": [
+     {
+      "code": "MRSA",
+      "label": "Methicillin-Resistant S. aureus",
+      "whoTier": "High",
+      "positive": 19,
+      "tested": 39,
+      "percent": 48.7
+     },
+     {
+      "code": "FQ-Salm",
+      "label": "Fluoroquinolone-Resistant Salmonella",
+      "whoTier": "High",
+      "positive": 9,
+      "tested": 50,
+      "percent": 18.0
+     },
+     {
+      "code": "ESBL-Ec",
+      "label": "ESBL-producing E. coli",
+      "whoTier": "Critical",
+      "positive": 7,
+      "tested": 73,
+      "percent": 9.6
+     },
+     {
+      "code": "CRE",
+      "label": "Carbapenem-Resistant Enterobacterales",
+      "whoTier": "Critical",
+      "positive": 2,
+      "tested": 135,
+      "percent": 1.5
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 8,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "mechanisms": {
+    "totals": [
+     {
+      "mechanism": "MRSA",
+      "isolates": 10,
+      "percent": 4.098360655737705,
+      "basis": "Staphylococcus aureus resistant to oxacillin, methicillin or cefoxitin."
+     },
+     {
+      "mechanism": "ESBL",
+      "isolates": 7,
+      "percent": 2.8688524590163933,
+      "basis": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme."
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "isolates": 2,
+      "percent": 0.819672131147541,
+      "basis": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC."
+     }
+    ],
+    "totalSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Escherichia coli",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Salmonella enterica",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Escherichia coli",
+      "isolates": 7,
+      "high": 7,
+      "moderate": 0
+     },
+     {
+      "mechanism": "MRSA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 10,
+      "high": 10,
+      "moderate": 0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 12,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "crossResistance": {
+    "rows": [
+     {
+      "antibioticClass": "Penicillins",
+      "isolates": 21,
+      "high": 7,
+      "moderate": 14,
+      "testedOnTwoOrMore": 49,
+      "percent": 42.857142857142854
+     },
+     {
+      "antibioticClass": "Fluoroquinolones",
+      "isolates": 12,
+      "high": 12,
+      "moderate": 0,
+      "testedOnTwoOrMore": 39,
+      "percent": 30.76923076923077
+     },
+     {
+      "antibioticClass": "Cephalosporins (3rd)",
+      "isolates": 7,
+      "high": 7,
+      "moderate": 0,
+      "testedOnTwoOrMore": 38,
+      "percent": 18.42105263157895
+     },
+     {
+      "antibioticClass": "Aminoglycosides",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0,
+      "testedOnTwoOrMore": 40,
+      "percent": 2.5
+     },
+     {
+      "antibioticClass": "Carbapenems",
+      "isolates": 0,
+      "high": 0,
+      "moderate": 0,
+      "testedOnTwoOrMore": 46,
+      "percent": 0.0
+     },
+     {
+      "antibioticClass": "Macrolides",
+      "isolates": 0,
+      "high": 0,
+      "moderate": 0,
+      "testedOnTwoOrMore": 39,
+      "percent": 0.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 18,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "breadth": {
+    "bands": [
+     {
+      "band": "3-4 agents",
+      "isolates": 68
+     },
+     {
+      "band": "5-6 agents",
+      "isolates": 27
+     },
+     {
+      "band": "7-9 agents",
+      "isolates": 2
+     },
+     {
+      "band": "10 or more agents",
+      "isolates": 0
+     }
+    ],
+    "bandSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "isolates": 57,
+      "medianAgents": 4.0,
+      "maxAgents": 7
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "isolates": 26,
+      "medianAgents": 4.0,
+      "maxAgents": 6
+     },
+     {
+      "organism": "Salmonella enterica",
+      "isolates": 10,
+      "medianAgents": 3.0,
+      "maxAgents": 4
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "isolates": 4,
+      "medianAgents": 3.0,
+      "maxAgents": 3
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "isolates": 97,
+    "isolatesScreened": 244,
+    "percent": 39.75409836065574,
+    "medianAgents": 4.0
+   }
+  },
+  {
+   "sector": "aquaculture",
+   "colour": "#56B4E9",
+   "isolatesScreened": 89,
+   "observations": 670,
+   "sentinel": {
+    "rows": [
+     {
+      "code": "CRPA",
+      "label": "Carbapenem-Resistant P. aeruginosa",
+      "whoTier": "Critical",
+      "positive": 7,
+      "tested": 24,
+      "percent": 29.2
+     },
+     {
+      "code": "ESBL-Ec",
+      "label": "ESBL-producing E. coli",
+      "whoTier": "Critical",
+      "positive": 5,
+      "tested": 31,
+      "percent": 16.1
+     },
+     {
+      "code": "FQ-Salm",
+      "label": "Fluoroquinolone-Resistant Salmonella",
+      "whoTier": "High",
+      "positive": 5,
+      "tested": 18,
+      "percent": 27.8
+     },
+     {
+      "code": "CRE",
+      "label": "Carbapenem-Resistant Enterobacterales",
+      "whoTier": "Critical",
+      "positive": 3,
+      "tested": 44,
+      "percent": 6.8
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 8,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "mechanisms": {
+    "totals": [
+     {
+      "mechanism": "Carbapenemase",
+      "isolates": 10,
+      "percent": 11.235955056179776,
+      "basis": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC."
+     },
+     {
+      "mechanism": "ESBL",
+      "isolates": 5,
+      "percent": 5.617977528089888,
+      "basis": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme."
+     }
+    ],
+    "totalSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 2,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 7,
+      "high": 7,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Escherichia coli",
+      "isolates": 2,
+      "high": 2,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Salmonella enterica",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Escherichia coli",
+      "isolates": 5,
+      "high": 5,
+      "moderate": 0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 12,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "crossResistance": {
+    "rows": [
+     {
+      "antibioticClass": "Penicillins",
+      "isolates": 9,
+      "high": 5,
+      "moderate": 4,
+      "testedOnTwoOrMore": 29,
+      "percent": 31.03448275862069
+     },
+     {
+      "antibioticClass": "Fluoroquinolones",
+      "isolates": 7,
+      "high": 7,
+      "moderate": 0,
+      "testedOnTwoOrMore": 29,
+      "percent": 24.137931034482758
+     },
+     {
+      "antibioticClass": "Cephalosporins (3rd)",
+      "isolates": 5,
+      "high": 5,
+      "moderate": 0,
+      "testedOnTwoOrMore": 16,
+      "percent": 31.25
+     },
+     {
+      "antibioticClass": "Aminoglycosides",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0,
+      "testedOnTwoOrMore": 34,
+      "percent": 2.9411764705882355
+     },
+     {
+      "antibioticClass": "Carbapenems",
+      "isolates": 0,
+      "high": 0,
+      "moderate": 0,
+      "testedOnTwoOrMore": 25,
+      "percent": 0.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 15,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "breadth": {
+    "bands": [
+     {
+      "band": "3-4 agents",
+      "isolates": 17
+     },
+     {
+      "band": "5-6 agents",
+      "isolates": 10
+     },
+     {
+      "band": "7-9 agents",
+      "isolates": 3
+     },
+     {
+      "band": "10 or more agents",
+      "isolates": 0
+     }
+    ],
+    "bandSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "isolates": 25,
+      "medianAgents": 5.0,
+      "maxAgents": 9
+     },
+     {
+      "organism": "Salmonella enterica",
+      "isolates": 3,
+      "medianAgents": 3.0,
+      "maxAgents": 3
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 2,
+      "medianAgents": 3.0,
+      "maxAgents": 3
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "isolates": 30,
+    "isolatesScreened": 89,
+    "percent": 33.70786516853933,
+    "medianAgents": 4.0
+   }
+  },
+  {
+   "sector": "environment",
+   "colour": "#CC79A7",
+   "isolatesScreened": 195,
+   "observations": 1783,
+   "sentinel": {
+    "rows": [
+     {
+      "code": "3GCRKP",
+      "label": "3rd-Gen Cephalosporin-Resistant K. pneumoniae",
+      "whoTier": "Critical",
+      "positive": 27,
+      "tested": 40,
+      "percent": 67.5
+     },
+     {
+      "code": "CRE",
+      "label": "Carbapenem-Resistant Enterobacterales",
+      "whoTier": "Critical",
+      "positive": 20,
+      "tested": 117,
+      "percent": 17.1
+     },
+     {
+      "code": "CRAB",
+      "label": "Carbapenem-Resistant A. baumannii",
+      "whoTier": "Critical",
+      "positive": 18,
+      "tested": 20,
+      "percent": 90.0
+     },
+     {
+      "code": "ESBL-Ec",
+      "label": "ESBL-producing E. coli",
+      "whoTier": "Critical",
+      "positive": 13,
+      "tested": 68,
+      "percent": 19.1
+     },
+     {
+      "code": "CRPA",
+      "label": "Carbapenem-Resistant P. aeruginosa",
+      "whoTier": "Critical",
+      "positive": 13,
+      "tested": 31,
+      "percent": 41.9
+     },
+     {
+      "code": "ESBL-Kp",
+      "label": "ESBL-producing K. pneumoniae",
+      "whoTier": "Critical",
+      "positive": 6,
+      "tested": 40,
+      "percent": 15.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 12,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "mechanisms": {
+    "totals": [
+     {
+      "mechanism": "Carbapenemase",
+      "isolates": 51,
+      "percent": 26.153846153846153,
+      "basis": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC."
+     },
+     {
+      "mechanism": "ESBL",
+      "isolates": 19,
+      "percent": 9.743589743589743,
+      "basis": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme."
+     },
+     {
+      "mechanism": "AmpC",
+      "isolates": 6,
+      "percent": 3.076923076923077,
+      "basis": "Resistant to two or more cephalosporins in an organism carrying an inducible chromosomal AmpC."
+     }
+    ],
+    "totalSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 3,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "mechanism": "AmpC",
+      "organism": "Acinetobacter baumannii",
+      "isolates": 3,
+      "high": 3,
+      "moderate": 0
+     },
+     {
+      "mechanism": "AmpC",
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 3,
+      "high": 3,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Acinetobacter baumannii",
+      "isolates": 18,
+      "high": 18,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 14,
+      "high": 14,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 13,
+      "high": 13,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Escherichia coli",
+      "isolates": 6,
+      "high": 6,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Escherichia coli",
+      "isolates": 13,
+      "high": 13,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 6,
+      "high": 6,
+      "moderate": 0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 24,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "crossResistance": {
+    "rows": [
+     {
+      "antibioticClass": "Fluoroquinolones",
+      "isolates": 27,
+      "high": 27,
+      "moderate": 0,
+      "testedOnTwoOrMore": 96,
+      "percent": 28.125
+     },
+     {
+      "antibioticClass": "Penicillins",
+      "isolates": 24,
+      "high": 12,
+      "moderate": 12,
+      "testedOnTwoOrMore": 81,
+      "percent": 29.62962962962963
+     },
+     {
+      "antibioticClass": "Cephalosporins (3rd)",
+      "isolates": 19,
+      "high": 19,
+      "moderate": 0,
+      "testedOnTwoOrMore": 63,
+      "percent": 30.158730158730158
+     },
+     {
+      "antibioticClass": "Carbapenems",
+      "isolates": 10,
+      "high": 10,
+      "moderate": 0,
+      "testedOnTwoOrMore": 96,
+      "percent": 10.416666666666666
+     },
+     {
+      "antibioticClass": "Aminoglycosides",
+      "isolates": 4,
+      "high": 4,
+      "moderate": 0,
+      "testedOnTwoOrMore": 95,
+      "percent": 4.2105263157894735
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 15,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "breadth": {
+    "bands": [
+     {
+      "band": "3-4 agents",
+      "isolates": 61
+     },
+     {
+      "band": "5-6 agents",
+      "isolates": 46
+     },
+     {
+      "band": "7-9 agents",
+      "isolates": 13
+     },
+     {
+      "band": "10 or more agents",
+      "isolates": 0
+     }
+    ],
+    "bandSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "isolates": 58,
+      "medianAgents": 4.0,
+      "maxAgents": 8
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 32,
+      "medianAgents": 5.0,
+      "maxAgents": 7
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "isolates": 19,
+      "medianAgents": 5.0,
+      "maxAgents": 8
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 11,
+      "medianAgents": 3.0,
+      "maxAgents": 5
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "isolates": 120,
+    "isolatesScreened": 195,
+    "percent": 61.53846153846154,
+    "medianAgents": 4.0
+   }
+  },
+  {
+   "sector": "food",
+   "colour": "#009E73",
+   "isolatesScreened": 299,
+   "observations": 2168,
+   "sentinel": {
+    "rows": [
+     {
+      "code": "MRSA",
+      "label": "Methicillin-Resistant S. aureus",
+      "whoTier": "High",
+      "positive": 16,
+      "tested": 34,
+      "percent": 47.1
+     },
+     {
+      "code": "FQ-Salm",
+      "label": "Fluoroquinolone-Resistant Salmonella",
+      "whoTier": "High",
+      "positive": 16,
+      "tested": 71,
+      "percent": 22.5
+     },
+     {
+      "code": "ESBL-Ec",
+      "label": "ESBL-producing E. coli",
+      "whoTier": "Critical",
+      "positive": 10,
+      "tested": 87,
+      "percent": 11.5
+     },
+     {
+      "code": "CRE",
+      "label": "Carbapenem-Resistant Enterobacterales",
+      "whoTier": "Critical",
+      "positive": 5,
+      "tested": 145,
+      "percent": 3.4
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 8,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "mechanisms": {
+    "totals": [
+     {
+      "mechanism": "ESBL",
+      "isolates": 10,
+      "percent": 3.3444816053511706,
+      "basis": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme."
+     },
+     {
+      "mechanism": "MRSA",
+      "isolates": 9,
+      "percent": 3.0100334448160537,
+      "basis": "Staphylococcus aureus resistant to oxacillin, methicillin or cefoxitin."
+     },
+     {
+      "mechanism": "VISA",
+      "isolates": 6,
+      "percent": 2.0066889632107023,
+      "basis": "Staphylococcus aureus intermediate to vancomycin."
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "isolates": 5,
+      "percent": 1.6722408026755853,
+      "basis": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC."
+     }
+    ],
+    "totalSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Escherichia coli",
+      "isolates": 4,
+      "high": 4,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Salmonella enterica",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Escherichia coli",
+      "isolates": 10,
+      "high": 10,
+      "moderate": 0
+     },
+     {
+      "mechanism": "MRSA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 9,
+      "high": 9,
+      "moderate": 0
+     },
+     {
+      "mechanism": "VISA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 6,
+      "high": 6,
+      "moderate": 0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 15,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "crossResistance": {
+    "rows": [
+     {
+      "antibioticClass": "Penicillins",
+      "isolates": 26,
+      "high": 14,
+      "moderate": 12,
+      "testedOnTwoOrMore": 70,
+      "percent": 37.142857142857146
+     },
+     {
+      "antibioticClass": "Fluoroquinolones",
+      "isolates": 17,
+      "high": 17,
+      "moderate": 0,
+      "testedOnTwoOrMore": 50,
+      "percent": 34.0
+     },
+     {
+      "antibioticClass": "Cephalosporins (3rd)",
+      "isolates": 10,
+      "high": 10,
+      "moderate": 0,
+      "testedOnTwoOrMore": 51,
+      "percent": 19.607843137254903
+     },
+     {
+      "antibioticClass": "Aminoglycosides",
+      "isolates": 1,
+      "high": 1,
+      "moderate": 0,
+      "testedOnTwoOrMore": 42,
+      "percent": 2.380952380952381
+     },
+     {
+      "antibioticClass": "Carbapenems",
+      "isolates": 0,
+      "high": 0,
+      "moderate": 0,
+      "testedOnTwoOrMore": 46,
+      "percent": 0.0
+     },
+     {
+      "antibioticClass": "Macrolides",
+      "isolates": 0,
+      "high": 0,
+      "moderate": 0,
+      "testedOnTwoOrMore": 53,
+      "percent": 0.0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 18,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "breadth": {
+    "bands": [
+     {
+      "band": "3-4 agents",
+      "isolates": 73
+     },
+     {
+      "band": "5-6 agents",
+      "isolates": 26
+     },
+     {
+      "band": "7-9 agents",
+      "isolates": 7
+     },
+     {
+      "band": "10 or more agents",
+      "isolates": 0
+     }
+    ],
+    "bandSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "isolates": 76,
+      "medianAgents": 4.0,
+      "maxAgents": 9
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "isolates": 14,
+      "medianAgents": 3.5,
+      "maxAgents": 7
+     },
+     {
+      "organism": "Salmonella enterica",
+      "isolates": 12,
+      "medianAgents": 3.0,
+      "maxAgents": 5
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "isolates": 4,
+      "medianAgents": 3.0,
+      "maxAgents": 3
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "isolates": 106,
+    "isolatesScreened": 299,
+    "percent": 35.45150501672241,
+    "medianAgents": 4.0
+   }
+  },
+  {
+   "sector": "human",
+   "colour": "#0072B2",
+   "isolatesScreened": 1675,
+   "observations": 12945,
+   "sentinel": {
+    "rows": [
+     {
+      "code": "3GCRKP",
+      "label": "3rd-Gen Cephalosporin-Resistant K. pneumoniae",
+      "whoTier": "Critical",
+      "positive": 178,
+      "tested": 245,
+      "percent": 72.7
+     },
+     {
+      "code": "CRE",
+      "label": "Carbapenem-Resistant Enterobacterales",
+      "whoTier": "Critical",
+      "positive": 145,
+      "tested": 755,
+      "percent": 19.2
+     },
+     {
+      "code": "MRSA",
+      "label": "Methicillin-Resistant S. aureus",
+      "whoTier": "High",
+      "positive": 107,
+      "tested": 223,
+      "percent": 48.0
+     },
+     {
+      "code": "CRPA",
+      "label": "Carbapenem-Resistant P. aeruginosa",
+      "whoTier": "Critical",
+      "positive": 51,
+      "tested": 135,
+      "percent": 37.8
+     },
+     {
+      "code": "ESBL-Kp",
+      "label": "ESBL-producing K. pneumoniae",
+      "whoTier": "Critical",
+      "positive": 49,
+      "tested": 245,
+      "percent": 20.0
+     },
+     {
+      "code": "CRAB",
+      "label": "Carbapenem-Resistant A. baumannii",
+      "whoTier": "Critical",
+      "positive": 42,
+      "tested": 50,
+      "percent": 84.0
+     },
+     {
+      "code": "ESBL-Ec",
+      "label": "ESBL-producing E. coli",
+      "whoTier": "Critical",
+      "positive": 41,
+      "tested": 355,
+      "percent": 11.5
+     },
+     {
+      "code": "FQ-Salm",
+      "label": "Fluoroquinolone-Resistant Salmonella",
+      "whoTier": "High",
+      "positive": 24,
+      "tested": 96,
+      "percent": 25.0
+     },
+     {
+      "code": "VRE",
+      "label": "Vancomycin-Resistant Enterococcus",
+      "whoTier": "High",
+      "positive": 1,
+      "tested": 57,
+      "percent": 1.8
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 18,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "mechanisms": {
+    "totals": [
+     {
+      "mechanism": "Carbapenemase",
+      "isolates": 238,
+      "percent": 14.208955223880597,
+      "basis": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC."
+     },
+     {
+      "mechanism": "ESBL",
+      "isolates": 90,
+      "percent": 5.373134328358209,
+      "basis": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme."
+     },
+     {
+      "mechanism": "MRSA",
+      "isolates": 75,
+      "percent": 4.477611940298507,
+      "basis": "Staphylococcus aureus resistant to oxacillin, methicillin or cefoxitin."
+     },
+     {
+      "mechanism": "AmpC",
+      "isolates": 38,
+      "percent": 2.2686567164179103,
+      "basis": "Resistant to two or more cephalosporins in an organism carrying an inducible chromosomal AmpC."
+     },
+     {
+      "mechanism": "VISA",
+      "isolates": 11,
+      "percent": 0.6567164179104478,
+      "basis": "Staphylococcus aureus intermediate to vancomycin."
+     },
+     {
+      "mechanism": "VRSA",
+      "isolates": 4,
+      "percent": 0.23880597014925373,
+      "basis": "Staphylococcus aureus resistant to vancomycin."
+     }
+    ],
+    "totalSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 6,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "mechanism": "AmpC",
+      "organism": "Acinetobacter baumannii",
+      "isolates": 19,
+      "high": 19,
+      "moderate": 0
+     },
+     {
+      "mechanism": "AmpC",
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 19,
+      "high": 19,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 107,
+      "high": 107,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 51,
+      "high": 51,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Acinetobacter baumannii",
+      "isolates": 42,
+      "high": 42,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Escherichia coli",
+      "isolates": 36,
+      "high": 36,
+      "moderate": 0
+     },
+     {
+      "mechanism": "Carbapenemase",
+      "organism": "Proteus mirabilis",
+      "isolates": 2,
+      "high": 2,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 49,
+      "high": 49,
+      "moderate": 0
+     },
+     {
+      "mechanism": "ESBL",
+      "organism": "Escherichia coli",
+      "isolates": 41,
+      "high": 41,
+      "moderate": 0
+     },
+     {
+      "mechanism": "MRSA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 75,
+      "high": 75,
+      "moderate": 0
+     },
+     {
+      "mechanism": "VISA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 11,
+      "high": 11,
+      "moderate": 0
+     },
+     {
+      "mechanism": "VRSA",
+      "organism": "Staphylococcus aureus",
+      "isolates": 4,
+      "high": 4,
+      "moderate": 0
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 36,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "crossResistance": {
+    "rows": [
+     {
+      "antibioticClass": "Penicillins",
+      "isolates": 167,
+      "high": 110,
+      "moderate": 57,
+      "testedOnTwoOrMore": 506,
+      "percent": 33.00395256916996
+     },
+     {
+      "antibioticClass": "Fluoroquinolones",
+      "isolates": 133,
+      "high": 133,
+      "moderate": 0,
+      "testedOnTwoOrMore": 442,
+      "percent": 30.09049773755656
+     },
+     {
+      "antibioticClass": "Cephalosporins (3rd)",
+      "isolates": 90,
+      "high": 90,
+      "moderate": 0,
+      "testedOnTwoOrMore": 311,
+      "percent": 28.938906752411576
+     },
+     {
+      "antibioticClass": "Carbapenems",
+      "isolates": 65,
+      "high": 65,
+      "moderate": 0,
+      "testedOnTwoOrMore": 445,
+      "percent": 14.606741573033707
+     },
+     {
+      "antibioticClass": "Aminoglycosides",
+      "isolates": 60,
+      "high": 60,
+      "moderate": 0,
+      "testedOnTwoOrMore": 433,
+      "percent": 13.856812933025404
+     },
+     {
+      "antibioticClass": "Macrolides",
+      "isolates": 2,
+      "high": 2,
+      "moderate": 0,
+      "testedOnTwoOrMore": 48,
+      "percent": 4.166666666666667
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 18,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    }
+   },
+   "breadth": {
+    "bands": [
+     {
+      "band": "3-4 agents",
+      "isolates": 410
+     },
+     {
+      "band": "5-6 agents",
+      "isolates": 187
+     },
+     {
+      "band": "7-9 agents",
+      "isolates": 119
+     },
+     {
+      "band": "10 or more agents",
+      "isolates": 6
+     }
+    ],
+    "bandSuppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 4,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "rows": [
+     {
+      "organism": "Escherichia coli",
+      "isolates": 240,
+      "medianAgents": 4.0,
+      "maxAgents": 10
+     },
+     {
+      "organism": "Klebsiella pneumoniae",
+      "isolates": 205,
+      "medianAgents": 5.0,
+      "maxAgents": 10
+     },
+     {
+      "organism": "Staphylococcus aureus",
+      "isolates": 117,
+      "medianAgents": 4.0,
+      "maxAgents": 8
+     },
+     {
+      "organism": "Pseudomonas aeruginosa",
+      "isolates": 45,
+      "medianAgents": 3.0,
+      "maxAgents": 7
+     },
+     {
+      "organism": "Acinetobacter baumannii",
+      "isolates": 44,
+      "medianAgents": 5.0,
+      "maxAgents": 11
+     },
+     {
+      "organism": "Proteus mirabilis",
+      "isolates": 17,
+      "medianAgents": 4.0,
+      "maxAgents": 5
+     },
+     {
+      "organism": "Streptococcus pneumoniae",
+      "isolates": 17,
+      "medianAgents": 3.0,
+      "maxAgents": 5
+     },
+     {
+      "organism": "Salmonella enterica",
+      "isolates": 13,
+      "medianAgents": 3.0,
+      "maxAgents": 4
+     },
+     {
+      "organism": "Shigella flexneri",
+      "isolates": 10,
+      "medianAgents": 3.0,
+      "maxAgents": 4
+     },
+     {
+      "organism": "Enterococcus faecalis",
+      "isolates": 9,
+      "medianAgents": 3.0,
+      "maxAgents": 5
+     },
+     {
+      "organism": "Campylobacter jejuni",
+      "isolates": 3,
+      "medianAgents": 3.0,
+      "maxAgents": 4
+     },
+     {
+      "organism": "Haemophilus influenzae",
+      "isolates": 2,
+      "medianAgents": 3.0,
+      "maxAgents": 3
+     }
+    ],
+    "suppression": {
+     "withheld": 0,
+     "primary": 0,
+     "secondary": 0,
+     "cellsTotal": 12,
+     "threshold": 1,
+     "summary": "No cell was withheld. Every value shown rests on at least 1 records."
+    },
+    "isolates": 722,
+    "isolatesScreened": 1675,
+    "percent": 43.1044776119403,
+    "medianAgents": 4.0
+   }
+  }
+ ],
+ "basis": {
+  "ESBL": "Non-susceptible to two or more third generation cephalosporins, in an organism that commonly carries an extended-spectrum beta-lactamase. A phenotype consistent with ESBL production, not a confirmed enzyme.",
+  "Carbapenemase": "Resistant to at least one carbapenem. Carbapenem resistance has causes other than a carbapenemase, including porin loss alongside an AmpC.",
+  "MRSA": "Staphylococcus aureus resistant to oxacillin, methicillin or cefoxitin.",
+  "AmpC": "Resistant to two or more cephalosporins in an organism carrying an inducible chromosomal AmpC.",
+  "VRSA": "Staphylococcus aureus resistant to vancomycin.",
+  "VISA": "Staphylococcus aureus intermediate to vancomycin."
+ }
+}
