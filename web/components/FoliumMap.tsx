@@ -13,7 +13,7 @@
 import { asset } from "@/lib/basePath";
 
 export function FoliumMap({
-  src = asset("/maps/regions.html"),
+  src = asset("/maps/regions/"),
   height = 620,
   title = "Map of Ghana showing surveillance isolates by region",
 }: {

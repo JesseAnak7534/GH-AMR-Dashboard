@@ -585,10 +585,15 @@ def main() -> int:
            sections.export_mdr(frame, threshold, _rows, _suppress))
     regions = sections.export_regions(frame, threshold, _rows, _suppress)
     _write(args.out, "regions.json", regions)
+    # Written as maps/regions/index.html rather than maps/regions.html.
+    # A host serving the site with trailing slashes will not serve a bare
+    # .html file: Vercel redirects /maps/regions.html to the slashed form and
+    # that form back again, and both 404. A directory index is served by every
+    # static host, including the one this was developed against.
     map_path = export_map.build_region_map(
         regions.get("regions", []),
-        os.path.join(args.out, "..", "maps", "regions.html"))
-    print(f"  {'maps/regions.html':<22} "
+        os.path.join(args.out, "..", "maps", "regions", "index.html"))
+    print(f"  {'maps/regions/':<22} "
           f"{os.path.getsize(map_path) / 1024:7.1f} KB")
     _write(args.out, "custody.json",
            sections.export_custody(threshold, _rows, _suppress))
