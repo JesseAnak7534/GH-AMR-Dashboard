@@ -538,15 +538,11 @@ except Exception:
 # The login page is shown only when a visitor asks for it. It used to stand in
 # front of the whole application; the dashboard is now readable in aggregate
 # without it, and signing in unlocks record-level detail and every write path.
-# This application is the staff tool. Anyone who is not signed in gets the
-# sign-in screen, not a page of figures.
-#
-# It used to render a public landing page here instead -- a second copy of the
-# public site, built from the same modules but wrapped in the authenticated
-# shell's stylesheet, so the two fought each other and the result was a mess
-# with the sign-in buried at the foot of it. The public site is the Next.js
-# one in web/; this is where the data is managed.
-if not st.session_state.authenticated:
+# The sign-in screen appears when it is asked for, not by default. This
+# application is the deployed public system as well as the staff tool: a
+# visitor arriving at its URL gets the surveillance figures, and staff reach
+# the sign-in from the button at the foot of that page.
+if st.session_state.get("show_login") and not st.session_state.authenticated:
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -2134,10 +2130,15 @@ if str(page).startswith(PUBLIC_PAGE_PREFIX):
 # DASHBOARD LANDING PAGE
 # ============================================================================
 elif page == "Home":
-    # Only a signed-in reader gets this far -- the sign-in screen stops the
-    # script above -- so Home is the workspace: KPI row, resistance trend, top
-    # pathogens and sentinel alerts.
-    render_dashboard_page()
+    # Home means two things to two readers. A visitor gets the public landing
+    # page. Someone signed in gets their workspace -- KPI row, resistance
+    # trend, top pathogens, sentinel alerts -- because sending staff to the
+    # visitor's view leaves them with nothing to act on.
+    if st.session_state.get("authenticated"):
+        render_dashboard_page()
+    else:
+        from src.page_home import render_home_page
+        render_home_page()
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
