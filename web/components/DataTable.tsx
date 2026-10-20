@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { count, isWithheld, percent } from "@/lib/format";
-import { downloadCsv, figureFilename } from "@/lib/download";
 
 /**
  * A table the reader can search and sort.
@@ -85,7 +84,6 @@ export function DataTable<Row>({
   initialSort,
   pageSize = 25,
   emptyMessage = "Nothing to show.",
-  downloadName,
 }: {
   columns: Column<Row>[];
   rows: Row[];
@@ -95,8 +93,6 @@ export function DataTable<Row>({
   initialSort?: { key: string; direction: "asc" | "desc" };
   pageSize?: number;
   emptyMessage?: string;
-  /** Names the CSV. Omit to leave the table without a download. */
-  downloadName?: string;
 }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState(initialSort ?? null);
@@ -147,13 +143,9 @@ export function DataTable<Row>({
 
   return (
     <div className="space-y-2.5">
-      {searchKeys?.length || downloadName ? (
+      {searchKeys?.length ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <label
-            className={`flex items-center gap-2 text-[0.8rem] text-ink-soft ${
-              searchKeys?.length ? "" : "hidden"
-            }`}
-          >
+          <label className="flex items-center gap-2 text-[0.8rem] text-ink-soft">
             <span className="sr-only">{searchLabel}</span>
             <input
               type="search"
@@ -169,26 +161,6 @@ export function DataTable<Row>({
                 ? `${rows.length.toLocaleString("en-GB")} rows`
                 : `${sorted.length.toLocaleString("en-GB")} of ${rows.length.toLocaleString("en-GB")} rows`}
             </span>
-            {downloadName ? (
-              <button
-                type="button"
-                onClick={() =>
-                  downloadCsv(
-                    sorted,
-                    columns.map((c) => ({
-                      key: c.key,
-                      header: c.header,
-                      value: c.value as ((row: never) => unknown) | undefined,
-                    })),
-                    figureFilename(downloadName),
-                  )
-                }
-                title="Download these rows as CSV, exactly as filtered and sorted"
-                className="no-print rounded border border-rule-strong bg-paper px-2 py-1 text-[0.72rem] font-medium text-ink-soft transition-colors hover:border-brand hover:text-brand"
-              >
-                Download CSV
-              </button>
-            ) : null}
           </span>
         </div>
       ) : null}

@@ -128,14 +128,6 @@ export function MdrView({ data }: { data: MdrData }) {
         <Figure
           title={`Multidrug resistance by organism — ${name === "all" ? "all sectors" : titleCase(name)}`}
           hideTitle
-          csv={{
-            rows: slice.byOrganism,
-            columns: [
-              { key: "organism", header: "Organism" },
-              { key: "classification", header: "Classification" },
-              { key: "isolates", header: "Isolates" },
-            ],
-          }}
         >
           <StackedBars
             rows={grid.organisms.map((organism) => ({
@@ -149,6 +141,8 @@ export function MdrView({ data }: { data: MdrData }) {
             }))}
             series={grid.classes}
             colours={CLASSIFICATION_COLOUR}
+            xLabel="Share of the organism's isolates, by classification"
+            yLabel="Organism"
             labelWidth={200}
           />
         </Figure>
@@ -159,7 +153,6 @@ export function MdrView({ data }: { data: MdrData }) {
           searchKeys={["organism"]}
           searchLabel="Search organism"
           initialSort={{ key: "MDR", direction: "desc" }}
-          downloadName={`multidrug resistance ${name}`}
         />
         <SuppressionNote suppression={slice.byOrganismSuppression} />
       </Section>

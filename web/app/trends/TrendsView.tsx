@@ -146,21 +146,12 @@ export function TrendsView({ data }: { data: TrendsData }) {
         <Figure
           title={`Non-susceptibility by quarter — ${titleCase(sector)}`}
           hideTitle
-          csv={{
-            rows: slice.periods,
-            columns: [
-              { key: "period", header: "Quarter" },
-              { key: "isolates", header: "Isolates" },
-              { key: "observations", header: "Observations" },
-              { key: "percent_non_susceptible", header: "% non-susceptible" },
-              { key: "ci_low", header: "95% CI low" },
-              { key: "ci_high", header: "95% CI high" },
-            ],
-          }}
         >
           <TrendChart
             series={overall}
             unit="% non-susceptible"
+            xLabel="Quarter of specimen collection"
+            yLabel="% of results non-susceptible"
             denominatorLabel="observations"
           />
         </Figure>
@@ -169,7 +160,12 @@ export function TrendsView({ data }: { data: TrendsData }) {
       {pairs.length ? (
         <Section title="The most-tested pairs (susceptibility)">
           <Figure title={`Most-tested pairs — ${titleCase(sector)}`} hideTitle>
-            <TrendChart series={pairs} unit="% susceptible" />
+            <TrendChart
+              series={pairs}
+              unit="% susceptible"
+              xLabel="Quarter of specimen collection"
+              yLabel="% of isolates susceptible"
+            />
           </Figure>
         </Section>
       ) : (
@@ -188,7 +184,6 @@ export function TrendsView({ data }: { data: TrendsData }) {
           rows={slice.periods}
           initialSort={{ key: "period", direction: "asc" }}
           pageSize={20}
-          downloadName={`trend ${sector}`}
         />
         <SuppressionNote suppression={slice.suppression} />
       </Section>

@@ -136,17 +136,6 @@ export function ConsumptionView({
             <Figure
               title={`${unit} by ${humanise(block.by).toLowerCase()}`}
               hideTitle
-              csv={{
-                rows: block.rows,
-                columns: [
-                  { key: "group", header: humanise(block.by) },
-                  { key: "records", header: "Records" },
-                  ...(volumeKey
-                    ? [{ key: volumeKey, header: volumeUnit ?? "Quantity" }]
-                    : []),
-                  { key: valueKey, header: unit },
-                ],
-              }}
             >
             <BarChart
               rows={[...block.rows]
@@ -162,9 +151,11 @@ export function ConsumptionView({
                   denominator: volumeKey ? row[volumeKey] : row.records,
                   colour,
                 }))}
-              unit={`${unit}${
-                volumeUnit ? ` (${volumeUnit.toLowerCase()} in brackets)` : ""
-              }`}
+              unit={
+                volumeUnit ? `${volumeUnit} shown in brackets.` : ""
+              }
+              xLabel={unit}
+              yLabel={humanise(block.by)}
               labelWidth={220}
               decimals={1}
             />
@@ -175,7 +166,6 @@ export function ConsumptionView({
               searchKeys={["group"]}
               searchLabel="Search"
               initialSort={{ key: valueKey, direction: "desc" }}
-              downloadName={`${unit} by ${block.by}`}
             />
             <Caption>{block.caveat}</Caption>
           </div>

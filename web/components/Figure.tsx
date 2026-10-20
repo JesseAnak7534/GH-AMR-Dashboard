@@ -1,56 +1,97 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { CsvColumn, downloadCsv, figureFilename, svgToPng } from "@/lib/download";
+import { figureFilename, svgToPng } from "@/lib/download";
 
 /**
- * The frame every figure sits in, and the toolbar that comes with it.
+ * The frame every figure sits in, and the two controls that come with it.
  *
- * The Streamlit pages this replaced gave each chart a modebar and each table a
- * download button. Losing that was a real regression: on a surveillance site
- * people quote from, a figure you cannot take away is a figure you have to
- * retype.
+ * **Save the image.** The chart as a PNG, for a slide or a report. It is
+ * serialised from the SVG rather than screenshotted, so it stays sharp at any
+ * size.
  *
- * What it offers, and what it deliberately does not:
+ * **Expand.** Charts here are dense -- a heat map of thirteen organisms
+ * against forty agents -- and filling the screen is what a reader actually
+ * wants when they cannot read one.
  *
- * **Data** downloads the rows behind the figure, exactly as they are on screen
- * — after whatever filter and sort the reader applied, so the file matches
- * what they were looking at.
+ * What is deliberately absent:
  *
- * **Image** rasterises the chart itself. Serialised from the SVG rather than
- * screenshotted, so it is sharp at any size.
+ * **The data.** There is no download of the rows behind a figure, anywhere on
+ * this site. The picture and its printed values are what is published.
  *
- * **Expand** fills the screen. Charts here are dense -- a heat map of thirteen
- * organisms against forty agents -- and this is what a reader actually wants
- * when they cannot read one.
- *
- * There is no free zoom or pan, and that is a decision rather than an
- * omission. These axes are fixed on purpose: susceptibility runs 0-100% so
- * that a five-point difference cannot be made to look like a collapse. A
- * reader who can rescale can undo that, and the figure stops meaning what it
- * says. The map is the exception and has real zoom, because it is a map.
+ * **Zoom and pan.** These axes are fixed on purpose: susceptibility runs
+ * 0-100% so a five-point difference cannot be made to look like a collapse,
+ * and a trend's confidence band only means something against a stable scale. A
+ * reader who can rescale can undo that. The map is the exception and has real
+ * zoom, because it is a map.
  */
 
-function ToolbarButton({
+function SaveIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"
+         fill="none" stroke="currentColor" strokeWidth="1.5"
+         strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5v8" />
+      <path d="M4.5 6.5 8 10l3.5-3.5" />
+      <path d="M2 11v2.5h12V11" />
+    </svg>
+  );
+}
+
+function ExpandIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"
+         fill="none" stroke="currentColor" strokeWidth="1.5"
+         strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2H2v4" />
+      <path d="M10 2h4v4" />
+      <path d="M6 14H2v-4" />
+      <path d="M10 14h4v-4" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"
+         fill="none" stroke="currentColor" strokeWidth="1.5"
+         strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2.5 6h4V2" />
+      <path d="M13.5 6h-4V2" />
+      <path d="M2.5 10h4v4" />
+      <path d="M13.5 10h-4v4" />
+    </svg>
+  );
+}
+
+function ToolButton({
   onClick,
   label,
-  title,
+  children,
   busy,
 }: {
   onClick: () => void;
+  /** Read aloud and shown on hover. The icon alone names nothing. */
   label: string;
-  title: string;
+  children: React.ReactNode;
   busy?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      title={title}
+      title={label}
+      aria-label={label}
       disabled={busy}
-      className="rounded border border-rule-strong bg-paper px-2 py-1 text-[0.74rem] font-medium text-ink-soft transition-colors hover:border-brand hover:text-brand disabled:opacity-50"
+      className="inline-flex h-7 w-7 items-center justify-center rounded border border-rule-strong bg-paper text-ink-faint transition-colors hover:border-brand hover:text-brand disabled:opacity-40"
     >
-      {busy ? "…" : label}
+      {busy ? (
+        <span className="text-[0.7rem]" aria-hidden="true">
+          …
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
@@ -58,22 +99,19 @@ function ToolbarButton({
 export function Figure({
   title,
   caption,
-  csv,
   downloadable = true,
   expandable = true,
   hideTitle = false,
   children,
 }: {
-  /** Names the figure, and names the file it downloads as. */
+  /** Names the figure, and names the file its image saves as. */
   title: string;
   caption?: string;
-  /** The rows behind the figure. Omit where there are none to offer. */
-  csv?: { rows: unknown[]; columns: CsvColumn[]; name?: string };
-  /** Whether an image of the figure can be taken. Tables have no SVG. */
+  /** Whether an image can be taken. False where there is no SVG to take. */
   downloadable?: boolean;
   expandable?: boolean;
-  /** Keep the title for the filename but do not draw it. Use when the section
-   *  around the figure already names it -- saying it twice is clutter. */
+  /** Keep the title for the filename but do not draw it, where the section
+   *  around the figure already names it. */
   hideTitle?: boolean;
   children: React.ReactNode;
 }) {
@@ -93,7 +131,7 @@ export function Figure({
     try {
       await svgToPng(svg as SVGSVGElement, figureFilename(title));
     } catch (error) {
-      // Said out loud rather than swallowed: a button that silently does
+      // Said out loud rather than swallowed: a control that silently does
       // nothing is worse than one that explains itself.
       setFailed(`Could not save the image (${(error as Error).message}).`);
     } finally {
@@ -111,13 +149,13 @@ export function Figure({
     }
     node.requestFullscreen?.().then(
       () => setExpanded(true),
-      // Fullscreen can be refused -- an iframe without the permission, a
-      // browser that does not allow it. Fall back rather than do nothing.
+      // Fullscreen can be refused. Fall back to an in-page expansion rather
+      // than leaving the control dead.
       () => setExpanded((previous) => !previous),
     );
   }, []);
 
-  const hasToolbar = Boolean(csv?.rows.length) || downloadable || expandable;
+  const hasTools = downloadable || expandable;
 
   return (
     <figure
@@ -128,47 +166,40 @@ export function Figure({
           : "rounded-lg border border-rule bg-paper p-4"
       }
     >
-      <figcaption className="mb-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-        <div>
-          {hideTitle ? null : (
-            <h3 className="text-[0.98rem] font-semibold leading-snug">{title}</h3>
-          )}
-          {caption ? (
-            <p className="measure mt-0.5 text-[0.8rem] leading-relaxed text-ink-faint">
-              {caption}
-            </p>
-          ) : null}
-        </div>
-        {hasToolbar ? (
-          <div className="no-print flex shrink-0 gap-1.5">
-            {csv?.rows.length ? (
-              <ToolbarButton
-                label="Data"
-                title="Download these rows as CSV, exactly as filtered and sorted here"
-                onClick={() =>
-                  downloadCsv(csv.rows, csv.columns,
-                    figureFilename(csv.name ?? title))
-                }
-              />
-            ) : null}
-            {downloadable ? (
-              <ToolbarButton
-                label="Image"
-                title="Save this figure as a PNG"
-                onClick={saveImage}
-                busy={busy}
-              />
-            ) : null}
-            {expandable ? (
-              <ToolbarButton
-                label={expanded ? "Close" : "Expand"}
-                title={expanded ? "Leave full screen" : "Fill the screen"}
-                onClick={toggleExpand}
-              />
+      {hideTitle && !caption && !hasTools ? null : (
+        <figcaption className="mb-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div>
+            {hideTitle ? null : (
+              <h3 className="text-[0.98rem] font-semibold leading-snug">
+                {title}
+              </h3>
+            )}
+            {caption ? (
+              <p className="measure mt-0.5 text-[0.8rem] leading-relaxed text-ink-faint">
+                {caption}
+              </p>
             ) : null}
           </div>
-        ) : null}
-      </figcaption>
+          {hasTools ? (
+            <div className="no-print ml-auto flex shrink-0 gap-1.5">
+              {downloadable ? (
+                <ToolButton label="Save this figure as an image"
+                            onClick={saveImage} busy={busy}>
+                  <SaveIcon />
+                </ToolButton>
+              ) : null}
+              {expandable ? (
+                <ToolButton
+                  label={expanded ? "Leave full screen" : "Fill the screen"}
+                  onClick={toggleExpand}
+                >
+                  {expanded ? <CloseIcon /> : <ExpandIcon />}
+                </ToolButton>
+              ) : null}
+            </div>
+          ) : null}
+        </figcaption>
+      )}
 
       {children}
 

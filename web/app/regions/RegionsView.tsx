@@ -146,19 +146,6 @@ export function RegionsView({ data }: { data: RegionsData }) {
           title="Resistance by region"
           hideTitle
           downloadable={false}
-          csv={{
-            rows: data.regions,
-            columns: [
-              { key: "region", header: "Region" },
-              { key: "isolates", header: "Isolates" },
-              { key: "resistant", header: "Resistant" },
-              { key: "intermediate", header: "Intermediate" },
-              { key: "susceptible", header: "Susceptible" },
-              { key: "percent_resistant", header: "% R" },
-              { key: "percent_intermediate", header: "% I" },
-              { key: "percent_susceptible", header: "% S" },
-            ],
-          }}
         >
           <FoliumMap />
         </Figure>
@@ -172,7 +159,6 @@ export function RegionsView({ data }: { data: RegionsData }) {
           searchLabel="Search region"
           initialSort={{ key: "isolates", direction: "desc" }}
           pageSize={20}
-          downloadName="regions"
         />
         <SuppressionNote suppression={data.suppression} />
         <SuppressionNote suppression={data.bySectorSuppression} />

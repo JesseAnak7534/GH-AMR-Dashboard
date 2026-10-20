@@ -128,15 +128,14 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
         <Figure
           title="Isolates by sector"
           hideTitle
-          csv={{
-            rows: data.sectors,
-            columns: [
-              { key: "sector", header: "Sector" },
-              { key: "isolates", header: "Isolates" },
-            ],
-          }}
         >
-          <BarChart rows={sectorRows} unit="Isolates" labelWidth={140} />
+          <BarChart
+            rows={sectorRows}
+            unit=""
+            xLabel="Isolates"
+            yLabel="Sector"
+            labelWidth={140}
+          />
         </Figure>
         <SuppressionNote suppression={data.sectorSuppression} />
       </Section>
@@ -156,6 +155,8 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
               }))}
               series={grid.sectors}
               colours={data.palette}
+              xLabel="Share of the organism's isolates, by sector"
+              yLabel="Organism"
               labelWidth={180}
             />
           </div>

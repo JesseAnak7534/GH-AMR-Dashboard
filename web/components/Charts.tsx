@@ -58,6 +58,8 @@ export function BarChart({
   max: fixedMax,
   suffix = "",
   decimals,
+  xLabel,
+  yLabel,
 }: {
   rows: BarRow[];
   unit: string;
@@ -71,6 +73,12 @@ export function BarChart({
    *  none, and printing 7.514% implies a precision the denominator of 173
    *  does not support. */
   decimals?: number;
+  /** What the bars measure, drawn under the axis. */
+  xLabel?: string;
+  /** What the rows are, drawn over the category column. A horizontal bar
+   *  chart reads like a table, so the category label belongs at the head of
+   *  its column rather than rotated down the side. */
+  yLabel?: string;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const titleId = useId();
@@ -116,7 +124,11 @@ export function BarChart({
     8,
   );
   const barArea = chartWidth - labelWidth - (widest * 5.9 + 14);
-  const height = rows.length * rowHeight + 26;
+  // Room at the top for the category heading, and at the foot for the axis
+  // label beneath the tick numbers.
+  const headPad = yLabel ? 18 : 0;
+  const footPad = xLabel ? 20 : 0;
+  const height = rows.length * rowHeight + 26 + headPad + footPad;
   const scale = (value: number) => (value / max) * barArea;
 
   // Four or five ticks that land on round numbers and cover the maximum. The
@@ -137,19 +149,32 @@ export function BarChart({
       >
         <title id={titleId}>{`${rows.length} values, in ${unit}`}</title>
 
+        {yLabel ? (
+          <text
+            x={labelWidth - 8}
+            y={11}
+            fontSize={10}
+            fontWeight={700}
+            fill={LABEL}
+            textAnchor="end"
+          >
+            {yLabel}
+          </text>
+        ) : null}
+
         {ticks(max, step).map((tick) => (
           <g key={tick}>
             <line
               x1={labelWidth + scale(tick)}
               x2={labelWidth + scale(tick)}
-              y1={0}
-              y2={height - 22}
+              y1={headPad}
+              y2={height - 22 - footPad}
               stroke={GRID}
               strokeWidth={1}
             />
             <text
               x={labelWidth + scale(tick)}
-              y={height - 8}
+              y={height - 8 - footPad}
               fontSize={9.5}
               fill={LABEL}
               textAnchor="middle"
@@ -159,9 +184,22 @@ export function BarChart({
           </g>
         ))}
 
+        {xLabel ? (
+          <text
+            x={labelWidth + barArea / 2}
+            y={height - 4}
+            fontSize={10}
+            fontWeight={700}
+            fill={LABEL}
+            textAnchor="middle"
+          >
+            {xLabel}
+          </text>
+        ) : null}
+
         {rows.map((row, index) => {
           const value = numeric(row.value);
-          const y = index * rowHeight + 4;
+          const y = index * rowHeight + 4 + headPad;
           const fill = row.colour ?? colour;
           const faded = hovered !== null && hovered !== index;
           return (
@@ -255,8 +293,8 @@ export function BarChart({
         <line
           x1={labelWidth}
           x2={labelWidth}
-          y1={0}
-          y2={height - 22}
+          y1={headPad}
+          y2={height - 22 - footPad}
           stroke={AXIS}
           strokeWidth={1}
         />
@@ -517,12 +555,16 @@ export function StackedBars({
   colours,
   labelWidth = 190,
   showPercent = true,
+  xLabel,
+  yLabel,
 }: {
   rows: StackedRow[];
   series: string[];
   colours: Record<string, string>;
   labelWidth?: number;
   showPercent?: boolean;
+  xLabel?: string;
+  yLabel?: string;
 }) {
   const [active, setActive] = useState<string | null>(null);
   const titleId = useId();
@@ -540,7 +582,9 @@ export function StackedBars({
   const rowHeight = 26;
   const chartWidth = 620;
   const barArea = chartWidth - labelWidth - 66;
-  const height = drawable.length * rowHeight + 8;
+  const headPad = yLabel ? 18 : 0;
+  const footPad = xLabel ? 18 : 0;
+  const height = drawable.length * rowHeight + 8 + headPad + footPad;
 
   return (
     <figure className="overflow-x-auto">
@@ -553,8 +597,20 @@ export function StackedBars({
         <title id={titleId}>
           {`${drawable.length} categories split across ${series.length} series`}
         </title>
+        {yLabel ? (
+          <text x={labelWidth - 8} y={11} fontSize={10} fontWeight={700}
+                fill="#6b7378" textAnchor="end">
+            {yLabel}
+          </text>
+        ) : null}
+        {xLabel ? (
+          <text x={labelWidth + barArea / 2} y={height - 4} fontSize={10}
+                fontWeight={700} fill="#6b7378" textAnchor="middle">
+            {xLabel}
+          </text>
+        ) : null}
         {drawable.map((row, index) => {
-          const y = index * rowHeight + 4;
+          const y = index * rowHeight + 4 + headPad;
           let offset = 0;
           return (
             <g key={`${row.label}-${index}`}>

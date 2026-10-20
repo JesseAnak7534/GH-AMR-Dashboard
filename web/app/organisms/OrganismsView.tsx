@@ -214,16 +214,14 @@ export function OrganismsView({
             <Figure
               title={`Most frequently isolated — ${sector === "all" ? "all sectors" : titleCase(sector)}`}
               hideTitle
-              csv={{
-                rows,
-                columns: [
-                  { key: "organism", header: "Organism" },
-                  { key: "isolates", header: "Isolates" },
-                  { key: "percent", header: "% of isolates" },
-                ],
-              }}
             >
-              <BarChart rows={chartRows} unit="Isolates" colour={slice?.colour} />
+              <BarChart
+                rows={chartRows}
+                unit=""
+                xLabel="Isolates"
+                yLabel="Organism"
+                colour={slice?.colour}
+              />
             </Figure>
           </Section>
 
@@ -234,7 +232,6 @@ export function OrganismsView({
               searchKeys={["organism"]}
               searchLabel="Search organism"
               initialSort={{ key: "isolates", direction: "desc" }}
-              downloadName={`organisms ${sector}`}
             />
             <SuppressionNote suppression={slice?.suppression} />
           </Section>
@@ -248,7 +245,6 @@ export function OrganismsView({
           searchKeys={["specimenType"]}
           searchLabel="Search specimen type"
           initialSort={{ key: "isolates", direction: "desc" }}
-          downloadName={`specimen types ${sector}`}
         />
         <SuppressionNote suppression={slice?.specimenTypeSuppression} />
       </Section>

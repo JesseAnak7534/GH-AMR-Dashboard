@@ -146,7 +146,9 @@ export function CustodyChain({
               value: event.events,
               colour: "#1d4d43",
             }))}
-            unit="Events recorded"
+            unit=""
+            xLabel="Events recorded"
+            yLabel="Event"
             labelWidth={150}
           />
         </div>

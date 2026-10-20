@@ -132,13 +132,6 @@ export function PpsView({ data }: { data: UseData }) {
             <Figure
               title={`Prescribing by ${breakdown.label.toLowerCase()}`}
               hideTitle
-              csv={{
-                rows: breakdown.rows,
-                columns: [
-                  { key: "value", header: breakdown.label },
-                  { key: "prescriptions", header: "Prescriptions" },
-                ],
-              }}
             >
               <BarChart
                 rows={[...breakdown.rows]
@@ -153,7 +146,9 @@ export function PpsView({ data }: { data: UseData }) {
                     value: row.prescriptions,
                     colour: "#8a6a22",
                   }))}
-                unit="Prescriptions"
+                unit=""
+                xLabel="Prescriptions"
+                yLabel={breakdown.label}
                 labelWidth={230}
               />
             </Figure>
@@ -163,7 +158,6 @@ export function PpsView({ data }: { data: UseData }) {
               searchKeys={["value"]}
               searchLabel="Search"
               initialSort={{ key: "prescriptions", direction: "desc" }}
-              downloadName={`prescribing by ${breakdown.label}`}
             />
           </div>
         </Section>
@@ -177,13 +171,14 @@ export function PpsView({ data }: { data: UseData }) {
               value: ward.prescriptions,
               colour: OKABE_ITO.purple,
             }))}
-            unit="Prescriptions"
+            unit=""
+            xLabel="Prescriptions"
+            yLabel="Ward"
             labelWidth={200}
           />
           <DataTable
             columns={wardColumns}
             rows={pps.wards}
-            downloadName="prescribing by ward"
           />
         </Section>
       ) : null}
@@ -196,7 +191,9 @@ export function PpsView({ data }: { data: UseData }) {
               value: row.prescriptions,
               colour: OKABE_ITO.vermillion,
             }))}
-            unit="Prescriptions"
+            unit=""
+            xLabel="Prescriptions"
+            yLabel="Course length"
             labelWidth={90}
           />
         </Section>

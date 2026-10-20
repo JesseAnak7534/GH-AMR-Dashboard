@@ -8,42 +8,10 @@
  * numbers behind a figure are the point, and a reader who cannot get at them
  * has to retype them.
  *
- * Two formats, for two uses. CSV is the data — exactly the rows on screen,
- * after whatever filtering and sorting the reader applied, so what is
- * downloaded is what was seen. PNG is the picture, for a slide or a report.
+ * What a reader can take is the picture, for a slide or a report. The rows
+ * behind it are not downloadable anywhere on this site: the figure and its
+ * printed values are what is published.
  */
-
-/** One CSV cell, quoted only where it has to be. */
-function cell(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  const text = String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-export interface CsvColumn {
-  key: string;
-  header: string;
-  /** Pull the value out, where it is not simply `row[key]`. */
-  value?: (row: never) => unknown;
-}
-
-export function toCsv(rows: unknown[], columns: CsvColumn[]): string {
-  const head = columns.map((c) => cell(c.header)).join(",");
-  const body = rows.map((row) =>
-    columns
-      .map((c) =>
-        cell(
-          c.value
-            ? c.value(row as never)
-            : (row as Record<string, unknown>)[c.key],
-        ),
-      )
-      .join(","),
-  );
-  // CRLF and a BOM: Excel opens UTF-8 CSV as mojibake without them, and this
-  // data has organism names with accents in it.
-  return "﻿" + [head, ...body].join("\r\n");
-}
 
 export function download(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -56,15 +24,6 @@ export function download(blob: Blob, filename: string): void {
   // Revoked on the next tick: revoking immediately cancels the download in
   // some browsers before it has started.
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-export function downloadCsv(
-  rows: unknown[],
-  columns: CsvColumn[],
-  filename: string,
-): void {
-  download(new Blob([toCsv(rows, columns)], { type: "text/csv;charset=utf-8" }),
-    filename.endsWith(".csv") ? filename : `${filename}.csv`);
 }
 
 /**

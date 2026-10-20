@@ -50,6 +50,8 @@ export function TrendChart({
   denominatorLabel = "tested",
   height = 290,
   axisMax,
+  xLabel = "Period",
+  yLabel,
 }: {
   series: TrendSeries[];
   unit: string;
@@ -59,6 +61,9 @@ export function TrendChart({
    *  scales to the data, which is what a consumption rate needs — DDD per
    *  1,000 patient-days is not bounded at a hundred. */
   axisMax?: number | null;
+  /** Drawn under the period labels and rotated down the left edge. */
+  xLabel?: string;
+  yLabel?: string;
 }) {
   // A percentage axis prints a percentage; anything else prints a number.
   // Appending % to a consumption rate turned 100.2 mg/kg into "100.2%".
@@ -91,10 +96,11 @@ export function TrendChart({
   );
 
   const width = 720;
-  const left = 42;
+  // Wider left gutter when a rotated axis label has to sit outside the ticks.
+  const left = yLabel ? 58 : 42;
   const right = 14;
   const topPad = 10;
-  const bottom = 34;
+  const bottom = xLabel ? 50 : 34;
   const plotWidth = width - left - right;
   const plotHeight = height - topPad - bottom;
 
@@ -143,12 +149,38 @@ export function TrendChart({
           </g>
         ))}
 
+        {yLabel ? (
+          <text
+            x={14}
+            y={topPad + plotHeight / 2}
+            fontSize={10}
+            fontWeight={700}
+            fill={LABEL}
+            textAnchor="middle"
+            transform={`rotate(-90 14 ${topPad + plotHeight / 2})`}
+          >
+            {yLabel}
+          </text>
+        ) : null}
+        {xLabel ? (
+          <text
+            x={left + plotWidth / 2}
+            y={height - 6}
+            fontSize={10}
+            fontWeight={700}
+            fill={LABEL}
+            textAnchor="middle"
+          >
+            {xLabel}
+          </text>
+        ) : null}
+
         {periods.map((period, index) =>
           index % labelEvery === 0 ? (
             <text
               key={period}
               x={x(period)}
-              y={height - 12}
+              y={height - (xLabel ? 26 : 12)}
               fontSize={9.5}
               fill={LABEL}
               textAnchor="middle"

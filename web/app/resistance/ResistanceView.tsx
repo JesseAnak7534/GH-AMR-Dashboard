@@ -368,21 +368,12 @@ export function ResistanceView({
                 <Figure
                   title={`Susceptibility — ${titleCase(sector)}${value ? ` · ${value}` : ""}`}
                   hideTitle
-                  csv={{
-                    rows,
-                    columns: [
-                      { key: "organism", header: "Organism" },
-                      { key: "antibiotic", header: "Antibiotic" },
-                      { key: "tested", header: "Isolates tested" },
-                      { key: "percent_susceptible", header: "% susceptible" },
-                      { key: "ci_low", header: "95% CI low" },
-                      { key: "ci_high", header: "95% CI high" },
-                    ],
-                  }}
                 >
                   <BarChart
                     rows={lowest}
-                    unit="% susceptible (95% CI, isolates tested in brackets)"
+                    unit="Isolates tested shown in brackets. The bar through each point is the 95% confidence interval."
+                    xLabel="% of tested isolates susceptible"
+                    yLabel="Organism · antibiotic"
                     labelWidth={290}
                     max={100}
                     suffix="%"
@@ -394,15 +385,6 @@ export function ResistanceView({
                   title={`Susceptibility matrix — ${titleCase(sector)}`}
                   hideTitle
                   downloadable={false}
-                  csv={{
-                    rows,
-                    columns: [
-                      { key: "organism", header: "Organism" },
-                      { key: "antibiotic", header: "Antibiotic" },
-                      { key: "tested", header: "Isolates tested" },
-                      { key: "percent_susceptible", header: "% susceptible" },
-                    ],
-                  }}
                 >
                   <HeatGrid
                     cells={rows.map((row) => ({
@@ -427,7 +409,6 @@ export function ResistanceView({
               searchKeys={["organism", "antibiotic"]}
               searchLabel="Search organism or antibiotic"
               initialSort={{ key: "tested", direction: "desc" }}
-              downloadName={`antibiogram ${sector}${value ? " " + value : ""}`}
             />
             <SuppressionNote suppression={slice?.suppression} />
           </Section>
@@ -462,7 +443,9 @@ export function ResistanceView({
                   denominator: row.observations,
                   colour: "#d62728",
                 }))}
-              unit="% non-susceptible (95% CI, results in brackets)"
+              unit="Results shown in brackets. The bar through each point is the 95% confidence interval."
+              xLabel="% of results non-susceptible"
+              yLabel={activeStratum.label}
               labelWidth={230}
               max={100}
               suffix="%"
