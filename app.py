@@ -538,11 +538,24 @@ except Exception:
 # The login page is shown only when a visitor asks for it. It used to stand in
 # front of the whole application; the dashboard is now readable in aggregate
 # without it, and signing in unlocks record-level detail and every write path.
-# The sign-in screen appears when it is asked for, not by default. This
-# application is the deployed public system as well as the staff tool: a
-# visitor arriving at its URL gets the surveillance figures, and staff reach
-# the sign-in from the button at the foot of that page.
-if st.session_state.get("show_login") and not st.session_state.authenticated:
+# ── Where the public figures live ─────────────────────────────────────────
+#
+# This application is the staff tool; the published figures are a static site
+# built from scripts/export_public_data.py and deployed separately. Anyone
+# arriving here without an account is pointed there. Overridable, so a change
+# of host does not need a code change.
+PUBLIC_SITE_URL = os.environ.get(
+    "PUBLIC_SITE_URL",
+    "https://jesseanak7534.github.io/GH-AMR-Dashboard/")
+PUBLIC_SITE_LABEL = (PUBLIC_SITE_URL
+                     .replace("https://", "")
+                     .replace("http://", "")
+                     .rstrip("/"))
+
+# This application is the staff tool. The public face is the static site at
+# PUBLIC_SITE_URL, so anyone not signed in gets the sign-in screen and a
+# signpost to the figures -- rather than a second, staler copy of them.
+if not st.session_state.authenticated:
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -884,6 +897,13 @@ if st.session_state.get("show_login") and not st.session_state.authenticated:
         st.markdown('<div class="form-eyebrow">Secure Access</div>', unsafe_allow_html=True)
         st.markdown('<div class="form-title">Welcome back</div>', unsafe_allow_html=True)
         st.markdown('<div class="form-sub">Sign in to continue to your surveillance workspace.</div>', unsafe_allow_html=True)
+        # Most people arriving at this URL want the figures, not the workspace.
+        st.markdown(
+            f'<div class="form-sub" style="margin-top:-0.35rem">Looking for the '
+            f'surveillance figures? They are published at '
+            f'<a href="{PUBLIC_SITE_URL}" target="_blank" rel="noopener">'
+            f'{PUBLIC_SITE_LABEL}</a>.</div>',
+            unsafe_allow_html=True)
 
         tab1, tab2 = st.tabs(["Sign in", "Information"])
 
@@ -2113,15 +2133,10 @@ if str(page).startswith(PUBLIC_PAGE_PREFIX):
 # DASHBOARD LANDING PAGE
 # ============================================================================
 elif page == "Home":
-    # Home means two things to two readers. A visitor gets the public landing
-    # page. Someone signed in gets their workspace -- KPI row, resistance
-    # trend, top pathogens, sentinel alerts -- because sending staff to the
-    # visitor's view leaves them with nothing to act on.
-    if st.session_state.get("authenticated"):
-        render_dashboard_page()
-    else:
-        from src.page_home import render_home_page
-        render_home_page()
+    # Only a signed-in reader reaches this: the sign-in screen stops the script
+    # above. So Home is the workspace -- KPI row, resistance trend, top
+    # pathogens, sentinel alerts.
+    render_dashboard_page()
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
