@@ -49,6 +49,13 @@ const SEVERITY_COLOUR: Record<string, string> = {
   HIGH: OKABE_ITO.vermillion,
 };
 
+/** The "YYYY-MM" label a given number of months after another. */
+function monthsAfter(period: string, months: number): string {
+  const [year, month] = period.split("-").map(Number);
+  const index = (year ?? 0) * 12 + (month ?? 1) - 1 + months;
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`;
+}
+
 const DIRECTION_NOTE: Record<string, string> = {
   increasing:
     "The second half of the record is more than five points more resistant than the first.",
@@ -61,7 +68,11 @@ const DIRECTION_NOTE: Record<string, string> = {
 
 export function RiskView({ data }: { data: RiskData }) {
   const sectors = data.slices.map((slice) => slice.sector);
-  const [sector, setSector] = useState(sectors[0] ?? "human");
+  // Human first where it exists. Slices arrive in alphabetical order, so
+  // taking the first one landed every visitor on the animal sector.
+  const [sector, setSector] = useState(
+    sectors.includes("human") ? "human" : (sectors[0] ?? "human"),
+  );
   const [floor, setFloor] = useState(0);
   const slice =
     data.slices.find((candidate) => candidate.sector === sector) ??
@@ -123,18 +134,53 @@ export function RiskView({ data }: { data: RiskData }) {
   ];
 
   const history = slice.forecast.history;
+  const measured = history.map((point) => ({
+    period: point.period,
+    value: point.resistancePercent,
+    low: null,
+    high: null,
+    denominator: point.observations,
+  }));
+
+  // The projection, on the same axis as the months it was fitted to and
+  // broken rather than solid. A separate figure for it put the predicted
+  // numbers on a chart of their own, where they read as measurements; drawn
+  // here it starts from the last measured point and the eye follows it out of
+  // the data.
+  const last = [...history].reverse().find(
+    (point) => point.resistancePercent !== null,
+  );
+  const projected = last
+    ? [
+        {
+          period: last.period,
+          value: last.resistancePercent,
+          low: null,
+          high: null,
+          denominator: null,
+        },
+        ...slice.forecast.points.map((point) => ({
+          period: monthsAfter(last.period, point.monthsAhead),
+          value: point.percent,
+          low: null,
+          high: null,
+          denominator: null,
+        })),
+      ]
+    : [];
+
   const forecastSeries = [
-    {
-      label: "Measured, by month",
-      colour: OKABE_ITO.blue,
-      points: history.map((point) => ({
-        period: point.period,
-        value: point.resistancePercent,
-        low: null,
-        high: null,
-        denominator: point.observations,
-      })),
-    },
+    { label: "Measured", colour: OKABE_ITO.blue, points: measured },
+    ...(projected.length > 1
+      ? [
+          {
+            label: "Projected",
+            colour: OKABE_ITO.vermillion,
+            points: projected,
+            dashed: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -162,23 +208,27 @@ export function RiskView({ data }: { data: RiskData }) {
           {
             value: percent(slice.statistics.resistancePercent),
             label: "Results resistant",
+            href: "#scores",
           },
           {
             value: percent(slice.statistics.intermediatePercent),
             label: "Intermediate",
+            href: "#fall",
           },
           {
             value: percent(slice.statistics.susceptiblePercent),
             label: "Susceptible",
+            href: "#summary",
           },
           {
             value: count(slice.statistics.observations),
             label: "Results assessed",
+            href: "#burden",
           },
         ]}
       />
 
-      <Section title="How the results fall">
+      <Section id="fall" title="How the results fall">
         <ProportionBar
           parts={[
             {
@@ -201,6 +251,7 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="direction"
         title="Direction of travel"
         intro="The first half of the record against the second."
       >
@@ -234,13 +285,10 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="scores"
         title="Organism risk scores"
         intro="Which organisms carry the most resistance, on the most evidence, across the widest panel."
       >
-        <Note tone="limit">
-          A way of ordering a list for review, not a validated measure of
-          danger.
-        </Note>
 
         <div className="rounded-lg border border-rule bg-shell px-4 py-3.5">
           <label className="block max-w-[22rem]">
@@ -298,6 +346,7 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="burden"
         title="Where the burden sits"
         intro="Which specimens the resistance is coming from."
       >
@@ -347,6 +396,7 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="emerging"
         title="Emerging patterns"
         intro="Organism–agent pairs that were heavily resistant in the most recent three months. Read each one against its count."
       >
@@ -380,8 +430,9 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="forecast"
         title="Where the trend is heading"
-        intro="The monthly rate, and where its slope points."
+        intro="The monthly rate, and the projection its slope gives."
       >
         {slice.forecast.error ? (
           <Note tone="limit">{slice.forecast.error}</Note>
@@ -400,8 +451,7 @@ export function RiskView({ data }: { data: RiskData }) {
               />
             </Figure>
             <Note tone="limit">
-              A straight line through the months so far. Not a prediction of
-              resistance in Ghana.
+              The dashed line is a projection, not a forecast.
             </Note>
           </>
         )}
@@ -442,12 +492,10 @@ export function RiskView({ data }: { data: RiskData }) {
       </Section>
 
       <Section
+        id="summary"
         title="Susceptibility summary"
         intro="Susceptibility for each organism–agent pair, with its interval."
       >
-        <Note tone="limit">
-          Not prescribing guidance, and not a cumulative antibiogram.
-        </Note>
         <StatStrip
           stats={[
             {

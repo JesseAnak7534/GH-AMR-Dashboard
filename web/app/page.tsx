@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NAV_GROUPS, groupSections, getManifest } from "@/lib/data";
+import { OKABE_ITO } from "@/lib/palette";
 import { count, monthYear } from "@/lib/format";
 
 /**
@@ -47,23 +48,72 @@ export default function HomePage() {
       {/* ── How much data ──────────────────────────────────────────── */}
       <section className="border-b border-rule bg-shell">
         <div className="mx-auto max-w-[1180px] px-5 py-8">
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+          <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {[
-              [manifest.counts.specimens, "Specimens"],
-              [manifest.counts.isolates, "Isolates"],
-              [manifest.counts.results, "Susceptibility results"],
-              [manifest.counts.genomes, "Genomes sequenced"],
-              [manifest.counts.laboratories, "Laboratories"],
-              [manifest.counts.regions, "Regions"],
-            ].map(([value, label]) => (
-              <div key={label as string}>
-                <dd className="text-[1.75rem] font-bold leading-none tracking-tight tabular-nums">
-                  {count(value)}
+              {
+                value: manifest.counts.specimens,
+                label: "Specimens",
+                href: "/quality",
+                colour: OKABE_ITO.blue,
+              },
+              {
+                value: manifest.counts.isolates,
+                label: "Isolates",
+                href: "/organisms",
+                colour: OKABE_ITO.vermillion,
+              },
+              {
+                value: manifest.counts.results,
+                label: "Susceptibility results",
+                href: "/resistance",
+                colour: OKABE_ITO.green,
+              },
+              {
+                value: manifest.counts.genomes,
+                label: "Genomes sequenced",
+                href: "/genomics",
+                colour: OKABE_ITO.purple,
+              },
+              {
+                value: manifest.counts.laboratories,
+                label: "Laboratories",
+                href: "/hai",
+                colour: OKABE_ITO.orange,
+              },
+              {
+                value: manifest.counts.regions,
+                label: "Regions",
+                href: "/regions",
+                colour: OKABE_ITO.black,
+              },
+            ].map((stat) => (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="group relative overflow-hidden rounded-lg border border-rule px-4 py-3.5 pl-5 transition-all hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_8px_22px_rgba(22,24,26,0.1)]"
+                style={{ background: `${stat.colour}0f` }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-0 h-full w-[4px]"
+                  style={{ background: stat.colour }}
+                />
+                <dd
+                  className="text-[1.75rem] font-bold leading-none tracking-tight tabular-nums"
+                  style={{ color: stat.colour }}
+                >
+                  {count(stat.value)}
                 </dd>
                 <dt className="mt-1.5 text-[0.79rem] font-medium text-ink-soft">
-                  {label as string}
+                  {stat.label}{" "}
+                  <span
+                    aria-hidden="true"
+                    className="inline-block transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
                 </dt>
-              </div>
+              </Link>
             ))}
           </dl>
           <p className="measure mt-6 text-[0.85rem] leading-relaxed text-ink-faint">

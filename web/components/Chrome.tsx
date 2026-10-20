@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Suppression } from "@/lib/data";
+import { STAT_SEQUENCE } from "@/lib/palette";
 
 /**
  * Page furniture: the pieces that repeat on every section page.
@@ -57,14 +58,18 @@ export function Container({ children }: { children: React.ReactNode }) {
 export function Section({
   title,
   intro,
+  id,
   children,
 }: {
   title: string;
   intro?: string;
+  /** An anchor, so a figure card elsewhere on the page can link to it. The
+   *  scroll margin keeps the heading clear of the sticky masthead. */
+  id?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-4">
+    <section id={id} className="scroll-mt-24 space-y-4">
       <div>
         <h2 className="text-[1.3rem] font-bold leading-snug">{title}</h2>
         {intro ? (
@@ -78,31 +83,89 @@ export function Section({
   );
 }
 
-export function StatStrip({
-  stats,
-}: {
-  stats: { value: string; label: string; hint?: string }[];
-}) {
+export interface Stat {
+  value: string;
+  label: string;
+  hint?: string;
+  /** The card's accent. Omitted, it takes the next colour in the Okabe-Ito
+   *  sequence, so a strip is coloured without every caller choosing. */
+  colour?: string;
+  /** Where the card leads. A card with a destination is a link, and the whole
+   *  card is the target rather than a word inside it. Cards with nothing to
+   *  point at stay as they are: a link that goes somewhere unrelated is worse
+   *  than no link. */
+  href?: string;
+}
+
+/**
+ * The figures at the head of a block.
+ *
+ * Each card carries its own colour from the Okabe-Ito set, which stays
+ * distinguishable under every common form of colour blindness. The colour is
+ * never the only signal -- the label is always written out -- so a card means
+ * the same thing to a reader who cannot see the difference.
+ */
+export function StatStrip({ stats }: { stats: Stat[] }) {
   return (
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="rounded-lg border border-rule bg-paper px-4 py-3.5"
-        >
-          <dd className="text-[1.6rem] font-bold leading-none tracking-tight">
-            {stat.value}
-          </dd>
-          <dt className="mt-1.5 text-[0.78rem] font-medium text-ink-soft">
-            {stat.label}
-          </dt>
-          {stat.hint ? (
-            <p className="mt-1 text-[0.7rem] leading-snug text-ink-faint">
-              {stat.hint}
-            </p>
-          ) : null}
-        </div>
-      ))}
+      {stats.map((stat, index) => {
+        const colour = stat.colour ?? STAT_SEQUENCE[index % STAT_SEQUENCE.length];
+        const body = (
+          <>
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-0 h-full w-[4px]"
+              style={{ background: colour }}
+            />
+            <dd
+              className="text-[1.6rem] font-bold leading-none tracking-tight"
+              style={{ color: colour }}
+            >
+              {stat.value}
+            </dd>
+            <dt className="mt-1.5 text-[0.78rem] font-medium text-ink-soft">
+              {stat.label}
+            </dt>
+            {stat.hint ? (
+              <p className="mt-1 text-[0.7rem] leading-snug text-ink-faint">
+                {stat.hint}
+              </p>
+            ) : null}
+          </>
+        );
+
+        const shell =
+          "relative overflow-hidden rounded-lg border border-rule px-4 py-3.5 pl-5";
+
+        return stat.href ? (
+          <Link
+            key={stat.label}
+            href={stat.href}
+            className={`${shell} group block transition-all hover:-translate-y-0.5 hover:border-rule-strong hover:shadow-[0_8px_22px_rgba(22,24,26,0.1)]`}
+            style={{ background: `${colour}0f` }}
+          >
+            {body}
+            <span
+              aria-hidden="true"
+              className="mt-1.5 block text-[0.72rem] font-semibold"
+              style={{ color: colour }}
+            >
+              Open{" "}
+              <span className="inline-block transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
+          </Link>
+        ) : (
+          <div
+            key={stat.label}
+            className={shell}
+            style={{ background: `${colour}0f` }}
+          >
+            {body}
+          </div>
+        );
+      })}
     </dl>
   );
 }

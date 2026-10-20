@@ -38,7 +38,11 @@ const TIER_COLOUR: Record<string, string> = {
 
 export function MechanismsView({ data }: { data: MechanismsData }) {
   const sectors = data.slices.map((slice) => slice.sector);
-  const [sector, setSector] = useState(sectors[0] ?? "human");
+  // Human first where it exists. Slices arrive in alphabetical order, so
+  // taking the first one landed every visitor on the animal sector.
+  const [sector, setSector] = useState(
+    sectors.includes("human") ? "human" : (sectors[0] ?? "human"),
+  );
   const slice =
     data.slices.find((candidate) => candidate.sector === sector) ??
     data.slices[0];
@@ -100,27 +104,30 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
 
       <StatStrip
         stats={[
-          { value: count(slice.isolatesScreened), label: "Isolates screened" },
+          {
+            value: count(slice.isolatesScreened),
+            label: "Isolates screened",
+            href: "/organisms",
+          },
           {
             value: count(slice.mechanisms.totals.length),
             label: "Mechanisms inferred",
+            href: "#inferred",
           },
           {
             value: percent(slice.breadth.percent ?? null),
             label: "Resistant to 3 or more agents",
+            href: "#breadth",
             hint: `${count(slice.breadth.isolates ?? 0)} isolates`,
           },
           {
             value: count(slice.breadth.medianAgents ?? null),
             label: "Median agents resisted",
+            href: "#cross",
             hint: "among those resistant to three or more",
           },
         ]}
       />
-
-      <Note tone="limit">
-        These are resistance patterns, not confirmed enzymes or genes.
-      </Note>
 
       <Section title="WHO priority phenotypes">
         <Figure
@@ -146,7 +153,7 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
         <SuppressionNote suppression={slice.sentinel.suppression} />
       </Section>
 
-      <Section title="Inferred mechanisms">
+      <Section id="inferred" title="Inferred mechanisms">
         <Figure
           title={`Inferred resistance mechanisms — ${sectorLabel}`}
           hideTitle
@@ -187,7 +194,7 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
         <SuppressionNote suppression={slice.mechanisms.suppression} />
       </Section>
 
-      <Section title="Cross-resistance within a class">
+      <Section id="cross" title="Cross-resistance within a class">
         <Figure
           title={`Cross-resistance within an antibiotic class — ${sectorLabel}`}
           caption="Isolates resisting two or more agents of the class."
@@ -212,6 +219,7 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
       </Section>
 
       <Section
+        id="breadth"
         title="How many agents an isolate defeats"
         intro="Isolates resistant to three agents or more."
       >

@@ -33,8 +33,16 @@ export function PpsView({ data }: { data: UseData }) {
     <>
       <StatStrip
         stats={[
-          { value: count(pps.surveys), label: "Surveys" },
-          { value: count(pps.patients), label: "Patients surveyed" },
+          {
+            value: count(pps.surveys),
+            label: "Surveys",
+            href: "#quality",
+          },
+          {
+            value: count(pps.patients),
+            label: "Patients surveyed",
+            href: "#wards",
+          },
           {
             value:
               pps.prevalencePercent === null ||
@@ -42,6 +50,7 @@ export function PpsView({ data }: { data: UseData }) {
                 ? "—"
                 : percent(pps.prevalencePercent),
             label: "On an antibiotic",
+            href: "#prescribed",
           },
           {
             value:
@@ -50,11 +59,12 @@ export function PpsView({ data }: { data: UseData }) {
                 ? "—"
                 : `${pps.durationMedianDays} days`,
             label: "Median course length",
+            href: "#course",
           },
         ]}
       />
 
-      <Section title="Prescribing quality">
+      <Section id="quality" title="Prescribing quality">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Gauge
             value={pps.guidelineCompliantPercent ?? null}
@@ -89,7 +99,7 @@ export function PpsView({ data }: { data: UseData }) {
       </Section>
 
       {breakdown ? (
-        <Section title="What was prescribed">
+        <Section id="prescribed" title="What was prescribed">
           <FilterBar
             controls={[
               {
@@ -132,7 +142,7 @@ export function PpsView({ data }: { data: UseData }) {
       ) : null}
 
       {pps.wards?.length ? (
-        <Section title="By ward">
+        <Section id="wards" title="By ward">
           <BarChart
             rows={pps.wards.map((ward) => ({
               label: ward.ward,
@@ -148,7 +158,7 @@ export function PpsView({ data }: { data: UseData }) {
       ) : null}
 
       {pps.duration?.length ? (
-        <Section title="Length of course">
+        <Section id="course" title="Length of course">
           <BarChart
             rows={pps.duration.map((row) => ({
               label: `${row.days} day${row.days === 1 ? "" : "s"}`,

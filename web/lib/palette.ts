@@ -47,6 +47,19 @@ export const SEQUENCE = [
   OKABE_ITO.grey,
 ];
 
+/** The colours the figure cards cycle through.
+ *
+ * Okabe-Ito, minus yellow: at #F0E442 a bold number on white is unreadable,
+ * and a card whose figure cannot be read is not a card. */
+export const STAT_SEQUENCE = [
+  OKABE_ITO.blue,
+  OKABE_ITO.vermillion,
+  OKABE_ITO.green,
+  OKABE_ITO.purple,
+  OKABE_ITO.orange,
+  OKABE_ITO.black,
+];
+
 export const SECTOR_COLOUR: Record<string, string> = {
   human: OKABE_ITO.blue,
   animal: OKABE_ITO.orange,

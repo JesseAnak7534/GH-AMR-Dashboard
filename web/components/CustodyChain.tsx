@@ -69,6 +69,7 @@ export function CustodyChain({
           {
             value: percent(data.percentGenomesTraceable),
             label: "Genomes traceable to a patient",
+            href: "/genomics",
             hint: `${count(data.genomesTraceable)} of ${count(data.genomes)}`,
           },
           {
@@ -79,6 +80,7 @@ export function CustodyChain({
           {
             value: count(stageCount("specimens")),
             label: "Specimens in the chain",
+            href: "/quality",
           },
           {
             value: count(stageCount("subjects")),

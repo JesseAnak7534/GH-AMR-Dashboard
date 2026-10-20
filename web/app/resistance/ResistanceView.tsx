@@ -274,21 +274,28 @@ export function ResistanceView({
 
       <StatStrip
         stats={[
-          { value: count(slice?.isolates), label: "Isolates" },
+          {
+            value: count(slice?.isolates),
+            label: "Isolates",
+            href: "/organisms",
+          },
           {
             value: count(slice?.pairsReported),
             label: "Published as a rate",
             hint: `of ${count(slice?.pairsTotal)} organism–antibiotic pairs`,
+            href: "#susceptibility",
           },
           {
             value: count(slice?.pairsSuppressed),
             label: "Too few to publish",
             hint: `fewer than ${data.minIsolatesForReporting} isolates`,
+            href: "/quality",
           },
           {
             value: value || titleCase(sector),
             label: value ? humanise(dimension) : "Sector shown",
             hint: value ? titleCase(sector) : "sectors are never pooled",
+            href: "/one-health",
           },
         ]}
       />
@@ -309,7 +316,7 @@ export function ResistanceView({
         </Note>
       ) : (
         <>
-          <Section title="Susceptibility">
+          <Section id="susceptibility" title="Susceptibility">
             <div className="flex flex-wrap gap-x-8 gap-y-3">
               <Segmented
                 label="View"

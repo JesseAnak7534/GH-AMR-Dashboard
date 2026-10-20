@@ -75,20 +75,31 @@ export function QualityView({ data }: { data: QualityData }) {
     <>
       <StatStrip
         stats={[
-          { value: count(data.coverage.specimens), label: "Specimens" },
-          { value: count(data.coverage.isolates), label: "Isolates" },
+          {
+            value: count(data.coverage.specimens),
+            label: "Specimens",
+            href: "#coverage",
+          },
+          {
+            value: count(data.coverage.isolates),
+            label: "Isolates",
+            href: "#linkage",
+          },
           {
             value: count(data.coverage.observations),
             label: "Susceptibility results",
+            href: "#result-quality",
           },
           {
             value: count(data.coverage.laboratories),
             label: "Laboratories reporting",
+            href: "#completeness",
           },
         ]}
       />
 
       <Section
+        id="coverage"
         title="Reporting coverage"
         intro="How much material each sector contributes."
       >
@@ -107,7 +118,7 @@ export function QualityView({ data }: { data: QualityData }) {
         </Figure>
       </Section>
 
-      <Section title="Completeness of core fields">
+      <Section id="completeness" title="Completeness of core fields">
         {data.completeness.notCollected.length ? (
           <Note tone="limit">
             Not collected at all:{" "}
@@ -136,7 +147,7 @@ export function QualityView({ data }: { data: QualityData }) {
         </Figure>
       </Section>
 
-      <Section title="Timeliness">
+      <Section id="timeliness" title="Timeliness">
         <StatStrip
           stats={[
             {
@@ -175,6 +186,7 @@ export function QualityView({ data }: { data: QualityData }) {
       </Section>
 
       <Section
+        id="linkage"
         title="Chain linkage"
         intro="How much of the chain from specimen to sequence is joined up."
       >
@@ -208,7 +220,7 @@ export function QualityView({ data }: { data: QualityData }) {
         />
       </Section>
 
-      <Section title="Result quality and provenance">
+      <Section id="result-quality" title="Result quality and provenance">
         <StatStrip
           stats={[
             {
@@ -248,6 +260,7 @@ export function QualityView({ data }: { data: QualityData }) {
       </Section>
 
       <Section
+        id="implausible"
         title="Implausible organism–agent combinations"
         intro="Results for pairs where the answer cannot be meaningful. Each one is a finding to correct at source."
       >
@@ -295,6 +308,7 @@ export function QualityView({ data }: { data: QualityData }) {
       </Section>
 
       <Section
+        id="denominators"
         title="Denominators for use and consumption"
         intro="Whether use and consumption can be reported as rates rather than volumes."
       >

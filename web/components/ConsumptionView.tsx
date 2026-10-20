@@ -104,6 +104,7 @@ export function ConsumptionView({
           {
             value: count(withDenominator),
             label: "With a usable denominator",
+            href: "/quality#denominators",
             hint: "the rest are excluded from the rate, not counted as zero",
           },
           {

@@ -116,12 +116,17 @@ export function Figure({
   children: React.ReactNode;
 }) {
   const frame = useRef<HTMLDivElement>(null);
+  // The chart is looked up inside the body, never inside the whole frame. The
+  // toolbar's own icons are SVGs and they sit before the chart in the DOM, so
+  // a search across the frame found the 14-pixel download icon and saved a
+  // picture of that instead of the figure.
+  const body = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
 
   const saveImage = useCallback(async () => {
-    const svg = frame.current?.querySelector("svg");
+    const svg = body.current?.querySelector("svg");
     if (!svg) {
       setFailed("This figure has no image to save.");
       return;
@@ -201,7 +206,7 @@ export function Figure({
         </figcaption>
       )}
 
-      {children}
+      <div ref={body}>{children}</div>
 
       {failed ? (
         <p className="mt-2 text-[0.78rem] text-data-vermillion">{failed}</p>

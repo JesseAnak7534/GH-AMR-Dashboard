@@ -79,15 +79,21 @@ export function HaiView({ data }: { data: HaiData }) {
     <>
       <StatStrip
         stats={[
-          { value: count(headline.isolates), label: "Hospital isolates" },
+          {
+            value: count(headline.isolates),
+            label: "Hospital isolates",
+            href: "#profile",
+          },
           {
             value: percent(headline.nosocomialPercent),
             label: "Nosocomial organisms",
+            href: "#eskape",
             hint: `${count(headline.nosocomialIsolates)} isolates`,
           },
           {
             value: percent(headline.mdrPercent),
             label: "Multidrug resistant",
+            href: "#mdr",
             hint: `${count(headline.mdrIsolates)} of ${count(
               headline.classifiable,
             )} classifiable`,
@@ -95,12 +101,14 @@ export function HaiView({ data }: { data: HaiData }) {
           {
             value: percent(headline.resistancePercent),
             label: "Results resistant",
+            href: "#trend",
             hint: `${count(headline.observations)} results`,
           },
         ]}
       />
 
       <Section
+        id="eskape"
         title="ESKAPE organisms"
         intro="The six organisms behind most healthcare-associated infection worldwide."
       >
@@ -124,6 +132,7 @@ export function HaiView({ data }: { data: HaiData }) {
       </Section>
 
       <Section
+        id="profile"
         title="Hospital resistance profile"
         intro="Nosocomial organisms in red, the rest in grey."
       >
@@ -171,6 +180,7 @@ export function HaiView({ data }: { data: HaiData }) {
       </Section>
 
       <Section
+        id="mdr"
         title="Multidrug resistance in hospital"
         intro="Isolates resistant across three or more antimicrobial categories."
       >
@@ -268,6 +278,7 @@ export function HaiView({ data }: { data: HaiData }) {
       </Section>
 
       <Section
+        id="trend"
         title="Hospital infection trends"
         intro="Resistance, multidrug resistance and the nosocomial share, by quarter."
       >

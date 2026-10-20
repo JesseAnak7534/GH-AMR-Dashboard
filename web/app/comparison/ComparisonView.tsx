@@ -138,23 +138,44 @@ function HeadToHead({
             label: a.group,
             value: percent(a.percent),
             hint: `95% CI ${interval(a.ciLow, a.ciHigh)}`,
+            colour: OKABE_ITO.blue,
           },
           {
             label: b.group,
             value: percent(b.percent),
             hint: `95% CI ${interval(b.ciLow, b.ciHigh)}`,
+            colour: OKABE_ITO.orange,
           },
           {
             label: "Difference",
             value: `${difference >= 0 ? "+" : ""}${difference.toFixed(1)} points`,
-            hint: measure,
+            hint:
+              overlap === null
+                ? measure
+                : overlap
+                  ? "Intervals overlap"
+                  : "Intervals do not overlap",
+            // Vermillion where the difference survives the uncertainty, grey
+            // where it does not. The hint says which, so the colour is a
+            // second signal rather than the only one.
+            colour:
+              overlap === false ? OKABE_ITO.vermillion : OKABE_ITO.grey,
           },
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-lg border border-rule bg-paper px-4 py-3.5"
+            className="relative overflow-hidden rounded-lg border border-rule px-4 py-3.5 pl-5"
+            style={{ background: `${stat.colour}0f` }}
           >
-            <dd className="text-[1.4rem] font-bold leading-none tracking-tight">
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-0 h-full w-[4px]"
+              style={{ background: stat.colour }}
+            />
+            <dd
+              className="text-[1.4rem] font-bold leading-none tracking-tight"
+              style={{ color: stat.colour }}
+            >
               {stat.value}
             </dd>
             <dt className="mt-1.5 text-[0.78rem] font-medium text-ink-soft">
@@ -169,28 +190,18 @@ function HeadToHead({
 
       {a.group === b.group ? (
         <Note tone="method">Choose two different {groupLabel.toLowerCase()}s.</Note>
-      ) : overlap === null ? (
-        <Note tone="limit">One group has no interval, so the difference cannot be assessed.</Note>
-      ) : overlap ? (
-        <Note tone="limit">
-          The intervals overlap, so this{" "}
-          {Math.abs(difference).toFixed(1)}-point difference is not
-          distinguishable from sampling variation.
-        </Note>
-      ) : (
-        <Note tone="method">
-          The intervals do not overlap, so the{" "}
-          {Math.abs(difference).toFixed(1)}-point difference is unlikely to be
-          chance. It does not say why.
-        </Note>
-      )}
+      ) : null}
     </div>
   );
 }
 
 export function ComparisonView({ data }: { data: ComparisonData }) {
   const sectors = data.slices.map((slice) => slice.sector);
-  const [sector, setSector] = useState(sectors[0] ?? "human");
+  // Human first where it exists. Slices arrive in alphabetical order, so
+  // taking the first one landed every visitor on the animal sector.
+  const [sector, setSector] = useState(
+    sectors.includes("human") ? "human" : (sectors[0] ?? "human"),
+  );
   const slice =
     data.slices.find((candidate) => candidate.sector === sector) ??
     data.slices[0];

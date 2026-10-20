@@ -79,21 +79,28 @@ export function MdrView({ data }: { data: MdrData }) {
 
       <StatStrip
         stats={[
-          { value: count(slice.isolates), label: "Isolates" },
+          {
+            value: count(slice.isolates),
+            label: "Isolates",
+            href: "/organisms",
+          },
           {
             value: count(slice.classifiable),
             label: "Classifiable",
             hint: "three or more categories tested",
+            href: "#classify",
           },
           {
             value: percent(slice.percent?.MDR ?? null),
             label: "MDR",
             hint: "of classifiable isolates",
+            href: "#by-organism",
           },
           {
             value: percent(slice.percent?.XDR ?? null),
             label: "XDR",
             hint: "of classifiable isolates",
+            href: "/mechanisms",
           },
         ]}
       />
@@ -104,12 +111,12 @@ export function MdrView({ data }: { data: MdrData }) {
         MDR&rdquo;.
       </Note>
 
-      <Section title="How the isolates classify">
+      <Section id="classify" title="How the isolates classify">
         <ProportionBar parts={parts} />
         <SuppressionNote suppression={slice.countsSuppression} />
       </Section>
 
-      <Section title="By organism">
+      <Section id="by-organism" title="By organism">
         <Figure
           title={`Multidrug resistance by organism — ${name === "all" ? "all sectors" : titleCase(name)}`}
           hideTitle

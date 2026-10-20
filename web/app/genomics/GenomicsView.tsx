@@ -109,16 +109,26 @@ export function GenomicsView({
 
       <StatStrip
         stats={[
-          { value: count(sequenced), label: "Genomes" },
+          {
+            value: count(sequenced),
+            label: "Genomes",
+            href: "#determinants",
+          },
           {
             value: count(data.coverage?.passed_qc),
             label: "Passed quality control",
+            href: "/quality",
           },
-          { value: count(data.coverage?.typed), label: "Typed" },
+          {
+            value: count(data.coverage?.typed),
+            label: "Typed",
+            href: "#types",
+          },
           {
             value:
               percentSequenced === null ? "—" : percent(percentSequenced),
             label: "Of all isolates",
+            href: "/organisms",
             hint: "the limit on every figure on this page",
           },
         ]}
@@ -158,7 +168,7 @@ export function GenomicsView({
         />
       </div>
 
-      <Section title="Resistance determinants found">
+      <Section id="determinants" title="Resistance determinants found">
         <Figure
           title="Resistance determinants found"
           hideTitle
@@ -215,13 +225,6 @@ export function GenomicsView({
             />
           </div>
 
-          <Note tone="limit">
-            <strong>Absence of a gene is not absence of a mechanism.</strong>{" "}
-            Efflux, porin loss or a determinant outside the panel all produce
-            resistance with nothing to find. A gene on a susceptible isolate is
-            the mirror image: not expressed, or below the breakpoint.
-          </Note>
-
           <DataTable
             columns={agentColumns}
             rows={data.concordance.agents}
@@ -241,7 +244,7 @@ export function GenomicsView({
         </Section>
       )}
 
-      <Section title="Sequence types, plasmids and virulence">
+      <Section id="types" title="Sequence types, plasmids and virulence">
         <div className="grid gap-6 lg:grid-cols-3">
           {data.sequenceTypes?.length ? (
             <div>

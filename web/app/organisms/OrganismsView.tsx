@@ -173,9 +173,21 @@ export function OrganismsView({
 
       <StatStrip
         stats={[
-          { value: count(slice?.organisms), label: "Distinct organisms" },
-          { value: count(slice?.isolates), label: "Isolates" },
-          { value: count(slice?.laboratories), label: "Laboratories" },
+          {
+            value: count(slice?.organisms),
+            label: "Distinct organisms",
+            href: "#most-isolated",
+          },
+          {
+            value: count(slice?.isolates),
+            label: "Isolates",
+            href: "/resistance",
+          },
+          {
+            value: count(slice?.laboratories),
+            label: "Laboratories",
+            href: "/hai",
+          },
           {
             value:
               slice?.sterileSitePercent === null ||
@@ -184,6 +196,7 @@ export function OrganismsView({
                 : percent(slice.sterileSitePercent),
             label: "From a sterile site",
             hint: "blood, CSF and other normally sterile sites",
+            href: "#specimen-types",
           },
         ]}
       />
@@ -192,7 +205,7 @@ export function OrganismsView({
         <Empty>No organism in this view matches those filters.</Empty>
       ) : (
         <>
-          <Section title="Most frequently isolated">
+          <Section id="most-isolated" title="Most frequently isolated">
             <Figure
               title={`Most frequently isolated — ${sector === "all" ? "all sectors" : titleCase(sector)}`}
               hideTitle
@@ -211,7 +224,7 @@ export function OrganismsView({
         </>
       )}
 
-      <Section title="Specimen types behind these isolates">
+      <Section id="specimen-types" title="Specimen types behind these isolates">
         <DataTable
           columns={specimenColumns}
           rows={slice?.specimenTypes ?? []}

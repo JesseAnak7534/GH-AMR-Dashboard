@@ -91,7 +91,11 @@ export function TrendsView({ data }: { data: TrendsData }) {
 
       <StatStrip
         stats={[
-          { value: count(drawn.length), label: "Quarters plotted" },
+          {
+            value: count(drawn.length),
+            label: "Quarters plotted",
+            href: "#pooled",
+          },
           {
             value: first ? percent(first.percent_non_susceptible) : "—",
             label: `First (${first?.period ?? "—"})`,
@@ -109,6 +113,7 @@ export function TrendsView({ data }: { data: TrendsData }) {
             hint: overlapping
               ? "within the uncertainty"
               : "beyond the uncertainty",
+            href: "/risk",
           },
         ]}
       />
@@ -121,7 +126,7 @@ export function TrendsView({ data }: { data: TrendsData }) {
         </Note>
       ) : null}
 
-      <Section title="All organism–antibiotic pairs pooled">
+      <Section id="pooled" title="All organism–antibiotic pairs pooled">
         <Figure
           title={`Non-susceptibility by quarter — ${titleCase(sector)}`}
           hideTitle

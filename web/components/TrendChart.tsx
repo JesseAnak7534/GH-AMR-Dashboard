@@ -42,6 +42,9 @@ export interface TrendSeries {
   label: string;
   colour: string;
   points: TrendPoint[];
+  /** Drawn as a broken line. Used for a projection, so a reader cannot take
+   *  it for something that was measured. */
+  dashed?: boolean;
 }
 
 export function TrendChart({
@@ -252,6 +255,7 @@ export function TrendChart({
                   fill="none"
                   stroke={line.colour}
                   strokeWidth={2}
+                  strokeDasharray={line.dashed ? "5 4" : undefined}
                   strokeLinejoin="round"
                 />
               ))}
@@ -287,7 +291,14 @@ export function TrendChart({
                 <span
                   aria-hidden="true"
                   className="inline-block h-0.5 w-4"
-                  style={{ background: line.colour }}
+                  style={
+                    line.dashed
+                      ? {
+                          backgroundImage:
+                            `repeating-linear-gradient(to right, ${line.colour} 0 4px, transparent 4px 7px)`,
+                        }
+                      : { background: line.colour }
+                  }
                 />
                 <span className="text-ink">{line.label}</span>
                 {last ? (

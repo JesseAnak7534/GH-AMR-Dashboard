@@ -94,20 +94,33 @@ export function RegionsView({ data }: { data: RegionsData }) {
 
       <StatStrip
         stats={[
-          { value: count(reporting), label: "Regions reporting" },
-          { value: count(data.regions.length), label: "Regions in the data" },
+          {
+            value: count(reporting),
+            label: "Regions reporting",
+            href: "#by-region",
+          },
+          {
+            value: count(data.regions.length),
+            label: "Regions in the data",
+            href: "/quality",
+          },
           {
             value: highest ? highest.region : "—",
             label: "Most resistance reported",
             hint: highest
               ? `${highest.percent_resistant?.toFixed(1)}% of results resistant`
               : undefined,
+            href: "/resistance",
           },
-          { value: count(sectors.length), label: "Sectors" },
+          {
+            value: count(sectors.length),
+            label: "Sectors",
+            href: "/one-health",
+          },
         ]}
       />
 
-      <Section title="Isolates by region">
+      <Section id="by-region" title="Isolates by region">
         <Figure
           title="Resistance by region"
           hideTitle

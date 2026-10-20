@@ -112,18 +112,31 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
 
       <StatStrip
         stats={[
-          { value: count(data.sectorsPresent.length), label: "Sectors" },
-          { value: count(data.isolates), label: "Isolates" },
-          { value: count(data.organismsTotal), label: "Organisms" },
+          {
+            value: count(data.sectorsPresent.length),
+            label: "Sectors",
+            href: "#by-sector",
+          },
+          {
+            value: count(data.isolates),
+            label: "Isolates",
+            href: "/resistance",
+          },
+          {
+            value: count(data.organismsTotal),
+            label: "Organisms",
+            href: "/organisms",
+          },
           {
             value: count(data.organismsShared),
             label: "In more than one sector",
             hint: "a reason to look, not evidence of transmission",
+            href: "#shared",
           },
         ]}
       />
 
-      <Section title="Isolates by sector">
+      <Section id="by-sector" title="Isolates by sector">
         <Figure
           title="Isolates by sector"
           hideTitle
@@ -139,7 +152,7 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
         <SuppressionNote suppression={data.sectorSuppression} />
       </Section>
 
-      <Section title="Organisms found in more than one sector">
+      <Section id="shared" title="Organisms found in more than one sector">
         {grid.organisms.length > 0 ? (
           <div className="mb-5">
             <StackedBars
