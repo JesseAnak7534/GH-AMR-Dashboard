@@ -1,0 +1,3304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_bce427a2455a4024c681dc8034a30cd1 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+    <div style="position:absolute;bottom:12px;left:10px;z-index:9999;
+                background:rgba(255,255,255,.95);border:1px solid #c9ced1;
+                border-radius:5px;padding:6px 8px;
+                font:11px/1.3 system-ui,-apple-system,'Segoe UI',sans-serif;
+                color:#16181a">
+      <div style="font-weight:700;margin-bottom:3px">R &middot; I &middot; S</div>
+      <div style="margin:1px 0;white-space:nowrap"><span style="display:inline-block;width:11px;height:11px;background:#fbe3e3;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#ffeedd;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#e3f3e3;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="margin-left:5px">under 10%</span></div><div style="margin:1px 0;white-space:nowrap"><span style="display:inline-block;width:11px;height:11px;background:#f3b0b0;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#ffd1a3;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#b5debb;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="margin-left:5px">10-25%</span></div><div style="margin:1px 0;white-space:nowrap"><span style="display:inline-block;width:11px;height:11px;background:#e87a7a;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#ffb166;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#81c784;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="margin-left:5px">25-40%</span></div><div style="margin:1px 0;white-space:nowrap"><span style="display:inline-block;width:11px;height:11px;background:#dc4a4a;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#ff9733;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#4caf50;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="margin-left:5px">40-60%</span></div><div style="margin:1px 0;white-space:nowrap"><span style="display:inline-block;width:11px;height:11px;background:#d62728;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#ff7f0e;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="display:inline-block;width:11px;height:11px;background:#2ca02c;border:1px solid rgba(0,0,0,.2);margin-right:2px"></span><span style="margin-left:5px">60% and over</span></div>
+    </div>
+    
+    
+            <div class="folium-map" id="map_bce427a2455a4024c681dc8034a30cd1" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_bce427a2455a4024c681dc8034a30cd1 = L.map(
+                "map_bce427a2455a4024c681dc8034a30cd1",
+                {
+                    center: [7.95, -1.05],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 7,
+  "zoomControl": true,
+  "preferCanvas": true,
+  "scrollWheelZoom": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_bce427a2455a4024c681dc8034a30cd1);
+
+            
+
+        
+    
+            var tile_layer_4e1a07f265b8dbb21a755da41f8c2eec = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_4e1a07f265b8dbb21a755da41f8c2eec.addTo(map_bce427a2455a4024c681dc8034a30cd1);
+        
+    
+            map_bce427a2455a4024c681dc8034a30cd1.fitBounds(
+                [[4.5, -3.35], [11.25, 1.25]],
+                {}
+            );
+        
+    
+            var feature_group_8313d1ae35fe8f2a426d7688aa08cd35 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_9bd9e03e8ede61a16269f662663e6f9e = L.circleMarker(
+                [5.5, -0.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#dc4a4a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 27.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_ee3f560971d52f6215655410abbbc073 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_1e95dbbbd9aa5ab8cd697e2af08ded9a = $(`<div id="html_1e95dbbbd9aa5ab8cd697e2af08ded9a" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Greater Accra</strong><br><span style="color:#6b7378">215 isolates · 1,611 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>42.7%</strong> <span style="color:#6b7378">(688)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.6%</strong> <span style="color:#6b7378">(91)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>51.6%</strong> <span style="color:#6b7378">(832)</span></div></div></div></div>`)[0];
+                popup_ee3f560971d52f6215655410abbbc073.setContent(html_1e95dbbbd9aa5ab8cd697e2af08ded9a);
+            
+        
+
+        circle_marker_9bd9e03e8ede61a16269f662663e6f9e.bindPopup(popup_ee3f560971d52f6215655410abbbc073)
+        ;
+
+        
+    
+    
+            circle_marker_9bd9e03e8ede61a16269f662663e6f9e.bindTooltip(
+                `<div>
+                     Greater Accra: R 42.7% · I 5.6% · S 51.6%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_28ce8c9d89968d7388492d349d10f217 = L.marker(
+                [5.5, -0.2],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_25164a06edec6146c4043bfcdbcc860a = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-37px)\"\u003eGreater Accra\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_28ce8c9d89968d7388492d349d10f217.setIcon(div_icon_25164a06edec6146c4043bfcdbcc860a);
+            
+    
+            var circle_marker_66d8e998c6a70a937a4537cf8bab1b6e = L.circleMarker(
+                [10.5, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 15.421052631578947, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_98f09bab69e706fea952ba18d84d2a5b = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_47b9d7339f6108d20279c0cd2d97a360 = $(`<div id="html_47b9d7339f6108d20279c0cd2d97a360" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper West</strong><br><span style="color:#6b7378">168 isolates · 1,258 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.0%</strong> <span style="color:#6b7378">(440)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.2%</strong> <span style="color:#6b7378">(78)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(740)</span></div></div></div></div>`)[0];
+                popup_98f09bab69e706fea952ba18d84d2a5b.setContent(html_47b9d7339f6108d20279c0cd2d97a360);
+            
+        
+
+        circle_marker_66d8e998c6a70a937a4537cf8bab1b6e.bindPopup(popup_98f09bab69e706fea952ba18d84d2a5b)
+        ;
+
+        
+    
+    
+            circle_marker_66d8e998c6a70a937a4537cf8bab1b6e.bindTooltip(
+                `<div>
+                     Upper West: R 35.0% · I 6.2% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_607c807df0acd4ec97861bfe4731d129 = L.marker(
+                [10.5, -2.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_b9dae831e5fc6a78f1ac35aa0c712169 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-25px)\"\u003eUpper West\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_607c807df0acd4ec97861bfe4731d129.setIcon(div_icon_b9dae831e5fc6a78f1ac35aa0c712169);
+            
+    
+            var circle_marker_b5ecd9ec4e9e26247aa9706e72c8e362 = L.circleMarker(
+                [8.5, 0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.661654135338347, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_935b23cb3111db52496fd53ca35cc1cd = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_6191680ee9996f2c21c1f17c3ec9c183 = $(`<div id="html_6191680ee9996f2c21c1f17c3ec9c183" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Oti</strong><br><span style="color:#6b7378">166 isolates · 1,326 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.5%</strong> <span style="color:#6b7378">(431)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.0%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.5%</strong> <span style="color:#6b7378">(802)</span></div></div></div></div>`)[0];
+                popup_935b23cb3111db52496fd53ca35cc1cd.setContent(html_6191680ee9996f2c21c1f17c3ec9c183);
+            
+        
+
+        circle_marker_b5ecd9ec4e9e26247aa9706e72c8e362.bindPopup(popup_935b23cb3111db52496fd53ca35cc1cd)
+        ;
+
+        
+    
+    
+            circle_marker_b5ecd9ec4e9e26247aa9706e72c8e362.bindTooltip(
+                `<div>
+                     Oti: R 32.5% · I 7.0% · S 60.5%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1339662cce44c64a30a219ccd8c1d7b0 = L.marker(
+                [8.5, 0.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_77a5cfd4582400b4a0caa23f4b57b848 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eOti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_1339662cce44c64a30a219ccd8c1d7b0.setIcon(div_icon_77a5cfd4582400b4a0caa23f4b57b848);
+            
+    
+            var circle_marker_fa1a83adc0395971d4d1ed690577e697 = L.circleMarker(
+                [10.0, -2.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 12.26315789473684, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_17f886e10266f039ce5cc7bb21598787 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_e8d45537331e53537422e3fd4981424f = $(`<div id="html_e8d45537331e53537422e3fd4981424f" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Savannah</strong><br><span style="color:#6b7378">164 isolates · 1,293 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.9%</strong> <span style="color:#6b7378">(425)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.4%</strong> <span style="color:#6b7378">(781)</span></div></div></div></div>`)[0];
+                popup_17f886e10266f039ce5cc7bb21598787.setContent(html_e8d45537331e53537422e3fd4981424f);
+            
+        
+
+        circle_marker_fa1a83adc0395971d4d1ed690577e697.bindPopup(popup_17f886e10266f039ce5cc7bb21598787)
+        ;
+
+        
+    
+    
+            circle_marker_fa1a83adc0395971d4d1ed690577e697.bindTooltip(
+                `<div>
+                     Savannah: R 32.9% · I 6.7% · S 60.4%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8e7f47c342f84c1072c039d02ea2a8a1 = L.marker(
+                [10.0, -2.0],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_ea1d28bad58e527b023a70649c5b860f = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eSavannah\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_8e7f47c342f84c1072c039d02ea2a8a1.setIcon(div_icon_ea1d28bad58e527b023a70649c5b860f);
+            
+    
+            var circle_marker_416a26b467839560eace3188c9b1b766 = L.circleMarker(
+                [10.8, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.812030075187973, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_48531e8eecd3d224f8332cd97263a1e2 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_e66d608c5b236a74d94fbdcfec4a689c = $(`<div id="html_e66d608c5b236a74d94fbdcfec4a689c" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper East</strong><br><span style="color:#6b7378">159 isolates · 1,213 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.6%</strong> <span style="color:#6b7378">(395)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.5%</strong> <span style="color:#6b7378">(79)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.9%</strong> <span style="color:#6b7378">(739)</span></div></div></div></div>`)[0];
+                popup_48531e8eecd3d224f8332cd97263a1e2.setContent(html_e66d608c5b236a74d94fbdcfec4a689c);
+            
+        
+
+        circle_marker_416a26b467839560eace3188c9b1b766.bindPopup(popup_48531e8eecd3d224f8332cd97263a1e2)
+        ;
+
+        
+    
+    
+            circle_marker_416a26b467839560eace3188c9b1b766.bindTooltip(
+                `<div>
+                     Upper East: R 32.6% · I 6.5% · S 60.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ea6148736d11723e631b6a2ed0d58e76 = L.marker(
+                [10.8, -1.2],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_ba95946de6019e6b794d3743749502f7 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eUpper East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_ea6148736d11723e631b6a2ed0d58e76.setIcon(div_icon_ba95946de6019e6b794d3743749502f7);
+            
+    
+            var circle_marker_e6b7220ae79f8b0801fa0136e1d46155 = L.circleMarker(
+                [5.0, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.511278195488721, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_da1f8cc4a39c3c618165e8a6245c17dc = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_b9c4d21c3ccbd4853f93a4076f10a3e4 = $(`<div id="html_b9c4d21c3ccbd4853f93a4076f10a3e4" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western</strong><br><span style="color:#6b7378">159 isolates · 1,245 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.4%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.5%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.1%</strong> <span style="color:#6b7378">(748)</span></div></div></div></div>`)[0];
+                popup_da1f8cc4a39c3c618165e8a6245c17dc.setContent(html_b9c4d21c3ccbd4853f93a4076f10a3e4);
+            
+        
+
+        circle_marker_e6b7220ae79f8b0801fa0136e1d46155.bindPopup(popup_da1f8cc4a39c3c618165e8a6245c17dc)
+        ;
+
+        
+    
+    
+            circle_marker_e6b7220ae79f8b0801fa0136e1d46155.bindTooltip(
+                `<div>
+                     Western: R 32.4% · I 7.5% · S 60.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a1e78bec599df8d9908774a7594f32f9 = L.marker(
+                [5.0, -2.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_5f0531f1054abd0777bc5e95d0aad44d = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eWestern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_a1e78bec599df8d9908774a7594f32f9.setIcon(div_icon_5f0531f1054abd0777bc5e95d0aad44d);
+            
+    
+            var circle_marker_162c5674f56e7b2c52dbf21585780e3d = L.circleMarker(
+                [7.5, -0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 13.616541353383454, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_7b2864c8f263def99396757a330b57ad = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_fb2cc36241a21789d9138ddffc5884ac = $(`<div id="html_fb2cc36241a21789d9138ddffc5884ac" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono East</strong><br><span style="color:#6b7378">157 isolates · 1,196 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.8%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.9%</strong> <span style="color:#6b7378">(705)</span></div></div></div></div>`)[0];
+                popup_7b2864c8f263def99396757a330b57ad.setContent(html_fb2cc36241a21789d9138ddffc5884ac);
+            
+        
+
+        circle_marker_162c5674f56e7b2c52dbf21585780e3d.bindPopup(popup_7b2864c8f263def99396757a330b57ad)
+        ;
+
+        
+    
+    
+            circle_marker_162c5674f56e7b2c52dbf21585780e3d.bindTooltip(
+                `<div>
+                     Bono East: R 33.8% · I 7.3% · S 58.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9f05860f1c96403d9c9965cb91015b54 = L.marker(
+                [7.5, -0.8],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_a3be427521c33c2ba1ab2f522d49265e = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-24px)\"\u003eBono East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_9f05860f1c96403d9c9965cb91015b54.setIcon(div_icon_a3be427521c33c2ba1ab2f522d49265e);
+            
+    
+            var circle_marker_e96b32bbbf2e3a652443c6d50663f498 = L.circleMarker(
+                [6.0, -0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 13.466165413533838, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_1ef96bdd425bd3ff00bca13752c6c98b = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_978da2c3b93fbcaf30cc7ed68e284e51 = $(`<div id="html_978da2c3b93fbcaf30cc7ed68e284e51" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Eastern</strong><br><span style="color:#6b7378">155 isolates · 1,189 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.7%</strong> <span style="color:#6b7378">(401)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(86)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.0%</strong> <span style="color:#6b7378">(702)</span></div></div></div></div>`)[0];
+                popup_1ef96bdd425bd3ff00bca13752c6c98b.setContent(html_978da2c3b93fbcaf30cc7ed68e284e51);
+            
+        
+
+        circle_marker_e96b32bbbf2e3a652443c6d50663f498.bindPopup(popup_1ef96bdd425bd3ff00bca13752c6c98b)
+        ;
+
+        
+    
+    
+            circle_marker_e96b32bbbf2e3a652443c6d50663f498.bindTooltip(
+                `<div>
+                     Eastern: R 33.7% · I 7.2% · S 59.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ebb0be28303757cb2bd727ce2a7d0a59 = L.marker(
+                [6.0, -0.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_42fb366a6ca27fc43e1caaaff3608497 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-23px)\"\u003eEastern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_ebb0be28303757cb2bd727ce2a7d0a59.setIcon(div_icon_42fb366a6ca27fc43e1caaaff3608497);
+            
+    
+            var circle_marker_95281fd769ef4bd8e336bae6f7e43ac9 = L.circleMarker(
+                [6.5, 0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 15.571428571428573, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_a98db1577ed10127990c044dff201457 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_0262bf43b62c8e71bcd7ba55f6f94578 = $(`<div id="html_0262bf43b62c8e71bcd7ba55f6f94578" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Volta</strong><br><span style="color:#6b7378">153 isolates · 1,249 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.1%</strong> <span style="color:#6b7378">(438)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.1%</strong> <span style="color:#6b7378">(76)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(735)</span></div></div></div></div>`)[0];
+                popup_a98db1577ed10127990c044dff201457.setContent(html_0262bf43b62c8e71bcd7ba55f6f94578);
+            
+        
+
+        circle_marker_95281fd769ef4bd8e336bae6f7e43ac9.bindPopup(popup_a98db1577ed10127990c044dff201457)
+        ;
+
+        
+    
+    
+            circle_marker_95281fd769ef4bd8e336bae6f7e43ac9.bindTooltip(
+                `<div>
+                     Volta: R 35.1% · I 6.1% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_eb88e947b9cabd8868286f16cb60fa4e = L.marker(
+                [6.5, 0.8],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_f07990ae31724d82600455d720a6ca0e = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-26px)\"\u003eVolta\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_eb88e947b9cabd8868286f16cb60fa4e.setIcon(div_icon_f07990ae31724d82600455d720a6ca0e);
+            
+    
+            var circle_marker_49da4c3ec9d90e88aec093cbbc123222 = L.circleMarker(
+                [6.5, -1.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 7.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_f6c86a5a66000d93742d37dc3ad0ff4c = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_eafaa3cea7e93ea9802ab8dc175a1ce9 = $(`<div id="html_eafaa3cea7e93ea9802ab8dc175a1ce9" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ashanti</strong><br><span style="color:#6b7378">151 isolates · 1,166 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>29.4%</strong> <span style="color:#6b7378">(343)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(85)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>63.3%</strong> <span style="color:#6b7378">(738)</span></div></div></div></div>`)[0];
+                popup_f6c86a5a66000d93742d37dc3ad0ff4c.setContent(html_eafaa3cea7e93ea9802ab8dc175a1ce9);
+            
+        
+
+        circle_marker_49da4c3ec9d90e88aec093cbbc123222.bindPopup(popup_f6c86a5a66000d93742d37dc3ad0ff4c)
+        ;
+
+        
+    
+    
+            circle_marker_49da4c3ec9d90e88aec093cbbc123222.bindTooltip(
+                `<div>
+                     Ashanti: R 29.4% · I 7.3% · S 63.3%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_003d13fe5100b976fc9a887f840953ef = L.marker(
+                [6.5, -1.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_ff7ae9c7f8d2dd56f17d37e933b93ac2 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-17px)\"\u003eAshanti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_003d13fe5100b976fc9a887f840953ef.setIcon(div_icon_ff7ae9c7f8d2dd56f17d37e933b93ac2);
+            
+    
+            var circle_marker_dbc645cad4f529d51c24da6ecf24a84c = L.circleMarker(
+                [9.3, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 10.308270676691732, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_72216092ca02d2b5f7abb267016bf3e6 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_1624aceb2c1cf41b93a63c9af115ebef = $(`<div id="html_1624aceb2c1cf41b93a63c9af115ebef" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Northern</strong><br><span style="color:#6b7378">148 isolates · 1,100 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.6%</strong> <span style="color:#6b7378">(348)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.4%</strong> <span style="color:#6b7378">(70)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>62.0%</strong> <span style="color:#6b7378">(682)</span></div></div></div></div>`)[0];
+                popup_72216092ca02d2b5f7abb267016bf3e6.setContent(html_1624aceb2c1cf41b93a63c9af115ebef);
+            
+        
+
+        circle_marker_dbc645cad4f529d51c24da6ecf24a84c.bindPopup(popup_72216092ca02d2b5f7abb267016bf3e6)
+        ;
+
+        
+    
+    
+            circle_marker_dbc645cad4f529d51c24da6ecf24a84c.bindTooltip(
+                `<div>
+                     Northern: R 31.6% · I 6.4% · S 62.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_93877cf10c4f51940f681e76a51bdcd4 = L.marker(
+                [9.3, -1.0],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_d534927b94080276ec3688d983c007a8 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-20px)\"\u003eNorthern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_93877cf10c4f51940f681e76a51bdcd4.setIcon(div_icon_d534927b94080276ec3688d983c007a8);
+            
+    
+            var circle_marker_66716cf4997bee57c4da1e1dedfc714a = L.circleMarker(
+                [5.2, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.060150375939852, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_826209e4de031f1ca897368220a7ce59 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_8b2106158e793d6f1ff9b6bc39a05cc6 = $(`<div id="html_8b2106158e793d6f1ff9b6bc39a05cc6" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Central</strong><br><span style="color:#6b7378">145 isolates · 1,107 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.1%</strong> <span style="color:#6b7378">(355)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(80)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.7%</strong> <span style="color:#6b7378">(672)</span></div></div></div></div>`)[0];
+                popup_826209e4de031f1ca897368220a7ce59.setContent(html_8b2106158e793d6f1ff9b6bc39a05cc6);
+            
+        
+
+        circle_marker_66716cf4997bee57c4da1e1dedfc714a.bindPopup(popup_826209e4de031f1ca897368220a7ce59)
+        ;
+
+        
+    
+    
+            circle_marker_66716cf4997bee57c4da1e1dedfc714a.bindTooltip(
+                `<div>
+                     Central: R 32.1% · I 7.2% · S 60.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7b69295c9bfe24ef5d29aca9ee09cc72 = L.marker(
+                [5.2, -1.2],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_49fd96ad2c1357005df978e388c396d5 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-21px)\"\u003eCentral\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_7b69295c9bfe24ef5d29aca9ee09cc72.setIcon(div_icon_49fd96ad2c1357005df978e388c396d5);
+            
+    
+            var circle_marker_4b40c9362e1bd1b0ee446dc92bbb06ff = L.circleMarker(
+                [6.8, -2.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.360902255639093, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_6b500a6a22b653ef1ca1eb74d24d934f = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_0d520b6fe81b456f6b35c7ea9fe49728 = $(`<div id="html_0d520b6fe81b456f6b35c7ea9fe49728" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ahafo</strong><br><span style="color:#6b7378">145 isolates · 1,148 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.3%</strong> <span style="color:#6b7378">(371)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>8.9%</strong> <span style="color:#6b7378">(102)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(675)</span></div></div></div></div>`)[0];
+                popup_6b500a6a22b653ef1ca1eb74d24d934f.setContent(html_0d520b6fe81b456f6b35c7ea9fe49728);
+            
+        
+
+        circle_marker_4b40c9362e1bd1b0ee446dc92bbb06ff.bindPopup(popup_6b500a6a22b653ef1ca1eb74d24d934f)
+        ;
+
+        
+    
+    
+            circle_marker_4b40c9362e1bd1b0ee446dc92bbb06ff.bindTooltip(
+                `<div>
+                     Ahafo: R 32.3% · I 8.9% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_29186725c73dc99809c5b8b7aa1d6aaf = L.marker(
+                [6.8, -2.2],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_b2464d70bc4e8ed793a5782df1ae6696 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-21px)\"\u003eAhafo\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_29186725c73dc99809c5b8b7aa1d6aaf.setIcon(div_icon_b2464d70bc4e8ed793a5782df1ae6696);
+            
+    
+            var circle_marker_b13a3b9e6b5b2bed0cf17ea55367ab88 = L.circleMarker(
+                [5.5, -3.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 9.85714285714286, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_068129c4d1f718e4360e920ec4c8aae8 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_2ab119b744f377080b6f0d5258428bd5 = $(`<div id="html_2ab119b744f377080b6f0d5258428bd5" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western North</strong><br><span style="color:#6b7378">144 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.3%</strong> <span style="color:#6b7378">(340)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.6%</strong> <span style="color:#6b7378">(83)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>61.1%</strong> <span style="color:#6b7378">(664)</span></div></div></div></div>`)[0];
+                popup_068129c4d1f718e4360e920ec4c8aae8.setContent(html_2ab119b744f377080b6f0d5258428bd5);
+            
+        
+
+        circle_marker_b13a3b9e6b5b2bed0cf17ea55367ab88.bindPopup(popup_068129c4d1f718e4360e920ec4c8aae8)
+        ;
+
+        
+    
+    
+            circle_marker_b13a3b9e6b5b2bed0cf17ea55367ab88.bindTooltip(
+                `<div>
+                     Western North: R 31.3% · I 7.6% · S 61.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f14e60cf4b12e1861858fb84d462d044 = L.marker(
+                [5.5, -3.0],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_728cba07c2d07dd61224a119686bf41c = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-20px)\"\u003eWestern North\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_f14e60cf4b12e1861858fb84d462d044.setIcon(div_icon_728cba07c2d07dd61224a119686bf41c);
+            
+    
+            var circle_marker_61bf175ecf634eb98a16fc42c40d9f8c = L.circleMarker(
+                [10.2, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 15.27067669172932, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_07c02373b50fdf886fbf271b71be22f5 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_8ee8941d3b02945e7133430f572f0325 = $(`<div id="html_8ee8941d3b02945e7133430f572f0325" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">North East</strong><br><span style="color:#6b7378">141 isolates · 1,119 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>34.9%</strong> <span style="color:#6b7378">(390)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.9%</strong> <span style="color:#6b7378">(66)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.2%</strong> <span style="color:#6b7378">(663)</span></div></div></div></div>`)[0];
+                popup_07c02373b50fdf886fbf271b71be22f5.setContent(html_8ee8941d3b02945e7133430f572f0325);
+            
+        
+
+        circle_marker_61bf175ecf634eb98a16fc42c40d9f8c.bindPopup(popup_07c02373b50fdf886fbf271b71be22f5)
+        ;
+
+        
+    
+    
+            circle_marker_61bf175ecf634eb98a16fc42c40d9f8c.bindTooltip(
+                `<div>
+                     North East: R 34.9% · I 5.9% · S 59.2%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_162c8fbf935cdf24b81dd4a445a3d751 = L.marker(
+                [10.2, -1.0],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_09a455b8067985682b2026a7d6738b42 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-25px)\"\u003eNorth East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_162c8fbf935cdf24b81dd4a445a3d751.setIcon(div_icon_09a455b8067985682b2026a7d6738b42);
+            
+    
+            var circle_marker_ff7788022b6b401651a126e8444817bd = L.circleMarker(
+                [7.2, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e87a7a", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 13.315789473684212, "stroke": true, "weight": 1}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+        var popup_c1cf487a3dc0767b9fad5278a75f9d3e = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_8a40d80b7bf8f43d1af3479d5a3811ed = $(`<div id="html_8a40d80b7bf8f43d1af3479d5a3811ed" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono</strong><br><span style="color:#6b7378">132 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.6%</strong> <span style="color:#6b7378">(365)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(73)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.7%</strong> <span style="color:#6b7378">(649)</span></div></div></div></div>`)[0];
+                popup_c1cf487a3dc0767b9fad5278a75f9d3e.setContent(html_8a40d80b7bf8f43d1af3479d5a3811ed);
+            
+        
+
+        circle_marker_ff7788022b6b401651a126e8444817bd.bindPopup(popup_c1cf487a3dc0767b9fad5278a75f9d3e)
+        ;
+
+        
+    
+    
+            circle_marker_ff7788022b6b401651a126e8444817bd.bindTooltip(
+                `<div>
+                     Bono: R 33.6% · I 6.7% · S 59.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_fb5c8c54bb9e3e6e80730142696782ea = L.marker(
+                [7.2, -2.5],
+                {
+}
+            ).addTo(feature_group_8313d1ae35fe8f2a426d7688aa08cd35);
+        
+    
+            var div_icon_7b9c4bf3d571543425a9436b1c92dd6a = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-23px)\"\u003eBono\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_fb5c8c54bb9e3e6e80730142696782ea.setIcon(div_icon_7b9c4bf3d571543425a9436b1c92dd6a);
+            
+    
+            feature_group_8313d1ae35fe8f2a426d7688aa08cd35.addTo(map_bce427a2455a4024c681dc8034a30cd1);
+        
+    
+            var feature_group_6200536e091e118603143f3c668703cb = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_5fccd82adf2397952400d0937fd27093 = L.circleMarker(
+                [5.5, -0.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 7.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_3cdb5a7b265d8afe9bcfecddffacde3c = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_fb8237b7b61f14d3a38351cbcc4d6a28 = $(`<div id="html_fb8237b7b61f14d3a38351cbcc4d6a28" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Greater Accra</strong><br><span style="color:#6b7378">215 isolates · 1,611 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>42.7%</strong> <span style="color:#6b7378">(688)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.6%</strong> <span style="color:#6b7378">(91)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>51.6%</strong> <span style="color:#6b7378">(832)</span></div></div></div></div>`)[0];
+                popup_3cdb5a7b265d8afe9bcfecddffacde3c.setContent(html_fb8237b7b61f14d3a38351cbcc4d6a28);
+            
+        
+
+        circle_marker_5fccd82adf2397952400d0937fd27093.bindPopup(popup_3cdb5a7b265d8afe9bcfecddffacde3c)
+        ;
+
+        
+    
+    
+            circle_marker_5fccd82adf2397952400d0937fd27093.bindTooltip(
+                `<div>
+                     Greater Accra: R 42.7% · I 5.6% · S 51.6%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5a4fc6e346fa4f95b239cb3d57942f36 = L.marker(
+                [5.5, -0.2],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_8b7cba1a8ef905c6996a3e83a8d5e8c5 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-17px)\"\u003eGreater Accra\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_5a4fc6e346fa4f95b239cb3d57942f36.setIcon(div_icon_8b7cba1a8ef905c6996a3e83a8d5e8c5);
+            
+    
+            var circle_marker_61da9f63cc1c8dd97e5a09a37db29d08 = L.circleMarker(
+                [10.5, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 10.636363636363638, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_cd5406a5853638d7e40a94714981cac7 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_7ac6f3ed6af229956de4e32523302eaf = $(`<div id="html_7ac6f3ed6af229956de4e32523302eaf" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper West</strong><br><span style="color:#6b7378">168 isolates · 1,258 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.0%</strong> <span style="color:#6b7378">(440)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.2%</strong> <span style="color:#6b7378">(78)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(740)</span></div></div></div></div>`)[0];
+                popup_cd5406a5853638d7e40a94714981cac7.setContent(html_7ac6f3ed6af229956de4e32523302eaf);
+            
+        
+
+        circle_marker_61da9f63cc1c8dd97e5a09a37db29d08.bindPopup(popup_cd5406a5853638d7e40a94714981cac7)
+        ;
+
+        
+    
+    
+            circle_marker_61da9f63cc1c8dd97e5a09a37db29d08.bindTooltip(
+                `<div>
+                     Upper West: R 35.0% · I 6.2% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e52f48c3257d5682e6b1f81f9c748195 = L.marker(
+                [10.5, -2.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_4b59fd2c7308f7049870d03defa2f5c2 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-21px)\"\u003eUpper West\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_e52f48c3257d5682e6b1f81f9c748195.setIcon(div_icon_4b59fd2c7308f7049870d03defa2f5c2);
+            
+    
+            var circle_marker_0ad13f843edd2f5e83edcea81e5707e7 = L.circleMarker(
+                [8.5, 0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 15.484848484848484, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_f751ca28c15e42848ea49d39bb61ef86 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_6e46e0daddac0a4efc01a36dc7073ac4 = $(`<div id="html_6e46e0daddac0a4efc01a36dc7073ac4" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Oti</strong><br><span style="color:#6b7378">166 isolates · 1,326 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.5%</strong> <span style="color:#6b7378">(431)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.0%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.5%</strong> <span style="color:#6b7378">(802)</span></div></div></div></div>`)[0];
+                popup_f751ca28c15e42848ea49d39bb61ef86.setContent(html_6e46e0daddac0a4efc01a36dc7073ac4);
+            
+        
+
+        circle_marker_0ad13f843edd2f5e83edcea81e5707e7.bindPopup(popup_f751ca28c15e42848ea49d39bb61ef86)
+        ;
+
+        
+    
+    
+            circle_marker_0ad13f843edd2f5e83edcea81e5707e7.bindTooltip(
+                `<div>
+                     Oti: R 32.5% · I 7.0% · S 60.5%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d7f5322cab16adbc65c856cf7db5a8d8 = L.marker(
+                [8.5, 0.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_c6010c1ae8e9b3b645c79da1cfc773cd = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-25px)\"\u003eOti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_d7f5322cab16adbc65c856cf7db5a8d8.setIcon(div_icon_c6010c1ae8e9b3b645c79da1cfc773cd);
+            
+    
+            var circle_marker_82ccc3ad449ca46eabbe27dea3a0ea09 = L.circleMarker(
+                [10.0, -2.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 13.666666666666668, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_dc943f251637a97468bcf69375cd9f6b = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_02410fa523734301be1b24049a6a7ce2 = $(`<div id="html_02410fa523734301be1b24049a6a7ce2" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Savannah</strong><br><span style="color:#6b7378">164 isolates · 1,293 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.9%</strong> <span style="color:#6b7378">(425)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.4%</strong> <span style="color:#6b7378">(781)</span></div></div></div></div>`)[0];
+                popup_dc943f251637a97468bcf69375cd9f6b.setContent(html_02410fa523734301be1b24049a6a7ce2);
+            
+        
+
+        circle_marker_82ccc3ad449ca46eabbe27dea3a0ea09.bindPopup(popup_dc943f251637a97468bcf69375cd9f6b)
+        ;
+
+        
+    
+    
+            circle_marker_82ccc3ad449ca46eabbe27dea3a0ea09.bindTooltip(
+                `<div>
+                     Savannah: R 32.9% · I 6.7% · S 60.4%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ca40ae0823ee5e91191ed4a3307dd98a = L.marker(
+                [10.0, -2.0],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_54d5795bb58d87ce290da8081641389d = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-24px)\"\u003eSavannah\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_ca40ae0823ee5e91191ed4a3307dd98a.setIcon(div_icon_54d5795bb58d87ce290da8081641389d);
+            
+    
+            var circle_marker_8c2588440ce37393dbad9766e025cae6 = L.circleMarker(
+                [10.8, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 12.454545454545455, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_b05a24104170800333aecaf465cddd52 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_e1ba3b7c063f6b348c518f28f13a11d0 = $(`<div id="html_e1ba3b7c063f6b348c518f28f13a11d0" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper East</strong><br><span style="color:#6b7378">159 isolates · 1,213 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.6%</strong> <span style="color:#6b7378">(395)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.5%</strong> <span style="color:#6b7378">(79)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.9%</strong> <span style="color:#6b7378">(739)</span></div></div></div></div>`)[0];
+                popup_b05a24104170800333aecaf465cddd52.setContent(html_e1ba3b7c063f6b348c518f28f13a11d0);
+            
+        
+
+        circle_marker_8c2588440ce37393dbad9766e025cae6.bindPopup(popup_b05a24104170800333aecaf465cddd52)
+        ;
+
+        
+    
+    
+            circle_marker_8c2588440ce37393dbad9766e025cae6.bindTooltip(
+                `<div>
+                     Upper East: R 32.6% · I 6.5% · S 60.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_edd21121a2ac09fcf6b883b3576980da = L.marker(
+                [10.8, -1.2],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_e34cf2a9b5f7da111583d379d1cf26df = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eUpper East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_edd21121a2ac09fcf6b883b3576980da.setIcon(div_icon_e34cf2a9b5f7da111583d379d1cf26df);
+            
+    
+            var circle_marker_7a3f4b66c6e2fd56f4eaf488490f9c4e = L.circleMarker(
+                [5.0, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 18.515151515151516, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_f4142c4eb4a3374d383ac03d7cda9680 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_39a86c3813c68ed7af2206a4513710bb = $(`<div id="html_39a86c3813c68ed7af2206a4513710bb" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western</strong><br><span style="color:#6b7378">159 isolates · 1,245 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.4%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.5%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.1%</strong> <span style="color:#6b7378">(748)</span></div></div></div></div>`)[0];
+                popup_f4142c4eb4a3374d383ac03d7cda9680.setContent(html_39a86c3813c68ed7af2206a4513710bb);
+            
+        
+
+        circle_marker_7a3f4b66c6e2fd56f4eaf488490f9c4e.bindPopup(popup_f4142c4eb4a3374d383ac03d7cda9680)
+        ;
+
+        
+    
+    
+            circle_marker_7a3f4b66c6e2fd56f4eaf488490f9c4e.bindTooltip(
+                `<div>
+                     Western: R 32.4% · I 7.5% · S 60.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5a9d56e69207fa6f593f6d69441681f6 = L.marker(
+                [5.0, -2.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_b3f1b782a65d47be8e1f80d8f9137db5 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eWestern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_5a9d56e69207fa6f593f6d69441681f6.setIcon(div_icon_b3f1b782a65d47be8e1f80d8f9137db5);
+            
+    
+            var circle_marker_13a149615de6170bce2ceb225f6e7ecd = L.circleMarker(
+                [7.5, -0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 17.303030303030305, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_afb29149374e9940f2cb89da5e4861dc = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_9c54f6b6ecd3161485480769551f5f28 = $(`<div id="html_9c54f6b6ecd3161485480769551f5f28" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono East</strong><br><span style="color:#6b7378">157 isolates · 1,196 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.8%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.9%</strong> <span style="color:#6b7378">(705)</span></div></div></div></div>`)[0];
+                popup_afb29149374e9940f2cb89da5e4861dc.setContent(html_9c54f6b6ecd3161485480769551f5f28);
+            
+        
+
+        circle_marker_13a149615de6170bce2ceb225f6e7ecd.bindPopup(popup_afb29149374e9940f2cb89da5e4861dc)
+        ;
+
+        
+    
+    
+            circle_marker_13a149615de6170bce2ceb225f6e7ecd.bindTooltip(
+                `<div>
+                     Bono East: R 33.8% · I 7.3% · S 58.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5cce1a2c64b08b3007961fe8b268023a = L.marker(
+                [7.5, -0.8],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_a5185396cd263d7a8eb38721001d7921 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-27px)\"\u003eBono East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_5cce1a2c64b08b3007961fe8b268023a.setIcon(div_icon_a5185396cd263d7a8eb38721001d7921);
+            
+    
+            var circle_marker_bd198ddc7fb5c078ca8deeaa712d2a9c = L.circleMarker(
+                [6.0, -0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 16.6969696969697, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_17e2af96e03ac82ff3597e2952f158c2 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_bc09729ea7d583f38c7c6db32016743e = $(`<div id="html_bc09729ea7d583f38c7c6db32016743e" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Eastern</strong><br><span style="color:#6b7378">155 isolates · 1,189 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.7%</strong> <span style="color:#6b7378">(401)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(86)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.0%</strong> <span style="color:#6b7378">(702)</span></div></div></div></div>`)[0];
+                popup_17e2af96e03ac82ff3597e2952f158c2.setContent(html_bc09729ea7d583f38c7c6db32016743e);
+            
+        
+
+        circle_marker_bd198ddc7fb5c078ca8deeaa712d2a9c.bindPopup(popup_17e2af96e03ac82ff3597e2952f158c2)
+        ;
+
+        
+    
+    
+            circle_marker_bd198ddc7fb5c078ca8deeaa712d2a9c.bindTooltip(
+                `<div>
+                     Eastern: R 33.7% · I 7.2% · S 59.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_957e22a7829749e9a9e56f6736575a3b = L.marker(
+                [6.0, -0.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_842514c5ca81828fcc00ee83326fad7a = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-27px)\"\u003eEastern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_957e22a7829749e9a9e56f6736575a3b.setIcon(div_icon_842514c5ca81828fcc00ee83326fad7a);
+            
+    
+            var circle_marker_473d9d1479c8059ec48925e54f1efbfd = L.circleMarker(
+                [6.5, 0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 10.03030303030303, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_f40d61ee97ef9c23be96f5f83a309f43 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_9d798e28468b646066fcbeecaa293d5d = $(`<div id="html_9d798e28468b646066fcbeecaa293d5d" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Volta</strong><br><span style="color:#6b7378">153 isolates · 1,249 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.1%</strong> <span style="color:#6b7378">(438)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.1%</strong> <span style="color:#6b7378">(76)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(735)</span></div></div></div></div>`)[0];
+                popup_f40d61ee97ef9c23be96f5f83a309f43.setContent(html_9d798e28468b646066fcbeecaa293d5d);
+            
+        
+
+        circle_marker_473d9d1479c8059ec48925e54f1efbfd.bindPopup(popup_f40d61ee97ef9c23be96f5f83a309f43)
+        ;
+
+        
+    
+    
+            circle_marker_473d9d1479c8059ec48925e54f1efbfd.bindTooltip(
+                `<div>
+                     Volta: R 35.1% · I 6.1% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8a0985a74b54dd6c5197e49308d773a9 = L.marker(
+                [6.5, 0.8],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_d9f7a4c073edd1d93329fd017fb89b10 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-20px)\"\u003eVolta\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_8a0985a74b54dd6c5197e49308d773a9.setIcon(div_icon_d9f7a4c073edd1d93329fd017fb89b10);
+            
+    
+            var circle_marker_c140ba093c43e498455766eedee3147a = L.circleMarker(
+                [6.5, -1.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 17.303030303030305, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_439d1c1843c57f6b930dd5e6e9324099 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_374f12a2cfdc88920e0d9dcb067d4f15 = $(`<div id="html_374f12a2cfdc88920e0d9dcb067d4f15" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ashanti</strong><br><span style="color:#6b7378">151 isolates · 1,166 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>29.4%</strong> <span style="color:#6b7378">(343)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(85)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>63.3%</strong> <span style="color:#6b7378">(738)</span></div></div></div></div>`)[0];
+                popup_439d1c1843c57f6b930dd5e6e9324099.setContent(html_374f12a2cfdc88920e0d9dcb067d4f15);
+            
+        
+
+        circle_marker_c140ba093c43e498455766eedee3147a.bindPopup(popup_439d1c1843c57f6b930dd5e6e9324099)
+        ;
+
+        
+    
+    
+            circle_marker_c140ba093c43e498455766eedee3147a.bindTooltip(
+                `<div>
+                     Ashanti: R 29.4% · I 7.3% · S 63.3%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_eda7c60b0b6ce0d44f65b67ad83cc290 = L.marker(
+                [6.5, -1.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_0b7047250fce439c3be6d6d017f42811 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-27px)\"\u003eAshanti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_eda7c60b0b6ce0d44f65b67ad83cc290.setIcon(div_icon_0b7047250fce439c3be6d6d017f42811);
+            
+    
+            var circle_marker_18d38f7848ef07f0c8acfa20e363e1a7 = L.circleMarker(
+                [9.3, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 11.848484848484851, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_8bb61f47af7c5bd5492c529a32245fde = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_4c9ec350a836831a2826462937082ef6 = $(`<div id="html_4c9ec350a836831a2826462937082ef6" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Northern</strong><br><span style="color:#6b7378">148 isolates · 1,100 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.6%</strong> <span style="color:#6b7378">(348)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.4%</strong> <span style="color:#6b7378">(70)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>62.0%</strong> <span style="color:#6b7378">(682)</span></div></div></div></div>`)[0];
+                popup_8bb61f47af7c5bd5492c529a32245fde.setContent(html_4c9ec350a836831a2826462937082ef6);
+            
+        
+
+        circle_marker_18d38f7848ef07f0c8acfa20e363e1a7.bindPopup(popup_8bb61f47af7c5bd5492c529a32245fde)
+        ;
+
+        
+    
+    
+            circle_marker_18d38f7848ef07f0c8acfa20e363e1a7.bindTooltip(
+                `<div>
+                     Northern: R 31.6% · I 6.4% · S 62.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_bfb07e47971f8e60ee1cb629ac644f65 = L.marker(
+                [9.3, -1.0],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_8e46659f7ce4573522789a1e8fe78093 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-22px)\"\u003eNorthern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_bfb07e47971f8e60ee1cb629ac644f65.setIcon(div_icon_8e46659f7ce4573522789a1e8fe78093);
+            
+    
+            var circle_marker_22c4313335707ac73653a5ae4b3f046b = L.circleMarker(
+                [5.2, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 16.6969696969697, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_57ebd8a1cd5ab41679b3623153d3114b = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_0de97a35fca51d0bf307980cbab286fe = $(`<div id="html_0de97a35fca51d0bf307980cbab286fe" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Central</strong><br><span style="color:#6b7378">145 isolates · 1,107 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.1%</strong> <span style="color:#6b7378">(355)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(80)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.7%</strong> <span style="color:#6b7378">(672)</span></div></div></div></div>`)[0];
+                popup_57ebd8a1cd5ab41679b3623153d3114b.setContent(html_0de97a35fca51d0bf307980cbab286fe);
+            
+        
+
+        circle_marker_22c4313335707ac73653a5ae4b3f046b.bindPopup(popup_57ebd8a1cd5ab41679b3623153d3114b)
+        ;
+
+        
+    
+    
+            circle_marker_22c4313335707ac73653a5ae4b3f046b.bindTooltip(
+                `<div>
+                     Central: R 32.1% · I 7.2% · S 60.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4055e9b0cf6db5cede500eac056c5018 = L.marker(
+                [5.2, -1.2],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_bc4e9a8f0b1d0f7a9e3ddfb21a1440e4 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-27px)\"\u003eCentral\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_4055e9b0cf6db5cede500eac056c5018.setIcon(div_icon_bc4e9a8f0b1d0f7a9e3ddfb21a1440e4);
+            
+    
+            var circle_marker_754ca6b208817cce9ffb1a84bd57d59a = L.circleMarker(
+                [6.8, -2.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 27.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_e1faac3a5eef3e8521dc6d6961ba228d = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_d11cf78a2c6d970285342454f2b6e208 = $(`<div id="html_d11cf78a2c6d970285342454f2b6e208" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ahafo</strong><br><span style="color:#6b7378">145 isolates · 1,148 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.3%</strong> <span style="color:#6b7378">(371)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>8.9%</strong> <span style="color:#6b7378">(102)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(675)</span></div></div></div></div>`)[0];
+                popup_e1faac3a5eef3e8521dc6d6961ba228d.setContent(html_d11cf78a2c6d970285342454f2b6e208);
+            
+        
+
+        circle_marker_754ca6b208817cce9ffb1a84bd57d59a.bindPopup(popup_e1faac3a5eef3e8521dc6d6961ba228d)
+        ;
+
+        
+    
+    
+            circle_marker_754ca6b208817cce9ffb1a84bd57d59a.bindTooltip(
+                `<div>
+                     Ahafo: R 32.3% · I 8.9% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0618df7a8516c7cddd24ef79022c18b6 = L.marker(
+                [6.8, -2.2],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_17f2af707cbe7881df061860e62fc3c3 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-37px)\"\u003eAhafo\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_0618df7a8516c7cddd24ef79022c18b6.setIcon(div_icon_17f2af707cbe7881df061860e62fc3c3);
+            
+    
+            var circle_marker_11c9dfb93ca4c29576fdb2502711d270 = L.circleMarker(
+                [5.5, -3.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.121212121212118, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_76fb2daf5c46b32a1f52f03ecc496ef3 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_9937974849657388a754c8a031e50f47 = $(`<div id="html_9937974849657388a754c8a031e50f47" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western North</strong><br><span style="color:#6b7378">144 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.3%</strong> <span style="color:#6b7378">(340)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.6%</strong> <span style="color:#6b7378">(83)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>61.1%</strong> <span style="color:#6b7378">(664)</span></div></div></div></div>`)[0];
+                popup_76fb2daf5c46b32a1f52f03ecc496ef3.setContent(html_9937974849657388a754c8a031e50f47);
+            
+        
+
+        circle_marker_11c9dfb93ca4c29576fdb2502711d270.bindPopup(popup_76fb2daf5c46b32a1f52f03ecc496ef3)
+        ;
+
+        
+    
+    
+            circle_marker_11c9dfb93ca4c29576fdb2502711d270.bindTooltip(
+                `<div>
+                     Western North: R 31.3% · I 7.6% · S 61.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_69ca7d076f5159d0f0064ef1ca2c2760 = L.marker(
+                [5.5, -3.0],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_536ad705ac0e66ae0c5ce997236b54c1 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eWestern North\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_69ca7d076f5159d0f0064ef1ca2c2760.setIcon(div_icon_536ad705ac0e66ae0c5ce997236b54c1);
+            
+    
+            var circle_marker_f1ade6acb86453d2c8439de75ceb684f = L.circleMarker(
+                [10.2, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 8.818181818181822, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_0033c193300ef62534fbcb24b552aebc = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_03e0dcdae23f8910a184eb99c201433f = $(`<div id="html_03e0dcdae23f8910a184eb99c201433f" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">North East</strong><br><span style="color:#6b7378">141 isolates · 1,119 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>34.9%</strong> <span style="color:#6b7378">(390)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.9%</strong> <span style="color:#6b7378">(66)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.2%</strong> <span style="color:#6b7378">(663)</span></div></div></div></div>`)[0];
+                popup_0033c193300ef62534fbcb24b552aebc.setContent(html_03e0dcdae23f8910a184eb99c201433f);
+            
+        
+
+        circle_marker_f1ade6acb86453d2c8439de75ceb684f.bindPopup(popup_0033c193300ef62534fbcb24b552aebc)
+        ;
+
+        
+    
+    
+            circle_marker_f1ade6acb86453d2c8439de75ceb684f.bindTooltip(
+                `<div>
+                     North East: R 34.9% · I 5.9% · S 59.2%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a9bc0adeb80de287c77e30b6d74701bc = L.marker(
+                [10.2, -1.0],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_9a0f04bea9c80c3173cef51d767276df = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-19px)\"\u003eNorth East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_a9bc0adeb80de287c77e30b6d74701bc.setIcon(div_icon_9a0f04bea9c80c3173cef51d767276df);
+            
+    
+            var circle_marker_9bf8f537f9ee222e6140c15baf243d1a = L.circleMarker(
+                [7.2, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffeedd", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 13.666666666666668, "stroke": true, "weight": 1}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+        var popup_4272494cc5e3a1b996a15930b9e78aa3 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_49c53e63540729b32084d91e90f9c33c = $(`<div id="html_49c53e63540729b32084d91e90f9c33c" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono</strong><br><span style="color:#6b7378">132 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.6%</strong> <span style="color:#6b7378">(365)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(73)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.7%</strong> <span style="color:#6b7378">(649)</span></div></div></div></div>`)[0];
+                popup_4272494cc5e3a1b996a15930b9e78aa3.setContent(html_49c53e63540729b32084d91e90f9c33c);
+            
+        
+
+        circle_marker_9bf8f537f9ee222e6140c15baf243d1a.bindPopup(popup_4272494cc5e3a1b996a15930b9e78aa3)
+        ;
+
+        
+    
+    
+            circle_marker_9bf8f537f9ee222e6140c15baf243d1a.bindTooltip(
+                `<div>
+                     Bono: R 33.6% · I 6.7% · S 59.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_00a97d6b9885f1d1f3f7e00891947b1e = L.marker(
+                [7.2, -2.5],
+                {
+}
+            ).addTo(feature_group_6200536e091e118603143f3c668703cb);
+        
+    
+            var div_icon_99de335a820dda3df9dbf91543814742 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-24px)\"\u003eBono\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_00a97d6b9885f1d1f3f7e00891947b1e.setIcon(div_icon_99de335a820dda3df9dbf91543814742);
+            
+    
+            var feature_group_879b7ba0fe8f57c67c4a47913de87426 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_3880a41e5e52129562d92a1acfdb2953 = L.circleMarker(
+                [5.5, -0.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 7.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_c44ff00c78e3e120e0a13a43f345efba = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_0bb559151d859f177bb1384944a45238 = $(`<div id="html_0bb559151d859f177bb1384944a45238" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Greater Accra</strong><br><span style="color:#6b7378">215 isolates · 1,611 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>42.7%</strong> <span style="color:#6b7378">(688)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.6%</strong> <span style="color:#6b7378">(91)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>51.6%</strong> <span style="color:#6b7378">(832)</span></div></div></div></div>`)[0];
+                popup_c44ff00c78e3e120e0a13a43f345efba.setContent(html_0bb559151d859f177bb1384944a45238);
+            
+        
+
+        circle_marker_3880a41e5e52129562d92a1acfdb2953.bindPopup(popup_c44ff00c78e3e120e0a13a43f345efba)
+        ;
+
+        
+    
+    
+            circle_marker_3880a41e5e52129562d92a1acfdb2953.bindTooltip(
+                `<div>
+                     Greater Accra: R 42.7% · I 5.6% · S 51.6%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1b89a7d7313bf1449207c8c01edff4cb = L.marker(
+                [5.5, -0.2],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_b3e2eec72000b208ec18ee0e07d38981 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-17px)\"\u003eGreater Accra\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_1b89a7d7313bf1449207c8c01edff4cb.setIcon(div_icon_b3e2eec72000b208ec18ee0e07d38981);
+            
+    
+            var circle_marker_af95ee8e5b761230dc5eed5f2a36f382 = L.circleMarker(
+                [10.5, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.307692307692303, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_fa2809dfe76c5cdb8a037c163b2b0881 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_2b1f7ae086738f16d51d15578d6bb646 = $(`<div id="html_2b1f7ae086738f16d51d15578d6bb646" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper West</strong><br><span style="color:#6b7378">168 isolates · 1,258 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.0%</strong> <span style="color:#6b7378">(440)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.2%</strong> <span style="color:#6b7378">(78)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(740)</span></div></div></div></div>`)[0];
+                popup_fa2809dfe76c5cdb8a037c163b2b0881.setContent(html_2b1f7ae086738f16d51d15578d6bb646);
+            
+        
+
+        circle_marker_af95ee8e5b761230dc5eed5f2a36f382.bindPopup(popup_fa2809dfe76c5cdb8a037c163b2b0881)
+        ;
+
+        
+    
+    
+            circle_marker_af95ee8e5b761230dc5eed5f2a36f382.bindTooltip(
+                `<div>
+                     Upper West: R 35.0% · I 6.2% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ce1e6f3b8ca2dbf9043b61890736f284 = L.marker(
+                [10.5, -2.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_cd75c6712c99450a46a2eded1aa298f1 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eUpper West\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_ce1e6f3b8ca2dbf9043b61890736f284.setIcon(div_icon_cd75c6712c99450a46a2eded1aa298f1);
+            
+    
+            var circle_marker_a90fcb463ba84502f8b45c8b24d0f49b = L.circleMarker(
+                [8.5, 0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 22.213675213675216, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_4a373bd55bd832d363e15c6839569718 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_fa595c5accb57d0220b374e9d0c62cca = $(`<div id="html_fa595c5accb57d0220b374e9d0c62cca" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Oti</strong><br><span style="color:#6b7378">166 isolates · 1,326 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.5%</strong> <span style="color:#6b7378">(431)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.0%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.5%</strong> <span style="color:#6b7378">(802)</span></div></div></div></div>`)[0];
+                popup_4a373bd55bd832d363e15c6839569718.setContent(html_fa595c5accb57d0220b374e9d0c62cca);
+            
+        
+
+        circle_marker_a90fcb463ba84502f8b45c8b24d0f49b.bindPopup(popup_4a373bd55bd832d363e15c6839569718)
+        ;
+
+        
+    
+    
+            circle_marker_a90fcb463ba84502f8b45c8b24d0f49b.bindTooltip(
+                `<div>
+                     Oti: R 32.5% · I 7.0% · S 60.5%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8514b376768babe46f620b23d8c1e681 = L.marker(
+                [8.5, 0.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_330746a8cfd5cd29be848ca494ae5b25 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-32px)\"\u003eOti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_8514b376768babe46f620b23d8c1e681.setIcon(div_icon_330746a8cfd5cd29be848ca494ae5b25);
+            
+    
+            var circle_marker_70fbd9c20cefe9e4154413d514099b7b = L.circleMarker(
+                [10.0, -2.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 22.042735042735043, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_19e43a72c2d18689f82fd53f382aa4f3 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_5d73ef519683a1dbad85e0f8b668ae91 = $(`<div id="html_5d73ef519683a1dbad85e0f8b668ae91" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Savannah</strong><br><span style="color:#6b7378">164 isolates · 1,293 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.9%</strong> <span style="color:#6b7378">(425)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.4%</strong> <span style="color:#6b7378">(781)</span></div></div></div></div>`)[0];
+                popup_19e43a72c2d18689f82fd53f382aa4f3.setContent(html_5d73ef519683a1dbad85e0f8b668ae91);
+            
+        
+
+        circle_marker_70fbd9c20cefe9e4154413d514099b7b.bindPopup(popup_19e43a72c2d18689f82fd53f382aa4f3)
+        ;
+
+        
+    
+    
+            circle_marker_70fbd9c20cefe9e4154413d514099b7b.bindTooltip(
+                `<div>
+                     Savannah: R 32.9% · I 6.7% · S 60.4%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_765b4fdf1626e2670745b05eb8d0bee4 = L.marker(
+                [10.0, -2.0],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_588de7250074c833f8b0250d35ca39a3 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-32px)\"\u003eSavannah\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_765b4fdf1626e2670745b05eb8d0bee4.setIcon(div_icon_588de7250074c833f8b0250d35ca39a3);
+            
+    
+            var circle_marker_4fe3db1539dfd801dcf9b1f2c89ea1ec = L.circleMarker(
+                [10.8, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 22.897435897435898, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_123e2044b813d63f2c1143e949699c3e = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_147e2c8b103aa39a4b5e8e4767744b7e = $(`<div id="html_147e2c8b103aa39a4b5e8e4767744b7e" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper East</strong><br><span style="color:#6b7378">159 isolates · 1,213 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.6%</strong> <span style="color:#6b7378">(395)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.5%</strong> <span style="color:#6b7378">(79)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.9%</strong> <span style="color:#6b7378">(739)</span></div></div></div></div>`)[0];
+                popup_123e2044b813d63f2c1143e949699c3e.setContent(html_147e2c8b103aa39a4b5e8e4767744b7e);
+            
+        
+
+        circle_marker_4fe3db1539dfd801dcf9b1f2c89ea1ec.bindPopup(popup_123e2044b813d63f2c1143e949699c3e)
+        ;
+
+        
+    
+    
+            circle_marker_4fe3db1539dfd801dcf9b1f2c89ea1ec.bindTooltip(
+                `<div>
+                     Upper East: R 32.6% · I 6.5% · S 60.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_63b83abb148c1b3fc77d2c512b1c03e4 = L.marker(
+                [10.8, -1.2],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_2b277becf86fbeb2b8dabab64b592963 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eUpper East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_63b83abb148c1b3fc77d2c512b1c03e4.setIcon(div_icon_2b277becf86fbeb2b8dabab64b592963);
+            
+    
+            var circle_marker_b2e03b0af10057f848716788587c8501 = L.circleMarker(
+                [5.0, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 21.529914529914535, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_0b36d58c9eff2ef86854070e27814dc8 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_c4dcc05181ec2ee9aea9bed7f7fca0c6 = $(`<div id="html_c4dcc05181ec2ee9aea9bed7f7fca0c6" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western</strong><br><span style="color:#6b7378">159 isolates · 1,245 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.4%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.5%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.1%</strong> <span style="color:#6b7378">(748)</span></div></div></div></div>`)[0];
+                popup_0b36d58c9eff2ef86854070e27814dc8.setContent(html_c4dcc05181ec2ee9aea9bed7f7fca0c6);
+            
+        
+
+        circle_marker_b2e03b0af10057f848716788587c8501.bindPopup(popup_0b36d58c9eff2ef86854070e27814dc8)
+        ;
+
+        
+    
+    
+            circle_marker_b2e03b0af10057f848716788587c8501.bindTooltip(
+                `<div>
+                     Western: R 32.4% · I 7.5% · S 60.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5f625bcccf876d9a3ff6dacf72c54879 = L.marker(
+                [5.0, -2.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_36db0563d03c59654c7d05afe5af85be = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-32px)\"\u003eWestern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_5f625bcccf876d9a3ff6dacf72c54879.setIcon(div_icon_36db0563d03c59654c7d05afe5af85be);
+            
+    
+            var circle_marker_ad6b6f193a086c0692bc1f9876daf330 = L.circleMarker(
+                [7.5, -0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.478632478632477, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_4d681ed0af382828d7f1086e36ce2642 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_a7541d673760bbca9e5a5fca1fdd543d = $(`<div id="html_a7541d673760bbca9e5a5fca1fdd543d" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono East</strong><br><span style="color:#6b7378">157 isolates · 1,196 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.8%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.9%</strong> <span style="color:#6b7378">(705)</span></div></div></div></div>`)[0];
+                popup_4d681ed0af382828d7f1086e36ce2642.setContent(html_a7541d673760bbca9e5a5fca1fdd543d);
+            
+        
+
+        circle_marker_ad6b6f193a086c0692bc1f9876daf330.bindPopup(popup_4d681ed0af382828d7f1086e36ce2642)
+        ;
+
+        
+    
+    
+            circle_marker_ad6b6f193a086c0692bc1f9876daf330.bindTooltip(
+                `<div>
+                     Bono East: R 33.8% · I 7.3% · S 58.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f5b76c2305a745dd245bff4a7bf4d14c = L.marker(
+                [7.5, -0.8],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_af6b8f4421e8a898e44c5dabe51b817f = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eBono East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_f5b76c2305a745dd245bff4a7bf4d14c.setIcon(div_icon_af6b8f4421e8a898e44c5dabe51b817f);
+            
+    
+            var circle_marker_b10b84eed4f8f657faa889b44da0f651 = L.circleMarker(
+                [6.0, -0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.64957264957265, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_e836d10dc3a2e4cded08f7b8b066cfa1 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_051d9bf25db0a7d3bdcc6bbb31af1b49 = $(`<div id="html_051d9bf25db0a7d3bdcc6bbb31af1b49" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Eastern</strong><br><span style="color:#6b7378">155 isolates · 1,189 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.7%</strong> <span style="color:#6b7378">(401)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(86)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.0%</strong> <span style="color:#6b7378">(702)</span></div></div></div></div>`)[0];
+                popup_e836d10dc3a2e4cded08f7b8b066cfa1.setContent(html_051d9bf25db0a7d3bdcc6bbb31af1b49);
+            
+        
+
+        circle_marker_b10b84eed4f8f657faa889b44da0f651.bindPopup(popup_e836d10dc3a2e4cded08f7b8b066cfa1)
+        ;
+
+        
+    
+    
+            circle_marker_b10b84eed4f8f657faa889b44da0f651.bindTooltip(
+                `<div>
+                     Eastern: R 33.7% · I 7.2% · S 59.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7634aa61fb17a735f62a87c0149af4cf = L.marker(
+                [6.0, -0.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_2319ac9d2f5045e11f447586eb457a88 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-30px)\"\u003eEastern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_7634aa61fb17a735f62a87c0149af4cf.setIcon(div_icon_2319ac9d2f5045e11f447586eb457a88);
+            
+    
+            var circle_marker_df21cd95f5240761a7bea8b1a940dbd6 = L.circleMarker(
+                [6.5, 0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.307692307692303, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_b3529b7293236c2a7380d339f85d6cee = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_8adcb03427af08c8185cb6d690c65286 = $(`<div id="html_8adcb03427af08c8185cb6d690c65286" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Volta</strong><br><span style="color:#6b7378">153 isolates · 1,249 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.1%</strong> <span style="color:#6b7378">(438)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.1%</strong> <span style="color:#6b7378">(76)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(735)</span></div></div></div></div>`)[0];
+                popup_b3529b7293236c2a7380d339f85d6cee.setContent(html_8adcb03427af08c8185cb6d690c65286);
+            
+        
+
+        circle_marker_df21cd95f5240761a7bea8b1a940dbd6.bindPopup(popup_b3529b7293236c2a7380d339f85d6cee)
+        ;
+
+        
+    
+    
+            circle_marker_df21cd95f5240761a7bea8b1a940dbd6.bindTooltip(
+                `<div>
+                     Volta: R 35.1% · I 6.1% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_bb7e7090d8ba4dfceac1ab6d531a41e4 = L.marker(
+                [6.5, 0.8],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_071e3c821230f0320ebff36c9d19a5f0 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eVolta\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_bb7e7090d8ba4dfceac1ab6d531a41e4.setIcon(div_icon_071e3c821230f0320ebff36c9d19a5f0);
+            
+    
+            var circle_marker_133db0a604c9dec86aeee995919767c4 = L.circleMarker(
+                [6.5, -1.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 27.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_68708a80acf56c30fd40e6f815e573e2 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_86db37c7c51f93820e1db3a75efd6912 = $(`<div id="html_86db37c7c51f93820e1db3a75efd6912" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ashanti</strong><br><span style="color:#6b7378">151 isolates · 1,166 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>29.4%</strong> <span style="color:#6b7378">(343)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(85)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>63.3%</strong> <span style="color:#6b7378">(738)</span></div></div></div></div>`)[0];
+                popup_68708a80acf56c30fd40e6f815e573e2.setContent(html_86db37c7c51f93820e1db3a75efd6912);
+            
+        
+
+        circle_marker_133db0a604c9dec86aeee995919767c4.bindPopup(popup_68708a80acf56c30fd40e6f815e573e2)
+        ;
+
+        
+    
+    
+            circle_marker_133db0a604c9dec86aeee995919767c4.bindTooltip(
+                `<div>
+                     Ashanti: R 29.4% · I 7.3% · S 63.3%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_930ea60726f56da986e029e911905e28 = L.marker(
+                [6.5, -1.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_b9b60b022fd6d379f2800d9caf2d30e1 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-37px)\"\u003eAshanti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_930ea60726f56da986e029e911905e28.setIcon(div_icon_b9b60b022fd6d379f2800d9caf2d30e1);
+            
+    
+            var circle_marker_ec157e224de7935ab328a46cd3c0d86d = L.circleMarker(
+                [9.3, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.777777777777782, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_4c2a1b7f6960a4737e33d635397a2008 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_21a6bc8d89701292afbe328433f04c9b = $(`<div id="html_21a6bc8d89701292afbe328433f04c9b" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Northern</strong><br><span style="color:#6b7378">148 isolates · 1,100 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.6%</strong> <span style="color:#6b7378">(348)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.4%</strong> <span style="color:#6b7378">(70)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>62.0%</strong> <span style="color:#6b7378">(682)</span></div></div></div></div>`)[0];
+                popup_4c2a1b7f6960a4737e33d635397a2008.setContent(html_21a6bc8d89701292afbe328433f04c9b);
+            
+        
+
+        circle_marker_ec157e224de7935ab328a46cd3c0d86d.bindPopup(popup_4c2a1b7f6960a4737e33d635397a2008)
+        ;
+
+        
+    
+    
+            circle_marker_ec157e224de7935ab328a46cd3c0d86d.bindTooltip(
+                `<div>
+                     Northern: R 31.6% · I 6.4% · S 62.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_41ecdcf8cf1ee7bd287d64cbd40261d4 = L.marker(
+                [9.3, -1.0],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_60bfed9d291ab16ae1b7d1cf6a006a51 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-35px)\"\u003eNorthern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_41ecdcf8cf1ee7bd287d64cbd40261d4.setIcon(div_icon_60bfed9d291ab16ae1b7d1cf6a006a51);
+            
+    
+            var circle_marker_285698e6e3106e7684a9eb4c9b330a02 = L.circleMarker(
+                [5.2, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 22.555555555555564, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_30c21fd932ea53fd4548d5190a3c29a3 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_2a2af76cff32d7d14ab46b28dd3f3433 = $(`<div id="html_2a2af76cff32d7d14ab46b28dd3f3433" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Central</strong><br><span style="color:#6b7378">145 isolates · 1,107 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.1%</strong> <span style="color:#6b7378">(355)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(80)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.7%</strong> <span style="color:#6b7378">(672)</span></div></div></div></div>`)[0];
+                popup_30c21fd932ea53fd4548d5190a3c29a3.setContent(html_2a2af76cff32d7d14ab46b28dd3f3433);
+            
+        
+
+        circle_marker_285698e6e3106e7684a9eb4c9b330a02.bindPopup(popup_30c21fd932ea53fd4548d5190a3c29a3)
+        ;
+
+        
+    
+    
+            circle_marker_285698e6e3106e7684a9eb4c9b330a02.bindTooltip(
+                `<div>
+                     Central: R 32.1% · I 7.2% · S 60.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d7338fbef46616cc488b44f6c0687b41 = L.marker(
+                [5.2, -1.2],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_2f1b249ddbb9e334ee54e12e7ce835b3 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eCentral\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_d7338fbef46616cc488b44f6c0687b41.setIcon(div_icon_2f1b249ddbb9e334ee54e12e7ce835b3);
+            
+    
+            var circle_marker_4f262fd826b19696a0255c2507e1a65c = L.circleMarker(
+                [6.8, -2.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.307692307692303, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_692e6a4045591e1776c6348f4792992f = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_9a34a59f84444b219c0ab4601db5f624 = $(`<div id="html_9a34a59f84444b219c0ab4601db5f624" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ahafo</strong><br><span style="color:#6b7378">145 isolates · 1,148 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.3%</strong> <span style="color:#6b7378">(371)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>8.9%</strong> <span style="color:#6b7378">(102)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(675)</span></div></div></div></div>`)[0];
+                popup_692e6a4045591e1776c6348f4792992f.setContent(html_9a34a59f84444b219c0ab4601db5f624);
+            
+        
+
+        circle_marker_4f262fd826b19696a0255c2507e1a65c.bindPopup(popup_692e6a4045591e1776c6348f4792992f)
+        ;
+
+        
+    
+    
+            circle_marker_4f262fd826b19696a0255c2507e1a65c.bindTooltip(
+                `<div>
+                     Ahafo: R 32.3% · I 8.9% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e47f3663eeed0add667f358c6689dd24 = L.marker(
+                [6.8, -2.2],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_c6dd99f84e29151ccddb1e96560c3ab9 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-29px)\"\u003eAhafo\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_e47f3663eeed0add667f358c6689dd24.setIcon(div_icon_c6dd99f84e29151ccddb1e96560c3ab9);
+            
+    
+            var circle_marker_97fcc3aeb8ff3fce6aedf3fe3303c12d = L.circleMarker(
+                [5.5, -3.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#2ca02c", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.239316239316246, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_7f18619c5ca4df9631b47ee7f50cb488 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_13a90a5e39acc70a9674f84f4c35cc20 = $(`<div id="html_13a90a5e39acc70a9674f84f4c35cc20" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western North</strong><br><span style="color:#6b7378">144 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.3%</strong> <span style="color:#6b7378">(340)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.6%</strong> <span style="color:#6b7378">(83)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>61.1%</strong> <span style="color:#6b7378">(664)</span></div></div></div></div>`)[0];
+                popup_7f18619c5ca4df9631b47ee7f50cb488.setContent(html_13a90a5e39acc70a9674f84f4c35cc20);
+            
+        
+
+        circle_marker_97fcc3aeb8ff3fce6aedf3fe3303c12d.bindPopup(popup_7f18619c5ca4df9631b47ee7f50cb488)
+        ;
+
+        
+    
+    
+            circle_marker_97fcc3aeb8ff3fce6aedf3fe3303c12d.bindTooltip(
+                `<div>
+                     Western North: R 31.3% · I 7.6% · S 61.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_37bb8f5ad1a39b59eb923a00f0a5d2e3 = L.marker(
+                [5.5, -3.0],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_304b495c7c69b7bbf24782de2bdeff0d = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eWestern North\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_37bb8f5ad1a39b59eb923a00f0a5d2e3.setIcon(div_icon_304b495c7c69b7bbf24782de2bdeff0d);
+            
+    
+            var circle_marker_5bc56ee1891343563b287582cd7a216a = L.circleMarker(
+                [10.2, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 19.991452991453, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_0edea59a9a137c2214c07da802c6828f = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_bdae55cf0afbf2e5547748f9d53bfbb2 = $(`<div id="html_bdae55cf0afbf2e5547748f9d53bfbb2" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">North East</strong><br><span style="color:#6b7378">141 isolates · 1,119 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>34.9%</strong> <span style="color:#6b7378">(390)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.9%</strong> <span style="color:#6b7378">(66)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.2%</strong> <span style="color:#6b7378">(663)</span></div></div></div></div>`)[0];
+                popup_0edea59a9a137c2214c07da802c6828f.setContent(html_bdae55cf0afbf2e5547748f9d53bfbb2);
+            
+        
+
+        circle_marker_5bc56ee1891343563b287582cd7a216a.bindPopup(popup_0edea59a9a137c2214c07da802c6828f)
+        ;
+
+        
+    
+    
+            circle_marker_5bc56ee1891343563b287582cd7a216a.bindTooltip(
+                `<div>
+                     North East: R 34.9% · I 5.9% · S 59.2%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_48826da59ec12a7c029acfe99808b1ae = L.marker(
+                [10.2, -1.0],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_b601b5fa961aee4a0c25c5db869ede64 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-30px)\"\u003eNorth East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_48826da59ec12a7c029acfe99808b1ae.setIcon(div_icon_b601b5fa961aee4a0c25c5db869ede64);
+            
+    
+            var circle_marker_9429a8c746bc2357de4db14c83b08def = L.circleMarker(
+                [7.2, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#4caf50", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 20.846153846153854, "stroke": true, "weight": 1}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+        var popup_9f1e24d4d6fbd55248f3b30ebb6c51fd = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_19c8341530c2e7fb1b3126d5706f97e6 = $(`<div id="html_19c8341530c2e7fb1b3126d5706f97e6" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono</strong><br><span style="color:#6b7378">132 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.6%</strong> <span style="color:#6b7378">(365)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(73)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.7%</strong> <span style="color:#6b7378">(649)</span></div></div></div></div>`)[0];
+                popup_9f1e24d4d6fbd55248f3b30ebb6c51fd.setContent(html_19c8341530c2e7fb1b3126d5706f97e6);
+            
+        
+
+        circle_marker_9429a8c746bc2357de4db14c83b08def.bindPopup(popup_9f1e24d4d6fbd55248f3b30ebb6c51fd)
+        ;
+
+        
+    
+    
+            circle_marker_9429a8c746bc2357de4db14c83b08def.bindTooltip(
+                `<div>
+                     Bono: R 33.6% · I 6.7% · S 59.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e7082f766a22365b0bff7c6109ae8e57 = L.marker(
+                [7.2, -2.5],
+                {
+}
+            ).addTo(feature_group_879b7ba0fe8f57c67c4a47913de87426);
+        
+    
+            var div_icon_cce2a23a45ac181ca277ee9c81a23fb8 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-31px)\"\u003eBono\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_e7082f766a22365b0bff7c6109ae8e57.setIcon(div_icon_cce2a23a45ac181ca277ee9c81a23fb8);
+            
+    
+            var feature_group_7d494b7d3326f4ab4b9d8a362092e22f = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var circle_marker_65908db1b19d8293fc300573a55db317 = L.circleMarker(
+                [5.5, -0.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 27.0, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_a06bbc1155b7453a3f3d09df047f0d3e = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_d1fb3070adc8d7600783041a74dd30e2 = $(`<div id="html_d1fb3070adc8d7600783041a74dd30e2" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Greater Accra</strong><br><span style="color:#6b7378">215 isolates · 1,611 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>42.7%</strong> <span style="color:#6b7378">(688)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.6%</strong> <span style="color:#6b7378">(91)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>51.6%</strong> <span style="color:#6b7378">(832)</span></div></div></div></div>`)[0];
+                popup_a06bbc1155b7453a3f3d09df047f0d3e.setContent(html_d1fb3070adc8d7600783041a74dd30e2);
+            
+        
+
+        circle_marker_65908db1b19d8293fc300573a55db317.bindPopup(popup_a06bbc1155b7453a3f3d09df047f0d3e)
+        ;
+
+        
+    
+    
+            circle_marker_65908db1b19d8293fc300573a55db317.bindTooltip(
+                `<div>
+                     Greater Accra: R 42.7% · I 5.6% · S 51.6%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1b8eccc95f4f9e8a5dc3019c7a631328 = L.marker(
+                [5.5, -0.2],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_c3129cf0a4434ee0b0cceeb9876a83de = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-37px)\"\u003eGreater Accra\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_1b8eccc95f4f9e8a5dc3019c7a631328.setIcon(div_icon_c3129cf0a4434ee0b0cceeb9876a83de);
+            
+    
+            var circle_marker_6f53536aded378db8c4bac3a7d81d6ca = L.circleMarker(
+                [10.5, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.679313887560333, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_802263a4ba8b54b481288d6a5593107c = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_af7fe121fc168d569b22d9de67e30e9a = $(`<div id="html_af7fe121fc168d569b22d9de67e30e9a" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper West</strong><br><span style="color:#6b7378">168 isolates · 1,258 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.0%</strong> <span style="color:#6b7378">(440)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.2%</strong> <span style="color:#6b7378">(78)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(740)</span></div></div></div></div>`)[0];
+                popup_802263a4ba8b54b481288d6a5593107c.setContent(html_af7fe121fc168d569b22d9de67e30e9a);
+            
+        
+
+        circle_marker_6f53536aded378db8c4bac3a7d81d6ca.bindPopup(popup_802263a4ba8b54b481288d6a5593107c)
+        ;
+
+        
+    
+    
+            circle_marker_6f53536aded378db8c4bac3a7d81d6ca.bindTooltip(
+                `<div>
+                     Upper West: R 35.0% · I 6.2% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_18bd2bf2b8bce638a66b7bc4bf92b107 = L.marker(
+                [10.5, -2.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_0862bd3db673da1eddb58f0f22d497cd = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-35px)\"\u003eUpper West\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_18bd2bf2b8bce638a66b7bc4bf92b107.setIcon(div_icon_0862bd3db673da1eddb58f0f22d497cd);
+            
+    
+            var circle_marker_113bac8b914e87a6b640848f5fcd7142 = L.circleMarker(
+                [8.5, 0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.57376480161054, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_a5b61f0cd1773827060b226d5772ea4f = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_f3a75a632d16ce3f18a33efc3aa449a9 = $(`<div id="html_f3a75a632d16ce3f18a33efc3aa449a9" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Oti</strong><br><span style="color:#6b7378">166 isolates · 1,326 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.5%</strong> <span style="color:#6b7378">(431)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.0%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.5%</strong> <span style="color:#6b7378">(802)</span></div></div></div></div>`)[0];
+                popup_a5b61f0cd1773827060b226d5772ea4f.setContent(html_f3a75a632d16ce3f18a33efc3aa449a9);
+            
+        
+
+        circle_marker_113bac8b914e87a6b640848f5fcd7142.bindPopup(popup_a5b61f0cd1773827060b226d5772ea4f)
+        ;
+
+        
+    
+    
+            circle_marker_113bac8b914e87a6b640848f5fcd7142.bindTooltip(
+                `<div>
+                     Oti: R 32.5% · I 7.0% · S 60.5%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_845ab61bb00837d9407b905edbb77678 = L.marker(
+                [8.5, 0.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_0e7e403f61fe74feed32d6b3e2808814 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-35px)\"\u003eOti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_845ab61bb00837d9407b905edbb77678.setIcon(div_icon_0e7e403f61fe74feed32d6b3e2808814);
+            
+    
+            var circle_marker_aac293bffef32977d9c2cf5f953c4866 = L.circleMarker(
+                [10.0, -2.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.46757793942158, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_e35fb9f48f4a1630a95ea5e0bd1c4471 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_235d7ede6635e8942bf0985e62382074 = $(`<div id="html_235d7ede6635e8942bf0985e62382074" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Savannah</strong><br><span style="color:#6b7378">164 isolates · 1,293 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.9%</strong> <span style="color:#6b7378">(425)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.4%</strong> <span style="color:#6b7378">(781)</span></div></div></div></div>`)[0];
+                popup_e35fb9f48f4a1630a95ea5e0bd1c4471.setContent(html_235d7ede6635e8942bf0985e62382074);
+            
+        
+
+        circle_marker_aac293bffef32977d9c2cf5f953c4866.bindPopup(popup_e35fb9f48f4a1630a95ea5e0bd1c4471)
+        ;
+
+        
+    
+    
+            circle_marker_aac293bffef32977d9c2cf5f953c4866.bindTooltip(
+                `<div>
+                     Savannah: R 32.9% · I 6.7% · S 60.4%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b2666970918bbd926659c4afb96738ed = L.marker(
+                [10.0, -2.0],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_8715305172117ea590d8f4a6d1a2d01c = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eSavannah\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_b2666970918bbd926659c4afb96738ed.setIcon(div_icon_8715305172117ea590d8f4a6d1a2d01c);
+            
+    
+            var circle_marker_780c6065048f95e9339c06ee414f1457 = L.circleMarker(
+                [10.8, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.19924281729786, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_95996c875dd3a859c07ab717e08fee05 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_972898e2021d2fd72c260542e99bfcdd = $(`<div id="html_972898e2021d2fd72c260542e99bfcdd" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Upper East</strong><br><span style="color:#6b7378">159 isolates · 1,213 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.6%</strong> <span style="color:#6b7378">(395)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.5%</strong> <span style="color:#6b7378">(79)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.9%</strong> <span style="color:#6b7378">(739)</span></div></div></div></div>`)[0];
+                popup_95996c875dd3a859c07ab717e08fee05.setContent(html_972898e2021d2fd72c260542e99bfcdd);
+            
+        
+
+        circle_marker_780c6065048f95e9339c06ee414f1457.bindPopup(popup_95996c875dd3a859c07ab717e08fee05)
+        ;
+
+        
+    
+    
+            circle_marker_780c6065048f95e9339c06ee414f1457.bindTooltip(
+                `<div>
+                     Upper East: R 32.6% · I 6.5% · S 60.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6fe94288e3699dbdaa03c420c1fca683 = L.marker(
+                [10.8, -1.2],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_16af8b91abc1b1fb4a19ab62629b1372 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eUpper East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_6fe94288e3699dbdaa03c420c1fca683.setIcon(div_icon_16af8b91abc1b1fb4a19ab62629b1372);
+            
+    
+            var circle_marker_72fa4299ca1e7cce2bba39ab1c5b4cdd = L.circleMarker(
+                [5.0, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.19924281729786, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_c24a2cf004a2c228d1a3d3a2c6081f72 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_4f7f03897a2b05b405123a6496addb0b = $(`<div id="html_4f7f03897a2b05b405123a6496addb0b" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western</strong><br><span style="color:#6b7378">159 isolates · 1,245 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.4%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.5%</strong> <span style="color:#6b7378">(93)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.1%</strong> <span style="color:#6b7378">(748)</span></div></div></div></div>`)[0];
+                popup_c24a2cf004a2c228d1a3d3a2c6081f72.setContent(html_4f7f03897a2b05b405123a6496addb0b);
+            
+        
+
+        circle_marker_72fa4299ca1e7cce2bba39ab1c5b4cdd.bindPopup(popup_c24a2cf004a2c228d1a3d3a2c6081f72)
+        ;
+
+        
+    
+    
+            circle_marker_72fa4299ca1e7cce2bba39ab1c5b4cdd.bindTooltip(
+                `<div>
+                     Western: R 32.4% · I 7.5% · S 60.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_72b08f3ee19f471fb059df8b3639ab6c = L.marker(
+                [5.0, -2.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_f2fe6a8919367ef67c0084a492443c24 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eWestern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_72b08f3ee19f471fb059df8b3639ab6c.setIcon(div_icon_f2fe6a8919367ef67c0084a492443c24);
+            
+    
+            var circle_marker_e5463e66f573be01bfc6a9371a939885 = L.circleMarker(
+                [7.5, -0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 24.090729161033885, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_9391a273e34becb7cdc2e5007d0c9b15 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_ed47db208273c82a24fc385cb43af141 = $(`<div id="html_ed47db208273c82a24fc385cb43af141" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono East</strong><br><span style="color:#6b7378">157 isolates · 1,196 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.8%</strong> <span style="color:#6b7378">(404)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(87)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.9%</strong> <span style="color:#6b7378">(705)</span></div></div></div></div>`)[0];
+                popup_9391a273e34becb7cdc2e5007d0c9b15.setContent(html_ed47db208273c82a24fc385cb43af141);
+            
+        
+
+        circle_marker_e5463e66f573be01bfc6a9371a939885.bindPopup(popup_9391a273e34becb7cdc2e5007d0c9b15)
+        ;
+
+        
+    
+    
+            circle_marker_e5463e66f573be01bfc6a9371a939885.bindTooltip(
+                `<div>
+                     Bono East: R 33.8% · I 7.3% · S 58.9%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6f82971e7207903c9c22133d4a1aa837 = L.marker(
+                [7.5, -0.8],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_8b33c44b4c3b36ba7e72d19201469bd0 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eBono East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_6f82971e7207903c9c22133d4a1aa837.setIcon(div_icon_8b33c44b4c3b36ba7e72d19201469bd0);
+            
+    
+            var circle_marker_c97455c6c1e7dc83cfbd60f4279630d4 = L.circleMarker(
+                [6.0, -0.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.98152210560808, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_4f87cf8e27fd00680115b59a7af11642 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_3bb5cfb7ada0c63229a0914b795a0ea8 = $(`<div id="html_3bb5cfb7ada0c63229a0914b795a0ea8" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Eastern</strong><br><span style="color:#6b7378">155 isolates · 1,189 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.7%</strong> <span style="color:#6b7378">(401)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(86)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.0%</strong> <span style="color:#6b7378">(702)</span></div></div></div></div>`)[0];
+                popup_4f87cf8e27fd00680115b59a7af11642.setContent(html_3bb5cfb7ada0c63229a0914b795a0ea8);
+            
+        
+
+        circle_marker_c97455c6c1e7dc83cfbd60f4279630d4.bindPopup(popup_4f87cf8e27fd00680115b59a7af11642)
+        ;
+
+        
+    
+    
+            circle_marker_c97455c6c1e7dc83cfbd60f4279630d4.bindTooltip(
+                `<div>
+                     Eastern: R 33.7% · I 7.2% · S 59.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_88933dcd287d2159ef8fd2c9dcef9404 = L.marker(
+                [6.0, -0.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_339af857ccd04c7c3e4058697122bc83 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eEastern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_88933dcd287d2159ef8fd2c9dcef9404.setIcon(div_icon_339af857ccd04c7c3e4058697122bc83);
+            
+    
+            var circle_marker_1b16531acba22c763dc4c97e52a520f7 = L.circleMarker(
+                [6.5, 0.8],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.87160818626066, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_628a3a80c64e474c702f5a18c2529416 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_2efd9c4648532249adf314a8d936aaaa = $(`<div id="html_2efd9c4648532249adf314a8d936aaaa" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Volta</strong><br><span style="color:#6b7378">153 isolates · 1,249 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>35.1%</strong> <span style="color:#6b7378">(438)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.1%</strong> <span style="color:#6b7378">(76)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(735)</span></div></div></div></div>`)[0];
+                popup_628a3a80c64e474c702f5a18c2529416.setContent(html_2efd9c4648532249adf314a8d936aaaa);
+            
+        
+
+        circle_marker_1b16531acba22c763dc4c97e52a520f7.bindPopup(popup_628a3a80c64e474c702f5a18c2529416)
+        ;
+
+        
+    
+    
+            circle_marker_1b16531acba22c763dc4c97e52a520f7.bindTooltip(
+                `<div>
+                     Volta: R 35.1% · I 6.1% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d0de95f35d62f5198d6e1a1237981b48 = L.marker(
+                [6.5, 0.8],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_5c54d38d5bd0ee95e6bb12f817cc0c6e = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eVolta\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_d0de95f35d62f5198d6e1a1237981b48.setIcon(div_icon_5c54d38d5bd0ee95e6bb12f817cc0c6e);
+            
+    
+            var circle_marker_6d377fb5dbf82ed7a2b1fd66f4de2ae5 = L.circleMarker(
+                [6.5, -1.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.760973496731612, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_2610212205e413957f9f1f03d2e4fae7 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_85fc8265cdad824019ad2ac9c8afd04c = $(`<div id="html_85fc8265cdad824019ad2ac9c8afd04c" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ashanti</strong><br><span style="color:#6b7378">151 isolates · 1,166 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>29.4%</strong> <span style="color:#6b7378">(343)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.3%</strong> <span style="color:#6b7378">(85)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>63.3%</strong> <span style="color:#6b7378">(738)</span></div></div></div></div>`)[0];
+                popup_2610212205e413957f9f1f03d2e4fae7.setContent(html_85fc8265cdad824019ad2ac9c8afd04c);
+            
+        
+
+        circle_marker_6d377fb5dbf82ed7a2b1fd66f4de2ae5.bindPopup(popup_2610212205e413957f9f1f03d2e4fae7)
+        ;
+
+        
+    
+    
+            circle_marker_6d377fb5dbf82ed7a2b1fd66f4de2ae5.bindTooltip(
+                `<div>
+                     Ashanti: R 29.4% · I 7.3% · S 63.3%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7385669ae3ff0dd8d9e313eb36cbba25 = L.marker(
+                [6.5, -1.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_564157e4132efde8cd27bda57c57a75c = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eAshanti\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_7385669ae3ff0dd8d9e313eb36cbba25.setIcon(div_icon_564157e4132efde8cd27bda57c57a75c);
+            
+    
+            var circle_marker_74ea7425355398205608d9b359a5fcdd = L.circleMarker(
+                [9.3, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.59363845602592, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_700b3d229d220592cf36611c123a45d5 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_a2c5f63bb6416d9f8e0fb2b1a01345fe = $(`<div id="html_a2c5f63bb6416d9f8e0fb2b1a01345fe" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Northern</strong><br><span style="color:#6b7378">148 isolates · 1,100 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.6%</strong> <span style="color:#6b7378">(348)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.4%</strong> <span style="color:#6b7378">(70)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>62.0%</strong> <span style="color:#6b7378">(682)</span></div></div></div></div>`)[0];
+                popup_700b3d229d220592cf36611c123a45d5.setContent(html_a2c5f63bb6416d9f8e0fb2b1a01345fe);
+            
+        
+
+        circle_marker_74ea7425355398205608d9b359a5fcdd.bindPopup(popup_700b3d229d220592cf36611c123a45d5)
+        ;
+
+        
+    
+    
+            circle_marker_74ea7425355398205608d9b359a5fcdd.bindTooltip(
+                `<div>
+                     Northern: R 31.6% · I 6.4% · S 62.0%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_75e34221fbc5899084192818841dd6b7 = L.marker(
+                [9.3, -1.0],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_9e62dffdc33c30b89ec702a30e923af9 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-34px)\"\u003eNorthern\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_75e34221fbc5899084192818841dd6b7.setIcon(div_icon_9e62dffdc33c30b89ec702a30e923af9);
+            
+    
+            var circle_marker_6bfc73d583349e11f2c9a451feebe52a = L.circleMarker(
+                [5.2, -1.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.42459868186937, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_d849ef95110da4adfbd567cfe29f8168 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_52688f9b0e25a860456e16a1f00a9aaf = $(`<div id="html_52688f9b0e25a860456e16a1f00a9aaf" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Central</strong><br><span style="color:#6b7378">145 isolates · 1,107 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.1%</strong> <span style="color:#6b7378">(355)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.2%</strong> <span style="color:#6b7378">(80)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>60.7%</strong> <span style="color:#6b7378">(672)</span></div></div></div></div>`)[0];
+                popup_d849ef95110da4adfbd567cfe29f8168.setContent(html_52688f9b0e25a860456e16a1f00a9aaf);
+            
+        
+
+        circle_marker_6bfc73d583349e11f2c9a451feebe52a.bindPopup(popup_d849ef95110da4adfbd567cfe29f8168)
+        ;
+
+        
+    
+    
+            circle_marker_6bfc73d583349e11f2c9a451feebe52a.bindTooltip(
+                `<div>
+                     Central: R 32.1% · I 7.2% · S 60.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c923158664d199a107eb553e99e7a184 = L.marker(
+                [5.2, -1.2],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_b5ddb9ac67743a2f038a80602dbe634f = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eCentral\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_c923158664d199a107eb553e99e7a184.setIcon(div_icon_b5ddb9ac67743a2f038a80602dbe634f);
+            
+    
+            var circle_marker_a6e3d94b9395f83490453c3b6fa1fcbd = L.circleMarker(
+                [6.8, -2.2],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.42459868186937, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_1d5f589ff6cc6329215c8a29411f7086 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_7c9753a554694bf1487f810097e28f9c = $(`<div id="html_7c9753a554694bf1487f810097e28f9c" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Ahafo</strong><br><span style="color:#6b7378">145 isolates · 1,148 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>32.3%</strong> <span style="color:#6b7378">(371)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>8.9%</strong> <span style="color:#6b7378">(102)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>58.8%</strong> <span style="color:#6b7378">(675)</span></div></div></div></div>`)[0];
+                popup_1d5f589ff6cc6329215c8a29411f7086.setContent(html_7c9753a554694bf1487f810097e28f9c);
+            
+        
+
+        circle_marker_a6e3d94b9395f83490453c3b6fa1fcbd.bindPopup(popup_1d5f589ff6cc6329215c8a29411f7086)
+        ;
+
+        
+    
+    
+            circle_marker_a6e3d94b9395f83490453c3b6fa1fcbd.bindTooltip(
+                `<div>
+                     Ahafo: R 32.3% · I 8.9% · S 58.8%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7c2daf66085c6ee06b25d383748ac0bf = L.marker(
+                [6.8, -2.2],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_0332523b5231e3a7a85f6ce538e3e345 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eAhafo\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_7c2daf66085c6ee06b25d383748ac0bf.setIcon(div_icon_0332523b5231e3a7a85f6ce538e3e345);
+            
+    
+            var circle_marker_9c7bff54f6b631117e1fad6f50f8b12d = L.circleMarker(
+                [5.5, -3.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.367864147291364, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_2177058c51cb12259a70294df260913c = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_8ec576d7f6f60add7456b058f25e4298 = $(`<div id="html_8ec576d7f6f60add7456b058f25e4298" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Western North</strong><br><span style="color:#6b7378">144 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>31.3%</strong> <span style="color:#6b7378">(340)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>7.6%</strong> <span style="color:#6b7378">(83)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>61.1%</strong> <span style="color:#6b7378">(664)</span></div></div></div></div>`)[0];
+                popup_2177058c51cb12259a70294df260913c.setContent(html_8ec576d7f6f60add7456b058f25e4298);
+            
+        
+
+        circle_marker_9c7bff54f6b631117e1fad6f50f8b12d.bindPopup(popup_2177058c51cb12259a70294df260913c)
+        ;
+
+        
+    
+    
+            circle_marker_9c7bff54f6b631117e1fad6f50f8b12d.bindTooltip(
+                `<div>
+                     Western North: R 31.3% · I 7.6% · S 61.1%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_bc4ddcf6713a95a820274afde00f5254 = L.marker(
+                [5.5, -3.0],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_8c6f548d788d5f90a073b6d0092531ce = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eWestern North\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_bc4ddcf6713a95a820274afde00f5254.setIcon(div_icon_8c6f548d788d5f90a073b6d0092531ce);
+            
+    
+            var circle_marker_b8aab67775aa1cc4e0ed761b4d1ec8c2 = L.circleMarker(
+                [10.2, -1.0],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 23.196468176591736, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_e3d2530b72237d3f09508416f9144529 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_839a51cec96d6f79b8ac5c71f15ebbc6 = $(`<div id="html_839a51cec96d6f79b8ac5c71f15ebbc6" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">North East</strong><br><span style="color:#6b7378">141 isolates · 1,119 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>34.9%</strong> <span style="color:#6b7378">(390)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>5.9%</strong> <span style="color:#6b7378">(66)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.2%</strong> <span style="color:#6b7378">(663)</span></div></div></div></div>`)[0];
+                popup_e3d2530b72237d3f09508416f9144529.setContent(html_839a51cec96d6f79b8ac5c71f15ebbc6);
+            
+        
+
+        circle_marker_b8aab67775aa1cc4e0ed761b4d1ec8c2.bindPopup(popup_e3d2530b72237d3f09508416f9144529)
+        ;
+
+        
+    
+    
+            circle_marker_b8aab67775aa1cc4e0ed761b4d1ec8c2.bindTooltip(
+                `<div>
+                     North East: R 34.9% · I 5.9% · S 59.2%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_19d899b341381d3bbae26e54deb3e837 = L.marker(
+                [10.2, -1.0],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_98d243f1122ec411a03f03278ff74f31 = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eNorth East\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_19d899b341381d3bbae26e54deb3e837.setIcon(div_icon_98d243f1122ec411a03f03278ff74f31);
+            
+    
+            var circle_marker_82f3be84485df3d1c780c71f79bf5003 = L.circleMarker(
+                [7.2, -2.5],
+                {"bubblingMouseEvents": true, "color": "#16181a", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#1f77b4", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 0.45, "radius": 22.671036830689832, "stroke": true, "weight": 1}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+        var popup_cbc15b2765b3d81fd7e89367afa4cc94 = L.popup({
+  "maxWidth": 280,
+});
+
+        
+            
+                var html_09e00c59cf7c59c733adb555c0b41fad = $(`<div id="html_09e00c59cf7c59c733adb555c0b41fad" style="width: 100.0%; height: 100.0%;"><div style="font:13px/1.55 system-ui,sans-serif;min-width:190px"><strong style="font-size:14px">Bono</strong><br><span style="color:#6b7378">132 isolates · 1,087 results</span><div style="margin-top:6px"><div><span style="display:inline-block;width:10px;height:10px;background:#d62728;border-radius:2px;margin-right:6px"></span>Resistant <strong>33.6%</strong> <span style="color:#6b7378">(365)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#ff7f0e;border-radius:2px;margin-right:6px"></span>Intermediate <strong>6.7%</strong> <span style="color:#6b7378">(73)</span></div><div><span style="display:inline-block;width:10px;height:10px;background:#2ca02c;border-radius:2px;margin-right:6px"></span>Susceptible <strong>59.7%</strong> <span style="color:#6b7378">(649)</span></div></div></div></div>`)[0];
+                popup_cbc15b2765b3d81fd7e89367afa4cc94.setContent(html_09e00c59cf7c59c733adb555c0b41fad);
+            
+        
+
+        circle_marker_82f3be84485df3d1c780c71f79bf5003.bindPopup(popup_cbc15b2765b3d81fd7e89367afa4cc94)
+        ;
+
+        
+    
+    
+            circle_marker_82f3be84485df3d1c780c71f79bf5003.bindTooltip(
+                `<div>
+                     Bono: R 33.6% · I 6.7% · S 59.7%
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f98bf06f2ac29da7b1456c060ec172c7 = L.marker(
+                [7.2, -2.5],
+                {
+}
+            ).addTo(feature_group_7d494b7d3326f4ab4b9d8a362092e22f);
+        
+    
+            var div_icon_4f9d963d92717c5251e37ba56213fe4f = L.divIcon({
+  "html": "\u003cdiv style=\"font:11px/1 system-ui,sans-serif;font-weight:700;color:#16181a;text-shadow:0 0 3px #fff,0 0 3px #fff;white-space:nowrap;transform:translate(-50%,-33px)\"\u003eBono\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_f98bf06f2ac29da7b1456c060ec172c7.setIcon(div_icon_4f9d963d92717c5251e37ba56213fe4f);
+            
+    
+            var layer_control_0998620fa9037a9e3759dcb1ff1bca90_layers = {
+                base_layers : {
+                    "Resistant (R)" : feature_group_8313d1ae35fe8f2a426d7688aa08cd35,
+                    "Intermediate (I)" : feature_group_6200536e091e118603143f3c668703cb,
+                    "Susceptible (S)" : feature_group_879b7ba0fe8f57c67c4a47913de87426,
+                    "All isolates (count only)" : feature_group_7d494b7d3326f4ab4b9d8a362092e22f,
+                },
+                overlays :  {
+                },
+            };
+            let layer_control_0998620fa9037a9e3759dcb1ff1bca90 = L.control.layers(
+                layer_control_0998620fa9037a9e3759dcb1ff1bca90_layers.base_layers,
+                layer_control_0998620fa9037a9e3759dcb1ff1bca90_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": false,
+  "autoZIndex": true,
+}
+            ).addTo(map_bce427a2455a4024c681dc8034a30cd1);
+
+        
+</script>
+</html>

@@ -110,3 +110,9 @@ web/.next/
 web/out/
 web/next-env.d.ts
 web/*.tsbuildinfo
+
+# The published map is generated, but it is part of the site the host builds
+# from, so it has to be in the repository. The blanket *.html rule above was
+# hiding it: GitHub Pages only ever saw it because the built directory is
+# pushed straight to its branch, bypassing this file entirely.
+!web/public/maps/**/*.html
