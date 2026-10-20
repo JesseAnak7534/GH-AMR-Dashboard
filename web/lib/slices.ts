@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { asset } from "@/lib/basePath";
 
 /**
  * Fetching a filtered view.
@@ -44,7 +45,7 @@ export function useSlice<T>(
     let cancelled = false;
     setState((current) => ({ ...current, loading: true, error: null }));
 
-    fetch(`/data/slices/${section}/${fileSlug}.json`)
+    fetch(asset(`/data/slices/${section}/${fileSlug}.json`))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`${response.status} ${response.statusText}`);

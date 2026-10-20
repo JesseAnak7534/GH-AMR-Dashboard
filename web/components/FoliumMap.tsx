@@ -10,8 +10,10 @@
  * reader, and the figures are repeated in the table below it so nothing
  * depends on the map loading at all.
  */
+import { asset } from "@/lib/basePath";
+
 export function FoliumMap({
-  src = "/maps/regions.html",
+  src = asset("/maps/regions.html"),
   height = 620,
   title = "Map of Ghana showing surveillance isolates by region",
 }: {

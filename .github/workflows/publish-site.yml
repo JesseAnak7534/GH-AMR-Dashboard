@@ -1,0 +1,80 @@
+# Publish the public surveillance site to GitHub Pages.
+#
+# The site is a static export and the figures it renders are committed under
+# web/public/data, so this build needs no database and no secrets. That is the
+# point of the architecture: the analysis and its disclosure control run on a
+# machine that can reach the database, and only their output is published.
+#
+# To refresh the figures: run `python scripts/export_public_data.py` locally,
+# commit the changed JSON, and push. This workflow rebuilds the site around it.
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - ".github/workflows/publish-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. Queued rather than cancelled, so a push that lands
+# during a deploy still publishes rather than being silently dropped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        # A project site is served from /<repo>, so the base path has to be
+        # baked in at build time: Next.js rewrites its own links and bundles,
+        # and lib/basePath.ts covers the URLs this code builds by hand.
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build
+
+      - name: Disable Jekyll
+        # Without this, Pages runs the output through Jekyll, which ignores
+        # every directory beginning with an underscore -- including _next,
+        # where the entire JavaScript and CSS bundle lives. The site would
+        # serve as unstyled HTML with no interactivity and no obvious cause.
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

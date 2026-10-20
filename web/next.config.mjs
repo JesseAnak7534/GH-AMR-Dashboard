@@ -12,8 +12,15 @@
  * `trailingSlash` so the export's directory-per-route layout works on a plain
  * static host.
  */
+// A GitHub Pages project site is served from /<repo>, not from a domain root.
+// NEXT_PUBLIC_BASE_PATH carries that prefix; it is empty locally and on any
+// root domain, so `npm run dev` and a Vercel deploy are unaffected.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 const nextConfig = {
   output: "export",
+  basePath: basePath || undefined,
+  assetPrefix: basePath || undefined,
   trailingSlash: true,
   images: { unoptimized: true },
   reactStrictMode: true,
