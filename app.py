@@ -184,13 +184,22 @@ if SESSION_TIMEOUT_MINUTES is None:
     SESSION_TIMEOUT_MINUTES = 120
 
 # Authentication check
-if "authenticated" not in st.session_state:
-    st.session_state.authenticated = False
-    st.session_state.user_email = None
-    st.session_state.is_admin = False
-    st.session_state.lab_name = None
-    st.session_state.last_activity_time = None
-    st.session_state.active_dataset_id = None  # Track selected dataset for filtering dashboards
+#
+# Each key is defaulted on its own rather than as a group behind one "is
+# authenticated set?" test. Set as a group, a session that has `authenticated`
+# but is missing any sibling -- a restored session, a hot reload, anything that
+# writes one key first -- raises on the timeout check below and takes every
+# page down with it.
+for _key, _default in (
+    ("authenticated", False),
+    ("user_email", None),
+    ("is_admin", False),
+    ("lab_name", None),
+    ("last_activity_time", None),
+    ("active_dataset_id", None),   # selected dataset for filtering dashboards
+):
+    if _key not in st.session_state:
+        st.session_state[_key] = _default
 
 # Check for session timeout
 if SESSION_TIMEOUT_MINUTES and st.session_state.authenticated and st.session_state.last_activity_time:
@@ -2117,11 +2126,20 @@ if str(page).startswith(PUBLIC_PAGE_PREFIX):
 # DASHBOARD LANDING PAGE
 # ============================================================================
 elif page == "Home":
-    # The public landing page. Everything on it is aggregate and passes through
-    # src.disclosure first; see src/page_home.py for why the filtering rather
-    # than the headline figures is what needed protecting.
-    from src.page_home import render_home_page
-    render_home_page()
+    # Home means two different things to two different readers.
+    #
+    # A visitor gets the public landing page: aggregate figures, every one
+    # through src.disclosure, and a door into each section.
+    #
+    # Someone who has signed in gets their workspace. Sending them to the
+    # public page instead -- which is what this did -- left an administrator
+    # looking at a visitor's view with no indication of what they could do,
+    # and the sidebar as the only route to any of it.
+    if st.session_state.get("authenticated"):
+        render_dashboard_page()
+    else:
+        from src.page_home import render_home_page
+        render_home_page()
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
