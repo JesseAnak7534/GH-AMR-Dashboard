@@ -1835,76 +1835,8 @@ _components.html(
     height=0,
 )
 
-# ── Is this render the public surface? ────────────────────────────────────
-# The public surface is the landing page and the public section pages, seen by
-# someone who has not signed in. The sidebar is the staff entrance: twenty
-# analytic pages, upload, dataset and user administration. A visitor who came
-# to read a resistance rate has no use for any of it, and showing it makes a
-# published page look like an application they are locked out of.
-#
-# Hiding it is not the access control -- the password is. It keeps the staff
-# door off the shop front. Administrators append ?admin=1, which puts the
-# sign-in control back in the sidebar.
-PUBLIC_PAGE_PREFIX = "public:"
 if "active_page" not in st.session_state:
     st.session_state.active_page = "Home"
-try:
-    WANTS_ADMIN = str(st.query_params.get("admin", "")).lower() in (
-        "1", "true", "yes")
-except Exception:                                     # noqa: BLE001
-    WANTS_ADMIN = False
-
-
-def _clear_page_param() -> None:
-    """Drop ?page= without disturbing ?admin=.
-
-    Called when the sidebar navigates, because a stale ?page= in the URL would
-    otherwise win on the next run and bounce the reader straight back to the
-    public page they just left.
-    """
-    try:
-        if "page" in st.query_params:
-            del st.query_params["page"]
-    except Exception:                                 # noqa: BLE001
-        pass
-
-
-# The URL is the source of truth for the public pages, so every section has a
-# real address: a reader can bookmark one, a colleague can be sent a link to
-# it, and the browser's back button works. Only public keys are honoured --
-# the staff pages stay behind the sidebar, where a URL would be a way of
-# guessing at them.
-_url_page = ""
-try:
-    _url_page = str(st.query_params.get("page", "")).strip()
-except Exception:                                     # noqa: BLE001
-    _url_page = ""
-if _url_page:
-    if _url_page.lower() in ("home", "overview", "landing"):
-        st.session_state.active_page = "Home"
-    elif _url_page.startswith(PUBLIC_PAGE_PREFIX):
-        st.session_state.active_page = _url_page
-    else:
-        _clear_page_param()
-
-_page_now = str(st.session_state.active_page)
-_on_public_surface = (
-    not st.session_state.get("authenticated")
-    and not WANTS_ADMIN
-    and (_page_now == "Home" or _page_now.startswith(PUBLIC_PAGE_PREFIX)))
-if _on_public_surface:
-    st.markdown(
-        """
-        <style>
-          [data-testid="stSidebar"],
-          [data-testid="stSidebarCollapsedControl"],
-          [data-testid="collapsedControl"] { display: none !important; }
-          [data-testid="stSidebarNav"] { display: none !important; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
 # Sidebar navigation with user info and admin panel
 with st.sidebar:
     # Logo/Title
@@ -2023,7 +1955,6 @@ with st.sidebar:
     st.markdown(f'<div class="{_home_cls}">', unsafe_allow_html=True)
     if st.button("🏠  Home", key="nav_Home", use_container_width=True):
         st.session_state.active_page = "Home"
-        _clear_page_param()
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2035,7 +1966,6 @@ with st.sidebar:
                 st.markdown(f'<div class="{_css_class}">', unsafe_allow_html=True)
                 if st.button(f"{_picon}  {_pname}", key=f"nav_{_pname}", use_container_width=True):
                     st.session_state.active_page = _pname
-                    _clear_page_param()
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2052,21 +1982,6 @@ with st.sidebar:
             st.session_state.show_login = False
             st.success("Signed out")
             st.rerun()
-    else:
-        # No sign-in control on the public surface. A visitor to a public
-        # surveillance site has no account and no use for a login box; offering
-        # one invites them to try, and makes the page look like something they
-        # are being kept out of rather than something published for them.
-        #
-        # Administrators reach it at ?admin=1. That is not a security measure --
-        # the password is -- it only keeps the door off the shop front.
-        if WANTS_ADMIN:
-            st.caption("Aggregate view — sign in for record-level detail.")
-            if st.button("Sign in", use_container_width=True):
-                st.session_state.show_login = True
-                st.rerun()
-        else:
-            st.caption("Aggregate view. No individual record is shown.")
 
     page = st.session_state.active_page
 
@@ -2116,23 +2031,9 @@ if os.path.exists(_pp_filter_path):
             st.caption(f"{len(pp_names)} pathogens selected")
 
 # ============================================================================
-# PUBLIC SECTION PAGES
+# WORKSPACE
 # ============================================================================
-# One branch for all six. The router recognises a public page by its key prefix
-# rather than by listing them, so adding a section is a change in one file.
-if str(page).startswith(PUBLIC_PAGE_PREFIX):
-    from src.page_public import render_public_page
-    if not render_public_page(str(page)):
-        # An unknown public key can only come from a stale session or a
-        # hand-edited URL. Falling back to the landing page beats a blank
-        # screen with no way out of it.
-        st.session_state.active_page = "Home"
-        st.rerun()
-
-# ============================================================================
-# DASHBOARD LANDING PAGE
-# ============================================================================
-elif page == "Home":
+if page == "Home":
     # Only a signed-in reader reaches this: the sign-in screen stops the script
     # above. So Home is the workspace -- KPI row, resistance trend, top
     # pathogens, sentinel alerts.
