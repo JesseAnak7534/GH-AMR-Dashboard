@@ -538,7 +538,15 @@ except Exception:
 # The login page is shown only when a visitor asks for it. It used to stand in
 # front of the whole application; the dashboard is now readable in aggregate
 # without it, and signing in unlocks record-level detail and every write path.
-if st.session_state.get("show_login") and not st.session_state.authenticated:
+# This application is the staff tool. Anyone who is not signed in gets the
+# sign-in screen, not a page of figures.
+#
+# It used to render a public landing page here instead -- a second copy of the
+# public site, built from the same modules but wrapped in the authenticated
+# shell's stylesheet, so the two fought each other and the result was a mess
+# with the sign-in buried at the foot of it. The public site is the Next.js
+# one in web/; this is where the data is managed.
+if not st.session_state.authenticated:
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -2126,20 +2134,10 @@ if str(page).startswith(PUBLIC_PAGE_PREFIX):
 # DASHBOARD LANDING PAGE
 # ============================================================================
 elif page == "Home":
-    # Home means two different things to two different readers.
-    #
-    # A visitor gets the public landing page: aggregate figures, every one
-    # through src.disclosure, and a door into each section.
-    #
-    # Someone who has signed in gets their workspace. Sending them to the
-    # public page instead -- which is what this did -- left an administrator
-    # looking at a visitor's view with no indication of what they could do,
-    # and the sidebar as the only route to any of it.
-    if st.session_state.get("authenticated"):
-        render_dashboard_page()
-    else:
-        from src.page_home import render_home_page
-        render_home_page()
+    # Only a signed-in reader gets this far -- the sign-in screen stops the
+    # script above -- so Home is the workspace: KPI row, resistance trend, top
+    # pathogens and sentinel alerts.
+    render_dashboard_page()
 
 # ============================================================================
 # PAGE 1: UPLOAD & DATA QUALITY
