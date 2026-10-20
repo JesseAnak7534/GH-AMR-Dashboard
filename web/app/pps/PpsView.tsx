@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BarChart } from "@/components/Charts";
 import { Donut } from "@/components/Donut";
 import { Gauge } from "@/components/Gauge";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import { Caption, Empty, Section, StatStrip } from "@/components/Chrome";
 import { FilterBar } from "@/components/FilterBar";
@@ -128,28 +129,41 @@ export function PpsView({ data }: { data: UseData }) {
             ]}
           />
           <div className="mt-4 space-y-5">
-            <BarChart
-              rows={[...breakdown.rows]
-                .sort(
-                  (a, b) =>
-                    (numeric(b.prescriptions) ?? 0) -
-                    (numeric(a.prescriptions) ?? 0),
-                )
-                .slice(0, 14)
-                .map((row) => ({
-                  label: row.value,
-                  value: row.prescriptions,
-                  colour: "#8a6a22",
-                }))}
-              unit="Prescriptions"
-              labelWidth={230}
-            />
+            <Figure
+              title={`Prescribing by ${breakdown.label.toLowerCase()}`}
+              hideTitle
+              csv={{
+                rows: breakdown.rows,
+                columns: [
+                  { key: "value", header: breakdown.label },
+                  { key: "prescriptions", header: "Prescriptions" },
+                ],
+              }}
+            >
+              <BarChart
+                rows={[...breakdown.rows]
+                  .sort(
+                    (a, b) =>
+                      (numeric(b.prescriptions) ?? 0) -
+                      (numeric(a.prescriptions) ?? 0),
+                  )
+                  .slice(0, 14)
+                  .map((row) => ({
+                    label: row.value,
+                    value: row.prescriptions,
+                    colour: "#8a6a22",
+                  }))}
+                unit="Prescriptions"
+                labelWidth={230}
+              />
+            </Figure>
             <DataTable
               columns={columns}
               rows={breakdown.rows}
               searchKeys={["value"]}
               searchLabel="Search"
               initialSort={{ key: "prescriptions", direction: "desc" }}
+              downloadName={`prescribing by ${breakdown.label}`}
             />
           </div>
         </Section>
@@ -166,7 +180,11 @@ export function PpsView({ data }: { data: UseData }) {
             unit="Prescriptions"
             labelWidth={200}
           />
-          <DataTable columns={wardColumns} rows={pps.wards} />
+          <DataTable
+            columns={wardColumns}
+            rows={pps.wards}
+            downloadName="prescribing by ward"
+          />
         </Section>
       ) : null}
 

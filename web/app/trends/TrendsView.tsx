@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -142,16 +143,34 @@ export function TrendsView({ data }: { data: TrendsData }) {
       ) : null}
 
       <Section title="All organism–antibiotic pairs pooled">
-        <TrendChart
-          series={overall}
-          unit="% non-susceptible"
-          denominatorLabel="observations"
-        />
+        <Figure
+          title={`Non-susceptibility by quarter — ${titleCase(sector)}`}
+          hideTitle
+          csv={{
+            rows: slice.periods,
+            columns: [
+              { key: "period", header: "Quarter" },
+              { key: "isolates", header: "Isolates" },
+              { key: "observations", header: "Observations" },
+              { key: "percent_non_susceptible", header: "% non-susceptible" },
+              { key: "ci_low", header: "95% CI low" },
+              { key: "ci_high", header: "95% CI high" },
+            ],
+          }}
+        >
+          <TrendChart
+            series={overall}
+            unit="% non-susceptible"
+            denominatorLabel="observations"
+          />
+        </Figure>
       </Section>
 
       {pairs.length ? (
         <Section title="The most-tested pairs (susceptibility)">
-          <TrendChart series={pairs} unit="% susceptible" />
+          <Figure title={`Most-tested pairs — ${titleCase(sector)}`} hideTitle>
+            <TrendChart series={pairs} unit="% susceptible" />
+          </Figure>
         </Section>
       ) : (
         <Section title="The most-tested pairs">
@@ -169,6 +188,7 @@ export function TrendsView({ data }: { data: TrendsData }) {
           rows={slice.periods}
           initialSort={{ key: "period", direction: "asc" }}
           pageSize={20}
+          downloadName={`trend ${sector}`}
         />
         <SuppressionNote suppression={slice.suppression} />
       </Section>

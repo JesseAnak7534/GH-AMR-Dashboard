@@ -1,5 +1,6 @@
 "use client";
 
+import { Figure } from "@/components/Figure";
 import { useMemo, useState } from "react";
 import { BarChart, StackedBars } from "@/components/Charts";
 import { FilterBar, ThresholdControl } from "@/components/FilterBar";
@@ -124,7 +125,19 @@ export function OneHealthView({ data }: { data: OneHealthData }) {
       />
 
       <Section title="Isolates by sector">
-        <BarChart rows={sectorRows} unit="Isolates" labelWidth={140} />
+        <Figure
+          title="Isolates by sector"
+          hideTitle
+          csv={{
+            rows: data.sectors,
+            columns: [
+              { key: "sector", header: "Sector" },
+              { key: "isolates", header: "Isolates" },
+            ],
+          }}
+        >
+          <BarChart rows={sectorRows} unit="Isolates" labelWidth={140} />
+        </Figure>
         <SuppressionNote suppression={data.sectorSuppression} />
       </Section>
 

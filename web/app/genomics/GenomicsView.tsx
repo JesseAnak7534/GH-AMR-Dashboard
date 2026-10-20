@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { BarChart, ProportionBar } from "@/components/Charts";
 import { FilterBar, ThresholdControl } from "@/components/FilterBar";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -174,18 +175,35 @@ export function GenomicsView({
       </div>
 
       <Section title="Resistance determinants found">
-        <BarChart
-          rows={determinantChart}
-          unit="Genomes carrying the determinant"
-          labelWidth={160}
-          colour={OKABE_ITO.purple}
-        />
+        <Figure
+          title="Resistance determinants found"
+          hideTitle
+          csv={{
+            rows: determinants,
+            columns: [
+              { key: "determinant", header: "Determinant" },
+              { key: "mechanism", header: "Mechanism" },
+              { key: "isolates", header: "Genomes carrying it" },
+              { key: "genomes_examined", header: "Genomes examined" },
+              { key: "percent", header: "% of genomes" },
+              { key: "database", header: "Database" },
+            ],
+          }}
+        >
+          <BarChart
+            rows={determinantChart}
+            unit="Genomes carrying the determinant"
+            labelWidth={160}
+            colour={OKABE_ITO.purple}
+          />
+        </Figure>
         <DataTable
           columns={determinantColumns}
           rows={determinants}
           searchKeys={["determinant", "mechanism"]}
           searchLabel="Search gene or mechanism"
           initialSort={{ key: "isolates", direction: "desc" }}
+          downloadName="resistance determinants"
         />
         <SuppressionNote suppression={data.determinantSuppression} />
       </Section>
@@ -243,6 +261,7 @@ export function GenomicsView({
             searchKeys={["antibiotic"]}
             searchLabel="Search antibiotic"
             initialSort={{ key: "pairs", direction: "desc" }}
+            downloadName="genotype phenotype agreement by agent"
           />
           <SuppressionNote suppression={data.concordance.agentSuppression} />
         </Section>
@@ -340,6 +359,7 @@ export function GenomicsView({
                 searchKeys={["cluster_id", "organism", "sector_mix"]}
                 searchLabel="Search cluster or organism"
                 initialSort={{ key: "isolates", direction: "desc" }}
+                downloadName="genomic clusters"
               />
             </div>
           </>

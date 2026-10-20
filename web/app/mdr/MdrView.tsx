@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ProportionBar, StackedBars } from "@/components/Charts";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -124,20 +125,33 @@ export function MdrView({ data }: { data: MdrData }) {
       </Section>
 
       <Section title="By organism">
-        <StackedBars
-          rows={grid.organisms.map((organism) => ({
-            label: organism,
-            parts: Object.fromEntries(
-              grid.classes.map((c) => [
-                c,
-                grid.cells.get(`${organism}||${c}`) ?? 0,
-              ]),
-            ),
-          }))}
-          series={grid.classes}
-          colours={CLASSIFICATION_COLOUR}
-          labelWidth={200}
-        />
+        <Figure
+          title={`Multidrug resistance by organism — ${name === "all" ? "all sectors" : titleCase(name)}`}
+          hideTitle
+          csv={{
+            rows: slice.byOrganism,
+            columns: [
+              { key: "organism", header: "Organism" },
+              { key: "classification", header: "Classification" },
+              { key: "isolates", header: "Isolates" },
+            ],
+          }}
+        >
+          <StackedBars
+            rows={grid.organisms.map((organism) => ({
+              label: organism,
+              parts: Object.fromEntries(
+                grid.classes.map((c) => [
+                  c,
+                  grid.cells.get(`${organism}||${c}`) ?? 0,
+                ]),
+              ),
+            }))}
+            series={grid.classes}
+            colours={CLASSIFICATION_COLOUR}
+            labelWidth={200}
+          />
+        </Figure>
         <div className="mt-5" />
         <DataTable
           columns={organismColumns}
@@ -145,6 +159,7 @@ export function MdrView({ data }: { data: MdrData }) {
           searchKeys={["organism"]}
           searchLabel="Search organism"
           initialSort={{ key: "MDR", direction: "desc" }}
+          downloadName={`multidrug resistance ${name}`}
         />
         <SuppressionNote suppression={slice.byOrganismSuppression} />
       </Section>

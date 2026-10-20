@@ -8,6 +8,7 @@ import {
   ThresholdControl,
   sectorOptions,
 } from "@/components/FilterBar";
+import { Figure } from "@/components/Figure";
 import { FoliumMap } from "@/components/FoliumMap";
 import type { RegionsData } from "@/lib/data";
 import { count, numeric, titleCase } from "@/lib/format";
@@ -141,7 +142,26 @@ export function RegionsView({ data }: { data: RegionsData }) {
       />
 
       <Section title="Isolates by region">
-        <FoliumMap />
+        <Figure
+          title="Resistance by region"
+          hideTitle
+          downloadable={false}
+          csv={{
+            rows: data.regions,
+            columns: [
+              { key: "region", header: "Region" },
+              { key: "isolates", header: "Isolates" },
+              { key: "resistant", header: "Resistant" },
+              { key: "intermediate", header: "Intermediate" },
+              { key: "susceptible", header: "Susceptible" },
+              { key: "percent_resistant", header: "% R" },
+              { key: "percent_intermediate", header: "% I" },
+              { key: "percent_susceptible", header: "% S" },
+            ],
+          }}
+        >
+          <FoliumMap />
+        </Figure>
       </Section>
 
       <Section title="The figures">
@@ -152,6 +172,7 @@ export function RegionsView({ data }: { data: RegionsData }) {
           searchLabel="Search region"
           initialSort={{ key: "isolates", direction: "desc" }}
           pageSize={20}
+          downloadName="regions"
         />
         <SuppressionNote suppression={data.suppression} />
         <SuppressionNote suppression={data.bySectorSuppression} />

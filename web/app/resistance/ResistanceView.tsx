@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { BarChart } from "@/components/Charts";
 import { HeatGrid } from "@/components/HeatGrid";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
   Caption,
@@ -364,26 +365,57 @@ export function ResistanceView({
             </div>
             <div className="mt-4">
               {view === "chart" ? (
-                <BarChart
-                  rows={lowest}
-                  unit="% susceptible (95% CI, isolates tested in brackets)"
-                  labelWidth={290}
-                  max={100}
-                  suffix="%"
-                  colour="#2ca02c"
-                />
+                <Figure
+                  title={`Susceptibility — ${titleCase(sector)}${value ? ` · ${value}` : ""}`}
+                  hideTitle
+                  csv={{
+                    rows,
+                    columns: [
+                      { key: "organism", header: "Organism" },
+                      { key: "antibiotic", header: "Antibiotic" },
+                      { key: "tested", header: "Isolates tested" },
+                      { key: "percent_susceptible", header: "% susceptible" },
+                      { key: "ci_low", header: "95% CI low" },
+                      { key: "ci_high", header: "95% CI high" },
+                    ],
+                  }}
+                >
+                  <BarChart
+                    rows={lowest}
+                    unit="% susceptible (95% CI, isolates tested in brackets)"
+                    labelWidth={290}
+                    max={100}
+                    suffix="%"
+                    colour="#2ca02c"
+                  />
+                </Figure>
               ) : (
-                <HeatGrid
-                  cells={rows.map((row) => ({
-                    organism: row.organism,
-                    antibiotic: row.antibiotic,
-                    percent: row.percent_susceptible,
-                    tested: row.tested,
-                    low: row.ci_low,
-                    high: row.ci_high,
-                  }))}
-                  highlightOrganisms={priorityOrganisms}
-                />
+                <Figure
+                  title={`Susceptibility matrix — ${titleCase(sector)}`}
+                  hideTitle
+                  downloadable={false}
+                  csv={{
+                    rows,
+                    columns: [
+                      { key: "organism", header: "Organism" },
+                      { key: "antibiotic", header: "Antibiotic" },
+                      { key: "tested", header: "Isolates tested" },
+                      { key: "percent_susceptible", header: "% susceptible" },
+                    ],
+                  }}
+                >
+                  <HeatGrid
+                    cells={rows.map((row) => ({
+                      organism: row.organism,
+                      antibiotic: row.antibiotic,
+                      percent: row.percent_susceptible,
+                      tested: row.tested,
+                      low: row.ci_low,
+                      high: row.ci_high,
+                    }))}
+                    highlightOrganisms={priorityOrganisms}
+                  />
+                </Figure>
               )}
             </div>
           </Section>
@@ -395,6 +427,7 @@ export function ResistanceView({
               searchKeys={["organism", "antibiotic"]}
               searchLabel="Search organism or antibiotic"
               initialSort={{ key: "tested", direction: "desc" }}
+              downloadName={`antibiogram ${sector}${value ? " " + value : ""}`}
             />
             <SuppressionNote suppression={slice?.suppression} />
           </Section>

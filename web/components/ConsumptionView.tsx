@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { BarChart } from "@/components/Charts";
 import { Donut } from "@/components/Donut";
 import { TrendChart } from "@/components/TrendChart";
+import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import { Caption, Empty, Section, StatStrip } from "@/components/Chrome";
 import { FilterBar } from "@/components/FilterBar";
@@ -132,6 +133,21 @@ export function ConsumptionView({
             />
           ) : null}
           <div className="mt-4 space-y-5">
+            <Figure
+              title={`${unit} by ${humanise(block.by).toLowerCase()}`}
+              hideTitle
+              csv={{
+                rows: block.rows,
+                columns: [
+                  { key: "group", header: humanise(block.by) },
+                  { key: "records", header: "Records" },
+                  ...(volumeKey
+                    ? [{ key: volumeKey, header: volumeUnit ?? "Quantity" }]
+                    : []),
+                  { key: valueKey, header: unit },
+                ],
+              }}
+            >
             <BarChart
               rows={[...block.rows]
                 .filter((row) => numeric(row[valueKey]) !== null)
@@ -152,12 +168,14 @@ export function ConsumptionView({
               labelWidth={220}
               decimals={1}
             />
+            </Figure>
             <DataTable
               columns={columns}
               rows={block.rows}
               searchKeys={["group"]}
               searchLabel="Search"
               initialSort={{ key: valueKey, direction: "desc" }}
+              downloadName={`${unit} by ${block.by}`}
             />
             <Caption>{block.caveat}</Caption>
           </div>
