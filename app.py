@@ -1551,7 +1551,8 @@ st.markdown("""
         background: transparent !important;
     }
     .amr-sticky-header h1 {
-        margin: 0 0 0.35rem 0 !important;
+        /* No ticker under it any more, so no gap to leave for one. */
+        margin: 0 !important;
     }
     .amr-sticky-header .amr-ticker {
         margin: 0 !important;
@@ -1713,34 +1714,16 @@ try:
 except Exception:
     logger.exception("auto-select of active dataset failed")
 
-# App title and animated tagline ticker — wrapped in a sticky header so they
-# stay pinned to the top of the main view when the user scrolls. The ticker
-# animation continues to run as normal inside the sticky strip.
-_ticker_item = (
-    "<span class='amr-ticker__item'>"
-    "<strong>ICBB AMR Surveillance System</strong>"
-    "Multi-source Surveillance"
-    "<span class='amr-ticker__dot'></span>"
-    "Environment"
-    "<span class='amr-ticker__dot'></span>"
-    "Food"
-    "<span class='amr-ticker__dot'></span>"
-    "Human"
-    "<span class='amr-ticker__dot'></span>"
-    "Animal"
-    "<span class='amr-ticker__dot'></span>"
-    "Aquaculture"
-    "<span class='amr-ticker__dot'></span>"
-    "Ghana"
-    "</span>"
-)
+# A slim brand bar, pinned to the top of the main view.
+#
+# This used to carry an animated marquee repeating "ICBB AMR Surveillance
+# System - Multi-source Surveillance - Environment - Food - Human - Animal -
+# Aquaculture - Ghana" four times across the screen. It scrolled above every
+# page, said nothing the page did not already say, and sat directly on top of
+# the landing page's own masthead, which names the system too. Decoration that
+# competes with the content is worse than no decoration.
 st.markdown(
-    "<div class='amr-sticky-header'>"
-    "<h1>ICBB-AMRSS</h1>"
-    "<div class='amr-ticker'><div class='amr-ticker__track'>"
-    f"{_ticker_item * 4}"
-    "</div></div>"
-    "</div>",
+    "<div class='amr-sticky-header'><h1>ICBB-AMRSS</h1></div>",
     unsafe_allow_html=True,
 )
 
