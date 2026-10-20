@@ -269,6 +269,124 @@ _CSS = f"""
       font-size: 0.82rem;
       color: {_MUTED};
       margin-top: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: baseline;
+      justify-content: space-between;
+  }}
+  .amr-section-label {{
+      font-size: 0.74rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: {_MUTED};
+      margin-bottom: 0.55rem;
+  }}
+
+  .amr-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.6rem;
+  }}
+  .amr-card {{
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background: {_SURFACE};
+      border: 1px solid {_LINE};
+      border-radius: 0.7rem;
+      padding: 1.15rem 1.15rem 1.05rem 1.3rem;
+      text-decoration: none !important;
+      color: {_INK} !important;
+      transition: box-shadow 150ms ease, transform 150ms ease,
+                  border-color 150ms ease;
+  }}
+  .amr-card:hover, .amr-card:focus-visible {{
+      box-shadow: 0 10px 26px rgba(26, 23, 14, 0.14);
+      transform: translateY(-3px);
+      border-color: rgba(26, 23, 14, 0.3);
+      outline: none;
+  }}
+  .amr-card:focus-visible {{
+      box-shadow: 0 0 0 3px rgba(29, 77, 67, 0.45);
+  }}
+  .amr-rule {{
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 5px;
+  }}
+  .amr-card-head {{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+  }}
+  .amr-badge {{
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #ffffff;
+      padding: 0.17rem 0.42rem;
+      border-radius: 0.25rem;
+  }}
+  .amr-card-title {{
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+  }}
+  .amr-stat {{
+      font-size: 2.15rem;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+  }}
+  .amr-unit {{
+      font-size: 0.79rem;
+      color: {_MUTED};
+      margin-bottom: 0.6rem;
+  }}
+  .amr-blurb {{
+      font-size: 0.89rem;
+      line-height: 1.55;
+      color: rgba(26, 23, 14, 0.78);
+      flex-grow: 1;
+  }}
+  .amr-cta {{
+      font-size: 0.83rem;
+      font-weight: 600;
+      margin-top: 0.85rem;
+  }}
+
+  .amr-notes {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.3rem;
+      border-top: 1px solid {_LINE};
+      padding-top: 1.2rem;
+  }}
+  .amr-notes h4 {{
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 0 0 0.4rem 0;
+      color: {_INK};
+  }}
+  .amr-notes p {{
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: {_MUTED};
+      margin: 0;
+  }}
+  .amr-owner {{
+      font-size: 0.82rem;
+      color: {_MUTED};
+      margin-top: 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem;
+      align-items: baseline;
+      justify-content: space-between;
   }}
 </style>
 """
@@ -369,17 +487,42 @@ def _notes() -> str:
     a measure of the burden of resistance in the general population.</p>
   </div>
 </div>
-<p class="amr-owner">{escape(OWNER)}, University of Ghana. Laboratories are
-named throughout, because a rate nobody can attribute is a rate nobody can act
-on.</p>
+<p class="amr-owner">{escape(OWNER)}, University of Ghana</p>
 """
 
 
 def render_home_page() -> None:
-    counts = landing_counts()
-
     st.markdown(_CSS, unsafe_allow_html=True)
     st.markdown(_hero(), unsafe_allow_html=True)
+
+    # The database is on the far side of a network the platform does not
+    # control, and some networks block the PostgreSQL TLS handshake outright:
+    # the socket opens and the connection is then reset. Letting that surface
+    # as a traceback took the whole page down, including the staff sign-in --
+    # so an administrator could not even reach the form to find out what was
+    # wrong. The failure is reported as a failure, and the page still renders.
+    try:
+        counts = landing_counts()
+        failure = None
+    except Exception as error:                        # noqa: BLE001
+        counts, failure = {}, error
+
+    if failure is not None:
+        st.error(
+            "The surveillance database could not be reached, so no figures "
+            "can be shown. This is a connection problem, not an absence of "
+            "data.")
+        st.caption(
+            "Networks that inspect database traffic block the PostgreSQL TLS "
+            "handshake: the port opens and the connection is then reset. "
+            "Trying another network, or a mobile hotspot, is the quickest way "
+            "to tell a local cause from a provider one."
+        )
+        with st.expander("Technical detail"):
+            st.code(str(failure)[:1200])
+        st.markdown(_notes(), unsafe_allow_html=True)
+        _staff_door()
+        return
 
     if not int(counts.get("specimens") or 0):
         st.info(
@@ -388,6 +531,7 @@ def render_home_page() -> None:
             "onto the resistance, organism, One Health, genomic and "
             "antimicrobial-use sections.")
         st.markdown(_notes(), unsafe_allow_html=True)
+        _staff_door()
         return
 
     # One block, so the browser lays the grid out rather than Streamlit laying
@@ -395,7 +539,37 @@ def render_home_page() -> None:
     st.markdown(_stats(counts) + _coverage(counts) + _grid(counts) + _notes(),
                 unsafe_allow_html=True)
 
+    _staff_door()
     _admin_hint()
+
+
+def _staff_door() -> None:
+    """The way in for staff.
+
+    The sidebar is hidden from the public surface, which left the sign-in
+    reachable only by typing ``?admin=1`` into the address bar -- so the
+    platform's own administrator had no way in. A link inside markdown does
+    not work here, because Streamlit intercepts in-app anchors; a button sets
+    the query parameter directly.
+    """
+    try:
+        already = str(st.query_params.get("admin", "")).lower() in (
+            "1", "true", "yes")
+    except Exception:                                 # noqa: BLE001
+        already = False
+    if already:
+        return
+
+    spacer, door = st.columns([5, 1])
+    with door:
+        if st.button("Staff sign-in", use_container_width=True,
+                     help="Opens the sign-in panel for laboratory and "
+                          "programme staff."):
+            try:
+                st.query_params["admin"] = "1"
+            except Exception:                         # noqa: BLE001
+                pass
+            st.rerun()
 
 
 def _admin_hint() -> None:

@@ -109,11 +109,6 @@ export function PpsView({ data }: { data: UseData }) {
             </div>
           ) : null}
         </div>
-        <Caption>
-          Documentation is about the notes, not about whether a prescription
-          was appropriate. The target line is a common audit standard, not a
-          figure this survey sets.
-        </Caption>
       </Section>
 
       {breakdown ? (
@@ -186,17 +181,9 @@ export function PpsView({ data }: { data: UseData }) {
             unit="Prescriptions"
             labelWidth={90}
           />
-          <Caption>
-            The median is {pps.durationMedianDays ?? "—"} days. A median rather
-            than a mean: a handful of long courses pulls a mean somewhere no
-            patient was.
-          </Caption>
         </Section>
       ) : null}
 
-      <Caption>
-        Prevalence is pooled across surveys, not averaged over them.
-      </Caption>
     </>
   );
 }

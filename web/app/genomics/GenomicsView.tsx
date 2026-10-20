@@ -342,12 +342,6 @@ export function GenomicsView({
                 initialSort={{ key: "isolates", direction: "desc" }}
               />
             </div>
-            {data.clustersWithheld > 0 ? (
-              <Caption>
-                {count(data.clustersWithheld)} clusters below the minimum cell
-                are dropped whole rather than shown with their size withheld.
-              </Caption>
-            ) : null}
           </>
         )}
         <Note tone="limit">

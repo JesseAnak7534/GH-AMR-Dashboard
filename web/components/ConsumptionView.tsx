@@ -32,6 +32,7 @@ export function ConsumptionView({
   colour,
   volumeKey,
   volumeUnit,
+  volumeShort,
   note,
   compositionKeys = [],
 }: {
@@ -42,6 +43,8 @@ export function ConsumptionView({
   /** The raw volume behind the rate, shown beside it. */
   volumeKey?: string;
   volumeUnit?: string;
+  /** Short form of the unit, for places with no room — a ring's centre. */
+  volumeShort?: string;
   note?: string;
   /** Dimensions worth drawing as a ring rather than as bars. */
   compositionKeys?: string[];
@@ -92,15 +95,15 @@ export function ConsumptionView({
     <>
       <StatStrip
         stats={[
-          { value: count(totalRecords), label: "Records" },
+          {
+            value: totalVolume === null ? "—" : count(Math.round(totalVolume)),
+            label: volumeUnit ?? "Total quantity",
+          },
+          { value: count(totalRecords), label: "Reports" },
           {
             value: count(withDenominator),
             label: "With a usable denominator",
             hint: "the rest are excluded from the rate, not counted as zero",
-          },
-          {
-            value: totalVolume === null ? "—" : count(Math.round(totalVolume)),
-            label: volumeUnit ?? "Volume",
           },
           {
             value: count(period?.rows.length ?? 0),
@@ -140,10 +143,12 @@ export function ConsumptionView({
                 .map((row) => ({
                   label: String(row.group ?? ""),
                   value: numeric(row[valueKey]),
-                  denominator: row.records,
+                  denominator: volumeKey ? row[volumeKey] : row.records,
                   colour,
                 }))}
-              unit={`${unit} (records in brackets)`}
+              unit={`${unit}${
+                volumeUnit ? ` (${volumeUnit.toLowerCase()} in brackets)` : ""
+              }`}
               labelWidth={220}
               decimals={1}
             />
@@ -186,22 +191,28 @@ export function ConsumptionView({
         </Section>
       ) : null}
 
-      {compositions.map((composition) => (
-        <Section key={composition.by} title={humanise(composition.by)}>
-          <Donut
-            parts={composition.rows
-              .map((row) => ({
-                label: String(row.group ?? ""),
-                value: numeric(row.records) ?? 0,
-              }))
-              .filter((part) => part.value > 0)}
-          />
-          <Caption>
-            Share of records, not of volume: a record is one report of one
-            agent, so this is what was reported rather than how much was used.
-          </Caption>
-        </Section>
-      ))}
+      {compositions.map((composition) => {
+        const total = composition.rows.reduce(
+          (sum, row) =>
+            sum + (numeric(volumeKey ? row[volumeKey] : row.records) ?? 0),
+          0,
+        );
+        return (
+          <Section key={composition.by} title={humanise(composition.by)}>
+            <Donut
+              parts={composition.rows
+                .map((row) => ({
+                  label: String(row.group ?? ""),
+                  value:
+                    numeric(volumeKey ? row[volumeKey] : row.records) ?? 0,
+                }))
+                .filter((part) => part.value > 0)}
+              centreValue={count(Math.round(total))}
+              centreLabel={volumeShort ?? volumeUnit ?? "records"}
+            />
+          </Section>
+        );
+      })}
 
       {note ? <Caption>{note}</Caption> : null}
     </>

@@ -28,6 +28,7 @@ export default function AmuPage() {
           unit="DDD per 1,000 patient-days"
           colour={OKABE_ITO.orange}
           volumeKey="quantity_dispensed"
+          volumeShort="units"
           volumeUnit="Quantity dispensed"
           note="A defined daily dose is an assumed average adult dose, not one anyone was given. It makes volumes comparable; it does not describe any patient."
         />

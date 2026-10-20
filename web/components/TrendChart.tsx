@@ -274,17 +274,12 @@ export function TrendChart({
         })}
       </ul>
 
-      <figcaption className="mt-1.5 text-[0.74rem] text-ink-faint">
-        {unit}.{" "}
-        {hasBands
-          ? `${
-              series.length > 2
-                ? "Point at a series to see its 95% confidence interval."
-                : "The band is the 95% confidence interval."
-            } Where intervals overlap between periods, the change is within the uncertainty.`
-          : ""}{" "}
-        The line breaks where a period had too few results to plot.
-      </figcaption>
+      {hasBands ? (
+        <figcaption className="mt-1.5 text-[0.74rem] text-ink-faint">
+          Shaded band: 95% confidence interval. Overlapping bands mean the
+          change is within the uncertainty.
+        </figcaption>
+      ) : null}
     </figure>
   );
 }

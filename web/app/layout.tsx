@@ -89,49 +89,79 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="no-print mt-16 border-t border-rule bg-shell">
-          <div className="mx-auto grid max-w-[1180px] gap-8 px-5 py-10 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="lg:col-span-2">
-              <p className="eyebrow mb-2">Published by</p>
-              <p className="text-[0.92rem] font-semibold">{OWNER}</p>
-              <p className="mt-1 text-[0.85rem] leading-relaxed text-ink-soft">
-                University of Ghana. Laboratories are named throughout.
+        {/* Deep ink-blue, so the page ends on something deliberate rather
+            than fading into another grey band. Three columns: who publishes
+            it, where to go, and when it was generated. */}
+        <footer className="no-print bg-[#0d1b2a] text-white/85">
+          <div className="mx-auto max-w-[1180px] px-5 py-12">
+            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+              <div>
+                <p className="text-[1.05rem] font-bold tracking-tight text-white">
+                  ICBB-AMRSS
+                </p>
+                <p className="mt-2 max-w-[42ch] text-[0.88rem] leading-relaxed text-white/70">
+                  {OWNER}
+                  <br />
+                  University of Ghana
+                </p>
+              </div>
+
+              <nav aria-label="Sections">
+                <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/45">
+                  Sections
+                </p>
+                <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                  {SECTIONS.map((section) => (
+                    <li key={section.href}>
+                      <Link
+                        href={section.href}
+                        className="text-[0.85rem] text-white/75 transition-colors hover:text-white"
+                      >
+                        {section.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+
+              <div>
+                <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.14em] text-white/45">
+                  Data
+                </p>
+                <dl className="space-y-1.5 text-[0.85rem]">
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/60">Susceptibility results</dt>
+                    <dd className="tabular-nums text-white">
+                      {manifest.counts.results.toLocaleString("en-GB")}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/60">Isolates</dt>
+                    <dd className="tabular-nums text-white">
+                      {manifest.counts.isolates.toLocaleString("en-GB")}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/60">Laboratories</dt>
+                    <dd className="tabular-nums text-white">
+                      {manifest.counts.laboratories.toLocaleString("en-GB")}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-white/60">Updated</dt>
+                    <dd className="text-white">
+                      {monthYear(manifest.generatedAt)}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <div className="mt-10 border-t border-white/12 pt-5">
+              <p className="text-[0.78rem] text-white/50">
+                &copy; {new Date(manifest.generatedAt).getFullYear()}{" "}
+                {OWNER}, University of Ghana.
               </p>
-            </div>
-
-            <div>
-              <p className="eyebrow mb-2">How to read it</p>
-              <p className="text-[0.82rem] leading-relaxed text-ink-soft">
-                No percentage below {manifest.minIsolatesForReporting}{" "}
-                isolates. Every percentage carries a 95% confidence interval.
-                {manifest.threshold > 1
-                  ? ` Counts below ${manifest.threshold} records are withheld — withheld is not zero.`
-                  : ""}
-              </p>
-            </div>
-
-            <div>
-              <p className="eyebrow mb-2">Sections</p>
-              <ul className="space-y-1">
-                {SECTIONS.map((section) => (
-                  <li key={section.href}>
-                    <Link
-                      href={section.href}
-                      className="text-[0.82rem] text-ink-soft hover:text-brand hover:underline"
-                    >
-                      {section.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-rule">
-            <div className="mx-auto max-w-[1180px] px-5 py-4 text-[0.76rem] text-ink-faint">
-              Generated {monthYear(manifest.generatedAt)} from{" "}
-              {manifest.counts.results.toLocaleString("en-GB")} susceptibility
-              results. Aggregate figures only.
             </div>
           </div>
         </footer>

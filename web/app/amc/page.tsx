@@ -28,6 +28,7 @@ export default function AmcPage() {
           unit="mg per kg biomass"
           colour={OKABE_ITO.vermillion}
           volumeKey="active_ingredient_kg"
+          volumeShort="kg"
           volumeUnit="Active ingredient (kg)"
           compositionKeys={["sector", "purpose", "route"]}
           note="Biomass is the denominator: the same tonnage means something different across poultry than across cattle."

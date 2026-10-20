@@ -158,11 +158,7 @@ export function RegionsView({ data }: { data: RegionsData }) {
       </Section>
 
       <Caption>
-        Pick resistant, intermediate or susceptible on the map to shade the
-        regions by that result; the circle size is the number of isolates
-        either way. Regions differ in how much they report as well as in what
-        they find, so a region with a large laboratory contributes more
-        isolates whatever is happening there.
+        Regions differ in how much they report as well as in what they find.
       </Caption>
     </>
   );

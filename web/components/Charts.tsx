@@ -595,12 +595,7 @@ export function StackedBars({
           </li>
         ))}
       </ul>
-      {showPercent ? (
-        <figcaption className="mt-1 text-[0.74rem] text-ink-faint">
-          Each bar is the mix within that category; the figure at the end is its
-          total.
-        </figcaption>
-      ) : null}
+
     </figure>
   );
 }

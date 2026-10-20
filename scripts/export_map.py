@@ -101,17 +101,6 @@ def _step(percent: Optional[float]) -> int:
     return len(BAND_EDGES)
 
 
-def _legend(layer: Dict[str, object]) -> str:
-    ramp = layer["ramp"]            # type: ignore[index]
-    rows = "".join(
-        f'<div style="margin:2px 0"><span style="display:inline-block;width:12px;'
-        f'height:12px;background:{ramp[i]};border:1px solid rgba(0,0,0,.25);'
-        f'margin-right:6px;vertical-align:-1px"></span>{BAND_LABELS[i]}</div>'
-        for i in range(len(BAND_LABELS)))
-    return (f'<div style="font-weight:700;margin:6px 0 3px">'
-            f'{layer["name"]}</div>{rows}')
-
-
 #: Circle radii, in pixels, from the smallest value on a layer to the largest.
 R_MIN, R_MAX = 7.0, 27.0
 
@@ -145,37 +134,31 @@ def _sizer(values: List[float], from_zero: bool):
     return radius, marks
 
 
-def _size_key(marks: List[float], suffix: str, radius) -> str:
-    """Three reference circles, so a size can be read back as a number."""
-    if not marks:
-        return ""
-    circles = ""
-    for mark in marks:
-        r = radius(mark)
-        circles += (
-            f'<div style="display:flex;align-items:center;gap:6px;margin:3px 0">'
-            f'<span style="display:inline-flex;width:{2*R_MAX:.0f}px;'
-            f'justify-content:center"><span style="display:inline-block;'
-            f'width:{2*r:.0f}px;height:{2*r:.0f}px;border-radius:50%;'
-            f'background:#cfd6da;border:1px solid rgba(0,0,0,.35)"></span></span>'
-            f'<span>{mark:,.1f}{suffix}</span></div>')
-    return ('<div style="font-weight:700;margin:7px 0 2px">Circle size</div>'
-            + circles)
+def _legend_html() -> str:
+    """A compact key: one row per band, one chip per result.
 
-
-def _legend_html(size_key: str) -> str:
-    blocks = "".join(_legend(layer) for layer in LAYERS if layer["key"])
+    The three ramps used to sit stacked, fifteen rows of swatches down the side
+    of the map. The band edges are shared between them, so the same information
+    fits in five rows of three chips. The circle-size key is gone too --
+    bigger means more needs no explaining.
+    """
+    rows = ""
+    for index, label in enumerate(BAND_LABELS):
+        chips = "".join(
+            f'<span style="display:inline-block;width:11px;height:11px;'
+            f'background:{layer["ramp"][index]};'       # type: ignore[index]
+            f'border:1px solid rgba(0,0,0,.2);margin-right:2px"></span>'
+            for layer in LAYERS if layer["key"])
+        rows += (f'<div style="margin:1px 0;white-space:nowrap">{chips}'
+                 f'<span style="margin-left:5px">{label}</span></div>')
     return f"""
-    <div style="position:fixed;bottom:16px;left:12px;z-index:9999;
+    <div style="position:absolute;bottom:12px;left:10px;z-index:9999;
                 background:rgba(255,255,255,.95);border:1px solid #c9ced1;
-                border-radius:6px;padding:8px 10px;max-height:66%;
-                overflow:auto;font:11.5px/1.35 system-ui,-apple-system,
-                'Segoe UI',sans-serif;color:#16181a">
-      <div style="font-weight:700;margin-bottom:2px">Share of results</div>
-      {blocks}
-      {size_key}
-      <div style="margin-top:6px;color:#6b7378">Size and shade both follow the
-        result you pick, top right.</div>
+                border-radius:5px;padding:6px 8px;
+                font:11px/1.3 system-ui,-apple-system,'Segoe UI',sans-serif;
+                color:#16181a">
+      <div style="font-weight:700;margin-bottom:3px">R &middot; I &middot; S</div>
+      {rows}
     </div>
     """
 
@@ -249,14 +232,11 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
     folium.TileLayer("OpenStreetMap", control=False).add_to(world)
     world.fit_bounds(GHANA_BOUNDS)
 
-    size_keys: List[str] = []
-
     for layer in LAYERS:
         key = layer["key"]
         # Each layer gets its own scale, because a percentage and a count are
         # not comparable and a shared scale would flatten one of them.
-        radius_for, marks = _sizer(values_for(key), from_zero=key is None)
-        size_keys.append(_size_key(marks, "%" if key else "", radius_for))
+        radius_for, _ = _sizer(values_for(key), from_zero=key is None)
         # overlay=False makes each a *base* layer, so Leaflet renders the
         # control as radio buttons: one result at a time, which is what a
         # comparison between regions needs.
@@ -307,11 +287,7 @@ def build_region_map(regions: List[Dict[str, object]], out_path: str) -> str:
         group.add_to(world)
 
     folium.LayerControl(collapsed=False, position="topright").add_to(world)
-    # The key for the layer shown first. Each layer has its own scale, and a
-    # legend that changed on click would need scripting the saved page does
-    # not carry; the tooltip gives the exact figure on every circle either way.
-    world.get_root().html.add_child(
-        folium.Element(_legend_html(size_keys[0] if size_keys else "")))
+    world.get_root().html.add_child(folium.Element(_legend_html()))
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     world.save(out_path)

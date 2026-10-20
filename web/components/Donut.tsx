@@ -109,9 +109,9 @@ export function Donut({
             </text>
             <text
               x={radius}
-              y={radius + size * 0.12}
+              y={radius + size * 0.115}
               textAnchor="middle"
-              fontSize={size * 0.062}
+              fontSize={size * 0.075}
               fill="#6b7378"
             >
               {centreLabel ?? ""}
@@ -138,7 +138,7 @@ export function Donut({
               />
               <span className="flex-1 text-ink">{arc.label}</span>
               <span className="tabular-nums text-ink-soft">
-                {count(arc.value)}
+                {count(arc.value >= 100 ? Math.round(arc.value) : arc.value)}
               </span>
               <span className="w-11 text-right tabular-nums text-ink-faint">
                 {percent((100 * arc.value) / total, 0)}

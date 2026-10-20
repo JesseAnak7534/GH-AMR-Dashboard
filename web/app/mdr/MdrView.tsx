@@ -162,10 +162,6 @@ export function MdrView({ data }: { data: MdrData }) {
         </dl>
       </Section>
 
-      <Caption>
-        Magiorakos et al. (2012), applied per organism against its own category
-        set.
-      </Caption>
     </>
   );
 }

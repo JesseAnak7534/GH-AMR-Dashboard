@@ -180,10 +180,7 @@ export function RegionMap({ points }: { points: RegionPoint[] }) {
         ))}
       </div>
 
-      <figcaption className="mt-2 text-[0.74rem] leading-relaxed text-ink-faint">
-        Circle area is proportional to isolates, positioned at each
-        region&rsquo;s centre. The figures are in the table below.
-      </figcaption>
+
     </figure>
   );
 }

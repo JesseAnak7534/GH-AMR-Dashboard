@@ -237,7 +237,6 @@ export function OrganismsView({
         <SuppressionNote suppression={slice?.specimenTypeSuppression} />
       </Section>
 
-      <Caption>Counts are isolates, not susceptibility results.</Caption>
     </>
   );
 }

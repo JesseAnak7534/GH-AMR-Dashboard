@@ -209,9 +209,7 @@ export function HeatGrid({
             — {percent(focus.percent)} susceptible ({interval(focus.low, focus.high)}
             ), {count(focus.tested)} isolates tested.
           </>
-        ) : (
-          "Hover a cell for its denominator and interval."
-        )}
+        ) : null}
       </p>
     </div>
   );

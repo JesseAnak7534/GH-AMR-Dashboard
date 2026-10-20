@@ -152,10 +152,7 @@ export function CustodyChain({
         </div>
       ) : null}
 
-      <Caption>
-        Counts of links, never the links themselves. No identifier appears here:
-        what is published is the shape of the chain, not its contents.
-      </Caption>
+
     </Section>
   );
 }

@@ -173,10 +173,6 @@ export function TrendsView({ data }: { data: TrendsData }) {
         <SuppressionNote suppression={slice.suppression} />
       </Section>
 
-      <Caption>
-        Quarterly, deduplicated inside each quarter. A quarter with fewer than{" "}
-        {data.minObservations} results is not plotted.
-      </Caption>
     </>
   );
 }
