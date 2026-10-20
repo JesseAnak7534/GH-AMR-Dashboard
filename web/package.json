@@ -15,7 +15,7 @@
     "@types/node": "^22.18.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "next": "^15.5.4",
+    "next": "^15.5.28",
     "postcss": "^8.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
