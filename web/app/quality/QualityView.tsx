@@ -40,22 +40,6 @@ export function QualityView({ data }: { data: QualityData }) {
     return <Empty>No specimens are in the traceability chain yet.</Empty>;
   }
 
-  const completenessColumns: Column<
-    (typeof data.completeness.rows)[number]
-  >[] = [
-    { key: "field", header: "Field", format: "text" },
-    { key: "scope", header: "Scope", format: "text" },
-    { key: "recorded", header: "Recorded", align: "right" },
-    { key: "of", header: "Records in scope", align: "right" },
-    {
-      key: "percent",
-      header: "% informative",
-      align: "right",
-      format: "percent",
-    },
-    { key: "status", header: "Status", format: "text" },
-  ];
-
   const plausibilityColumns: Column<
     (typeof data.plausibility.rows)[number]
   >[] = [
@@ -75,20 +59,17 @@ export function QualityView({ data }: { data: QualityData }) {
     { key: "reason", header: "Why", format: "text" },
   ];
 
-  const denominatorColumns: Column<
-    (typeof data.denominators.rows)[number]
-  >[] = [
-    { key: "dataset", header: "Dataset", format: "text" },
-    { key: "denominator", header: "Denominator", format: "text" },
-    { key: "withDenominator", header: "Records with one", align: "right" },
-    { key: "records", header: "Records", align: "right" },
-    { key: "percent", header: "% with one", align: "right", format: "percent" },
-    { key: "consequence", header: "What is lost without it", format: "text" },
-  ];
-
-  const metricColumns: Column<Record<string, string>>[] = Object.keys(
-    data.denominators.metrics[0] ?? {},
-  ).map((key) => ({ key, header: key, format: "text" as const }));
+  // What each metric is and what it must not be used for. The numerator,
+  // denominator, conversion and calculation columns are dropped: they describe
+  // how the figure is produced rather than what it says.
+  const metricColumns: Column<Record<string, string>>[] = [
+    "Metric",
+    "Unit",
+    "Intended use",
+    "Not to be used for",
+  ]
+    .filter((key) => key in (data.denominators.metrics[0] ?? {}))
+    .map((key) => ({ key, header: key, format: "text" as const }));
 
   return (
     <>
@@ -107,15 +88,9 @@ export function QualityView({ data }: { data: QualityData }) {
         ]}
       />
 
-      <Note tone="method">
-        A field counts as recorded only when it holds an informative value. A
-        stored &ldquo;Unknown&rdquo; counts as missing: it is a placeholder, not
-        an observation.
-      </Note>
-
       <Section
         title="Reporting coverage"
-        intro="A sector with few specimens cannot support a national statement about it, however confident a percentage elsewhere on this site looks."
+        intro="How much material each sector contributes."
       >
         <Figure title="Specimens by sector" hideTitle>
           <BarChart
@@ -136,10 +111,7 @@ export function QualityView({ data }: { data: QualityData }) {
         {data.completeness.notCollected.length ? (
           <Note tone="limit">
             Not collected at all:{" "}
-            <strong>{data.completeness.notCollected.join(", ")}</strong>. These
-            fields exist in the data model and are on the upload template, but
-            no submission has populated them. Any breakdown by them shows a
-            single &ldquo;Not recorded&rdquo; group.
+            <strong>{data.completeness.notCollected.join(", ")}</strong>.
           </Note>
         ) : null}
 
@@ -162,14 +134,6 @@ export function QualityView({ data }: { data: QualityData }) {
             labelWidth={210}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={completenessColumns}
-          rows={data.completeness.rows}
-          searchKeys={["field"]}
-          searchLabel="Search field"
-          initialSort={{ key: "percent", direction: "asc" }}
-        />
       </Section>
 
       <Section title="Timeliness">
@@ -212,7 +176,7 @@ export function QualityView({ data }: { data: QualityData }) {
 
       <Section
         title="Chain linkage"
-        intro="The traceability chain is only useful where it is joined up. These are the joins, measured."
+        intro="How much of the chain from specimen to sequence is joined up."
       >
         <StatStrip
           stats={[
@@ -281,16 +245,11 @@ export function QualityView({ data }: { data: QualityData }) {
             labelWidth={180}
           />
         </Figure>
-        <Note tone="limit">
-          Measured results were read from a plate or an instrument;
-          rule-interpreted results were derived from a measurement; imported
-          results arrived already interpreted, with provenance unknown.
-        </Note>
       </Section>
 
       <Section
         title="Implausible organism–agent combinations"
-        intro="Results recording susceptibility where it is not biologically possible, or where CLSI directs that the agent not be reported for that organism. These are data-quality findings, and the response is to correct them at source."
+        intro="Results for pairs where the answer cannot be meaningful. Each one is a finding to correct at source."
       >
         {data.plausibility.rows.length ? (
           <>
@@ -330,15 +289,14 @@ export function QualityView({ data }: { data: QualityData }) {
           </>
         ) : (
           <Note tone="method">
-            No implausible organism–agent combination was found. Every result is
-            for a pair where susceptibility testing is meaningful.
+            None found.
           </Note>
         )}
       </Section>
 
       <Section
         title="Denominators for use and consumption"
-        intro="A rate needs a denominator. These are the records that carry one, and what is lost where they do not."
+        intro="Whether use and consumption can be reported as rates rather than volumes."
       >
         {data.denominators.available ? (
           <>
@@ -358,11 +316,6 @@ export function QualityView({ data }: { data: QualityData }) {
                 labelWidth={240}
               />
             </Figure>
-            <div className="mt-5" />
-            <DataTable
-              columns={denominatorColumns}
-              rows={data.denominators.rows}
-            />
             {data.denominators.metrics.length ? (
               <>
                 <h3 className="mt-6 text-[0.98rem] font-semibold">

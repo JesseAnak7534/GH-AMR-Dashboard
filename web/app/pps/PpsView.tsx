@@ -5,19 +5,11 @@ import { BarChart } from "@/components/Charts";
 import { Donut } from "@/components/Donut";
 import { Gauge } from "@/components/Gauge";
 import { Figure } from "@/components/Figure";
-import { Column, DataTable } from "@/components/DataTable";
-import { Caption, Empty, Section, StatStrip } from "@/components/Chrome";
+import { Empty, Section, StatStrip } from "@/components/Chrome";
 import { FilterBar } from "@/components/FilterBar";
 import type { UseData } from "@/lib/data";
 import { count, numeric, percent } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
-
-type Row = { value: string; prescriptions: number | string | null };
-type WardRow = {
-  ward: string;
-  prescriptions: number | string | null;
-  median_duration: number | null;
-};
 
 /**
  * Point prevalence surveys.
@@ -36,22 +28,6 @@ export function PpsView({ data }: { data: UseData }) {
 
   const breakdown = breakdowns.find((b) => b.key === key) ?? breakdowns[0];
   const route = breakdowns.find((b) => b.key === "route");
-
-  const columns: Column<Row>[] = [
-    { key: "value", header: breakdown?.label ?? "Value", format: "text" },
-    { key: "prescriptions", header: "Prescriptions", align: "right" },
-  ];
-
-  const wardColumns: Column<WardRow>[] = [
-    { key: "ward", header: "Ward", format: "text" },
-    { key: "prescriptions", header: "Prescriptions", align: "right" },
-    {
-      key: "median_duration",
-      header: "Median days",
-      align: "right",
-      format: "decimal",
-    },
-  ];
 
   return (
     <>
@@ -140,7 +116,6 @@ export function PpsView({ data }: { data: UseData }) {
                       (numeric(b.prescriptions) ?? 0) -
                       (numeric(a.prescriptions) ?? 0),
                   )
-                  .slice(0, 14)
                   .map((row) => ({
                     label: row.value,
                     value: row.prescriptions,
@@ -152,13 +127,6 @@ export function PpsView({ data }: { data: UseData }) {
                 labelWidth={230}
               />
             </Figure>
-            <DataTable
-              columns={columns}
-              rows={breakdown.rows}
-              searchKeys={["value"]}
-              searchLabel="Search"
-              initialSort={{ key: "prescriptions", direction: "desc" }}
-            />
           </div>
         </Section>
       ) : null}
@@ -175,10 +143,6 @@ export function PpsView({ data }: { data: UseData }) {
             xLabel="Prescriptions"
             yLabel="Ward"
             labelWidth={200}
-          />
-          <DataTable
-            columns={wardColumns}
-            rows={pps.wards}
           />
         </Section>
       ) : null}

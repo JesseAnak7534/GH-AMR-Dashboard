@@ -19,7 +19,7 @@ export default function GenomicsPage() {
         badge="WGS"
         colour="#CC79A7"
         title="Genomics"
-        lede="What sequencing adds: the mechanisms behind the resistance, how often they explain the laboratory result, and which genomes look alike."
+        lede="The genes behind the resistance, and which genomes look alike."
       />
       <Container>
         <GenomicsView data={data} custody={custody} />

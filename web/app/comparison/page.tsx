@@ -18,7 +18,7 @@ export default function ComparisonPage() {
         badge="CMP"
         colour="#0b6e6e"
         title="Comparative analysis"
-        lede="Resistance between groups, on one denominator, with the uncertainty shown. Comparing is where surveillance data misleads most easily, so small groups keep their counts and lose their percentages, and two groups whose intervals overlap are described as not distinguishable rather than ranked."
+        lede="Resistance between laboratories, regions, wards, specimens and periods."
       />
       <Container>
         <ComparisonView data={getComparison()} />

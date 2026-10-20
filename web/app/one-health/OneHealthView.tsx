@@ -7,7 +7,6 @@ import { FilterBar, ThresholdControl } from "@/components/FilterBar";
 import {
   Caption,
   Empty,
-  Note,
   Section,
   StatStrip,
   SuppressionNote,

@@ -17,7 +17,7 @@ export default function MdrPage() {
         badge="MDR"
         colour="#000000"
         title="Multidrug resistance"
-        lede="Isolates non-susceptible across three or more antimicrobial categories, and those non-susceptible across all but two."
+        lede="Isolates resistant across three or more antimicrobial categories."
       />
       <Container>
         <MdrView data={getMdr()} />

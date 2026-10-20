@@ -18,7 +18,7 @@ export default function HaiPage() {
         badge="HAI"
         colour="#3b4e8c"
         title="Hospital infection"
-        lede="Human clinical isolates: the organisms behind most healthcare-associated infection, how resistant they are, how much of it is multidrug resistant, and how that has moved."
+        lede="The organisms behind healthcare-associated infection, and how resistant they are."
       />
       <Container>
         <HaiView data={getHai()} />

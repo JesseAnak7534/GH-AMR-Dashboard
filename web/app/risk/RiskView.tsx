@@ -77,34 +77,6 @@ export function RiskView({ data }: { data: RiskData }) {
     (row) => (numeric(row.resistancePercent) ?? 0) >= floor,
   );
 
-  const scoreColumns: Column<(typeof slice.scores.rows)[number]>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "riskScore", header: "Score", align: "right" },
-    { key: "riskLevel", header: "Band", format: "text" },
-    {
-      key: "resistancePercent",
-      header: "% resistant",
-      align: "right",
-      format: "percent",
-    },
-    { key: "observations", header: "Results", align: "right" },
-    { key: "antibioticDiversity", header: "Agents tested", align: "right" },
-    { key: "factors", header: "What contributed", format: "text" },
-  ];
-
-  const emergingColumns: Column<(typeof slice.emerging.rows)[number]>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "antibiotic", header: "Antibiotic", format: "text" },
-    {
-      key: "resistancePercent",
-      header: "% resistant",
-      align: "right",
-      format: "percent",
-    },
-    { key: "observations", header: "Results", align: "right" },
-    { key: "severity", header: "Band", format: "text" },
-  ];
-
   const organismColumns: Column<
     (typeof slice.organismComparison.rows)[number]
   >[] = [
@@ -113,28 +85,6 @@ export function RiskView({ data }: { data: RiskData }) {
     { key: "intermediate", header: "I", align: "right" },
     { key: "susceptible", header: "S", align: "right" },
     { key: "observations", header: "Results", align: "right" },
-    {
-      key: "resistancePercent",
-      header: "% resistant",
-      align: "right",
-      format: "percent",
-    },
-  ];
-
-  const antibioticColumns: Column<
-    (typeof slice.antibioticComparison.rows)[number]
-  >[] = [
-    { key: "antibiotic", header: "Antibiotic", format: "text" },
-    { key: "resistant", header: "R", align: "right" },
-    { key: "intermediate", header: "I", align: "right" },
-    { key: "susceptible", header: "S", align: "right" },
-    { key: "observations", header: "Results", align: "right" },
-    {
-      key: "susceptibilityPercent",
-      header: "% susceptible",
-      align: "right",
-      format: "percent",
-    },
     {
       key: "resistancePercent",
       header: "% resistant",
@@ -170,12 +120,6 @@ export function RiskView({ data }: { data: RiskData }) {
       value: (row) => (row.meetsThreshold ? "Yes" : "No"),
     },
     { key: "observation", header: "Observation", format: "text" },
-  ];
-
-  const ruleColumns: Column<(typeof data.scoringRule)[number]>[] = [
-    { key: "component", header: "Component", format: "text" },
-    { key: "condition", header: "Condition", format: "text" },
-    { key: "points", header: "Points", align: "right", format: "text" },
   ];
 
   const history = slice.forecast.history;
@@ -258,7 +202,7 @@ export function RiskView({ data }: { data: RiskData }) {
 
       <Section
         title="Direction of travel"
-        intro="The first half of the dated record against the second. A crude comparison, and the quarterly series on the Trends page is the better one; this is the figure the staff tool reports and it is here for the same reading."
+        intro="The first half of the record against the second."
       >
         <StatStrip
           stats={[
@@ -285,22 +229,17 @@ export function RiskView({ data }: { data: RiskData }) {
         />
         <Note tone="limit">
           {DIRECTION_NOTE[slice.trend.direction] ??
-            "The two halves could not be compared."}{" "}
-          It splits the record in half by row order, not by a fixed calendar
-          period, so it cannot carry a confidence interval.
+            "The two halves could not be compared."}
         </Note>
       </Section>
 
       <Section
         title="Organism risk scores"
-        intro="A composite indicator for ordering a list for review, not a validated measure of danger. The scoring rule is below the table."
+        intro="Which organisms carry the most resistance, on the most evidence, across the widest panel."
       >
         <Note tone="limit">
-          The score adds points for resistance level, breadth of panel and
-          volume of evidence. Those weights were chosen for this dashboard and
-          have not been derived from outcome data or approved by any clinical
-          governance group. Because volume contributes, an organism tested often
-          scores higher than an equally resistant one tested rarely.
+          A way of ordering a list for review, not a validated measure of
+          danger.
         </Note>
 
         <div className="rounded-lg border border-rule bg-shell px-4 py-3.5">
@@ -329,7 +268,7 @@ export function RiskView({ data }: { data: RiskData }) {
           <>
             <Figure
               title={`Organism risk scores — ${sectorLabel}`}
-              caption="Score out of 100. The band is the score, not the resistance rate."
+              caption="Out of 100."
               hideTitle
             >
               <BarChart
@@ -347,33 +286,20 @@ export function RiskView({ data }: { data: RiskData }) {
                 labelWidth={220}
               />
             </Figure>
-            <div className="mt-5" />
-            <DataTable
-              columns={scoreColumns}
-              rows={scoreRows}
-              searchKeys={["organism"]}
-              searchLabel="Search organism"
-              initialSort={{ key: "riskScore", direction: "desc" }}
-            />
             <SuppressionNote suppression={slice.scores.suppression} />
           </>
         ) : (
           <Empty>No organism reaches that resistance rate.</Empty>
         )}
 
-        <h3 className="mt-6 text-[0.98rem] font-semibold">
-          How the score is calculated
-        </h3>
-        <DataTable columns={ruleColumns} rows={data.scoringRule} />
         <p className="text-[0.78rem] text-ink-faint">
-          Maximum 100. Bands: 70 and above critical, 50 and above high, 30 and
-          above moderate, below 30 low.
+          Out of 100: 70 and above critical, 50 high, 30 moderate, below 30 low.
         </p>
       </Section>
 
       <Section
         title="Where the burden sits"
-        intro="Resistant results as a share of all results, by specimen type. The sector is already fixed, so this is the split within it."
+        intro="Which specimens the resistance is coming from."
       >
         <StatStrip
           stats={[
@@ -422,7 +348,7 @@ export function RiskView({ data }: { data: RiskData }) {
 
       <Section
         title="Emerging patterns"
-        intro={`Organism–agent pairs over 60% resistant in the last ${slice.emerging.windowDays} days of the record, on at least five results. Five results is a low floor, so the count beside each pair is the figure to read.`}
+        intro="Organism–agent pairs that were heavily resistant in the most recent three months. Read each one against its count."
       >
         {slice.emerging.rows.length ? (
           <>
@@ -446,14 +372,6 @@ export function RiskView({ data }: { data: RiskData }) {
                 labelWidth={280}
               />
             </Figure>
-            <div className="mt-5" />
-            <DataTable
-              columns={emergingColumns}
-              rows={slice.emerging.rows}
-              searchKeys={["organism", "antibiotic"]}
-              searchLabel="Search organism or antibiotic"
-              initialSort={{ key: "resistancePercent", direction: "desc" }}
-            />
             <SuppressionNote suppression={slice.emerging.suppression} />
           </>
         ) : (
@@ -463,7 +381,7 @@ export function RiskView({ data }: { data: RiskData }) {
 
       <Section
         title="Where the trend is heading"
-        intro="A straight line fitted to the monthly resistance rate, projected forward. Shown with the history it was fitted to."
+        intro="The monthly rate, and where its slope points."
       >
         {slice.forecast.error ? (
           <Note tone="limit">{slice.forecast.error}</Note>
@@ -471,9 +389,6 @@ export function RiskView({ data }: { data: RiskData }) {
           <>
             <Figure
               title={`Monthly resistance rate — ${sectorLabel}`}
-              caption={`A month holding fewer results than the reporting floor is not plotted. Fit confidence: ${
-                slice.forecast.confidence ?? "unknown"
-              }.`}
               hideTitle
             >
               <TrendChart
@@ -484,34 +399,9 @@ export function RiskView({ data }: { data: RiskData }) {
                 denominatorLabel="results"
               />
             </Figure>
-            <div className="mt-5" />
-            <Figure
-              title={`Projected resistance rate — ${sectorLabel}`}
-              hideTitle
-            >
-              <BarChart
-                rows={slice.forecast.points.map((point) => ({
-                  label: `${point.monthsAhead} month${
-                    point.monthsAhead === 1 ? "" : "s"
-                  } ahead`,
-                  value: point.percent,
-                }))}
-                unit=""
-                suffix="%"
-                max={100}
-                colour={OKABE_ITO.sky}
-                xLabel="Projected % of results resistant"
-                yLabel="Months ahead"
-                labelWidth={150}
-              />
-            </Figure>
             <Note tone="limit">
-              A linear extrapolation of{" "}
-              {count(slice.forecast.history.length)} monthly points, with a
-              slope of {slice.forecast.slope ?? "—"} points a month. It carries
-              no interval and assumes nothing changes — not the panel, not the
-              submitting laboratories, not the case mix. It is not a prediction
-              of resistance in Ghana.
+              A straight line through the months so far. Not a prediction of
+              resistance in Ghana.
             </Note>
           </>
         )}
@@ -530,7 +420,7 @@ export function RiskView({ data }: { data: RiskData }) {
 
       <Section
         title="Agents compared"
-        intro="Pooled across every organism tested against the agent, so this says how the agent performed in this collection and not how it would perform against one organism."
+        intro="How each agent performed across every organism it was tested against."
       >
         <Figure title={`Susceptibility by agent — ${sectorLabel}`} hideTitle>
           <BarChart
@@ -548,27 +438,15 @@ export function RiskView({ data }: { data: RiskData }) {
             labelWidth={220}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={antibioticColumns}
-          rows={slice.antibioticComparison.rows}
-          searchKeys={["antibiotic"]}
-          searchLabel="Search antibiotic"
-          initialSort={{ key: "susceptibilityPercent", direction: "desc" }}
-        />
         <SuppressionNote suppression={slice.antibioticComparison.suppression} />
       </Section>
 
       <Section
         title="Susceptibility summary"
-        intro="One row per organism–agent pair, with the number tested and a 95% Wilson interval. Descriptive, organism-specific, and carrying no advice."
+        intro="Susceptibility for each organism–agent pair, with its interval."
       >
         <Note tone="limit">
-          Not prescribing guidance. These are descriptive counts pooled across
-          facilities, specimen types and time. They take no account of infection
-          site, patient factors, local formulary or breakpoint version, and they
-          are not a cumulative antibiogram. Treatment decisions need a CLSI M39
-          antibiogram for the specific facility and period.
+          Not prescribing guidance, and not a cumulative antibiogram.
         </Note>
         <StatStrip
           stats={[

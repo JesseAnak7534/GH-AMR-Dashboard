@@ -3,15 +3,13 @@
 import { BarChart } from "@/components/Charts";
 import {
   Empty,
-  Note,
   Section,
   StatStrip,
   SuppressionNote,
 } from "@/components/Chrome";
-import { Column, DataTable } from "@/components/DataTable";
 import { Figure } from "@/components/Figure";
 import { TrendChart } from "@/components/TrendChart";
-import type { HaiData, HaiGroupRow } from "@/lib/clinical";
+import type { HaiData } from "@/lib/clinical";
 import { count, percent } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
 
@@ -28,19 +26,6 @@ import { OKABE_ITO } from "@/lib/palette";
  * surveillance and they are named everywhere else on this site. The facility a
  * patient attended is not published anywhere, and does not reach this page.
  */
-
-const GROUP_COLUMNS: Column<HaiGroupRow>[] = [
-  { key: "group", header: "Reporting unit", format: "text" },
-  { key: "isolates", header: "Isolates", align: "right" },
-  { key: "observations", header: "Results", align: "right" },
-  {
-    key: "resistancePercent",
-    header: "% resistant",
-    align: "right",
-    format: "percent",
-  },
-  { key: "mdrIsolates", header: "MDR isolates", align: "right" },
-];
 
 export function HaiView({ data }: { data: HaiData }) {
   if (
@@ -61,43 +46,6 @@ export function HaiView({ data }: { data: HaiData }) {
   }
 
   const { headline, eskape, profile, split, mdr, trend } = data;
-
-  const eskapeColumns: Column<(typeof eskape.rows)[number]>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "isolates", header: "Isolates", align: "right" },
-    { key: "observations", header: "Results", align: "right" },
-    {
-      key: "resistancePercent",
-      header: "% resistant",
-      align: "right",
-      format: "percent",
-    },
-    { key: "mdrIsolates", header: "MDR isolates", align: "right" },
-    {
-      key: "mdrPercent",
-      header: "% MDR",
-      align: "right",
-      format: "percent",
-    },
-  ];
-
-  const profileColumns: Column<(typeof profile.rows)[number]>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    {
-      key: "nosocomial",
-      header: "Nosocomial",
-      format: "text",
-      value: (row) => (row.nosocomial ? "Yes" : "No"),
-    },
-    { key: "isolates", header: "Isolates", align: "right" },
-    { key: "observations", header: "Results", align: "right" },
-    {
-      key: "resistancePercent",
-      header: "% resistant",
-      align: "right",
-      format: "percent",
-    },
-  ];
 
   const series = [
     {
@@ -152,15 +100,9 @@ export function HaiView({ data }: { data: HaiData }) {
         ]}
       />
 
-      <Note tone="method">
-        One isolate per patient per organism, following CLSI M39. Multidrug
-        resistance is the Magiorakos definition, applied with the category set
-        for each organism.
-      </Note>
-
       <Section
         title="ESKAPE organisms"
-        intro="Enterococcus faecium, Staphylococcus aureus, Klebsiella pneumoniae, Acinetobacter baumannii, Pseudomonas aeruginosa and Enterobacter — the organisms behind most healthcare-associated infection worldwide."
+        intro="The six organisms behind most healthcare-associated infection worldwide."
       >
         <Figure title="ESKAPE organisms — resistance and multidrug resistance" hideTitle>
           <BarChart
@@ -178,20 +120,12 @@ export function HaiView({ data }: { data: HaiData }) {
             labelWidth={210}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={eskapeColumns}
-          rows={eskape.rows}
-          searchKeys={["organism"]}
-          searchLabel="Search organism"
-          initialSort={{ key: "resistancePercent", direction: "desc" }}
-        />
         <SuppressionNote suppression={eskape.suppression} />
       </Section>
 
       <Section
         title="Hospital resistance profile"
-        intro="The fifteen organisms with the most evidence behind them. Nosocomial organisms are marked, so the two groups can be read apart."
+        intro="Nosocomial organisms in red, the rest in grey."
       >
         <Figure title="Hospital resistance profile by organism" hideTitle>
           <BarChart
@@ -210,14 +144,6 @@ export function HaiView({ data }: { data: HaiData }) {
             labelWidth={210}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={profileColumns}
-          rows={profile.rows}
-          searchKeys={["organism"]}
-          searchLabel="Search organism"
-          initialSort={{ key: "resistancePercent", direction: "desc" }}
-        />
         <SuppressionNote suppression={profile.suppression} />
       </Section>
 
@@ -246,7 +172,7 @@ export function HaiView({ data }: { data: HaiData }) {
 
       <Section
         title="Multidrug resistance in hospital"
-        intro="Isolates non-susceptible across three or more antimicrobial categories, by organism."
+        intro="Isolates resistant across three or more antimicrobial categories."
       >
         {mdr.rows.length ? (
           <>
@@ -300,7 +226,7 @@ export function HaiView({ data }: { data: HaiData }) {
 
       <Section
         title="By sentinel laboratory"
-        intro="Laboratories are named: attribution is the point of sentinel surveillance. The facility a patient attended is not published."
+        intro="Resistance at each reporting laboratory."
       >
         <Figure title="Hospital resistance by sentinel laboratory" hideTitle>
           <BarChart
@@ -318,14 +244,6 @@ export function HaiView({ data }: { data: HaiData }) {
             labelWidth={240}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={GROUP_COLUMNS}
-          rows={data.laboratories?.rows ?? []}
-          searchKeys={["group"]}
-          searchLabel="Search laboratory"
-          initialSort={{ key: "resistancePercent", direction: "desc" }}
-        />
         <SuppressionNote suppression={data.laboratories?.suppression ?? null} />
       </Section>
 
@@ -346,20 +264,12 @@ export function HaiView({ data }: { data: HaiData }) {
             labelWidth={190}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={GROUP_COLUMNS}
-          rows={data.regions?.rows ?? []}
-          searchKeys={["group"]}
-          searchLabel="Search region"
-          initialSort={{ key: "resistancePercent", direction: "desc" }}
-        />
         <SuppressionNote suppression={data.regions?.suppression ?? null} />
       </Section>
 
       <Section
         title="Hospital infection trends"
-        intro={`Quarterly. A quarter holding fewer than ${trend.minObservations} results is not plotted, and the line breaks there rather than bridging a value nobody measured.`}
+        intro="Resistance, multidrug resistance and the nosocomial share, by quarter."
       >
         <Figure title="Hospital infection trends, by quarter" hideTitle>
           <TrendChart

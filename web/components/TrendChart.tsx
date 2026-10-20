@@ -48,7 +48,7 @@ export function TrendChart({
   series,
   unit,
   denominatorLabel = "tested",
-  height = 290,
+  height = 235,
   axisMax,
   xLabel = "Period",
   yLabel,

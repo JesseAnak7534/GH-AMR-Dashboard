@@ -4,9 +4,7 @@ import { useMemo, useState } from "react";
 import { BarChart } from "@/components/Charts";
 import { HeatGrid } from "@/components/HeatGrid";
 import { Figure } from "@/components/Figure";
-import { Column, DataTable } from "@/components/DataTable";
 import {
-  Caption,
   Empty,
   Note,
   Section,
@@ -21,11 +19,9 @@ import {
 } from "@/components/FilterBar";
 import { Segmented } from "@/components/Segmented";
 import type {
-  AntibiogramRow,
   PriorityData,
   ResistanceData,
   ResistanceSlice,
-  StratumRow,
 } from "@/lib/data";
 import {
   FilterManifest,
@@ -33,7 +29,7 @@ import {
   slugFor,
   useSlice,
 } from "@/lib/slices";
-import { count, humanise, interval, numeric, titleCase } from "@/lib/format";
+import { count, humanise, numeric, titleCase } from "@/lib/format";
 
 /**
  * The resistance section.
@@ -120,7 +116,6 @@ export function ResistanceView({
         .sort(
           (a, b) => (a.percent_susceptible ?? 0) - (b.percent_susceptible ?? 0),
         )
-        .slice(0, 18)
         .map((row) => ({
           label: `${row.organism} · ${row.antibiotic}`,
           value: row.percent_susceptible,
@@ -235,38 +230,9 @@ export function ResistanceView({
     slice?.isolates,
   )} isolates.`;
 
-  const antibiogramColumns: Column<AntibiogramRow>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "antibiotic", header: "Antibiotic", format: "text" },
-    { key: "tested", header: "Isolates tested", align: "right" },
-    {
-      key: "percent_susceptible",
-      header: "% susceptible",
-      align: "right",
-      format: "percent",
-    },
-  ];
-
   const activeStratum =
     (slice?.strata ?? []).find((s) => s.key === stratum) ??
     (slice?.strata ?? [])[0];
-
-  const stratumColumns: Column<StratumRow>[] = [
-    {
-      key: "stratum",
-      header: humanise(activeStratum?.key ?? ""),
-      format: "text",
-    },
-    { key: "isolates", header: "Isolates", align: "right" },
-    { key: "observations", header: "Observations", align: "right" },
-    {
-      key: "percent_non_susceptible",
-      header: "% non-susceptible",
-      align: "right",
-      format: "percent",
-    },
-    { key: "distinct_pairs", header: "Distinct pairs", align: "right" },
-  ];
 
   return (
     <>
@@ -336,9 +302,6 @@ export function ResistanceView({
                 slice?.pairsSuppressed,
               )}{" "}
               organism–antibiotic pairs were tested but fall below the floor.
-              That is a statement about how much data this view holds, not
-              about how much resistance is in it. Widen the filter, or see the
-              counts in the organisms section.
             </>
           ) : (
             <>No published row matches those filters. Try widening them.</>
@@ -402,16 +365,7 @@ export function ResistanceView({
             </div>
           </Section>
 
-          <Section title="Every published combination">
-            <DataTable
-              columns={antibiogramColumns}
-              rows={rows}
-              searchKeys={["organism", "antibiotic"]}
-              searchLabel="Search organism or antibiotic"
-              initialSort={{ key: "tested", direction: "desc" }}
-            />
-            <SuppressionNote suppression={slice?.suppression} />
-          </Section>
+          <SuppressionNote suppression={slice?.suppression} />
         </>
       )}
 

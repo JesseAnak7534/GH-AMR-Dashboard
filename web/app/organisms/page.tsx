@@ -19,7 +19,7 @@ export default function OrganismsPage() {
         badge="ORG"
         colour="#D55E00"
         title="Organisms"
-        lede="What is actually being isolated, counted as isolates rather than as test results, and the specimens they were grown from."
+        lede="What is being isolated, and the specimens it was grown from."
       />
       <Container>
         <OrganismsView data={data} filters={filters.organisms} />

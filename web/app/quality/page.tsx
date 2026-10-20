@@ -18,7 +18,7 @@ export default function QualityPage() {
         badge="DQ"
         colour="#4a5568"
         title="Data coverage and quality"
-        lede="Whether the data can support the figures drawn from it. Every rate elsewhere on this site should be read against this page."
+        lede="Whether the data can support the figures drawn from it."
       />
       <Container>
         <QualityView data={getQuality()} />

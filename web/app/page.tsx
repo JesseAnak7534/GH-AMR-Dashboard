@@ -34,12 +34,12 @@ export default function HomePage() {
           </h1>
           <p className="measure mt-5 text-[1.08rem] leading-relaxed text-white/90">
             Resistance, the organisms behind it, the antimicrobials being used
-            and the genomes explaining it — collected across human, animal,
-            food, environmental and aquaculture sources, and reported together.
+            and the genomes explaining it — across human, animal, food,
+            environmental and aquaculture sources.
           </p>
           <p className="mt-5 max-w-[78ch] text-[0.87rem] leading-relaxed text-white/70">
             Institute of Computational Biology and Bioinformatics, University
-            of Ghana. No patient, specimen or individual result is shown.
+            of Ghana.
           </p>
         </div>
       </section>
@@ -67,7 +67,7 @@ export default function HomePage() {
             ))}
           </dl>
           <p className="measure mt-6 text-[0.85rem] leading-relaxed text-ink-faint">
-            Specimens collected between{" "}
+            Collected between{" "}
             <strong className="font-semibold text-ink-soft">
               {monthYear(manifest.period.first)}
             </strong>{" "}
@@ -75,8 +75,7 @@ export default function HomePage() {
             <strong className="font-semibold text-ink-soft">
               {monthYear(manifest.period.last)}
             </strong>
-            , across {manifest.counts.sectors} sectors. First isolate per
-            patient per organism, following CLSI M39.
+            , across {manifest.counts.sectors} sectors.
           </p>
         </div>
       </section>

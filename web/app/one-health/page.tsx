@@ -18,7 +18,7 @@ export default function OneHealthPage() {
         badge="OH"
         colour="#009E73"
         title="One Health"
-        lede="The same surveillance across human, animal, food, environmental and aquaculture sources — counted separately, because resistance means something different in each."
+        lede="Human, animal, food, environmental and aquaculture surveillance, side by side."
       />
       <Container>
         <OneHealthView data={data} />

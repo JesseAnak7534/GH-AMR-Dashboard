@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart } from "@/components/Charts";
-import { Caption, Section, StatStrip } from "@/components/Chrome";
+import { Section, StatStrip } from "@/components/Chrome";
 import type { CustodyData } from "@/lib/data";
 import { count, percent } from "@/lib/format";
 

@@ -17,7 +17,7 @@ export default function MechanismsPage() {
         badge="MECH"
         colour="#7a1f6b"
         title="Resistance mechanisms"
-        lede="The patterns behind the laboratory result: the phenotypes that point to an enzyme, resistance running across a whole class, and how many agents a single isolate defeats."
+        lede="The phenotypes that point to an enzyme, resistance across a whole class, and how many agents an isolate defeats."
       />
       <Container>
         <MechanismsView data={getMechanisms()} />

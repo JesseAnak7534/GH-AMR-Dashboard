@@ -5,7 +5,6 @@ import { BarChart } from "@/components/Charts";
 import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
-  Caption,
   Empty,
   Note,
   Section,
@@ -22,11 +21,6 @@ import type { OrganismData, OrganismSlice } from "@/lib/data";
 import { FilterManifest, entriesFor, slugFor, useSlice } from "@/lib/slices";
 import { count, numeric, percent, titleCase } from "@/lib/format";
 
-type OrganismRow = {
-  organism: string;
-  isolates: number | string | null;
-  percent: number | null;
-};
 type SpecimenRow = { specimenType: string; isolates: number | string | null };
 
 /**
@@ -129,23 +123,11 @@ export function OrganismsView({
 
   const chartRows = rows
     .filter((row) => numeric(row.isolates) !== null)
-    .slice(0, 15)
     .map((row) => ({
       label: row.organism,
       value: row.isolates,
       colour: slice?.colour,
     }));
-
-  const organismColumns: Column<OrganismRow>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "isolates", header: "Isolates", align: "right" },
-    {
-      key: "percent",
-      header: "% of isolates",
-      align: "right",
-      format: "percent",
-    },
-  ];
 
   const specimenColumns: Column<SpecimenRow>[] = [
     { key: "specimenType", header: "Specimen type", format: "text" },
@@ -225,16 +207,7 @@ export function OrganismsView({
             </Figure>
           </Section>
 
-          <Section title="Every organism">
-            <DataTable
-              columns={organismColumns}
-              rows={rows}
-              searchKeys={["organism"]}
-              searchLabel="Search organism"
-              initialSort={{ key: "isolates", direction: "desc" }}
-            />
-            <SuppressionNote suppression={slice?.suppression} />
-          </Section>
+          <SuppressionNote suppression={slice?.suppression} />
         </>
       )}
 

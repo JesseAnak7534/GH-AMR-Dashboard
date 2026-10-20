@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { Figure } from "@/components/Figure";
-import { Column, DataTable } from "@/components/DataTable";
 import {
-  Caption,
   Empty,
   Note,
   Section,
@@ -13,8 +11,8 @@ import {
 } from "@/components/Chrome";
 import { FilterBar, sectorOptions } from "@/components/FilterBar";
 import { TrendChart } from "@/components/TrendChart";
-import type { TrendPeriodRow, TrendsData } from "@/lib/data";
-import { count, interval, numeric, percent, titleCase } from "@/lib/format";
+import type { TrendsData } from "@/lib/data";
+import { count, numeric, percent, titleCase } from "@/lib/format";
 import { ramp } from "@/lib/palette";
 
 export function TrendsView({ data }: { data: TrendsData }) {
@@ -72,25 +70,6 @@ export function TrendsView({ data }: { data: TrendsData }) {
       ? (last.ci_low as number) <= (first.ci_high as number) &&
         (first.ci_low as number) <= (last.ci_high as number)
       : true;
-
-  const columns: Column<TrendPeriodRow>[] = [
-    { key: "period", header: "Quarter", format: "text" },
-    { key: "isolates", header: "Isolates", align: "right" },
-    { key: "observations", header: "Observations", align: "right" },
-    {
-      key: "percent_non_susceptible",
-      header: "% non-susceptible",
-      align: "right",
-      format: "percent",
-    },
-    {
-      key: "ci",
-      header: "95% CI",
-      align: "right",
-      format: "text",
-      value: (row) => interval(row.ci_low, row.ci_high),
-    },
-  ];
 
   return (
     <>
@@ -178,15 +157,7 @@ export function TrendsView({ data }: { data: TrendsData }) {
         </Section>
       )}
 
-      <Section title="The figures">
-        <DataTable
-          columns={columns}
-          rows={slice.periods}
-          initialSort={{ key: "period", direction: "asc" }}
-          pageSize={20}
-        />
-        <SuppressionNote suppression={slice.suppression} />
-      </Section>
+      <SuppressionNote suppression={slice.suppression} />
 
     </>
   );

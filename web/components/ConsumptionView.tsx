@@ -5,7 +5,7 @@ import { BarChart } from "@/components/Charts";
 import { Donut } from "@/components/Donut";
 import { TrendChart } from "@/components/TrendChart";
 import { Figure } from "@/components/Figure";
-import { Column, DataTable } from "@/components/DataTable";
+import { Column } from "@/components/DataTable";
 import { Caption, Empty, Section, StatStrip } from "@/components/Chrome";
 import { FilterBar } from "@/components/FilterBar";
 import type { PooledBlock } from "@/lib/data";
@@ -144,7 +144,6 @@ export function ConsumptionView({
                   (a, b) =>
                     (numeric(b[valueKey]) ?? 0) - (numeric(a[valueKey]) ?? 0),
                 )
-                .slice(0, 14)
                 .map((row) => ({
                   label: String(row.group ?? ""),
                   value: numeric(row[valueKey]),
@@ -160,13 +159,6 @@ export function ConsumptionView({
               decimals={1}
             />
             </Figure>
-            <DataTable
-              columns={columns}
-              rows={block.rows}
-              searchKeys={["group"]}
-              searchLabel="Search"
-              initialSort={{ key: valueKey, direction: "desc" }}
-            />
             <Caption>{block.caveat}</Caption>
           </div>
         </Section>

@@ -287,7 +287,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "AST",
     title: "Resistance",
     blurb:
-      "Susceptibility by organism and antibiotic, with the number of isolates behind every figure, and where the resistance sits.",
+      "How often each organism still responds to each antibiotic.",
     colour: "#0072B2",
     stat: (m) => ({ value: m.counts.results, unit: "susceptibility results" }),
   },
@@ -296,7 +296,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "TIME",
     title: "Trends",
     blurb:
-      "How resistance has moved by quarter, with the confidence band drawn so a change can be read against its uncertainty.",
+      "How resistance has moved, quarter by quarter.",
     colour: "#56B4E9",
     stat: (m) => ({ value: m.counts.months, unit: "months of data" }),
   },
@@ -305,7 +305,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "MDR",
     title: "Multidrug resistance",
     blurb:
-      "Isolates resistant across three or more antimicrobial categories, to the Magiorakos definitions.",
+      "Isolates resistant across three or more antimicrobial categories.",
     colour: "#000000",
     stat: (m) => ({ value: m.counts.isolates, unit: "isolates classified" }),
   },
@@ -314,7 +314,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "GEO",
     title: "Regions",
     blurb:
-      "Where the isolates were collected, region by region, and how much each region contributes.",
+      "Where the isolates were collected, region by region.",
     colour: "#1d4d43",
     stat: (m) => ({ value: m.counts.regions, unit: "regions reporting" }),
   },
@@ -323,7 +323,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "ORG",
     title: "Organisms",
     blurb:
-      "What is being isolated, counted as isolates rather than as test results, and the specimens they came from.",
+      "What is being isolated, and the specimens it came from.",
     colour: "#D55E00",
     stat: (m) => ({ value: m.counts.organisms, unit: "organisms identified" }),
   },
@@ -332,7 +332,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "OH",
     title: "One Health",
     blurb:
-      "Human, animal, food, environmental and aquaculture surveillance side by side, never pooled into one national rate.",
+      "Human, animal, food, environmental and aquaculture surveillance side by side.",
     colour: "#009E73",
     stat: (m) => ({ value: m.counts.sectors, unit: "sectors under surveillance" }),
   },
@@ -341,7 +341,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "WGS",
     title: "Genomics",
     blurb:
-      "The mechanisms behind the resistance, how often they explain the laboratory result, and which genomes look alike.",
+      "The genes behind the resistance, and which genomes look alike.",
     colour: "#CC79A7",
     stat: (m) => ({ value: m.counts.genomes, unit: "genomes sequenced" }),
   },
@@ -350,7 +350,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "AMU",
     title: "AMU",
     blurb:
-      "Human antimicrobial use: defined daily doses per 1,000 patient-days.",
+      "How much antimicrobial human health is using, and which agents.",
     colour: "#E69F00",
     stat: (m) => ({ value: m.counts.amu, unit: "consumption records" }),
   },
@@ -359,7 +359,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "AMC",
     title: "AMC",
     blurb:
-      "Veterinary antimicrobial consumption: milligrams per kilogram of biomass.",
+      "How much antimicrobial animals are given, and which agents.",
     colour: "#999999",
     stat: (m) => ({ value: m.counts.amc, unit: "veterinary records" }),
   },
@@ -368,7 +368,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "PPS",
     title: "PPS",
     blurb:
-      "Point prevalence surveys: how many patients were on an antibiotic, and what.",
+      "How many patients were on an antibiotic, and what.",
     colour: "#8a6a22",
     stat: (m) => ({ value: m.counts.pps, unit: "prevalence surveys" }),
   },
@@ -377,7 +377,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "MECH",
     title: "Mechanisms",
     blurb:
-      "The resistance patterns behind the result: ESBL, carbapenemase, MRSA and AmpC phenotypes, cross-resistance within a class, and how many agents an isolate defeats.",
+      "ESBL, carbapenemase, MRSA and AmpC patterns, and resistance across a whole class.",
     colour: "#7a1f6b",
     stat: (m) => ({ value: m.counts.isolates, unit: "isolates screened" }),
   },
@@ -386,7 +386,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "HAI",
     title: "Hospital infection",
     blurb:
-      "Healthcare-associated infection: the ESKAPE organisms, the hospital resistance profile, multidrug resistance in hospital, and how each sentinel laboratory compares.",
+      "The ESKAPE organisms and the rest of the hospital resistance picture.",
     colour: "#3b4e8c",
     stat: (m) => ({ value: m.counts.laboratories, unit: "sentinel laboratories" }),
   },
@@ -395,7 +395,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "CMP",
     title: "Comparison",
     blurb:
-      "Resistance between laboratories, regions, wards, specimens and periods, on one denominator, with the interval beside every figure.",
+      "Resistance between laboratories, regions, wards, specimens and periods.",
     colour: "#0b6e6e",
     stat: (m) => ({ value: m.counts.sectors, unit: "sectors compared apart" }),
   },
@@ -404,7 +404,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "RISK",
     title: "Risk",
     blurb:
-      "Which organisms carry the most resistance, where the burden sits, what is emerging, and where the trend is heading.",
+      "Which organisms carry the most resistance, and what is emerging.",
     colour: "#8c1d18",
     stat: (m) => ({ value: m.counts.organisms, unit: "organisms scored" }),
   },
@@ -413,7 +413,7 @@ export const SECTIONS: SectionMeta[] = [
     badge: "DQ",
     title: "Data quality",
     blurb:
-      "Whether the data can support the figures drawn from it: field completeness, coverage, timeliness, chain linkage, result provenance and implausible results.",
+      "Whether the data can support the figures drawn from it.",
     colour: "#4a5568",
     stat: (m) => ({ value: m.counts.specimens, unit: "specimens assessed" }),
   },

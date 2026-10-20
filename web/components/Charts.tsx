@@ -51,7 +51,7 @@ export interface BarRow {
 }
 
 export function BarChart({
-  rows,
+  rows: allRows,
   unit,
   labelWidth = 190,
   colour = "#0072b2",
@@ -60,11 +60,17 @@ export function BarChart({
   decimals,
   xLabel,
   yLabel,
+  limit = 14,
 }: {
   rows: BarRow[];
   unit: string;
   labelWidth?: number;
   colour?: string;
+  /** How many bars to draw before the rest go behind a toggle. A chart of
+   *  ninety-seven districts is taller than a screen, and a reader scrolling
+   *  past it never reaches the next figure. Nothing is dropped -- the toggle
+   *  draws the lot. */
+  limit?: number;
   /** Fix the axis, e.g. 100 for a percentage, so bars are not rescaled to
    *  whatever happens to be in the current filter. */
   max?: number;
@@ -81,7 +87,11 @@ export function BarChart({
   yLabel?: string;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const titleId = useId();
+
+  const capped = allRows.length > limit && !showAll;
+  const rows = capped ? allRows.slice(0, limit) : allRows;
 
   // A rate gets one decimal place by default, a count none.
   const places = decimals ?? (suffix === "%" ? 1 : 0);
@@ -106,7 +116,7 @@ export function BarChart({
         Math.max(numeric(row.value) as number, numeric(row.high) ?? 0),
       ),
     );
-  const rowHeight = 26;
+  const rowHeight = 21;
   const chartWidth = 620;
   // The printed value sits past the end of its bar, so the gutter has to fit
   // the longest one. A fixed gutter clipped "249.7 (113,774)" off the frame.
@@ -147,7 +157,7 @@ export function BarChart({
         role="img"
         aria-labelledby={titleId}
       >
-        <title id={titleId}>{`${rows.length} values, in ${unit}`}</title>
+        <title id={titleId}>{`${allRows.length} values${unit ? `, in ${unit}` : ""}`}</title>
 
         {yLabel ? (
           <text
@@ -200,6 +210,11 @@ export function BarChart({
         {rows.map((row, index) => {
           const value = numeric(row.value);
           const y = index * rowHeight + 4 + headPad;
+          // The bar, and the baseline that centres text on it. Both are
+          // derived from the row height rather than fixed, so the rows can be
+          // tightened without the labels sliding off them.
+          const bar = rowHeight - 10;
+          const base = y + 2 + bar / 2 + 3.6;
           const fill = row.colour ?? colour;
           const faded = hovered !== null && hovered !== index;
           return (
@@ -211,8 +226,8 @@ export function BarChart({
             >
               <text
                 x={labelWidth - 8}
-                y={y + 13}
-                fontSize={11}
+                y={base}
+                fontSize={10.5}
                 fill="#16181a"
                 textAnchor="end"
               >
@@ -224,7 +239,7 @@ export function BarChart({
               {value === null ? (
                 <text
                   x={labelWidth + 6}
-                  y={y + 13}
+                  y={base}
                   fontSize={10}
                   fill={LABEL}
                   fontStyle="italic"
@@ -235,9 +250,9 @@ export function BarChart({
                 <>
                   <rect
                     x={labelWidth}
-                    y={y + 3}
+                    y={y + 2}
                     width={Math.max(1, scale(value))}
-                    height={rowHeight - 12}
+                    height={bar}
                     fill={fill}
                     rx={1.5}
                   />
@@ -249,26 +264,26 @@ export function BarChart({
                       <line
                         x1={labelWidth + scale(numeric(row.low) as number)}
                         x2={labelWidth + scale(numeric(row.high) as number)}
-                        y1={y + (rowHeight - 12) / 2 + 3}
-                        y2={y + (rowHeight - 12) / 2 + 3}
+                        y1={y + 2 + bar / 2}
+                        y2={y + 2 + bar / 2}
                       />
                       <line
                         x1={labelWidth + scale(numeric(row.low) as number)}
                         x2={labelWidth + scale(numeric(row.low) as number)}
-                        y1={y + 5}
-                        y2={y + rowHeight - 10}
+                        y1={y + 3}
+                        y2={y + bar + 1}
                       />
                       <line
                         x1={labelWidth + scale(numeric(row.high) as number)}
                         x2={labelWidth + scale(numeric(row.high) as number)}
-                        y1={y + 5}
-                        y2={y + rowHeight - 10}
+                        y1={y + 3}
+                        y2={y + bar + 1}
                       />
                     </g>
                   ) : null}
                   <text
                     x={labelWidth + scale(numeric(row.high) ?? value) + 6}
-                    y={y + 13}
+                    y={base}
                     fontSize={10.5}
                     fill="#4a5156"
                     fontVariant="tabular-nums"
@@ -299,7 +314,22 @@ export function BarChart({
           strokeWidth={1}
         />
       </svg>
-      <figcaption className="mt-1 text-[0.74rem] text-ink-faint">{unit}</figcaption>
+      {allRows.length > limit ? (
+        <button
+          type="button"
+          onClick={() => setShowAll(!showAll)}
+          className="no-print mt-1 text-[0.78rem] font-semibold text-brand hover:underline"
+        >
+          {capped
+            ? `Show all ${allRows.length}`
+            : `Show the first ${limit} only`}
+        </button>
+      ) : null}
+      {unit ? (
+        <figcaption className="mt-1 text-[0.74rem] text-ink-faint">
+          {unit}
+        </figcaption>
+      ) : null}
     </figure>
   );
 }
@@ -579,7 +609,8 @@ export function StackedBars({
 
   if (!drawable.length) return null;
 
-  const rowHeight = 26;
+  const rowHeight = 21;
+  const bar = rowHeight - 10;
   const chartWidth = 620;
   const barArea = chartWidth - labelWidth - 66;
   const headPad = yLabel ? 18 : 0;
@@ -611,13 +642,14 @@ export function StackedBars({
         ) : null}
         {drawable.map((row, index) => {
           const y = index * rowHeight + 4 + headPad;
+          const base = y + 2 + bar / 2 + 3.6;
           let offset = 0;
           return (
             <g key={`${row.label}-${index}`}>
               <text
                 x={labelWidth - 8}
-                y={y + 13}
-                fontSize={11}
+                y={base}
+                fontSize={10.5}
                 fill="#16181a"
                 textAnchor="end"
               >
@@ -633,9 +665,9 @@ export function StackedBars({
                   <rect
                     key={name}
                     x={x}
-                    y={y + 3}
+                    y={y + 2}
                     width={width}
-                    height={rowHeight - 12}
+                    height={bar}
                     fill={colours[name] ?? "#999999"}
                     opacity={active === null || active === name ? 1 : 0.3}
                   >
@@ -645,7 +677,7 @@ export function StackedBars({
               })}
               <text
                 x={labelWidth + barArea + 6}
-                y={y + 13}
+                y={base}
                 fontSize={10.5}
                 fill="#4a5156"
                 fontVariant="tabular-nums"

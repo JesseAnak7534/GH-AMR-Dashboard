@@ -6,7 +6,6 @@ import { FilterBar, ThresholdControl } from "@/components/FilterBar";
 import { Figure } from "@/components/Figure";
 import { Column, DataTable } from "@/components/DataTable";
 import {
-  Caption,
   Empty,
   Note,
   Section,
@@ -18,7 +17,6 @@ import type { CustodyData, GenomicsData } from "@/lib/data";
 import { count, numeric, percent } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
 
-type DeterminantRow = GenomicsData["determinants"][number];
 type AgentRow = { antibiotic: string; pairs: number | string | null };
 type ClusterRow = GenomicsData["clusters"][number];
 
@@ -74,25 +72,11 @@ export function GenomicsView({
 
   const determinantChart = determinants
     .filter((row) => numeric(row.isolates) !== null)
-    .slice(0, 15)
     .map((row) => ({
       label: row.determinant,
       value: row.isolates,
       colour: OKABE_ITO.purple,
     }));
-
-  const determinantColumns: Column<DeterminantRow>[] = [
-    {
-      key: "determinant",
-      header: "Determinant",
-      format: "text",
-      sub: (row) => row.mechanism,
-    },
-    { key: "isolates", header: "Genomes carrying it", align: "right" },
-    { key: "genomes_examined", header: "Genomes examined", align: "right" },
-    { key: "percent", header: "% of genomes", align: "right", format: "percent" },
-    { key: "database", header: "Database", format: "text" },
-  ];
 
   const agentColumns: Column<AgentRow>[] = [
     { key: "antibiotic", header: "Antibiotic", format: "text" },
@@ -188,13 +172,6 @@ export function GenomicsView({
             colour={OKABE_ITO.purple}
           />
         </Figure>
-        <DataTable
-          columns={determinantColumns}
-          rows={determinants}
-          searchKeys={["determinant", "mechanism"]}
-          searchLabel="Search gene or mechanism"
-          initialSort={{ key: "isolates", direction: "desc" }}
-        />
         <SuppressionNote suppression={data.determinantSuppression} />
       </Section>
 

@@ -19,7 +19,7 @@ export default function AmcPage() {
         badge="AMC"
         colour="#999999"
         title="AMC"
-        lede="Veterinary antimicrobial consumption: milligrams of active ingredient per kilogram of biomass."
+        lede="How much antimicrobial is being used in animals, and which agents."
       />
       <Container>
         <ConsumptionView

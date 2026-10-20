@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Column, DataTable } from "@/components/DataTable";
-import { Caption, Section, StatStrip, SuppressionNote } from "@/components/Chrome";
+import { Section, StatStrip, SuppressionNote } from "@/components/Chrome";
 import {
   FilterBar,
   ThresholdControl,
@@ -11,9 +10,7 @@ import {
 import { Figure } from "@/components/Figure";
 import { FoliumMap } from "@/components/FoliumMap";
 import type { RegionsData } from "@/lib/data";
-import { count, numeric, titleCase } from "@/lib/format";
-
-type RegionRow = RegionsData["regions"][number];
+import { count, numeric } from "@/lib/format";
 
 export function RegionsView({ data }: { data: RegionsData }) {
   // Sector here switches the *counts* only. The per-region rate is published
@@ -59,37 +56,6 @@ export function RegionsView({ data }: { data: RegionsData }) {
   const highest = [...withRate].sort(
     (a, b) => (b.percent_resistant ?? 0) - (a.percent_resistant ?? 0),
   )[0];
-
-  const columns: Column<RegionRow>[] = [
-    { key: "region", header: "Region", format: "text" },
-    { key: "isolates", header: "Isolates", align: "right" },
-    { key: "organisms", header: "Organisms", align: "right" },
-    { key: "laboratories", header: "Laboratories", align: "right" },
-    {
-      key: "percent_resistant",
-      header: "% R",
-      align: "right",
-      format: "percent",
-    },
-    {
-      key: "percent_intermediate",
-      header: "% I",
-      align: "right",
-      format: "percent",
-    },
-    {
-      key: "percent_susceptible",
-      header: "% S",
-      align: "right",
-      format: "percent",
-    },
-    ...sectors.map((sector) => ({
-      key: sector,
-      header: titleCase(sector),
-      align: "right" as const,
-      value: (row: RegionRow) => bySector.get(row.region)?.get(sector) ?? 0,
-    })),
-  ];
 
   return (
     <>
@@ -151,22 +117,8 @@ export function RegionsView({ data }: { data: RegionsData }) {
         </Figure>
       </Section>
 
-      <Section title="The figures">
-        <DataTable
-          columns={columns}
-          rows={visible}
-          searchKeys={["region"]}
-          searchLabel="Search region"
-          initialSort={{ key: "isolates", direction: "desc" }}
-          pageSize={20}
-        />
-        <SuppressionNote suppression={data.suppression} />
-        <SuppressionNote suppression={data.bySectorSuppression} />
-      </Section>
-
-      <Caption>
-        Regions differ in how much they report as well as in what they find.
-      </Caption>
+      <SuppressionNote suppression={data.suppression} />
+      <SuppressionNote suppression={data.bySectorSuppression} />
     </>
   );
 }

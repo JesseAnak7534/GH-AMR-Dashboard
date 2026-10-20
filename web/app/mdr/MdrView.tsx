@@ -3,9 +3,7 @@
 import { useMemo, useState } from "react";
 import { ProportionBar, StackedBars } from "@/components/Charts";
 import { Figure } from "@/components/Figure";
-import { Column, DataTable } from "@/components/DataTable";
 import {
-  Caption,
   Empty,
   Note,
   Section,
@@ -14,7 +12,7 @@ import {
 } from "@/components/Chrome";
 import { FilterBar, sectorOptions } from "@/components/FilterBar";
 import type { MdrData } from "@/lib/data";
-import { count, isWithheld, percent, titleCase } from "@/lib/format";
+import { count, percent, titleCase } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
 
 const CLASSIFICATION_COLOUR: Record<string, string> = {
@@ -59,17 +57,6 @@ export function MdrView({ data }: { data: MdrData }) {
       colour: CLASSIFICATION_COLOUR[row.classification] ?? OKABE_ITO.grey,
     }));
 
-  const organismColumns: Column<{ organism: string }>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    ...grid.classes.map((classification) => ({
-      key: classification,
-      header: classification,
-      align: "right" as const,
-      value: (row: { organism: string }) =>
-        grid.cells.get(`${row.organism}||${classification}`) ?? 0,
-    })),
-  ];
-
   return (
     <>
       <FilterBar
@@ -113,10 +100,8 @@ export function MdrView({ data }: { data: MdrData }) {
 
       <Note tone="limit">
         {count(slice.insufficient)} isolates were tested against too few
-        categories to answer the question and are counted as{" "}
-        <strong>insufficient testing</strong>, not as &ldquo;not MDR&rdquo;.
-        Calling them not-MDR would make a laboratory with a small panel look
-        like one with little resistance.
+        categories to classify, and are counted apart from &ldquo;not
+        MDR&rdquo;.
       </Note>
 
       <Section title="How the isolates classify">
@@ -146,14 +131,6 @@ export function MdrView({ data }: { data: MdrData }) {
             labelWidth={200}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={organismColumns}
-          rows={grid.organisms.map((organism) => ({ organism }))}
-          searchKeys={["organism"]}
-          searchLabel="Search organism"
-          initialSort={{ key: "MDR", direction: "desc" }}
-        />
         <SuppressionNote suppression={slice.byOrganismSuppression} />
       </Section>
 

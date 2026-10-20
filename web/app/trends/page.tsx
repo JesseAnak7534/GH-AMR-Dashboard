@@ -17,7 +17,7 @@ export default function TrendsPage() {
         badge="TIME"
         colour="#56B4E9"
         title="Trends"
-        lede="Resistance by quarter, with the confidence band drawn behind each line. Where bands overlap, the change is within the uncertainty."
+        lede="Resistance by quarter. Where the bands overlap, the change is within the uncertainty."
       />
       <Container>
         <TrendsView data={getTrends()} />

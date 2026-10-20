@@ -8,7 +8,6 @@ import {
   Section,
   SuppressionNote,
 } from "@/components/Chrome";
-import { Column, DataTable } from "@/components/DataTable";
 import { Figure } from "@/components/Figure";
 import { FilterBar, sectorOptions } from "@/components/FilterBar";
 import { Segmented } from "@/components/Segmented";
@@ -51,63 +50,22 @@ function overlaps(a: ComparisonRow, b: ComparisonRow): boolean | null {
   return !(a.ciHigh < b.ciLow || b.ciHigh < a.ciLow);
 }
 
-function statusText(status: string): string {
-  if (status === "reported") return "Reported";
-  if (status === "no_data") return "No data";
-  return "Below the reporting floor";
-}
-
-function Table({
+/** The groups the chart cannot show, named in one line. */
+function BelowFloor({
   rows,
-  groupLabel,
-  measure,
-  unitLabel,
+  label,
 }: {
   rows: ComparisonRow[];
-  groupLabel: string;
-  measure: string;
-  unitLabel: string;
+  label: string;
 }) {
-  const columns: Column<ComparisonRow>[] = [
-    { key: "group", header: groupLabel, format: "text" },
-    { key: "unit", header: unitLabel, align: "right" },
-    { key: "percent", header: measure, align: "right", format: "percent" },
-    {
-      key: "ci",
-      header: "95% CI",
-      align: "right",
-      format: "text",
-      value: (row) => interval(row.ciLow, row.ciHigh),
-    },
-    {
-      key: "status",
-      header: "Status",
-      format: "text",
-      value: (row) => statusText(row.status),
-    },
-  ];
-  if (rows.some((row) => row.isolates !== undefined)) {
-    columns.splice(2, 0, {
-      key: "isolates",
-      header: "Isolates",
-      align: "right",
-    });
-  }
-  if (rows.some((row) => row.pairs !== undefined)) {
-    columns.push({
-      key: "pairs",
-      header: "Organism–agent pairs",
-      align: "right",
-    });
-  }
+  const held = rows.filter((row) => row.status !== "reported");
+  if (!held.length) return null;
   return (
-    <DataTable
-      columns={columns}
-      rows={rows}
-      searchKeys={["group"]}
-      searchLabel={`Search ${groupLabel.toLowerCase()}`}
-      initialSort={{ key: "unit", direction: "desc" }}
-    />
+    <p className="mt-2 text-[0.78rem] text-ink-faint">
+      {held.length} {label.toLowerCase()}
+      {held.length === 1 ? "" : "s"} held too few isolates to carry a
+      percentage: {held.map((row) => row.group).join(", ")}.
+    </p>
   );
 }
 
@@ -136,9 +94,7 @@ function HeadToHead({
   if (reportable.length < 2) {
     return (
       <Note tone="limit">
-        Fewer than two groups reach the reporting floor, so no two can be
-        compared. The counts above are real; a percentage computed on them would
-        not be dependable.
+        Fewer than two groups hold enough isolates to compare.
       </Note>
     );
   }
@@ -214,24 +170,18 @@ function HeadToHead({
       {a.group === b.group ? (
         <Note tone="method">Choose two different {groupLabel.toLowerCase()}s.</Note>
       ) : overlap === null ? (
-        <Note tone="limit">
-          One of the two groups has no interval, so the difference cannot be
-          assessed.
-        </Note>
+        <Note tone="limit">One group has no interval, so the difference cannot be assessed.</Note>
       ) : overlap ? (
         <Note tone="limit">
-          The 95% intervals of {a.group} and {b.group} overlap, so this{" "}
+          The intervals overlap, so this{" "}
           {Math.abs(difference).toFixed(1)}-point difference is not
-          distinguishable from sampling variation at these sample sizes.
-          Reporting it as a difference between the two would not be supportable.
+          distinguishable from sampling variation.
         </Note>
       ) : (
         <Note tone="method">
-          The 95% intervals of {a.group} and {b.group} do not overlap, which is
-          strong evidence that the {Math.abs(difference).toFixed(1)}-point
-          difference is real. It does not explain why: case mix, specimen mix
-          and testing practice differ between groups and are not adjusted for
-          here.
+          The intervals do not overlap, so the{" "}
+          {Math.abs(difference).toFixed(1)}-point difference is unlikely to be
+          chance. It does not say why.
         </Note>
       )}
     </div>
@@ -288,7 +238,7 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
             label: "Sector",
             value: sector,
             options: sectorOptions(sectors),
-            note: "Sectors are compared separately. A human blood culture and a wastewater grab are not interchangeable observations.",
+            note: "Sectors are never compared against each other.",
             onChange: (next) => {
               setSector(next);
               setViewKey("pooled");
@@ -305,7 +255,7 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
                 ? undefined
                 : `${count(candidate.isolates ?? 0)} isolates`,
             })),
-            note: "One organism and one agent gives a clinically usable figure. Pooled across every pair depends on which agents each group tested.",
+            note: "One organism and one agent is the clinically usable figure.",
             onChange: setViewKey,
           },
           {
@@ -327,15 +277,6 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
         } isolates; the counts are still shown.`}
       />
 
-      {slice.excludedPairs ? (
-        <Note tone="method">
-          {slice.excludedPairs} organism–agent pair
-          {slice.excludedPairs === 1 ? " was" : "s were"} excluded as
-          unreportable before comparing. An impossible combination would
-          otherwise distort every group it lands in.
-        </Note>
-      ) : null}
-
       {fetched.error ? (
         <Note tone="limit">
           That comparison did not load ({fetched.error}).
@@ -346,8 +287,8 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
         title={`Between ${dimension ? dimension.label.toLowerCase() : "groups"}`}
         intro={
           view.pooled
-            ? "Pooled across organism–agent pairs, so the unit is one isolate tested against one agent and the figure depends on which agents each group tested. Compare groups only where the pair counts are similar."
-            : "One isolate per patient per organism, deduplicated to CLSI M39."
+            ? "Pooled across every organism and agent, so groups are only comparable where they tested similar panels."
+            : undefined
         }
       >
         {fetched.loading ? (
@@ -360,7 +301,6 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
               title={`${view.label} by ${dimension.label.toLowerCase()} — ${titleCase(
                 slice.sector,
               )}`}
-              caption="The bar through each point is the 95% confidence interval. A group below the reporting floor is not plotted."
               hideTitle
             >
               <BarChart
@@ -382,13 +322,7 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
                 labelWidth={220}
               />
             </Figure>
-            <div className="mt-5" />
-            <Table
-              rows={dimension.rows}
-              groupLabel={dimension.label}
-              measure={view.measure}
-              unitLabel={view.unitLabel}
-            />
+            <BelowFloor rows={dimension.rows} label={dimension.label} />
             <SuppressionNote suppression={dimension.suppression} />
           </>
         )}
@@ -406,7 +340,7 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
 
       <Section
         title="Over time"
-        intro="The most recent window against the one immediately before it, pooled across every organism–agent pair the sector tested."
+        intro="The most recent window against the one before it."
       >
         <Segmented
           label="Period length"
@@ -423,7 +357,6 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
               title={`Most recent ${months} months against the preceding ${months} — ${titleCase(
                 slice.sector,
               )}`}
-              caption="The bar through each point is the 95% confidence interval."
               hideTitle
             >
               <BarChart
@@ -445,13 +378,7 @@ export function ComparisonView({ data }: { data: ComparisonData }) {
                 labelWidth={210}
               />
             </Figure>
-            <div className="mt-5" />
-            <Table
-              rows={period.rows}
-              groupLabel="Period"
-              measure="% non-susceptible"
-              unitLabel="Observations"
-            />
+            <BelowFloor rows={period.rows} label="Period" />
             <SuppressionNote suppression={period.suppression} />
             <HeadToHead
               rows={period.rows}

@@ -12,14 +12,7 @@ import {
 import { Column, DataTable } from "@/components/DataTable";
 import { Figure } from "@/components/Figure";
 import { FilterBar, sectorOptions } from "@/components/FilterBar";
-import type {
-  BreadthOrganismRow,
-  CrossResistanceRow,
-  MechanismOrganismRow,
-  MechanismsData,
-  MechanismTotalRow,
-  SentinelRow,
-} from "@/lib/clinical";
+import type { MechanismsData } from "@/lib/clinical";
 import { count, numeric, percent, titleCase } from "@/lib/format";
 import { OKABE_ITO } from "@/lib/palette";
 
@@ -76,36 +69,6 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
 
   const sectorLabel = titleCase(slice.sector);
 
-  const sentinelColumns: Column<SentinelRow>[] = [
-    { key: "label", header: "Phenotype", format: "text" },
-    { key: "code", header: "Code", format: "text" },
-    { key: "whoTier", header: "WHO tier", format: "text" },
-    { key: "positive", header: "Isolates", align: "right" },
-    {
-      key: "tested",
-      header: "Tested for it",
-      align: "right",
-    },
-    {
-      key: "percent",
-      header: "% of those tested",
-      align: "right",
-      format: "percent",
-    },
-  ];
-
-  const mechanismColumns: Column<MechanismTotalRow>[] = [
-    { key: "mechanism", header: "Mechanism", format: "text" },
-    { key: "isolates", header: "Isolates", align: "right" },
-    {
-      key: "percent",
-      header: "% of isolates screened",
-      align: "right",
-      format: "percent",
-    },
-    { key: "basis", header: "What the count rests on", format: "text" },
-  ];
-
   const byOrganismColumns: Column<{ organism: string }>[] = [
     { key: "organism", header: "Organism", format: "text" },
     ...organismGrid.mechanisms.map((mechanism) => ({
@@ -115,35 +78,6 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
       value: (row: { organism: string }) =>
         organismGrid.cells.get(`${row.organism}||${mechanism}`) ?? 0,
     })),
-  ];
-
-  const crossColumns: Column<CrossResistanceRow>[] = [
-    { key: "antibioticClass", header: "Antibiotic class", format: "text" },
-    { key: "isolates", header: "Cross-resistant", align: "right" },
-    {
-      key: "high",
-      header: "Every agent tested",
-      align: "right",
-    },
-    { key: "moderate", header: "Some agents", align: "right" },
-    {
-      key: "testedOnTwoOrMore",
-      header: "Tested on 2 or more",
-      align: "right",
-    },
-    {
-      key: "percent",
-      header: "% of those tested",
-      align: "right",
-      format: "percent",
-    },
-  ];
-
-  const breadthColumns: Column<BreadthOrganismRow>[] = [
-    { key: "organism", header: "Organism", format: "text" },
-    { key: "isolates", header: "Isolates resistant to 3+", align: "right" },
-    { key: "medianAgents", header: "Median agents", align: "right", format: "decimal" },
-    { key: "maxAgents", header: "Most agents", align: "right" },
   ];
 
   return (
@@ -185,15 +119,13 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
       />
 
       <Note tone="limit">
-        Every figure here is inferred from a susceptibility pattern, not from a
-        confirmatory test or a gene. What each count rests on is printed beside
-        it.
+        These are resistance patterns, not confirmed enzymes or genes.
       </Note>
 
       <Section title="WHO priority phenotypes">
         <Figure
           title={`WHO priority phenotypes — ${sectorLabel}`}
-          caption="The denominator is the isolates tested against the agents that define the phenotype, not every isolate."
+          caption="Of the isolates tested for each phenotype."
           hideTitle
         >
           <BarChart
@@ -211,14 +143,6 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
             labelWidth={250}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={sentinelColumns}
-          rows={slice.sentinel.rows}
-          searchKeys={["label", "code"]}
-          searchLabel="Search phenotype"
-          initialSort={{ key: "positive", direction: "desc" }}
-        />
         <SuppressionNote suppression={slice.sentinel.suppression} />
       </Section>
 
@@ -240,13 +164,17 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
             labelWidth={150}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={mechanismColumns}
-          rows={slice.mechanisms.totals}
-          initialSort={{ key: "isolates", direction: "desc" }}
-        />
         <SuppressionNote suppression={slice.mechanisms.totalSuppression} />
+        <dl className="divide-y divide-rule rounded-lg border border-rule">
+          {slice.mechanisms.totals.map((row) => (
+            <div key={row.mechanism} className="flex flex-wrap gap-x-4 px-4 py-2.5">
+              <dt className="w-32 shrink-0 text-[0.85rem] font-semibold">
+                {row.mechanism}
+              </dt>
+              <dd className="flex-1 text-[0.85rem] text-ink-soft">{row.basis}</dd>
+            </div>
+          ))}
+        </dl>
       </Section>
 
       <Section title="Which organisms carry them">
@@ -262,7 +190,7 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
       <Section title="Cross-resistance within a class">
         <Figure
           title={`Cross-resistance within an antibiotic class — ${sectorLabel}`}
-          caption="An isolate counts as cross-resistant when it resists two or more agents of the class. The denominator is the isolates tested against two or more of them."
+          caption="Isolates resisting two or more agents of the class."
           hideTitle
         >
           <BarChart
@@ -280,20 +208,12 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
             labelWidth={190}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={crossColumns}
-          rows={slice.crossResistance.rows}
-          searchKeys={["antibioticClass"]}
-          searchLabel="Search class"
-          initialSort={{ key: "percent", direction: "desc" }}
-        />
         <SuppressionNote suppression={slice.crossResistance.suppression} />
       </Section>
 
       <Section
         title="How many agents an isolate defeats"
-        intro="Three agents is the Magiorakos floor for multidrug resistance. These bands say how far past it the isolates reach."
+        intro="Isolates resistant to three agents or more."
       >
         <Figure
           title={`Breadth of resistance per isolate — ${sectorLabel}`}
@@ -312,15 +232,7 @@ export function MechanismsView({ data }: { data: MechanismsData }) {
             labelWidth={140}
           />
         </Figure>
-        <div className="mt-5" />
-        <DataTable
-          columns={breadthColumns}
-          rows={slice.breadth.rows}
-          searchKeys={["organism"]}
-          searchLabel="Search organism"
-          initialSort={{ key: "isolates", direction: "desc" }}
-        />
-        <SuppressionNote suppression={slice.breadth.suppression} />
+        <SuppressionNote suppression={slice.breadth.bandSuppression} />
       </Section>
     </>
   );

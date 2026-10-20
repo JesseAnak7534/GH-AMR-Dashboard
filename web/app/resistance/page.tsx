@@ -25,7 +25,7 @@ export default function ResistancePage() {
         badge="AST"
         colour="#0072B2"
         title="Resistance"
-        lede="The proportion of tested isolates that remained susceptible, with the number tested and a 95% confidence interval."
+        lede="How often each organism still responds to each antibiotic."
       />
       <Container>
         <ResistanceView

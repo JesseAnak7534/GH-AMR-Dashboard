@@ -19,7 +19,7 @@ export default function AmuPage() {
         badge="AMU"
         colour="#E69F00"
         title="AMU"
-        lede="Human antimicrobial use: defined daily doses per 1,000 patient-days, with the volume dispensed behind it."
+        lede="How much antimicrobial is being used in human health, and which agents."
       />
       <Container>
         <ConsumptionView
