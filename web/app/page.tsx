@@ -84,7 +84,7 @@ export default function HomePage() {
       {/* ── The sections ───────────────────────────────────────────── */}
       <section className="mx-auto max-w-[1180px] px-5 py-12">
         <p className="eyebrow mb-4">Explore the surveillance</p>
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2">
           {SECTIONS.map((section) => {
             const stat = section.stat(manifest);
             return (
@@ -137,29 +137,6 @@ export default function HomePage() {
         </ul>
       </section>
 
-      {/* ── How to read it ─────────────────────────────────────────── */}
-      <section className="border-t border-rule bg-shell">
-        <div className="mx-auto grid max-w-[1180px] gap-10 px-5 py-12 lg:grid-cols-2">
-          <div>
-            <h2 className="text-[1.06rem] font-bold">
-              How to read anything on this site
-            </h2>
-            <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              No percentage below {manifest.minIsolatesForReporting} isolates.
-              Every percentage carries a 95% confidence interval. Rates are
-              pooled, not averaged. Sectors are never combined into one figure.
-            </p>
-          </div>
-          <div>
-            <h2 className="text-[1.06rem] font-bold">What this is and is not</h2>
-            <p className="mt-2 text-[0.88rem] leading-relaxed text-ink-soft">
-              Laboratory-based sentinel surveillance: the isolates that reached
-              a participating laboratory. Not a random sample of infections, and
-              not a measure of resistance in the population.
-            </p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
